@@ -1,0 +1,105 @@
+body {
+    padding-top: 50px;
+}
+
+.starter-template {
+    padding: 40px 15px;
+    /*text-align: center;*/
+}
+
+.pageTitle {
+    text-align: center;    
+}
+
+.dropArea {
+    padding: 5;
+    margin: 0;
+}
+
+.dropArea .draggable {
+    list-style: none;
+    margin: 10px;
+    padding: 0;
+    /*width: 100px;
+  height: 40px; */
+    background-color: #e0e0e0;
+}
+
+.table {
+    text-align: left;
+}
+
+.formEdit {
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #eff4ff
+}
+
+.select-label {
+    white-space: nowrap
+}
+
+.colEditPanel {
+    display:none;
+    margin-bottom:0px;
+}
+
+.formColEditOn {
+    display: none;
+}
+
+.selEdit{
+    display: none;
+}
+
+Table.formDataList{
+    table-layout:fixed;
+    margin-bottom:16px;
+    width:100%;
+}
+
+Table.formDataList tr th{
+  padding :5px;
+  border: 1px solid #888;
+}
+
+Table.formDataList tr td{
+  padding :5px;
+  border: 1px solid #888;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  overflow:hidden;
+}
+
+Table.formDataView{
+    /*table-layout:fixed;*/
+    margin-bottom:16px;
+    width:100%;
+}
+
+Table.formDataView tr th{
+  padding :5px;
+  border: 1px solid #888;
+}
+
+Table.formDataView tr td{
+  padding :5px;
+  border: 1px solid #888;
+  word-break: break-all;
+  /*text-overflow:ellipsis;*/
+  /*white-space:nowrap;*/
+  /*overflow:hidden;*/
+}
+
+.transfer-config-selected {
+    background-color:#cccccc;
+}
+
+.transfer-config-panel-show {
+    dipslay: block;
+}
+
+.transfer-panel {
+    display: none;
+}
+

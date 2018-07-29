@@ -1,0 +1,517 @@
+@* 
+* This template takes a single argument, a String containing a 
+* message to display. 
+*@
+@import helper._
+@import play.api.i18n.Messages
+@import play.api.mvc.RequestHeader
+@import org.webjars.play.WebJarsUtil
+
+@(user: models.User)(implicit request: RequestHeader, messages: Messages, webJarsUtil: WebJarsUtil)
+@* 
+* Call the `main` template with two arguments. The first 
+* argument is a `String` with the title of the page, the second 
+* argument is an `Html` object containing the body of the page. 
+*@ 
+
+@main("sform", Some(user)){
+<div id="app">
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+                <a class="navbar-brand" href="#">Project name</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li v-bind:class="menuStatus[0]"><a href="#" v-on:click="togglePage('formList',0)">フォーム</a></li>
+                    <li v-bind:class="menuStatus[3]"><a href="#" v-on:click="togglePage('transferSetting',3)">転送</a></li>
+                    <li v-bind:class="menuStatus[1]"><a href="#about" v-on:click="togglePage('userList',1)">Users</a></li>
+                    <li v-bind:class="menuStatus[2]"><a href="#config" v-on:click="togglePage('config',2)">Config</a></li>
+                    <li><a href="#config" v-on:click="logout">Logout</a></li>
+                </ul>
+            </div>
+            <!--/.nav-collapse -->
+        </div>
+    </nav>
+
+    <div class="container sfpage" id="formList">
+        <div class="starter-template">
+            <h1 class="pageTitle">フォーム一覧</h1><!-- [@user.email.getOrElse("")][@user.group.getOrElse("")] -->
+            <p class="lead"></p>
+            <div>
+                <div class="table">
+                    <div class="row">
+                        <div class="col-md-3"></div>
+                        <div class="col-md-3">ID</div>
+                        <div class="col-md-3">フォーム名称</div>
+                        <div class="col-md-3">タイトル</div>
+                    </div>
+                    <div class="row" v-for="form in orderedItems" style="margin-bottom:5px">
+                        <div class="col-md-3">
+                            <span class="glyphicon glyphicon-play" aria-hidden="true" v-if="form.status=='1'"></span>
+                            <span class="glyphicon glyphicon-minus-sign" aria-hidden="true" v-if="form.status=='2'"></span>
+                            <span class="glyphicon glyphicon-ban-circle" aria-hidden="true" v-if="form.status=='0'"></span>
+                            <button type="button" class="btn btn-default btn-sm btn-formList" v-on:click="startFormEdit(1,form.index)">
+                                          <span class="glyphicon glyphicon-list-alt" aria-hidden="true">設定</span>
+                                        </button>
+                            <button type="button" class="btn btn-default btn-sm btn-formList" v-on:click="startFormData(2,form.index)">
+                                          <span class="glyphicon glyphicon-align-justify" aria-hidden="true">データ</span>
+                                        </button>
+                            <div class="dropup" style="display:inline">
+                                <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            操作
+                                            <span class="caret"></span>
+                                            </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                    <li><a href="#" v-on:click="changeFormStatus(form.index,'0')">無効にする</a></li>
+                                    <li><a href="#" v-on:click="changeFormStatus(form.index,'1')">有効にする</a></li>
+                                    <li><a href="#" v-on:click="changeFormStatus(form.index,'2')">停止状態にする</a></li>
+                                    <li><a href="#" v-on:click="deleteFormConfirm(form.index, form.id)">削除する</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-3">{{form.id}}</div>
+                        <div class="col-md-3">{{form.name}}</div>
+                        <div class="col-md-3">{{form.title}}</div>
+                    </div>
+                    <div class="row"><div class="col-md-12"></div></div>
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <button class="btn btn-default btn-sm" type="button" v-on:click="addForm()">フォーム追加</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container sfpage" id="formEdit">
+        <div class="starter-template">
+
+            <h1 class="pageTitle">{{tmpFormInput.name}}の設定</h1>
+            <p class="lead"></p>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="formEdit_">
+                        <div class="row form-group">
+                            <label class="col-md-4">フォーム名</label>
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" id="name" v-model="tmpFormInput.name" />
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <label class="col-md-4">タイトル</label>
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" v-model="tmpFormInput.title" />
+                            </div>
+                        </div>
+
+                        <div class="row form-group">
+                            <label class="col-md-4">フォームキャンセル時遷移先URL</label>
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" v-model="tmpFormInput.cancelUrl" />
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <label class="col-md-4">フォーム送信完了時遷移先URL</label>
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" v-model="tmpFormInput.completeUrl" />
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <label class="col-md-4">フォーム入力画面ヘッダ文面</label>
+                            <div class="col-md-8">
+                                <textarea class="form-control" v-model="tmpFormInput.inputHeader"></textarea>
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <label class="col-md-4">フォーム確認画面ヘッダ文面</label>
+                            <div class="col-md-8">
+                                <textarea class="form-control" v-model="tmpFormInput.confirmHeader"></textarea>
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <label class="col-md-4">フォーム送信後画面文面</label>
+                            <div class="col-md-8">
+                                <textarea class="form-control" v-model="tmpFormInput.completeText"></textarea>
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <label class="col-md-4">フォーム停止時文面</label>
+                            <div class="col-md-8">
+                                <textarea class="form-control" v-model="tmpFormInput.closeText"></textarea>
+                            </div>
+                        </div>
+                        <!--
+                        <div class="form-group">
+                            <label class="col-md-4">自動返信メール送信元アドレス</label>
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" v-model="tmpFormInput.replymailFrom" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-4">自動返信メール件名</label>
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" v-model="tmpFormInput.replymailSubject" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-4">自動返信メール文面</label>
+                            <div class="col-md-8">
+                                <textarea class="form-control" v-model="tmpFormInput.replymailText"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-4">フォーム受信通知メール送信</label>
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" v-model="tmpFormInput.noticemailSend" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-4">フォーム受信通知メール文面</label>
+                            <div class="col-md-8">
+                                <textarea class="form-control" v-model="tmpFormInput.noticemailText"></textarea>
+                            </div>
+                        </div>
+                        -->
+                        <div class="row form-group" style="margin-top:40px">
+                            <label class="col-md-4">フォーム項目</label>
+                            <div class="col-md-8">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>項目名</th><th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="col in orderedCols">
+                                            <td>{{col.name}}</td>
+                                            <td>
+                                                <button type="button" class="btn btn-default btn-sm formColEditOff" v-bind:id="'btColEdit_'+col.index" v-on:click="startFormColEdit(tmpFormInput.index,col.index)">
+                                                    <span class="glyphicon glyphicon-pencil" aria-hidden="true">編集</span>
+                                                </button>
+                                                <button type="button" class="btn btn-default btn-sm formColEditOff" v-bind:id="'btColDelete_'+col.index" v-on:click="deleteFormColConfirm(tmpFormInput.index,col.index)">
+                                                    <span class="glyphicon glyphicon-trash" aria-hidden="true">削除</span>
+                                                </button>
+                                                <button type="button" class="btn btn-default btn-sm formColEditOn" v-bind:id="'btColUpdate_'+col.index" v-on:click="endFormColEdit(tmpFormInput.index,col.index)">
+                                                    <span class="glyphicon glyphicon-remove" aria-hidden="true">閉じる</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <div>
+                                    <button type="button" class="btn btn-default btn-sm" v-on:click="addFormCol">
+                                        <span class="glyphicon glyphicon-plus" aria-hidden="true">追加</span>
+                                    </button>
+                                    <button type="button" class="btn btn-default btn-sm" v-on:click="reorderFormCol">
+                                        <span class="glyphicon glyphicon-sort" aria-hidden="true">並び替え</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row form-group" style="margin-top:40px">
+                            <label class="col-md-4">転送ルール</label>
+                            <div class="col-md-8">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>転送ルール名</th><th>転送タイプ</th><th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="(index,task) in tmpTransferTaskList">
+                                                <td>{{task.name}}</td>
+                                                <td>{{task.transfer_name}}</td>
+                                                <td>
+                                                    <button type="button" class="btn btn-default btn-sm" v-on:click="EditTransferRule(index)">
+                                                        <span class="glyphicon glyphicon-pencil" aria-hidden="true">編集</span>
+                                                    </button>
+                                                    <button type="button" class="btn btn-default btn-sm" v-on:click="DeleteTransferRule(index)">
+                                                        <span class="glyphicon glyphicon-trash" aria-hidden="true">削除</span>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <select class="form-control" v-model="transferSelected">
+                                            <option  v-for="transfer in transferList" value="{{transfer.type_id}}">{{transfer.name}}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="form-control btn btn-default btn-sm" v-on:click="AddTransferRule">
+                                            <span class="glyphicon glyphicon-plus" aria-hidden="true">追加</span>
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-left">
+                                <button type="button" class="btn btn-default btn-sm" value="取消" v-on:click="cancelFormEdit()">
+                                                    <span class="glyphicon glyphicon-remove" aria-hidden="true">取消</span>
+                                                  </button>
+                                <button type="button" class="btn btn-default btn-sm" value="変更" v-on:click="endFormEdit(1,tmpFormInput.index)">
+                                                    <span class="glyphicon glyphicon-ok" aria-hidden="true">変更</span>
+                                                  </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container sfpage" id="transferSetting">
+        <div class="starter-template">
+            <h1 class="pageTitle">転送</h1>
+            @transferConfig()
+        </div>
+    </div>
+
+
+    <div class="container sfpage" id="formData">
+        <div class="starter-template">
+            <h1 class="pageTitle">フォームデータ</h1>
+            <p class="lead"></p>
+            <div class="row">
+                <div class="col-md-12">
+                    <table id="formDataTable"></table>
+                    <table id="formDataGrid" class="formDataList">
+                        <tr>
+                            <th></th>
+                            <th v-for="c in formDataColumns" v-if="c.name != 'index'">{{c.label}}</th>
+                        </tr>
+                        <tr v-for="fd in formDataList">
+                            <td>
+                                <button type="button" class="btn btn-default btn-sm" v-on:click="showFormPostData(fd.index)">
+                                        <span class="glyphicon glyphicon-list">データ確認</span>
+                                    </button>
+                                <button type="button" class="btn btn-default btn-sm" v-on:click="deleteFormPostDataConfirm(fd.index)">
+                                        <span class="glyphicon glyphicon-trash">削除</span>
+                                    </button>
+                            </td>
+                            <td v-for="(f,key) in fd" v-if="key!='index'">{{f}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-left">
+                    <button type="button" class="btn btn-default btn-sm" v-on:click="cancelFormEdit()">
+                            <span class="glyphicon glyphicon-repeat">フォーム一覧に戻る</span>
+                        </button>
+                    <button type="button" class="btn btn-default btn-sm" v-on:click="downloadCsvConfirm()">
+                            <span class="glyphicon glyphicon-download-alt">CSVダウンロード</span>
+                        </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container sfpage" id="userList">
+        <div class="starter-template">
+            <h1 class="pageTitle">ユーザー一覧</h1>
+            <p class="lead"></p>
+            <div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="col-md-2">状態</div>
+                            <div class="col-md-1">ID</div>
+                            <div class="col-md-2">ログインID</div>
+                            <div class="col-md-3">氏名</div>
+                            <div class="col-md-4">メールドレス</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" v-for="user in orderedUsers">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <span class="glyphicon glyphicon-user" aria-hidden="true" v-if="user.status==1"></span>
+                                <span class="glyphicon glyphicon-minus-sign" aria-hidden="true" v-if="user.status==0"></span>
+                                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true" v-if="user.status==2"></span>
+
+                                <button type="button" class="btn btn-default btn-sm" v-on:click="startUserEdit(user.index)">
+                                        <span class="glyphicon glyphicon-pencil" aria-hidden="true">編集</span>
+                                    </button>
+                                <div class="dropup" style="display:inline">
+                                    <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            操作
+                                            <span class="caret"></span>
+                                            </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                        <li><a href="#" v-on:click="changeUserStatus(user.index,2)">パスワードリセット</a></li>
+                                        <li><a href="#" v-on:click="changeUserStatus(user.index,0)">無効にする</a></li>
+                                        <li><a href="#" v-on:click="changeUserStatus(user.index,1)">有効にする</a></li>
+                                        <li><a href="#" v-on:click="deleteUserConfirm(user.index)">削除する</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-1">{{user.id}}</div>
+                            <div class="col-md-2">{{user.uid}}</div>
+                            <div class="col-md-3">{{user.name}}</div>
+                            <div class="col-md-4">{{user.email}}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-12" v-bind:id="'userEdit_'+user.index" style="display:none">
+                        <div class="row">
+                            <div class="col-md-3">ステータス</div>
+                            <div class="col-md-9"><input type="text" class="form-control"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">ログインID</div>
+                            <div class="col-md-9"><input type="text" class="form-control"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">氏名</div>
+                            <div class="col-md-9"><input type="text" class="form-control"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">メールアドレス</div>
+                            <div class="col-md-9"><input type="text" class="form-control"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container sfpage" id="userEdit">
+        <div class="starter-template">
+            <h1 class="pageTitle">ユーザー設定</h1>
+            <p class="lead"></p>
+            <div>h
+                <div class="row">
+                    <div class="col-md-3">ステータス</div>
+                    <div class="col-md-9"><input type="text" class="form-control" v-model="tmpUserInput.status" /></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">ログインID</div>
+                    <div class="col-md-9"><input type="text" class="form-control" v-model="tmpUserInput.uid" /></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">氏名</div>
+                    <div class="col-md-9"><input type="text" class="form-control" v-model="tmpUserInput.name" /></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">メールアドレス</div>
+                    <div class="col-md-9"><input type="text" class="form-control" v-model="tmpUserInput.email" /></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-left">
+                        <button type="button" class="btn btn-default btn-sm" value="取消" v-on:click="cancelUserEdit()">
+                                                    <span class="glyphicon glyphicon-remove" aria-hidden="true">取消</span>
+                                                  </button>
+                        <button type="button" class="btn btn-default btn-sm" value="変更" v-on:click="endUserEdit(tmpUserInput.index)">
+                                                    <span class="glyphicon glyphicon-ok" aria-hidden="true">変更</span>
+                                                  </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container sfpage" id="config">
+        <div class="starter-template">
+            <h1 class="pageTitle">設定</h1>
+            <p class="lead"></p>
+            <h3>SForm機能</h3>
+            <div class="row">
+                <div class="col-md-3">管理者メールアドレス</div>
+                <div class="col-md-9"><input type="text" class="form-control" /></div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">ログインアラート</div>
+                <div class="col-md-9"><input type="text" class="form-control" /></div>
+            </div>
+
+            <h3>Salesforce設定</h3>
+            <div class="row">
+                <div class="col-md-3">SFユーザー名</div>
+                <div class="col-md-9"><input type="text" class="form-control" /></div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">SFパスワード</div>
+                <div class="col-md-9"><input type="text" class="form-control" /></div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">SFセキュリティトークン</div>
+                <div class="col-md-9"><input type="text" class="form-control" /></div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-left">
+                    <button type="button" class="btn btn-default btn-sm" value="変更" v-on:click="endUserEdit(tmpUserInput.index)">
+                            <span class="glyphicon glyphicon-ok" aria-hidden="true">変更</span>
+                        </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- CSVダウンロードmodal -->
+    <div class="modal fade" tabindex="-1" role="dialog" id="modal_download_csv">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">CSVダウンロード</h4>
+                </div>
+                <div class="modal-body">
+                    CSVダウンロード
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+                    <button type="button" class="btn btn-primary" v-on:click="downloadCsv">ダウンロード実行</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+
+    @commonModals()
+    <!-- Transfer用 -->
+    @transferRuleEdit()
+    <!-- Transfer用 -->
+
+
+</div>
+
+
+
+</div>
+
+@CSRF.formField
+
+<script src="assets/javascripts/jquery-3.2.0.js"></script>
+<script src="assets/javascripts/vue.js"></script>
+<script src="assets/javascripts/bootstrap.js"></script>
+<script src="assets/javascripts/lodash.min.js"></script>
+<script src="assets/javascripts/jquery.datatables.min.js"></script>
+<script src="assets/javascripts/dataTables.colReorder.min.js"></script>
+<script src="assets/javascripts/sformComponents.js"></script>
+<script src="assets/javascripts/sformDefaultData.js"></script>
+<script src="assets/javascripts/sform.js"></script>
+
+
+}

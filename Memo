@@ -1,0 +1,87 @@
+m_transfers 転送マスタ（転送設定）
+    id          int         not null
+    type_id     int
+    name        varchar     not null
+    status      int         not null default 1  0:無効 1:有効
+    config      json
+    created     datetime
+    updated     datetime
+
+d_transfers_task 転送タスク（転送処理定義）
+    id          int         not null
+    transfer_type_id     int
+    name        varchar     not null
+    status      int         not null default 0  0:未処理 1:処理済み 2:処理中 9:異常終了
+    config      json
+    created     datetime
+    updated     datetime
+
+d_transfer_log 転送ログ（転送処理ごとに作成）
+    id              int
+    transfer_id     int
+    transfer_type_id   int
+    transfer_data   json
+    result_data     json
+    created         datetime
+    updated         datetime
+
+d_salesforce_transfer_log 転送ログ（SF専用）
+    id              int
+    postdata_id     int
+    postdata        json
+    modified_postdata  json
+    result          int
+    message         varchar(json?)
+    created         datetime
+    updated         datetime
+
+SalesforceのField Typeはとりあえず以下のみ対応とする
+・string
+・boolean
+・int
+・double
+・date
+・datetime
+・textarea
+・phone
+・url
+・email
+・combobox
+・picklist
+・multipicklist
+
+各Field Typeごとに必要な処理
+・string 文字数チェック
+・boolean 型チェック（"true" or "false"）
+・int、double 数値範囲チェック
+・date 型チェック（"YYYY/MM/DD"）
+・datetime 型チェック（"YYYY/MM/DD hh:mm:ss"）
+・textarea なし
+・phone 文字列チェック（+,-,数値）
+・url 型チェック
+・email 型チェック
+・combobox,picklist,multipicklist 選択肢チェック
+
+SalesforceのTransfer Ruleの設定時、sform側フィールドとsalesforce側フィールドの
+入力規則を照合してマッチしない場合はエラー表示できるようにしたい・・・
+salesforce側からとる必要がある情報（型以外）
+ - 入力文字数
+ - 選択肢文字列
+ - 必須かどうか
+
+Salesforce定義データ
+
+オブジェクト名
+ -項目 Fieldの配列（autonumber:false, calculated:false, createable:false, dependentPicklist:false）
+  -項目名 name
+  -項目ラベル label
+  -タイプ type (string,boolean,int,double,date,datetime,textarea,phone,url,email,combobox,picklist,multipicklistのみ)
+  -null可 nillable
+  -長さ length(文字項目の長さ)
+  -最大桁数 degits(整数値の桁数)
+  -バイト長 byteLength
+  -最大桁数 precision(倍精度浮動小数点型のピリオドを除く総桁数)
+  -整数部桁数 scale
+  -選択リスト picklistValues?
+   -ラベル label
+   -値 value

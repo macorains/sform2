@@ -1,0 +1,39 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET         /                                controllers.ApplicationController.index
+GET         /signOut                         controllers.ApplicationController.signOut
+GET         /authenticate/:provider          controllers.SocialAuthController.authenticate(provider)
+
+GET         /signUp                          controllers.SignUpController.view
+POST        /signUp                          controllers.SignUpController.submit
+
+GET         /signIn                          controllers.SignInController.view
+POST        /signIn                          controllers.SignInController.submit
+
+GET         /password/forgot                 controllers.ForgotPasswordController.view
+POST        /password/forgot                 controllers.ForgotPasswordController.submit
+GET         /password/reset/:token           controllers.ResetPasswordController.view(token: java.util.UUID)
+POST        /password/reset/:token           controllers.ResetPasswordController.submit(token: java.util.UUID)
+GET         /password/change                 controllers.ChangePasswordController.view
+POST        /password/change                 controllers.ChangePasswordController.submit
+
+GET         /account/email/:email            controllers.ActivateAccountController.send(email: String)
+GET         /account/activate/:token         controllers.ActivateAccountController.activate(token: java.util.UUID)
+
+# Map static resources from the /public folder to the /assets URL path
+GET         /assets/*file                    controllers.Assets.at(path="/public", file)
+->          /webjars                         webjars.Routes
+
+POST     /rc/           controllers.RcController.receive()
+GET     /t/           controllers.RcController.t()
+GET     /test           controllers.FormExecuteController.test()
+GET   /auth   controllers.FormExecuteController.getCsrfToken
+POST   /auth   controllers.FormExecuteController.auth
+POST   /getform  controllers.FormExecuteController.getForm
+POST   /validate/  controllers.FormExecuteController.validateForm
+POST   /save/  controllers.FormExecuteController.saveForm
+GET /sformjs/*path controllers.RcController.getjs(path)
+GET /forminputjs/*path controllers.FormExecuteController.getjs(path)
