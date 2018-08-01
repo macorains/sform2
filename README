@@ -1,49 +1,35 @@
-This is your new Play application
-=================================
+概要
+　複雑なコードを書かずに便利なWebフォーム機能をWebサイトに追加することができるシステムです。
+　管理画面で設定後、フォームを表示したいサイトに小さなプログラム（フォームレシーバ）を設置するだけで、以下の機能を実現します。
+　・管理画面での設定によるフォーム表示（項目変更時も管理画面から設定変更するのみ）
+　・フォーム送信内容の閲覧、ダウンロード
+　・フォーム送信内容の外部システムへの転送
+　・自動返信メールの送信
 
-This file will be packaged with your application when using `activator dist`.
+基盤
+・Scala
+・sbt
+・play framework
+・scalikeJDBC
+・silhoutte
+・mysql
 
-There are several demonstration files available in this template.
+動作確認環境
+・Java8(JDK 1.8.0_121)
+・scala 2.12.3
+・sbt 0.13
 
-Controllers
-===========
+使い方
+ 【管理画面】
+ ログイン後、画面上部の「フォーム」をクリックするとフォーム一覧画面が表示されます。
+ 一覧の「設定」ボタンをクリックするとフォームの設定画面が表示されます。
+ 「新規追加」ボタンを押すと一覧にフォームが追加されます。
+ 【フォーム表示デモサイト】
+ 管理画面で設定された内容に従ってフォームがされます。
+ 管理画面で設定を変えた（例えばフォーム項目を増やす）後再表示すると、その内容が
+ 反映されます。
+ ※デモサイトで使用しているフォームのIDについては別途お問い合わせください。
 
-- HomeController.scala:
-
-  Shows how to handle simple HTTP requests.
-
-- AsyncController.scala:
-
-  Shows how to do asynchronous programming when handling a request.
-
-- CountController.scala:
-
-  Shows how to inject a component into a controller and use the component when
-  handling requests.
-
-Components
-==========
-
-- Module.scala:
-
-  Shows how to use Guice to bind all the components needed by your application.
-
-- Counter.scala:
-
-  An example of a component that contains state, in this case a simple counter.
-
-- ApplicationTimer.scala:
-
-  An example of a component that starts when the application starts and stops
-  when the application stops.
-
-Filters
-=======
-
-- Filters.scala:
-
-  Creates the list of HTTP filters used by your application.
-
-- ExampleFilter.scala
-
-  A simple filter that adds a header to every response.
+その他
+　現在、本番環境に適合させるための調整作業中につき、動作が不安定な状況です。
+　外部システムへの転送については現状Salesforceへの対応を行っています。
