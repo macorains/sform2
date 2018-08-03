@@ -46,41 +46,51 @@
             <p class="lead"></p>
             <div>
                 <div class="table">
-                    <div class="row">
-                        <div class="col-md-3"></div>
-                        <div class="col-md-2">フォーム名称</div>
-                        <div class="col-md-3">タイトル</div>
-                        <div class="col-md-4">ID</div>
-                    </div>
-                    <div class="row" v-for="form in orderedItems" style="margin-bottom:5px">
-                        <div class="col-md-3">
-                            <span class="glyphicon glyphicon-play" aria-hidden="true" v-if="form.status=='1'"></span>
-                            <span class="glyphicon glyphicon-minus-sign" aria-hidden="true" v-if="form.status=='2'"></span>
-                            <span class="glyphicon glyphicon-ban-circle" aria-hidden="true" v-if="form.status=='0'"></span>
-                            <button type="button" class="btn btn-default btn-sm btn-formList" v-on:click="startFormEdit(1,form.index)">
-                                          <span class="glyphicon glyphicon-list-alt" aria-hidden="true">設定</span>
-                                        </button>
-                            <button type="button" class="btn btn-default btn-sm btn-formList" v-on:click="startFormData(2,form.index)">
-                                          <span class="glyphicon glyphicon-align-justify" aria-hidden="true">データ</span>
-                                        </button>
-                            <div class="dropup" style="display:inline">
-                                <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>フォーム名称</th>
+                                <th>タイトル</th>
+                                <th>ID</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="form in orderedItems">
+                                <td>
+                                    <span class="glyphicon glyphicon-play" aria-hidden="true" v-if="form.status=='1'"></span>
+                                    <span class="glyphicon glyphicon-minus-sign" aria-hidden="true" v-if="form.status=='2'"></span>
+                                    <span class="glyphicon glyphicon-ban-circle" aria-hidden="true" v-if="form.status=='0'"></span>
+                                </td>
+                                <td>{{form.name}}</td>
+                                <td>{{form.title}}</td>
+                                <td>{{form.hashed_id}}</td>
+                                <td>
+                                    <button type="button" class="btn btn-default btn-sm btn-formList" v-on:click="startFormEdit(1,form.index)">
+                                        <span class="glyphicon glyphicon-list-alt" aria-hidden="true">設定</span>
+                                    </button>
+                                    <button type="button" class="btn btn-default btn-sm btn-formList" v-on:click="startFormData(2,form.index)">
+                                        <span class="glyphicon glyphicon-align-justify" aria-hidden="true">データ</span>
+                                    </button>
+                                    <div class="dropup" style="display:inline">
+                                        <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                             操作
                                             <span class="caret"></span>
-                                            </button>
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                    <li><a href="#" v-on:click="changeFormStatus(form.index,'0')">無効にする</a></li>
-                                    <li><a href="#" v-on:click="changeFormStatus(form.index,'1')">有効にする</a></li>
-                                    <li><a href="#" v-on:click="changeFormStatus(form.index,'2')">停止状態にする</a></li>
-                                    <li><a href="#" v-on:click="deleteFormConfirm(form.index, form.id)">削除する</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-md-2">{{form.name}}</div>
-                        <div class="col-md-3">{{form.title}}</div>
-                        <div class="col-md-4">{{form.hashed_id}}</div>
-                    </div>
-                    <div class="row"><div class="col-md-12"></div></div>
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                            <li><a href="#" v-on:click="changeFormStatus(form.index,'0')">無効にする</a></li>
+                                            <li><a href="#" v-on:click="changeFormStatus(form.index,'1')">有効にする</a></li>
+                                            <li><a href="#" v-on:click="changeFormStatus(form.index,'2')">停止状態にする</a></li>
+                                            <li><a href="#" v-on:click="deleteFormConfirm(form.index, form.id)">削除する</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table">
                     <div class="row">
                         <div class="col-md-12 text-center">
                             <button class="btn btn-default btn-sm" type="button" v-on:click="addForm()">フォーム追加</button>
