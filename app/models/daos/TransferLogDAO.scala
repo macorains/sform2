@@ -8,7 +8,7 @@ class TransferLogDAO {
   case class TransferLog(id: Int, transfer_id: Int, transfer_type_id: Int, transfer_data: String,
     result_data: String, created: Option[String], updates: Option[String])
   object TransferLog extends SQLSyntaxSupport[TransferLog] {
-    override val tableName = "d_transfer_log"
+    override val tableName = "D_TRANSFER_LOG"
     def apply(rs: WrappedResultSet): TransferLog = {
       TransferLog(rs.int("id"), rs.int("transfer_id"), rs.int("transfer_type_id"), rs.string("transfer_data"),
         rs.string("result_data"), rs.stringOpt("creared"), rs.stringOpt("updated"))

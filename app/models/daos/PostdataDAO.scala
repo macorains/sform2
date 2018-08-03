@@ -7,7 +7,7 @@ class PostdataDAO {
 
   case class Postdata(postdata_id: Int, form_hashed_id: String, postdata: JsValue)
   object Postdata extends SQLSyntaxSupport[Postdata] {
-    override val tableName = "d_postdata"
+    override val tableName = "D_POSTDATA"
     def apply(rs: WrappedResultSet): Postdata = {
       Postdata(rs.int("postdata_id"), rs.string("form_hashed_id"), Json.parse(rs.string("postdata")))
     }

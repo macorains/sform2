@@ -25,7 +25,7 @@ class FormsDAO extends FormParts {
    */
   case class FormData(id: Int, hashed_id: String, form_data: String, user_group: String)
   object FormData extends SQLSyntaxSupport[FormData] {
-    override val tableName = "d_form"
+    override val tableName = "D_FORM"
     def apply(rs: WrappedResultSet): FormData = {
       FormData(rs.int("id"), rs.string("hashed_id"), rs.string("form_data"), rs.string("user_group"))
     }
@@ -39,7 +39,7 @@ class FormsDAO extends FormParts {
    */
   case class FormPostData(postdata_id: Int, form_hashed_id: String, postdata: String)
   object FormPostData extends SQLSyntaxSupport[FormPostData] {
-    override val tableName = "d_postdata"
+    override val tableName = "D_POSTDATA"
     def apply(rs: WrappedResultSet): FormPostData = {
       FormPostData(rs.int("postdata_id"), rs.string("form_hashed_id"), rs.string("postdata"))
     }

@@ -101,7 +101,7 @@
                 };
                 jQuery.ajax({
                     type: "POST",
-                    url: "http://localhost:9001/rc/",
+                    url: "rc/",
                     dataType: "json",
                     contentType: "application/json",
                     data: JSON.stringify(reqdata),
@@ -201,7 +201,7 @@
                         };
                         jQuery.ajax({
                             type: "POST",
-                            url: "http://localhost:9001/rc/",
+                            url: "rc/",
                             dataType: "json",
                             contentType: "application/json",
                             data: JSON.stringify(reqdata),
@@ -242,7 +242,7 @@
                 };
                 jQuery.ajax({
                     type: "POST",
-                    url: "http://localhost:9001/rc/",
+                    url: "rc/",
                     dataType: "json",
                     contentType: "application/json",
                     data: JSON.stringify(reqdata),
@@ -377,7 +377,7 @@
                 };
                 jQuery.ajax({
                     type: "POST",
-                    url: "http://localhost:9001/rc/",
+                    url: "rc/",
                     dataType: "json",
                     contentType: "application/json",
                     data: JSON.stringify(reqdata),
@@ -583,7 +583,7 @@
 
         jQuery.ajax({
             type: "POST",
-            url: "http://localhost:9001/rc/",
+            url: "rc/",
             dataType: "json",
             contentType: "application/json",
             data: JSON.stringify(reqdata),
@@ -608,7 +608,7 @@
         };
         jQuery.ajax({
             type: "POST",
-            url: "http://localhost:9001/rc/",
+            url: "rc/",
             dataType: "json",
             contentType: "application/json",
             data: JSON.stringify(reqdata),

@@ -10,14 +10,14 @@ class TransfersDAO {
 
   case class Transfer(id: Int, type_id: Int, name: String, status: Int, config: JsValue, modified: DateTime)
   object Transfer extends SQLSyntaxSupport[Transfer] {
-    override val tableName = "m_transfers"
+    override val tableName = "M_TRANSFERS"
     def apply(rs: WrappedResultSet): Transfer = {
       Transfer(rs.int("id"), rs.int("type_Id"), rs.string("name"), rs.int("status"), Json.parse(rs.string("config")), rs.jodaDateTime("modified"))
     }
   }
   case class TransferList(id: Int, type_id: Int, name: String)
   object TransferList extends SQLSyntaxSupport[Transfer] {
-    override val tableName = "m_transfers"
+    override val tableName = "M_TRANSFERS"
     def apply(rs: WrappedResultSet): TransferList = {
       TransferList(rs.int("id"), rs.int("type_Id"), rs.string("name"))
     }

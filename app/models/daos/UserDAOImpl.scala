@@ -27,7 +27,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
   def find(loginInfo: LoginInfo) =
     Future.successful(
       DB localTx { implicit l =>
-        sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED FROM m_userinfo WHERE PROVIDER_ID=${loginInfo.providerID} AND PROVIDER_KEY=${loginInfo.providerKey}"
+        sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED FROM M_USERINFO WHERE PROVIDER_ID=${loginInfo.providerID} AND PROVIDER_KEY=${loginInfo.providerKey}"
           .map(rs => User(UUID.fromString(rs.string("USER_ID")), LoginInfo(rs.string("PROVIDER_ID"), rs.string("PROVIDER_KEY")),
             Option(rs.string("USER_GROUP")), Option(rs.string("FIRST_NAME")), Option(rs.string("LAST_NAME")), Option(rs.string("FULL_NAME")),
             Option(rs.string("EMAIL")), Option(rs.string("AVATAR_URL")), rs.boolean("ACTIVATED"))).single.apply()
@@ -43,7 +43,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
   def find(userID: UUID) =
     Future.successful(
       DB localTx { implicit l =>
-        sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED FROM m_userinfo WHERE USER_ID=${userID.toString}"
+        sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED FROM M_USERINFO WHERE USER_ID=${userID.toString}"
           .map(rs => User(UUID.fromString(rs.string("USER_ID")), LoginInfo(rs.string("PROVIDER_ID"), rs.string("PROVIDER_KEY")),
             Option(rs.string("USER_GROUP")), Option(rs.string("FIRST_NAME")), Option(rs.string("LAST_NAME")), Option(rs.string("FULL_NAME")),
             Option(rs.string("EMAIL")), Option(rs.string("AVATAR_URL")), rs.boolean("ACTIVATED"))).single.apply()
