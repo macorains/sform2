@@ -195,6 +195,7 @@ var salesforceTransferRuleEditComponent = {
     props: ['transferConfig','formCols','tmpTransferTask','tmpTransferTaskList','transferTaskDefault','tmpTransferRuleSetting','tmpFormInput','tmpSFObject'],
     created: function(){
         //this.tmpTransferRuleSetting = {sformCol:"", sfCol:"", sformColConvert:{}, sfColConvert:{}};
+
     },
     template: salesforceTransferRuleEditComponentTemplate,
     methods : {
@@ -301,15 +302,19 @@ var salesforceTransferRuleEditComponent = {
             var sfObjectFields = {};
             if(typeof this.tmpTransferTask.config != 'undefined'){
                 var that = this;
-                var sfObjectName = function(){
-                    if(typeof that.tmpTransferTask.config != 'undefined'&& typeof that.tmpTransferTask.config.sfObject != 'undefined'){
-                        return that.tmpTransferTask.config.sfObject
-                    }
-                    return '';
+
+                var sfObjectName = '';
+                if(typeof this.tmpTransferTask.config != 'undefined'&& typeof this.tmpTransferTask.config.sfObject != 'undefined'){
+                    sfObjectName = this.tmpTransferTask.config.sfObject
                 }
-                var sfObjectDefinisions = this.transferConfig.Salesforce.sfObjectDefinition.filter(function(item,index){
-                    if(item.name == sfObjectName) return true;
-                });
+
+                var sfObjectDefinisions = [];
+                for(var d in this.transferConfig.Salesforce.sfObjectDefinition){
+                    if(this.transferConfig.Salesforce.sfObjectDefinition[d].name == sfObjectName){
+                        sfObjectDefinisions.push(this.transferConfig.Salesforce.sfObjectDefinition[d]);
+                    }
+                }
+
                 if(sfObjectDefinisions.length>0){
                     sfObjectFields = sfObjectDefinisions[0]['fields'].filter(function(item,index){
                         var res = true;
