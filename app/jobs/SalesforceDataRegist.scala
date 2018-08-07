@@ -50,7 +50,7 @@ class SalesforceDataRegister @Inject() (
   def transferToSalesforce(transfer: Option[transfersDao.Transfer]) = {
     transfer match {
       case s: transfersDao.Transfer => {
-
+        val transferTaskList = transferTaskDao.getTransferTaskList(transferType)
 
       }
     }
