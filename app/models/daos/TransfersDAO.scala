@@ -23,7 +23,7 @@ class TransfersDAO {
     }
   }
 
-  case class TransferJson(id: Int, type_id: Int, name: String, status: Int, config: JsObject, modified: Option[DateTime])
+  case class TransferJson(id: Int, type_id: Int, name: String, status: Int, config: JsObject, user_group: String, modified: Option[DateTime])
   object TransferJson {
     implicit def jsonTransferWrites: Writes[TransferJson] = Json.writes[TransferJson]
     implicit def jsonTransferReads: Reads[TransferJson] = Json.reads[TransferJson]
@@ -39,8 +39,9 @@ class TransfersDAO {
 
   def getTransfer(transferType: Int) = {
     DB localTx { implicit l =>
-      sql"SELECT ID,TYPE_ID,NAME,STATUS,CONFIG,MODIFIED FROM M_TRANSFERS WHERE TYPE_ID=${transferType}"
-        .map(rs => Transfer(rs)).single.apply()
+      sql"SELECT ID,TYPE_ID,NAME,STATUS,CONFIG,USER_GROUP,MODIFIED FROM M_TRANSFERS WHERE TYPE_ID=${transferType}"
+        .map(rs => Transfer(rs)).list.apply()
+        //.map(rs => Transfer(rs)).single.apply()
     }
   }
 

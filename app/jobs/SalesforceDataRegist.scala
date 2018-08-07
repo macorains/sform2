@@ -26,7 +26,7 @@ class SalesforceDataRegister @Inject() (
 
   val transferType = 1
 
-  case class SalesforceTransferConfig(user: String, password: String, securityToken: String)
+  case class SalesforceTransferConfig(user: String,  password: String, securityToken: String)
   object SalesforceTransferConfig {
     implicit def jsonSalesforceTransferConfigWrites: Writes[SalesforceTransferConfig] = Json.writes[SalesforceTransferConfig]
     implicit def jsonSalesforceTransferConfigReads: Reads[SalesforceTransferConfig] = Json.reads[SalesforceTransferConfig]
@@ -40,7 +40,33 @@ class SalesforceDataRegister @Inject() (
   case class SalesforceDataSet(postdata_id: Int, sobject: SObject, postdata: JsValue)
   case class TransferLogInfo(log_id: Long)
 
+  def checkTransferConfig(transfer: transfersDao.Transfer) :Option[transfersDao.Transfer] = {
+    transfer.config.validate[SalesforceTransferConfig] match{
+      case s: JsSuccess[SalesforceTransferConfig] => Option(transfer)
+      case _ => None
+    }
+  }
+
+  def transferToSalesforce(transfer: Option[transfersDao.Transfer]) = {
+    transfer match {
+      case s: transfersDao.Transfer => {
+
+
+      }
+    }
+  }
+
   def receive: Receive = {
+    case msg: String => {
+      val salesforceTransferList = transfersDao.getTransfer(transferType)
+      val validTransferList = salesforceTransferList.map(s => checkTransferConfig(s))
+      validTransferList.map(s=>transferToSalesforce(s))
+    }
+    case _ => {
+      Array(new SObject)
+    }
+
+    /*
     case msg: String => {
       val salesforceObjectArray = transfersDao.getTransfer(transferType) match {
         case Some(t1: transfersDao.Transfer) => {
@@ -109,6 +135,7 @@ class SalesforceDataRegister @Inject() (
         }
       }
     }
+    */
   }
 
 }

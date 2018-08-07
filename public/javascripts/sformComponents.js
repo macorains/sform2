@@ -255,29 +255,56 @@ var salesforceTransferRuleEditComponent = {
             if(typeof this.tmpTransferTask.config != 'undefined'){
                 var def = this.tmpTransferTask.config.columnConvertDefinition;
                 for(var d in def){
-                    tmp[d] = {}
+                    tmp[d] = {};
                     for(col in this.tmpFormInput.formCols){
                         if(this.tmpFormInput.formCols[col]['colId'] == this.tmpTransferTask.config.columnConvertDefinition[d].sformCol){
                             tmp[d]['sformCol'] = this.tmpFormInput.formCols[col]['name'];
                         }
                     }
                     var that = this;
+                    var sfObjectName = '';
+
+                    if(typeof this.tmpTransferTask.config !='undefined' && typeof this.tmpTransferTask.config.sfObject != 'undefined'){
+                        sfObjectName = this.tmpTransferTask.config.sfObject;
+                    }
+
+                    /*
                     var sfObjectName = function(){
                         if(typeof that.tmpTransferTask.config !='undefined' && typeof that.tmpTransferTask.config.sfObject != 'undefined'){
                             return that.tmpTransferTask.config.sfObject;
                         }
                         return '';
                     }
+                    */
+
+                    var sfObjectDefinisions = [];
+                    for(s in this.transferConfig.Salesforce.sfObjectDefinition){
+                        if(this.transferConfig.Salesforce.sfObjectDefinition[s].name == sfObjectName){
+                            sfObjectDefinisions.push(this.transferConfig.Salesforce.sfObjectDefinition[s]);
+                        }
+                    }
+                    /*
                     var sfObjectDefinisions = this.transferConfig.Salesforce.sfObjectDefinition.filter(function(item,index){
                         if(item.name == sfObjectName) return true;
                     });
+                    */
+
                     if(sfObjectDefinisions.length>0){
+                        var sfLabel = "";
+                        for(s in sfObjectDefinisions[0]['fields']){
+                            if(sfObjectDefinisions[0]['fields'][s]['name'] == this.tmpTransferTask.config.columnConvertDefinition[d]['sfCol']){
+                                sfLabel = sfObjectDefinisions[0]['fields'][s]['label'];
+                            }
+                        }
+                        /*
                         var sfObjectFields = sfObjectDefinisions[0]['fields'].filter(function(item,index){
                             if(item.name == that.tmpTransferTask.config.columnConvertDefinition[d].sfCol) return true;
                         });
                         if(sfObjectFields.length>0){
                             tmp[d]['sfCol'] = sfObjectFields[0]['label'];
                         }
+                        */
+                        tmp[d]['sfCol'] = sfLabel;
                     }
                 }
             }
