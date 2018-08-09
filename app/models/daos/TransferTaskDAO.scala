@@ -14,15 +14,14 @@ object TransferTask extends SQLSyntaxSupport[TransferTask] {
       Json.parse(rs.string("config")), rs.stringOpt("created"), rs.stringOpt("modified"))
   }
 }
+case class TransferTaskJson(id: Int, transfer_type_id: Int, name: String, status: Int, config: JsObject,
+  created: Option[String], modified: Option[String])
+object TransferTaskJson {
+  implicit def jsonTransferTaskWrites: Writes[TransferTaskJson] = Json.writes[TransferTaskJson]
+  implicit def jsonTransferTaskReads: Reads[TransferTaskJson] = Json.reads[TransferTaskJson]
+}
 
 class TransferTaskDAO {
-
-  case class TransferTaskJson(id: Int, transfer_type_id: Int, name: String, status: Int, config: JsObject,
-    created: Option[String], modified: Option[String])
-  object TransferTaskJson {
-    implicit def jsonTransferTaskWrites: Writes[TransferTaskJson] = Json.writes[TransferTaskJson]
-    implicit def jsonTransferTaskReads: Reads[TransferTaskJson] = Json.reads[TransferTaskJson]
-  }
 
   def getTransferTaskList(transferType: Int) = {
     DB localTx { implicit l =>

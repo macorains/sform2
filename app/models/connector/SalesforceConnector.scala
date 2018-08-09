@@ -11,7 +11,15 @@ class SalesforceConnector {
     val config: ConnectorConfig = new ConnectorConfig()
     config.setUsername(user)
     config.setPassword(password + securityToken)
-    try { Some(Connector.newConnection(config)) } catch { case e: Exception => None }
+    print("[SalesforceLogin] User:" + user + " Password:" + password + securityToken)
+    try {
+      Some(Connector.newConnection(config))
+    } catch {
+      case e: Exception => {
+        print("Salesforce Login Failed.")
+        None
+      }
+    }
   }
 
   def create(connection: PartnerConnection, sObjectArray: Array[SObject]) = {

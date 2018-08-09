@@ -15,7 +15,7 @@ object SalesforceTransferConfig {
   implicit def jsonSalesforceTransferConfigWrites: Writes[SalesforceTransferConfig] = Json.writes[SalesforceTransferConfig]
   implicit def jsonSalesforceTransferConfigReads: Reads[SalesforceTransferConfig] = Json.reads[SalesforceTransferConfig]
 }
-case class SalesforceTransferTaskConfig(formId: String, sfObject: String, columnConvertDefinition: JsObject)
+case class SalesforceTransferTaskConfig(formId: String, sfObject: String, columnConvertDefinition: List[JsObject])
 object SalesforceTransferTaskConfig {
   implicit def jsonSalesforceTransferTaskConfigWrites: Writes[SalesforceTransferTaskConfig] = Json.writes[SalesforceTransferTaskConfig]
   implicit def jsonSalesforceTransferTaskConfigReads: Reads[SalesforceTransferTaskConfig] = Json.reads[SalesforceTransferTaskConfig]
@@ -62,7 +62,7 @@ class SalesforceDataRegister @Inject() (
       case s: SalesforceDataRegister.this.transfersDao.Transfer => {
         s.config.validate[SalesforceTransferConfig] match {
           case t: JsSuccess[SalesforceTransferConfig] =>
-            Option((transferTaskDao.getTransferTaskList(transferType), t.get))
+            Option((transferTaskDao.getTransferTaskList(transferType), t.value))
           case _ => None
         }
       }
@@ -75,7 +75,11 @@ class SalesforceDataRegister @Inject() (
     task match {
       case t: (List[TransferTask], SalesforceTransferConfig) => {
         t._1.foreach(s => {
-          print(s.config)
+          //val x1 = (s.config \ "formId").as[String]
+          //val x2 = (s.config \ "sfObject").as[String]
+          //val x3 = (s.config \ "columnConvertDefinition").as[List[JsObject]]
+          //val taskConfig = SalesforceTransferTaskConfig(x1, x2, x3)
+
           s.config.validate[SalesforceTransferTaskConfig] match {
             case c: JsSuccess[SalesforceTransferTaskConfig] => {
               createSalesforceDataSet(t._2, c.get, s.id)
@@ -83,6 +87,7 @@ class SalesforceDataRegister @Inject() (
             case e: JsError => println(e)
             case _ => print("***1")
           }
+
         })
 
       }
@@ -111,17 +116,26 @@ class SalesforceDataRegister @Inject() (
   }
 
   def createSalesforceDataSet(transferConfig: SalesforceTransferConfig, taskConfig: SalesforceTransferTaskConfig, taskId: Int) = {
-    val columnConvertDefinition = taskConfig.columnConvertDefinition.value
+    val columnConvertDefinition = taskConfig.columnConvertDefinition
+      .map(s => (s.value.get("sfCol").toString, s.value.get("sformCol").toString))
+
     val posts = postdataDao.getPostdataByFormHashedId(taskConfig.formId, transferType)
     val log_id = transferLogDao.create(transferType)
     transferLogDao.start(log_id, taskId, posts.map(p => { p.postdata.toString() }).mkString("[", ",", "]"))
     val sfobjArray: Array[SalesforceDataSet] =
       posts.map(p => {
         val sfobj: SObject = new SObject()
+        (p.postdata \ "col1").getOrElse(JsNull).as[String]
         sfobj.setType(taskConfig.sfObject)
+        columnConvertDefinition.foreach(s => {
+          sfobj.setField(s._1, (p.postdata \ s._2).getOrElse(JsNull).as[String])
+        })
+        /*
         sfobj.setField(
           columnConvertDefinition.get("sfCol").toString,
           columnConvertDefinition.get("sformCol").toString)
+          */
+
         SalesforceDataSet(p.postdata_id, sfobj, p.postdata)
       }).toArray
     sendToSalesforce(sfobjArray, transferConfig, log_id)
