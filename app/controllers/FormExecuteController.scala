@@ -59,6 +59,7 @@ class FormExecuteController @Inject() (
 
   def auth = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     val body: AnyContent = request.body
+    println(body)
     val jsonBody: Option[JsValue] = body.asJson
     println(CSRF.getToken(request))
     println(body.toString)

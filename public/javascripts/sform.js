@@ -208,7 +208,8 @@
                             success: function(msg) {
                                 console.log(msg.dataset);
                                 console.log(that.tmpFormInput);
-                                var dt = JSON.parse(msg.dataset);
+                                //var dt = JSON.parse(msg.dataset);
+                                var dt = msg.dataset;
                                 that.formlist[idx].id = dt.id;
                                 //app.formlist = JSON.parse(msg.dataset);
                             },

@@ -41,7 +41,7 @@ class TransfersDAO {
     DB localTx { implicit l =>
       sql"SELECT ID,TYPE_ID,NAME,STATUS,CONFIG,USER_GROUP,MODIFIED FROM M_TRANSFERS WHERE TYPE_ID=${transferType}"
         .map(rs => Transfer(rs)).list.apply()
-        //.map(rs => Transfer(rs)).single.apply()
+      //.map(rs => Transfer(rs)).single.apply()
     }
   }
 

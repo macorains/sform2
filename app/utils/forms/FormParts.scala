@@ -48,7 +48,7 @@ trait FormParts {
       |<!-- {$host} -->
       |<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
       |<!-- <script src="http://localhost:9001/assets/javascripts/forminput.js"></script> -->
-      |<script src="http://$host/forminputjs$receiverPath"></script>
+      |<script src="http://$host/assets/javascripts/forminput.js$receiverPath"></script>
     """.stripMargin
   }
 

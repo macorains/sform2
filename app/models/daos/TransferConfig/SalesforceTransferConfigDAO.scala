@@ -36,36 +36,42 @@ case class SalesforceTransferConfigDAO @Inject() (
   override def getTransferConfig: JsValue = {
     println("SalesforceTransferInfoDAO")
     transfersDao.getTransfer(transferType) match {
-      case Some(t1: transfersDao.Transfer) => {
-        t1.config.validate[SalesforceTransferConfig] match {
-          case c1: JsSuccess[SalesforceTransferConfig] => {
-            // ToDo configの日付見て古ければ取得しにいく
-            val sfObjectDefinition: Option[List[DescribeSObjectResult]] = salesforceConnector.getConnection(c1.get.user, c1.get.password, c1.get.securityToken) match {
-              case Some(c: PartnerConnection) => {
-                val sObjectNames = salesforceConnector.getSObjectNames(c)
-                Option(salesforceConnector.getSObjectInfo(c, sObjectNames))
-              }
-              case None => {
-                c1.get.sfObjectDefinition match {
-                  case Some(s: List[DescribeSObjectResult]) => c1.get.sfObjectDefinition
-                  case _ => None
+      case tx: List[SalesforceTransferConfigDAO.this.transfersDao.Transfer] => {
+        // 暫定対応
+        tx.size match {
+          case size1 if size1 > 0 => {
+            val t1 = tx.apply(0)
+            t1.config.validate[SalesforceTransferConfig] match {
+              case c1: JsSuccess[SalesforceTransferConfig] => {
+                // ToDo configの日付見て古ければ取得しにいく
+                val sfObjectDefinition: Option[List[DescribeSObjectResult]] = salesforceConnector.getConnection(c1.get.user, c1.get.password, c1.get.securityToken) match {
+                  case Some(c: PartnerConnection) => {
+                    val sObjectNames = salesforceConnector.getSObjectNames(c)
+                    Option(salesforceConnector.getSObjectInfo(c, sObjectNames))
+                  }
+                  case None => {
+                    c1.get.sfObjectDefinition match {
+                      case Some(s: List[DescribeSObjectResult]) => c1.get.sfObjectDefinition
+                      case _ => None
+                    }
+                  }
                 }
+                val newSalesforceTransferConfig = SalesforceTransferConfig(Option(t1.id), c1.get.user, c1.get.password, c1.get.securityToken, sfObjectDefinition)
+                transfersDao.update(t1.id, t1.type_id, t1.name, t1.status, Json.toJson(newSalesforceTransferConfig).toString)
+                Json.toJson(newSalesforceTransferConfig)
+              }
+              case e: JsError => {
+                println(e.toString)
+                Json.toJson("""{"error" : "2"}""")
+              }
+              case _ => {
+                Json.toJson("""{"error" : "2"}""")
               }
             }
-            val newSalesforceTransferConfig = SalesforceTransferConfig(Option(t1.id), c1.get.user, c1.get.password, c1.get.securityToken, sfObjectDefinition)
-            transfersDao.update(t1.id, t1.type_id, t1.name, t1.status, Json.toJson(newSalesforceTransferConfig).toString)
-            Json.toJson(newSalesforceTransferConfig)
-          }
-          case e: JsError => {
-            println(e.toString)
-            Json.toJson("""{"error" : "2"}""")
-          }
-          case _ => {
-            Json.toJson("""{"error" : "2"}""")
           }
         }
       }
-      case None => {
+      case _ => {
         Json.toJson("""{"error" : "3"}""")
       }
     }

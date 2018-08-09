@@ -38,7 +38,23 @@ class MailTransferConfigDAO @Inject() (
   override def getTransferConfig: JsValue = {
     println("MailTransferInfoDAO")
     transfersDao.getTransfer(transferType) match {
-      case Some(t1: transfersDao.Transfer) => {
+      case t1: List[MailTransferConfigDAO.this.transfersDao.Transfer] => {
+        // 暫定対応
+        t1.size match {
+          case size1 if size1 > 0 => {
+            t1.apply(0).config.validate[MailTransferConfig] match {
+              case c1: JsSuccess[MailTransferConfig] => {
+                Json.toJson(c1.get)
+              }
+              case e: JsError => { //Configが取れない時は新規作成
+                Json.toJson(MailTransferConfig(None, None))
+              }
+            }
+          }
+          case _ => Json.toJson(MailTransferConfig(None, None))
+        }
+
+        /*
         t1.config.validate[MailTransferConfig] match {
           case c1: JsSuccess[MailTransferConfig] => {
             Json.toJson(c1.get)
@@ -48,8 +64,9 @@ class MailTransferConfigDAO @Inject() (
             Json.toJson(newConfig)
           }
         }
+        */
       }
-      case None => {
+      case _ => {
         Json.toJson("""{"error" : "2"}""")
       }
     }

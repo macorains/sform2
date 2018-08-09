@@ -62,18 +62,20 @@ class MailTransferSendMail @Inject() (
   def receive: Receive = {
     case msg: String => {
       transfersDao.getTransfer(transferType) match {
-        case Some(t1: transfersDao.Transfer) => {
-          t1.config.validate[MailTransferConfig] match {
-            case c1: JsSuccess[MailTransferConfig] => {
-              getTransferTask(c1.get)
-              Logger.debug("")
+        case t1: List[MailTransferSendMail.this.transfersDao.Transfer] => {
+          t1.foreach(s => {
+            s.config.validate[MailTransferConfig] match {
+              case c1: JsSuccess[MailTransferConfig] => {
+                getTransferTask(c1.get)
+                Logger.debug("")
+              }
+              case e: JsError => {
+                Logger.debug("")
+              }
             }
-            case e: JsError => {
-              Logger.debug("")
-            }
-          }
+          })
         }
-        case None => {
+        case _ => {
           Logger.debug("")
         }
       }
