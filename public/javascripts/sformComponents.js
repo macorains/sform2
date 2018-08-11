@@ -308,6 +308,7 @@ var salesforceTransferRuleEditComponent = {
                     }
                 }
             }
+            console.log(tmp);
             return tmp;
           },
           formColList(){

@@ -116,19 +116,31 @@ class SalesforceDataRegister @Inject() (
   }
 
   def createSalesforceDataSet(transferConfig: SalesforceTransferConfig, taskConfig: SalesforceTransferTaskConfig, taskId: Int) = {
-    val columnConvertDefinition = taskConfig.columnConvertDefinition
-      .map(s => (s.value.get("sfCol").toString, s.value.get("sformCol").toString))
-
+    val columnConvertDefinition: List[(String, String)] = taskConfig.columnConvertDefinition
+      .map(s => (s.value.get("sfName").toString, s.value.get("sformName").toString))
+    //print(taskConfig.columnConvertDefinition);
     val posts = postdataDao.getPostdataByFormHashedId(taskConfig.formId, transferType)
     val log_id = transferLogDao.create(transferType)
     transferLogDao.start(log_id, taskId, posts.map(p => { p.postdata.toString() }).mkString("[", ",", "]"))
     val sfobjArray: Array[SalesforceDataSet] =
       posts.map(p => {
         val sfobj: SObject = new SObject()
-        (p.postdata \ "col1").getOrElse(JsNull).as[String]
         sfobj.setType(taskConfig.sfObject)
         columnConvertDefinition.foreach(s => {
-          sfobj.setField(s._1, (p.postdata \ s._2).getOrElse(JsNull).as[String])
+          //print(s._1)
+          print(p.postdata.toString())
+          print("  ||  ")
+          print(s._2)
+          print("\n")
+          s._2 match {
+            case x: String => {
+              (p.postdata \ x).getOrElse(JsNull) match {
+                case c: JsString => sfobj.setField(s._1, c.toString())
+                case _ => None //sfobj.setField(s._1, "")
+              }
+            }
+            case _ => None
+          }
         })
         /*
         sfobj.setField(
@@ -148,12 +160,6 @@ class SalesforceDataRegister @Inject() (
       case c: PartnerConnection => {
         val d = sfobjArray.map(b => b.sobject)
         val dt = sfobjArray.map(b => b)
-        d.foreach(s => {
-          println("***")
-          println(s.getField("company"))
-          println(s.getField("lastName"))
-          println("***")
-        })
         var result = salesforceConnector.create(c, d)
         print(result)
         (0 to d.length - 1).foreach(u => {

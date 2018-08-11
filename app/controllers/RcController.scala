@@ -126,9 +126,12 @@ class RcController @Inject() (
             }
 
             case "saveConfig" => {
+              print("***saveConfig***")
               val data = (json \ "rcdata").as[JsValue]
               data.validate[transferSaveConfigRequest] match {
                 case s: JsSuccess[transferSaveConfigRequest] => {
+                  print(s.get)
+
                   val transferConfig = Class.forName("models.daos.TransferConfig." + s.get.transferName + "TransferConfigDAO")
                     .getDeclaredConstructor(classOf[TransfersDAO])
                     .newInstance(transfersDAO).asInstanceOf[BaseTransferConfigDAO]
