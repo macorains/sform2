@@ -154,7 +154,7 @@
                 var reqdata = {
                     objtype: "TransferTask",
                     action: "getTransferTaskListByFormId",
-                    rcdata: {"formId" : Number(this.tmpFormInput.id)}
+                    rcdata: {"formId" : this.tmpFormInput.hashed_id}
                 };
                 jQuery.ajax({
                     type: "POST",
@@ -489,35 +489,35 @@
                 }
                 return "";
             },
-            //setExtLink1_List1(idx) {
-            //    this.tmpExtLink1_List1 = this.sfobj[idx]["fields"];
-            //},
-            SalesforceTransferRuleEditModalShow(){
-                jQuery('#SalesforceTransferRuleEditModal').modal('show');
-            },
-            SalesforceTransferRuleEditAddColumnConvertDefinitions(){
-                console.log(this.tmpColumnConvertDefinition);
-            },
             TransferConfigChangeTransfer(transfer){
                 jQuery('.transfer-config-selected').removeClass('transfer-config-selected');
                 jQuery('.transfer-config-panel-show').addClass('transfer-panel').removeClass('transfer-config-panel-show');
                 jQuery("#item-transfer-"+transfer).addClass('transfer-config-selected');
                 jQuery("#" + transfer + "TransferDefinitionPanel").addClass('transfer-config-panel-show').removeClass('transfer-panel');
             },
+            // 転送ルール追加
             AddTransferRule(){
                 var that = this;
                 var transfers = this.transferList.filter(function(item,index){
                     if(item.type_id == that.transferSelected) return true;
                 })
                 this.tmpTransferTask = jQuery.extend(true,{},this.transferTaskDefault[transfers[0]["name"]]);
-                this.tmpTransferTask.config.formId = this.tmpFormInput.id;
+                this.tmpTransferTask.config.formId = this.tmpFormInput.hashed_id;
                 jQuery('#' + transfers[0]["name"] + 'TransferRuleEditModal').modal('show');
             },
+            // 転送ルール編集
             EditTransferRule(index){
                 this.tmpTransferTask = jQuery.extend(true,{},this.tmpTransferTaskList[index]);
                 jQuery('#' + this.tmpTransferTaskList[index]["transfer_name"] + 'TransferRuleEditModal').modal('show');
             },
+            // 転送ルール削除
             DeleteTransferRule(index){
+                this.tmpTransferTaskList = this.tmpTransferTaskList.map(function(item, index2){
+                    if(index == index2){
+                        item.del_flg = 1;
+                    }
+                    return item;
+                })
             },
             // Transfer設定
             SetTransferConfig(type,data){
@@ -546,9 +546,6 @@
             orderedCols: function() {
                 return _.orderBy(this.tmpFormCols, "index")
             },
-            //orderedSelectList: function() {
-             //   return _.orderBy(this.tmpFormColSelect, "index")
-            //},
             formDataList: function() {
                 return this.formPostData.data
             },
@@ -562,6 +559,11 @@
             },
             formDataColumns: function() {
                 return this.formPostData.column
+            },
+            tmpTransferTaskListFiltered: function(){
+                return this.tmpTransferTaskList.filter(function(item,index){
+                    if(item.del_flg == 0) return true;
+                });
             }
         },
     })

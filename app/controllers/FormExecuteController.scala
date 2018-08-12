@@ -138,13 +138,25 @@ class FormExecuteController @Inject() (
     request.identity match {
       case Some(user) =>
         request.body.asJson match {
-          case Some(f) =>
-            val html = formsDAO.savePost(f, request.host)
-            Future.successful(Ok(Json.toJson(html.getDataset)))
-          case None => Future.successful(Ok(Json.toJson("error")))
-          case _ => Future.successful(Ok(Json.toJson("a")))
+          case f: Option[JsValue] =>
+            f.get match {
+              case f1: JsValue => {
+                val html = formsDAO.savePost(f1, request.host)
+                Logger.info("FormExecuteController.saveForm sucess.")
+                Future.successful(Ok(Json.toJson(html.getDataset)))
+              }
+              case _ => {
+                Logger.error("FormExecuteController.saveForm failed. (1)")
+                Future.successful(Ok(Json.toJson("NG")))
+              }
+            }
+          case _ =>
+            Logger.error("FormExecuteController.saveForm failed. (2)")
+            Future.successful(Ok(Json.toJson("{msg:a}")))
         }
-      case None => Future.successful(Ok(Json.toJson("Unauthorized.")))
+      case None =>
+        Logger.error("FormExecuteController.saveForm failed. (Unauthorized)")
+        Future.successful(Ok(Json.toJson("Unauthorized.")))
     }
   }
 

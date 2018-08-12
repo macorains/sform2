@@ -57,7 +57,7 @@ class RcController @Inject() (
     implicit def jsonTransferSaveConfigRequestReads: Reads[transferSaveConfigRequest] = Json.reads[transferSaveConfigRequest]
   }
 
-  case class transferGetTaskRequest(formId: Int)
+  case class transferGetTaskRequest(formId: String)
   object transferGetTaskRequest {
     implicit def jsonTransferGetConfigRequestWrites: Writes[transferGetTaskRequest] = Json.writes[transferGetTaskRequest]
     implicit def jsonTransferGetConfigRequestReads: Reads[transferGetTaskRequest] = Json.reads[transferGetTaskRequest]
@@ -154,11 +154,15 @@ class RcController @Inject() (
           action match {
             case "getTransferTaskListByFormId" => {
               val data = (json \ "rcdata").as[JsValue]
+              println("### getTransferTaskListByFormId ###")
+              println(data)
               data.validate[transferGetTaskRequest] match {
                 case s: JsSuccess[transferGetTaskRequest] => {
+                  Logger.info("RcController.receive TransferTask.getTransferTaskListByFormId success.")
                   RsResultSet("OK", "OK", transferTaskDAO.getTransferTaskListByFormId(s.get.formId))
                 }
                 case e: JsError => {
+                  Logger.error("RcController.receive TransferTask.getTransferTaskListByFormId failed.(1)")
                   RsResultSet("NG", "NG", Json.parse("""{}"""))
                 }
               }
@@ -168,6 +172,7 @@ class RcController @Inject() (
       }
       Future.successful(Ok(Json.toJson(res)))
     }.getOrElse {
+      Logger.error("RcController.receive TransferTask.getTransferTaskListByFormId failed.(2)")
       Future.successful(BadRequest("Bad!"))
     }
   }

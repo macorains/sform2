@@ -15,7 +15,7 @@ object TransferTask extends SQLSyntaxSupport[TransferTask] {
   }
 }
 case class TransferTaskJson(id: Int, transfer_type_id: Int, name: String, status: Int, config: JsObject,
-  created: Option[String], modified: Option[String])
+  created: Option[String], modified: Option[String], del_flg: Int)
 object TransferTaskJson {
   implicit def jsonTransferTaskWrites: Writes[TransferTaskJson] = Json.writes[TransferTaskJson]
   implicit def jsonTransferTaskReads: Reads[TransferTaskJson] = Json.reads[TransferTaskJson]
@@ -25,21 +25,21 @@ class TransferTaskDAO {
 
   def getTransferTaskList(transferType: Int) = {
     DB localTx { implicit l =>
-      sql"""SELECT ID,TRANSFER_TYPE_ID,NAME,STATUS,CONFIG,CREATED,MODIFIED
+      sql"""SELECT ID,TRANSFER_TYPE_ID,NAME,FORM_ID,STATUS,CONFIG,CREATED,MODIFIED
       FROM D_TRANSFER_TASKS
       WHERE TRANSFER_TYPE_ID=${transferType}"""
         .map(rs => TransferTask(rs)).list.apply()
     }
   }
 
-  def getTransferTaskListByFormId(formId: Int) = {
+  def getTransferTaskListByFormId(formId: String) = {
     DB localTx { implicit l =>
       val transferTaskList = sql"""SELECT ID,TRANSFER_TYPE_ID,NAME,STATUS,CONFIG,CREATED,MODIFIED
       FROM D_TRANSFER_TASKS
       WHERE FORM_ID=${formId}"""
         .map(rs => TransferTask(rs)).list.apply()
       val transferTaskListJson = transferTaskList.map(
-        t => { TransferTaskJson(t.id, t.transfer_type_id, t.name, t.status, t.config.as[JsObject], t.created, t.modified) })
+        t => { TransferTaskJson(t.id, t.transfer_type_id, t.name, t.status, t.config.as[JsObject], t.created, t.modified, 0) })
       Json.toJson(transferTaskListJson)
     }
   }
@@ -65,6 +65,15 @@ class TransferTaskDAO {
     }
   }
 
+  def delete(id: Int) = {
+    DB localTx { implicit l =>
+      sql"""
+      DELETE FROM D_TRANSFER_TASKS
+      WHERE ID = ${id}"""
+        .update.apply()
+    }
+  }
+
   def bulkSave(dt: JsValue, identity: User) = {
     val transferTaskList = (dt \ "transferTasks").as[JsValue]
     println(transferTaskList)
@@ -77,13 +86,19 @@ class TransferTaskDAO {
               this.save(t.transfer_type_id, t.name, t.status, t.config.toString(), identity.userID.toString, identity.group.getOrElse(""))
             }
             case _ => {
-              this.update(t.id, t.transfer_type_id, t.name, t.status, t.config.toString(), identity.userID.toString)
+              t.del_flg match {
+                case f1: Int if f1 != 1 =>
+                  this.update(t.id, t.transfer_type_id, t.name, t.status, t.config.toString(), identity.userID.toString)
+                case f2: Int if f2 == 1 =>
+                  this.delete(t.id)
+              }
             }
           }
         })
       }
-      case _ => {
-        println("error!")
+      case e: JsError => {
+        println("Error: TransferTaskDao.bulkSave failed.")
+        println(e.toString)
       }
     }
 

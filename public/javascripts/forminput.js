@@ -69,6 +69,7 @@ $(document).ready(function(){
         console.log("submit");
         tmpData = JSON.parse($("#sform_tmp").val());
         console.log(tmpData);
+        var that = this;
         $.ajax({
           type: "POST",
           url: "/sform/sfcon_php/formsave.php",
@@ -79,10 +80,15 @@ $(document).ready(function(){
             postdata : tmpData
           },
           success: function(msg) {
-            console.log(msg);
-            //parentElement.empty();
-            //parentElement.append(msg);
+            parentElement.empty();
+            parentElement.append(msg);
             that.formStatus = 2;
+          },
+          error: function(XMLHttpRequest, textStatus, errorThrown){
+            console.log("***** formsave failed. *****");
+            console.log(XMLHttpRequest);
+            console.log(textStatus);
+            console.log(errorThrown);
           }
         });
     });
