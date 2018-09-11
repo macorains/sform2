@@ -477,7 +477,7 @@ var mailTransferConfigComponent = {
 
 var mailTransferRuleEditComponentTemplate = (function () {/*
 <div class="modal fade" tabindex="-1" role="dialog" id="MailTransferRuleEditModal" style="display:none">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -485,24 +485,24 @@ var mailTransferRuleEditComponentTemplate = (function () {/*
             </div>
             <div class="modal-body">
                 <div class="row">
-                  <div class="col-md-4">転送ルール名</div>
-                  <div class="col-md-8"><input type="text" class="form-control" v-model="tmpTransferTask.name"></div>
+                  <div class="col-md-3">転送ルール名</div>
+                  <div class="col-md-9"><input type="text" class="form-control" v-model="tmpTransferTask.name"></div>
                 </div>
                 <div class="row">
-                  <div class="col-md-4">メール件名</div>
-                  <div class="col-md-8"><input type="text" class="form-control" v-model="tmpTransferTask.config.mailSubject"></div>
+                  <div class="col-md-3">メール件名</div>
+                  <div class="col-md-9"><input type="text" class="form-control" v-model="tmpTransferTask.config.mailSubject"></div>
                 </div>
                 <div class="row">
-                  <div class="col-md-4">メール送信元</div>
-                  <div class="col-md-8"><input type="text" class="form-control" v-model="tmpTransferTask.config.mailFrom"></div>
+                  <div class="col-md-3">メール送信元</div>
+                  <div class="col-md-9"><input type="text" class="form-control" v-model="tmpTransferTask.config.mailFrom"></div>
                 </div>
                 <div class="row">
-                  <div class="col-md-4">メール送信先</div>
-                  <div class="col-md-8"><input type="text" class="form-control" v-model="tmpTransferTask.config.mailTo"></div>
+                  <div class="col-md-3">メール送信先</div>
+                  <div class="col-md-9"><input type="text" class="form-control" v-model="tmpTransferTask.config.mailTo"></div>
                 </div>
                 <div class="row">
-                  <div class="col-md-4">メール本文</div>
-                  <div class="col-md-8"><textarea class="form-control" v-model="tmpTransferTask.config.mailBody"></textarea></div>
+                  <div class="col-md-3">メール本文</div>
+                  <div class="col-md-9"><textarea class="form-control" v-model="tmpTransferTask.config.mailBody" rows="15"></textarea></div>
                 </div>
                 <div class="row">
                   <div class="col-md-12">&nbsp;</div>
