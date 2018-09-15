@@ -3,6 +3,9 @@
 # ~~~~
 
 # Home page
+GET /formpost controllers.FormPostDataController.getPostData()
+POST /formpost controllers.FormPostDataController.getPostData()
+
 GET         /                                controllers.ApplicationController.index
 GET         /signOut                         controllers.ApplicationController.signOut
 GET         /authenticate/:provider          controllers.SocialAuthController.authenticate(provider)

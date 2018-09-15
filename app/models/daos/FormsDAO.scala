@@ -497,7 +497,8 @@ class FormsDAO extends FormParts {
                 if (v.as[String].matches("[\\u3041-\\u3096]*")) "" else cValidationErrorMessage.NOT_HIRAGANA_ERROR
               case cFormValidationType.EMAIL =>
                 if (v.as[String].matches("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$")) "" else cValidationErrorMessage.EMAIL_ADDRESS_FORMAT_ERROR
-              case cFormValidationType.POSTCODE => { "" }
+              case cFormValidationType.POSTCODE =>
+                if (v.as[String].matches("[0-9]{3}-{0,1}[0-9]{4}")) "" else cValidationErrorMessage.NOT_POSTCODE_ERROR
               case _ => ""
             }
           case _ => {
