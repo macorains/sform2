@@ -10,6 +10,7 @@ import play.api.i18n.I18nSupport
 import play.api.libs.json.{ JsValue, Json, Reads, Writes }
 import play.api.mvc.{ AbstractController, ControllerComponents }
 import utils.auth.DefaultEnv
+import models.daos.PostdataDAO
 
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -29,8 +30,13 @@ class FormPostDataController @Inject() (
     implicit def jsonPostDataResponseReads: Reads[postDataResponse] = Json.reads[postDataResponse]
   }
 
-  def getPostData() = silhouette.UnsecuredAction.async { implicit request =>
-    val res = postDataResponse("100", "1", "1", Json.toJson("aaa"))
+  def getPostData(hashed_form_id: String) = silhouette.UnsecuredAction.async { implicit request =>
+    val dao = new PostdataDAO()
+    val d = hashed_form_id match {
+      case s: String => { dao.getPostdata(s).map(t => t.postdata) }
+      case _ => List(Json.toJson(""))
+    }
+    val res = postDataResponse(d.length.toString, "1", "1", Json.toJson(d))
 
     Future.successful(Ok(Json.toJson(res)).as("application/json; charset=UTF-8"))
   }

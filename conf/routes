@@ -3,8 +3,6 @@
 # ~~~~
 
 # Home page
-GET /formpost controllers.FormPostDataController.getPostData()
-POST /formpost controllers.FormPostDataController.getPostData()
 
 GET         /                                controllers.ApplicationController.index
 GET         /signOut                         controllers.ApplicationController.signOut
@@ -40,3 +38,4 @@ POST   /validate/  controllers.FormExecuteController.validateForm
 POST   /save/  controllers.FormExecuteController.saveForm
 GET /sformjs/*path controllers.RcController.getjs(path)
 GET /forminputjs/*path controllers.FormExecuteController.getjs(path)
+GET /formpost/:hashed_form_id controllers.FormPostDataController.getPostData(hashed_form_id: String)

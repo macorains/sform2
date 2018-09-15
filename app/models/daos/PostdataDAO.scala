@@ -24,4 +24,13 @@ class PostdataDAO {
     }
   }
 
+  def getPostdata(form_hashed_id: String) = {
+    DB localTx { implicit l =>
+      sql"""SELECT pd.POSTDATA_ID, pd.FORM_HASHED_ID, pd.POSTDATA
+           FROM D_POSTDATA pd
+           WHERE pd.FORM_HASHED_ID=${form_hashed_id}  """
+        .map(rs => Postdata(rs)).list.apply()
+    }
+  }
+
 }
