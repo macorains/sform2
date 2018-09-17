@@ -452,6 +452,32 @@ class FormsDAO extends FormParts {
   }
 
   /**
+   * フォーム項目情報取得
+   * @param hashed_id
+   * @return
+   */
+  def getFormCols(hashed_id: String) = {
+    val f = FormData.syntax("f")
+    DB localTx { implicit s =>
+      val formData =
+        withSQL {
+          select(f.id, f.hashed_id, f.form_data, f.user_group)
+            .from(FormData as f)
+            .where
+            .eq(f.hashed_id, hashed_id)
+        }.map(rs => FormData(rs)).single.apply()
+      formData match {
+        case Some(s: FormData) => {
+          val dt = Json.parse(s.form_data)
+          (dt \ "formCols").asOpt[JsValue].getOrElse(Json.toJson(""))
+        }
+        case _ => Json.toJson("")
+      }
+    }
+
+  }
+
+  /**
    * 各項目についてバリデーション実行
    * @param fd フォーム定義
    * @param pd 受信データ
