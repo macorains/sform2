@@ -367,22 +367,16 @@
                 jQuery(".selEdit").hide();
             },
             // フォームデータ一覧表示
-            startFormData() {
-                this.togglePage("formData",0);
-                var reqdata = {
-                    objtype: "Form",
-                    action: "getdata",
-                    rcdata: {
-                        formid : "1"
-                    }
-                };
+            startFormData(index) {
                 jQuery.ajax({
-                    type: "POST",
-                    url: "rc/",
-                    dataType: "json",
+                    type: "GET",
+                    url: "formpost/" + this.formlist[index].hashed_id,
+                    //dataType: "json",
                     contentType: "application/json",
-                    data: JSON.stringify(reqdata),
                     success: function(msg) {
+                        console.log(msg);
+                        //jQuery("#formDataTable").DataTable({
+                        /*
                         var formData = []
                         var cols = [];
                         var colName = JSON.parse(msg.message);
@@ -401,6 +395,7 @@
                             data: formData,
                             columns: cols
                         });
+                        */
                     },
                     error: function(XMLHttpRequest, textStatus, errorThrown) {
                         console.log(textStatus);
