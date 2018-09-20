@@ -366,7 +366,7 @@
                 jQuery(".selView").show();
                 jQuery(".selEdit").hide();
             },
-            // フォームデータ一覧表示
+            // フォーム送信データ一覧表示
             startFormData(index) {
                 jQuery.ajax({
                     type: "GET",
@@ -374,7 +374,25 @@
                     //dataType: "json",
                     contentType: "application/json",
                     success: function(msg) {
-                        console.log(msg);
+                        var getData = function(src, cols){
+                            return cols.map(x=>typeof src[x] == "undefined"?"":src[x]);
+                        }
+                        var cols = function(src){
+                            var res = [];
+                            for(s in src){
+                                var d = {};
+                                d['data'] = src[s].colId
+                                res.push(d);
+                            }
+                            return res;
+                        }
+                        var dt = msg.rows.map(x=>getData(x, cols(msg.cols)));
+                        console.log(dt);
+                        jQuery("#formDataTable").DataTable({
+                            data: dt,
+                            columns: cols(msg.cols)
+                        });
+
                         //jQuery("#formDataTable").DataTable({
                         /*
                         var formData = []
@@ -559,6 +577,9 @@
                 return this.tmpTransferTaskList.filter(function(item,index){
                     if(item.del_flg == 0) return true;
                 });
+            },
+            test: function() {
+                return "test";
             }
         },
     })
