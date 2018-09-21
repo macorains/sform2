@@ -368,52 +368,40 @@
             },
             // フォーム送信データ一覧表示
             startFormData(index) {
+                this.togglePage("formData",0);
                 jQuery.ajax({
                     type: "GET",
                     url: "formpost/" + this.formlist[index].hashed_id,
-                    //dataType: "json",
                     contentType: "application/json",
                     success: function(msg) {
                         var getData = function(src, cols){
-                            return cols.map(x=>typeof src[x] == "undefined"?"":src[x]);
+                            var tmpObj = function(n,d){
+                                var obj = {};
+                                obj[n] = "";
+                                if(typeof d != 'undefined'){
+                                    obj[n] = d;
+                                }
+                                return obj;
+                            }
+                            return cols.map(x=>tmpObj(x.data, src[x.data])).reduce((a,b) => {return Object.assign(a,b)});
+
                         }
                         var cols = function(src){
                             var res = [];
                             for(s in src){
                                 var d = {};
                                 d['data'] = src[s].colId
+                                d['title'] = src[s].name
                                 res.push(d);
                             }
                             return res;
                         }
                         var dt = msg.rows.map(x=>getData(x, cols(msg.cols)));
-                        console.log(dt);
                         jQuery("#formDataTable").DataTable({
                             data: dt,
                             columns: cols(msg.cols)
                         });
 
-                        //jQuery("#formDataTable").DataTable({
-                        /*
-                        var formData = []
-                        var cols = [];
-                        var colName = JSON.parse(msg.message);
-                        for(var i in msg.dataset){
-                            var tmp = JSON.parse(msg.dataset[i].postdata)
-                            for( var t in tmp){
-                                cols.push({ data : t, title : colName[t]});
-                            }
-                            break;
-                        }
-                        for(var i in msg.dataset){
-                            formData.push(JSON.parse(msg.dataset[i].postdata));
-                        }
-
-                        jQuery("#formDataTable").DataTable({
-                            data: formData,
-                            columns: cols
-                        });
-                        */
                     },
                     error: function(XMLHttpRequest, textStatus, errorThrown) {
                         console.log(textStatus);
