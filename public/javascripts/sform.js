@@ -394,6 +394,7 @@
                         }
                         var cols = function(src){
                             var res = [];
+                            res.push({data : 'id', title : 'Id'});
                             for(s in src){
                                 var d = {};
                                 d['data'] = src[s].colId
