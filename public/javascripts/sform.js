@@ -368,7 +368,13 @@
             },
             // フォーム送信データ一覧表示
             startFormData(index) {
+                if(typeof this.tmpFormDataTable.destroy == 'function'){
+                    this.tmpFormDataTable.destroy();
+                    jQuery("#formDataTable").empty();
+                    this.tmpFormDataTable = {};
+                }
                 this.togglePage("formData",0);
+                var that = this;
                 jQuery.ajax({
                     type: "GET",
                     url: "formpost/" + this.formlist[index].hashed_id,
@@ -397,10 +403,19 @@
                             return res;
                         }
                         var dt = msg.rows.map(x=>getData(x, cols(msg.cols)));
-                        jQuery("#formDataTable").DataTable({
-                            data: dt,
-                            columns: cols(msg.cols)
-                        });
+                        if(dt.length > 0){
+                            that.tmpFormDataTable = jQuery("#formDataTable").DataTable({
+                                select: true,
+                                data: dt,
+                                columns: cols(msg.cols),
+                            });
+                            that.tmpFormDataTable.on('selectItems', function(e, dt, items){
+                               console.log('select');
+                            });
+                            jQuery("#formDataTable").addClass("table").addClass("table-striped").addClass("table-bordered");
+                            //jQuery("#formData").find('input').addClass("form-control");
+                            //jQuery("#formData").find('[name="formDataTable_length"]').addClass("form-control");
+                        }
 
                     },
                     error: function(XMLHttpRequest, textStatus, errorThrown) {
@@ -408,6 +423,11 @@
                         console.log(errorThrown);
                     }
                 });
+            },
+            endFormData(){
+                jQuery(".sfpage").hide();
+                jQuery("#formList").show();
+                this.hideFormColEdit();
             },
             // ユーザー編集開始
             startUserEdit(idx) {

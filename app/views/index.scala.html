@@ -301,29 +301,12 @@
             <p class="lead"></p>
             <div class="row">
                 <div class="col-md-12">
-                    <table id="formDataTable"></table>
-                    <table id="formDataGrid" class="formDataList">
-                        <tr>
-                            <th></th>
-                            <th v-for="c in formDataColumns" v-if="c.name != 'index'">{{c.label}}</th>
-                        </tr>
-                        <tr v-for="fd in formDataList">
-                            <td>
-                                <button type="button" class="btn btn-default btn-sm" v-on:click="showFormPostData(fd.index)">
-                                        <span class="glyphicon glyphicon-list">データ確認</span>
-                                    </button>
-                                <button type="button" class="btn btn-default btn-sm" v-on:click="deleteFormPostDataConfirm(fd.index)">
-                                        <span class="glyphicon glyphicon-trash">削除</span>
-                                    </button>
-                            </td>
-                            <td v-for="(f,key) in fd" v-if="key!='index'">{{f}}</td>
-                        </tr>
-                    </table>
+                    <table id="formDataTable" class="table table-striped table-bordered"></table>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-12 text-left">
-                    <button type="button" class="btn btn-default btn-sm" v-on:click="cancelFormEdit()">
+                    <button type="button" class="btn btn-default btn-sm" v-on:click="endFormData()">
                             <span class="glyphicon glyphicon-repeat">フォーム一覧に戻る</span>
                         </button>
                     <button type="button" class="btn btn-default btn-sm" v-on:click="downloadCsvConfirm()">
@@ -519,6 +502,7 @@
 <script src="assets/javascripts/lodash.min.js"></script>
 <script src="assets/javascripts/jquery.datatables.min.js"></script>
 <script src="assets/javascripts/dataTables.colReorder.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
 <script src="assets/javascripts/sformComponents.js"></script>
 <script src="assets/javascripts/sformDefaultData.js"></script>
 <script src="assets/javascripts/sform.js"></script>
