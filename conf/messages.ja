@@ -6,7 +6,7 @@ could.not.authenticate = Could not authenticate with social provider! Please try
 
 home.title = Silhouette - Home
 sign.up.title = Silhouette - Sign Up
-sign.in.title = Sform - Sign In
+sign.in.title = Sform - サインイン
 forgot.password.title = Silhouette - Forgot Password
 reset.password.title = Silhouette - Reset Password
 change.password.title = Silhouette - Change Password
@@ -16,7 +16,7 @@ toggle.navigation = Toggle navigation
 welcome.signed.in = Welcome, you are now signed in!
 
 sign.up.account = Sign up for a new account
-sign.in.credentials = Sign in with your credentials
+sign.in.credentials = サインイン
 
 error = Error!
 info = Info!
@@ -25,20 +25,20 @@ home = Home
 first.name = First name
 last.name = Last name
 full.name = Full name
-email = Email
-group = Group
-password = Password
+email = メールアドレス
+group = 組織ID
+password = パスワード
 send = Send
 change = Change
 reset = Reset
 sign.up = Sign up
-sign.in = Sign in
-sign.out = Sign out
+sign.in = サインイン
+sign.out = サインアウト
 sign.in.now = Sign in now
 sign.up.now = Sign up now
 already.a.member = Already a member?
 not.a.member = Not a member?
-forgot.your.password = Forgot your password?
+forgot.your.password = パスワードを忘れた場合
 forgot.password = Forgot password
 reset.password = Reset password
 change.password = Change password
@@ -46,7 +46,7 @@ activate.account = Activate Account
 current.password = Current password
 new.password = New password
 
-remember.me = Remember my login on this computer
+remember.me = このコンピュータにログイン情報を記憶します
 or.use.social = Or use your existing account on one of the following services to sign in:
 forgot.password.info = Please enter your email address and we will send you an email with further instructions to reset your password.
 strong.password.info = Strong passwords include numbers, letters and punctuation marks.
@@ -106,7 +106,7 @@ email.activate.account.txt.text = Please follow the link to confirm and activate
 ##########
 # Sform
 ##########
-sform.menu.form = Forms
-sform.menu.transfer = Transfers
-sform.menu.user = Users
-sform.menu.signout = Signout
+sform.menu.form = フォーム
+sform.menu.transfer = 転送
+sform.menu.user = ユーザー
+sform.menu.signout = サインアウト

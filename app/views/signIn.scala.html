@@ -10,7 +10,7 @@
 
 @main(messages("sign.in.title")) {
     <fieldset class="col-md-6 col-md-offset-3">
-        <legend><img src="@controllers.routes.Assets.at("/images/sform_logo.png ")">@messages("sign.in.credentials")</legend>
+        <legend><img src="@controllers.routes.Assets.at("/images/sform_logo_1.png ")">@messages("sign.in.credentials")</legend>
         @helper.form(action = controllers.routes.SignInController.submit()) {
             @helper.CSRF.formField
             @b3.email(signInForm("email"), '_hiddenLabel -> messages("email"), 'placeholder -> messages("email"), 'class -> "form-control input-lg")

@@ -25,15 +25,15 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-                <a class="navbar-brand" href="#"><img src="@controllers.routes.Assets.at("/images/sform_logo.png ")" height="36"></a>
+                <a class="navbar-brand" href="#"><img src="@controllers.routes.Assets.at("/images/sform_logo_2.png ")" height="36"></a>
             </div>
             <div id="navbar" class="collapse navbar-collapse">
                 <ul class="nav navbar-nav">
-                    <li v-bind:class="menuStatus[0]"><a href="#" v-on:click="togglePage('formList',0)">フォーム</a></li>
-                    <li v-bind:class="menuStatus[3]"><a href="#" v-on:click="togglePage('transferSetting',3)">転送</a></li>
-                    <li v-bind:class="menuStatus[1]"><a href="#about" v-on:click="togglePage('userList',1)">Users</a></li>
-                    <li v-bind:class="menuStatus[2]"><a href="#config" v-on:click="togglePage('config',2)">Config</a></li>
-                    <li><a href="#config" v-on:click="logout">Logout</a></li>
+                    <li v-bind:class="menuStatus[0]"><a href="#" v-on:click="togglePage('formList',0)">@messages("sform.menu.form")</a></li>
+                    <li v-bind:class="menuStatus[3]"><a href="#" v-on:click="togglePage('transferSetting',3)">@messages("sform.menu.transfer")</a></li>
+                    <li v-bind:class="menuStatus[1]"><a href="#about" v-on:click="togglePage('userList',1)">@messages("sform.menu.user")</a></li>
+                    <!-- <li v-bind:class="menuStatus[2]"><a href="#config" v-on:click="togglePage('config',2)">Config</a></li> -->
+                    <li><a href="#config" v-on:click="logout">@messages("sform.menu.signout")</a></li>
                 </ul>
             </div>
             <!--/.nav-collapse -->
