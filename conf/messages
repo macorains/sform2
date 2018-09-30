@@ -6,7 +6,7 @@ could.not.authenticate = Could not authenticate with social provider! Please try
 
 home.title = Silhouette - Home
 sign.up.title = Silhouette - Sign Up
-sign.in.title = Silhouette - Sign In
+sign.in.title = Sform - Sign In
 forgot.password.title = Silhouette - Forgot Password
 reset.password.title = Silhouette - Reset Password
 change.password.title = Silhouette - Change Password

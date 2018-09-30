@@ -410,8 +410,17 @@
                                 data: dt,
                                 columns: cols(msg.cols),
                             });
-                            that.tmpFormDataTable.on('selectItems', function(e, dt, items){
-                               console.log('select');
+//                            that.tmpFormDataTable.on('selectItems', function(e, dt, items){
+//                               console.log('select');
+//                            });
+                            jQuery("#formDataTable tbody").on('click', 'tr', function(){
+                                if ( jQuery(this).hasClass('selected') ) {
+                                        jQuery(this).removeClass('selected');
+                                }
+                                else {
+                                    jQuery('#formDataTable tbody tr.selected').removeClass('selected');
+                                    jQuery(this).addClass('selected');
+                                }
                             });
                             jQuery("#formDataTable").addClass("table").addClass("table-striped").addClass("table-bordered");
                             //jQuery("#formData").find('input').addClass("form-control");
