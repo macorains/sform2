@@ -1,4 +1,4 @@
-@* 
+@*
 * This template takes a single argument, a String containing a 
 * message to display. 
 *@
@@ -42,7 +42,7 @@
 
     <div class="container sfpage" id="formList">
         <div class="starter-template">
-            <h1 class="pageTitle">フォーム一覧</h1><!-- [@user.email.getOrElse("")][@user.group.getOrElse("")] -->
+            <h1 class="pageTitle">@messages("sform.title.forms")</h1><!-- [@user.email.getOrElse("")][@user.group.getOrElse("")] -->
             <p class="lead"></p>
             <div>
                 <div class="table">
@@ -50,9 +50,9 @@
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>フォーム名称</th>
-                                <th>タイトル</th>
-                                <th>ID</th>
+                                <th>@messages("sform.formlist.header.name")</th>
+                                <th>@messages("sform.formlist.header.title")</th>
+                                <th>@messages("sform.formlist.header.id")</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -68,21 +68,21 @@
                                 <td>{{form.hashed_id}}</td>
                                 <td>
                                     <button type="button" class="btn btn-default btn-sm btn-formList" v-on:click="startFormEdit(1,form.index)">
-                                        <span class="glyphicon glyphicon-list-alt" aria-hidden="true">設定</span>
+                                        <span class="glyphicon glyphicon-list-alt" aria-hidden="true">@messages("sform.button.setting")</span>
                                     </button>
                                     <button type="button" class="btn btn-default btn-sm btn-formList" v-on:click="startFormData(form.index)">
-                                        <span class="glyphicon glyphicon-align-justify" aria-hidden="true">データ</span>
+                                        <span class="glyphicon glyphicon-align-justify" aria-hidden="true">@messages("sform.button.data")</span>
                                     </button>
                                     <div class="dropup" style="display:inline">
                                         <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            操作
+                                            @messages("sform.button.action")
                                             <span class="caret"></span>
                                         </button>
                                         <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                            <li><a href="#" v-on:click="changeFormStatus(form.index,'0')"><span class="glyphicon glyphicon-ban-circle">無効にする</a></li>
-                                            <li><a href="#" v-on:click="changeFormStatus(form.index,'1')"><span class="glyphicon glyphicon-play"></span>有効にする</a></li>
-                                            <li><a href="#" v-on:click="changeFormStatus(form.index,'2')"><span class="glyphicon glyphicon-minus-sign">停止状態にする</a></li>
-                                            <li><a href="#" v-on:click="deleteFormConfirm(form.index, form.id)"><span class="glyphicon glyphicon-trash"></span>削除する</a></li>
+                                            <li><a href="#" v-on:click="changeFormStatus(form.index,'0')"><span class="glyphicon glyphicon-ban-circle">@messages("sform.action.inactive")</a></li>
+                                            <li><a href="#" v-on:click="changeFormStatus(form.index,'1')"><span class="glyphicon glyphicon-play"></span>@messages("sform.action.active")</a></li>
+                                            <li><a href="#" v-on:click="changeFormStatus(form.index,'2')"><span class="glyphicon glyphicon-minus-sign">@messages("sform.action.stop")</a></li>
+                                            <li><a href="#" v-on:click="deleteFormConfirm(form.index, form.id)"><span class="glyphicon glyphicon-trash"></span>@messages("sform.action.delete")</a></li>
                                         </ul>
                                     </div>
                                 </td>
@@ -93,7 +93,7 @@
                 <div class="table">
                     <div class="row">
                         <div class="col-md-12 text-center">
-                            <button class="btn btn-default btn-sm" type="button" v-on:click="addForm()"><span class="glyphicon glyphicon-plus"></span>フォーム追加</button>
+                            <button class="btn btn-default btn-sm" type="button" v-on:click="addForm()"><span class="glyphicon glyphicon-plus"></span>@messages("sform.button.addform")</button>
                         </div>
                     </div>
 
@@ -105,99 +105,67 @@
     <div class="container sfpage" id="formEdit">
         <div class="starter-template">
 
-            <h1 class="pageTitle">{{tmpFormInput.name}}の設定</h1>
+            <h1 class="pageTitle">{{tmpFormInput.name}}@messages("sform.title.formsetting")</h1>
             <p class="lead"></p>
             <div class="row">
                 <div class="col-md-12">
                     <div class="formEdit_">
                         <div class="row form-group">
-                            <label class="col-md-4">フォーム名</label>
+                            <label class="col-md-4">@messages("sform.setting.form_name")</label>
                             <div class="col-md-8">
                                 <input type="text" class="form-control" id="name" v-model="tmpFormInput.name" />
                             </div>
                         </div>
                         <div class="row form-group">
-                            <label class="col-md-4">タイトル</label>
+                            <label class="col-md-4">>@messages("sform.setting.form_title")</label>
                             <div class="col-md-8">
                                 <input type="text" class="form-control" v-model="tmpFormInput.title" />
                             </div>
                         </div>
 
                         <div class="row form-group">
-                            <label class="col-md-4">フォームキャンセル時遷移先URL</label>
+                            <label class="col-md-4">@messages("sform.setting.url_after_cancel")</label>
                             <div class="col-md-8">
                                 <input type="text" class="form-control" v-model="tmpFormInput.cancelUrl" />
                             </div>
                         </div>
                         <div class="row form-group">
-                            <label class="col-md-4">フォーム送信完了時遷移先URL</label>
+                            <label class="col-md-4">@messages("sform.setting.url_after_complete")</label>
                             <div class="col-md-8">
                                 <input type="text" class="form-control" v-model="tmpFormInput.completeUrl" />
                             </div>
                         </div>
                         <div class="row form-group">
-                            <label class="col-md-4">フォーム入力画面ヘッダ文面</label>
+                            <label class="col-md-4">@messages("sform.setting.form_input_header")</label>
                             <div class="col-md-8">
                                 <textarea class="form-control" v-model="tmpFormInput.inputHeader" rows="8"></textarea>
                             </div>
                         </div>
                         <div class="row form-group">
-                            <label class="col-md-4">フォーム確認画面ヘッダ文面</label>
+                            <label class="col-md-4">@messages("sform.setting.form_confirm_header")</label>
                             <div class="col-md-8">
                                 <textarea class="form-control" v-model="tmpFormInput.confirmHeader" rows="8"></textarea>
                             </div>
                         </div>
                         <div class="row form-group">
-                            <label class="col-md-4">フォーム送信後画面文面</label>
+                            <label class="col-md-4">@messages("sform.setting.form_complete_text")</label>
                             <div class="col-md-8">
                                 <textarea class="form-control" v-model="tmpFormInput.completeText" rows="8"></textarea>
                             </div>
                         </div>
                         <div class="row form-group">
-                            <label class="col-md-4">フォーム停止時文面</label>
+                            <label class="col-md-4">@messages("sform.setting.form_stop_text")</label>
                             <div class="col-md-8">
                                 <textarea class="form-control" v-model="tmpFormInput.closeText" rows="8"></textarea>
                             </div>
                         </div>
-                        <!--
-                        <div class="form-group">
-                            <label class="col-md-4">自動返信メール送信元アドレス</label>
-                            <div class="col-md-8">
-                                <input type="text" class="form-control" v-model="tmpFormInput.replymailFrom" />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-md-4">自動返信メール件名</label>
-                            <div class="col-md-8">
-                                <input type="text" class="form-control" v-model="tmpFormInput.replymailSubject" />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-md-4">自動返信メール文面</label>
-                            <div class="col-md-8">
-                                <textarea class="form-control" v-model="tmpFormInput.replymailText"></textarea>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-md-4">フォーム受信通知メール送信</label>
-                            <div class="col-md-8">
-                                <input type="text" class="form-control" v-model="tmpFormInput.noticemailSend" />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-md-4">フォーム受信通知メール文面</label>
-                            <div class="col-md-8">
-                                <textarea class="form-control" v-model="tmpFormInput.noticemailText"></textarea>
-                            </div>
-                        </div>
-                        -->
                         <div class="row form-group" style="margin-top:40px">
-                            <label class="col-md-4">フォーム項目</label>
+                            <label class="col-md-4">@messages("sform.setting.form_column")</label>
                             <div class="col-md-8">
                                 <table class="table">
                                     <thead>
                                         <tr>
-                                            <th>項目名</th><th>操作</th>
+                                            <th>@messages("sform.setting.form_column_name")</th><th>@messages("sform.setting.form_column_action")</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -205,13 +173,13 @@
                                             <td>{{col.name}}</td>
                                             <td>
                                                 <button type="button" class="btn btn-default btn-sm formColEditOff" v-bind:id="'btColEdit_'+col.index" v-on:click="startFormColEdit(tmpFormInput.index,col.index)">
-                                                    <span class="glyphicon glyphicon-pencil" aria-hidden="true">編集</span>
+                                                    <span class="glyphicon glyphicon-pencil" aria-hidden="true">@messages("sform.button.edit")</span>
                                                 </button>
                                                 <button type="button" class="btn btn-default btn-sm formColEditOff" v-bind:id="'btColDelete_'+col.index" v-on:click="deleteFormColConfirm(tmpFormInput.index,col.index)">
-                                                    <span class="glyphicon glyphicon-trash" aria-hidden="true">削除</span>
+                                                    <span class="glyphicon glyphicon-trash" aria-hidden="true">@messages("sform.button.delete")</span>
                                                 </button>
                                                 <button type="button" class="btn btn-default btn-sm formColEditOn" v-bind:id="'btColUpdate_'+col.index" v-on:click="endFormColEdit(tmpFormInput.index,col.index)">
-                                                    <span class="glyphicon glyphicon-remove" aria-hidden="true">閉じる</span>
+                                                    <span class="glyphicon glyphicon-remove" aria-hidden="true">@messages("sform.button.close")</span>
                                                 </button>
                                             </td>
                                         </tr>
@@ -220,23 +188,23 @@
 
                                 <div>
                                     <button type="button" class="btn btn-default btn-sm" v-on:click="addFormCol">
-                                        <span class="glyphicon glyphicon-plus" aria-hidden="true">追加</span>
+                                        <span class="glyphicon glyphicon-plus" aria-hidden="true">@messages("sform.button.add")</span>
                                     </button>
                                     <button type="button" class="btn btn-default btn-sm" v-on:click="reorderFormCol">
-                                        <span class="glyphicon glyphicon-sort" aria-hidden="true">並び替え</span>
+                                        <span class="glyphicon glyphicon-sort" aria-hidden="true">@messages("sform.button.reorder")</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
                         <div class="row form-group" style="margin-top:40px">
-                            <label class="col-md-4">転送ルール</label>
+                            <label class="col-md-4">@messages("sform.setting.transfer_rule")</label>
                             <div class="col-md-8">
                                 <div class="row">
                                     <div class="col-md-12">
                                     <table class="table">
                                         <thead>
                                             <tr>
-                                                <th>転送ルール名</th><th>転送タイプ</th><th>操作</th>
+                                                <th>@messages("sform.setting.transfer_name")</th><th>@messages("sform.setting.transfer_type")</th><th>@messages("sform.setting.transfer_action")</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -245,10 +213,10 @@
                                                 <td>{{task.transfer_name}}</td>
                                                 <td>
                                                     <button type="button" class="btn btn-default btn-sm" v-on:click="EditTransferRule(index)">
-                                                        <span class="glyphicon glyphicon-pencil" aria-hidden="true">編集</span>
+                                                        <span class="glyphicon glyphicon-pencil" aria-hidden="true">@messages("sform.button.edit")</span>
                                                     </button>
                                                     <button type="button" class="btn btn-default btn-sm" v-on:click="DeleteTransferRule(index)">
-                                                        <span class="glyphicon glyphicon-trash" aria-hidden="true">削除</span>
+                                                        <span class="glyphicon glyphicon-trash" aria-hidden="true">@messages("sform.button.delete")</span>
                                                     </button>
                                                 </td>
                                             </tr>
@@ -264,7 +232,7 @@
                                     </div>
                                     <div class="col-md-2">
                                         <button type="button" class="form-control btn btn-default btn-sm" v-on:click="AddTransferRule">
-                                            <span class="glyphicon glyphicon-plus" aria-hidden="true">追加</span>
+                                            <span class="glyphicon glyphicon-plus" aria-hidden="true">@messages("sform.button.add")</span>
                                         </button>
                                     </div>
                                     <div class="col-md-4"></div>
@@ -273,11 +241,11 @@
                         </div>
                         <div class="row">
                             <div class="col-md-12 text-left">
-                                <button type="button" class="btn btn-default btn-sm" value="取消" v-on:click="cancelFormEdit()">
-                                                    <span class="glyphicon glyphicon-remove" aria-hidden="true">取消</span>
+                                <button type="button" class="btn btn-default btn-sm" value="cancel" v-on:click="cancelFormEdit()">
+                                                    <span class="glyphicon glyphicon-remove" aria-hidden="true">@messages("sform.button.cancel")</span>
                                                   </button>
-                                <button type="button" class="btn btn-default btn-sm" value="変更" v-on:click="endFormEdit(1,tmpFormInput.index)">
-                                                    <span class="glyphicon glyphicon-ok" aria-hidden="true">変更</span>
+                                <button type="button" class="btn btn-default btn-sm" value="change" v-on:click="endFormEdit(1,tmpFormInput.index)">
+                                                    <span class="glyphicon glyphicon-ok" aria-hidden="true">@messages("sform.button.change")</span>
                                                   </button>
                             </div>
                         </div>
@@ -289,7 +257,7 @@
 
     <div class="container sfpage" id="transferSetting">
         <div class="starter-template">
-            <h1 class="pageTitle">転送</h1>
+            <h1 class="pageTitle">@messages("sform.title.transfer")</h1>
             @transferConfig()
         </div>
     </div>
@@ -297,7 +265,7 @@
 
     <div class="container sfpage" id="formData">
         <div class="starter-template">
-            <h1 class="pageTitle">フォームデータ</h1>
+            <h1 class="pageTitle">@messages("sform.title.data")</h1>
             <p class="lead"></p>
             <div class="row">
                 <div class="col-md-12">
@@ -307,80 +275,11 @@
             <div class="row">
                 <div class="col-md-12 text-left">
                     <button type="button" class="btn btn-default btn-sm" v-on:click="endFormData()">
-                            <span class="glyphicon glyphicon-repeat">フォーム一覧に戻る</span>
+                            <span class="glyphicon glyphicon-repeat">@messages("sform.button.backtolist")</span>
                         </button>
                     <button type="button" class="btn btn-default btn-sm" v-on:click="downloadCsvConfirm()">
-                            <span class="glyphicon glyphicon-download-alt">CSVダウンロード</span>
+                            <span class="glyphicon glyphicon-download-alt">@messages("sform.button.csvdl")</span>
                         </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="container sfpage" id="userList">
-        <div class="starter-template">
-            <h1 class="pageTitle">ユーザー一覧</h1>
-            <p class="lead"></p>
-            <div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="row">
-                            <div class="col-md-2">状態</div>
-                            <div class="col-md-1">ID</div>
-                            <div class="col-md-2">ログインID</div>
-                            <div class="col-md-3">氏名</div>
-                            <div class="col-md-4">メールドレス</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row" v-for="user in orderedUsers">
-                    <div class="col-md-12">
-                        <div class="row">
-                            <div class="col-md-2">
-                                <span class="glyphicon glyphicon-user" aria-hidden="true" v-if="user.status==1"></span>
-                                <span class="glyphicon glyphicon-minus-sign" aria-hidden="true" v-if="user.status==0"></span>
-                                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true" v-if="user.status==2"></span>
-
-                                <button type="button" class="btn btn-default btn-sm" v-on:click="startUserEdit(user.index)">
-                                        <span class="glyphicon glyphicon-pencil" aria-hidden="true">編集</span>
-                                    </button>
-                                <div class="dropup" style="display:inline">
-                                    <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            操作
-                                            <span class="caret"></span>
-                                            </button>
-                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                        <li><a href="#" v-on:click="changeUserStatus(user.index,2)">パスワードリセット</a></li>
-                                        <li><a href="#" v-on:click="changeUserStatus(user.index,0)">無効にする</a></li>
-                                        <li><a href="#" v-on:click="changeUserStatus(user.index,1)">有効にする</a></li>
-                                        <li><a href="#" v-on:click="deleteUserConfirm(user.index)">削除する</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="col-md-1">{{user.id}}</div>
-                            <div class="col-md-2">{{user.uid}}</div>
-                            <div class="col-md-3">{{user.name}}</div>
-                            <div class="col-md-4">{{user.email}}</div>
-                        </div>
-                    </div>
-                    <div class="col-md-12" v-bind:id="'userEdit_'+user.index" style="display:none">
-                        <div class="row">
-                            <div class="col-md-3">ステータス</div>
-                            <div class="col-md-9"><input type="text" class="form-control"></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-3">ログインID</div>
-                            <div class="col-md-9"><input type="text" class="form-control"></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-3">氏名</div>
-                            <div class="col-md-9"><input type="text" class="form-control"></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-3">メールアドレス</div>
-                            <div class="col-md-9"><input type="text" class="form-control"></div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -388,32 +287,32 @@
 
     <div class="container sfpage" id="userEdit">
         <div class="starter-template">
-            <h1 class="pageTitle">ユーザー設定</h1>
+            <h1 class="pageTitle">@messages("sform.title.user")</h1>
             <p class="lead"></p>
             <div>h
                 <div class="row">
-                    <div class="col-md-3">ステータス</div>
+                    <div class="col-md-3">@messages("sform.user.status")</div>
                     <div class="col-md-9"><input type="text" class="form-control" v-model="tmpUserInput.status" /></div>
                 </div>
                 <div class="row">
-                    <div class="col-md-3">ログインID</div>
+                    <div class="col-md-3">@messages("sform.user.login_id")</div>
                     <div class="col-md-9"><input type="text" class="form-control" v-model="tmpUserInput.uid" /></div>
                 </div>
                 <div class="row">
-                    <div class="col-md-3">氏名</div>
+                    <div class="col-md-3">@messages("sform.user.name")</div>
                     <div class="col-md-9"><input type="text" class="form-control" v-model="tmpUserInput.name" /></div>
                 </div>
                 <div class="row">
-                    <div class="col-md-3">メールアドレス</div>
+                    <div class="col-md-3">@messages("sform.user.email")</div>
                     <div class="col-md-9"><input type="text" class="form-control" v-model="tmpUserInput.email" /></div>
                 </div>
                 <div class="row">
                     <div class="col-md-12 text-left">
-                        <button type="button" class="btn btn-default btn-sm" value="取消" v-on:click="cancelUserEdit()">
-                                                    <span class="glyphicon glyphicon-remove" aria-hidden="true">取消</span>
+                        <button type="button" class="btn btn-default btn-sm" value="cancel" v-on:click="cancelUserEdit()">
+                                                    <span class="glyphicon glyphicon-remove" aria-hidden="true">@messages("sform.button.cancel")</span>
                                                   </button>
-                        <button type="button" class="btn btn-default btn-sm" value="変更" v-on:click="endUserEdit(tmpUserInput.index)">
-                                                    <span class="glyphicon glyphicon-ok" aria-hidden="true">変更</span>
+                        <button type="button" class="btn btn-default btn-sm" value="ok" v-on:click="endUserEdit(tmpUserInput.index)">
+                                                    <span class="glyphicon glyphicon-ok" aria-hidden="true">@messages("sform.button.change")</span>
                                                   </button>
                     </div>
                 </div>
@@ -421,6 +320,7 @@
         </div>
     </div>
 
+    <!--
     <div class="container sfpage" id="config">
         <div class="starter-template">
             <h1 class="pageTitle">設定</h1>
@@ -457,6 +357,7 @@
             </div>
         </div>
     </div>
+    -->
 
 
 
@@ -466,14 +367,14 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">CSVダウンロード</h4>
+                    <h4 class="modal-title">@messages("sform.title.csvdl")</h4>
                 </div>
                 <div class="modal-body">
-                    CSVダウンロード
+                    @messages("sform.title.csvdl")
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
-                    <button type="button" class="btn btn-primary" v-on:click="downloadCsv">ダウンロード実行</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">@messages("sform.button.close")</button>
+                    <button type="button" class="btn btn-primary" v-on:click="downloadCsv">@messages("sform.button.csvdl")</button>
                 </div>
             </div>
             <!-- /.modal-content -->
@@ -482,10 +383,11 @@
     </div>
     <!-- /.modal -->
 
+    <!-- 共通Modal用 -->
     @commonModals()
+
     <!-- Transfer用 -->
     @transferRuleEdit()
-    <!-- Transfer用 -->
 
 
 </div>
