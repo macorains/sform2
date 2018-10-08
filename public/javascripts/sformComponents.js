@@ -343,6 +343,14 @@ var salesforceTransferRuleEditComponent = {
                     }
                 }
 
+                var checkNillable = function(src) {
+                    var res = src;
+                    if(!src.nillable){
+                        res.label = res.label + " *";
+                    }
+                    return res;
+                };
+
                 if(sfObjectDefinisions.length>0){
                     sfObjectFields = sfObjectDefinisions[0]['fields'].filter(function(item,index){
                         var res = true;
@@ -351,8 +359,11 @@ var salesforceTransferRuleEditComponent = {
                                 res = false;
                             }
                         }
+                        if(!item.updateable){
+                            res = false;
+                        }
                         return res;
-                    });
+                    }).map(sfof=>checkNillable(sfof));
                     return sfObjectFields;
                 }
             }
