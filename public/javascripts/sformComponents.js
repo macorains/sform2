@@ -346,7 +346,7 @@ var salesforceTransferRuleEditComponent = {
                 var checkNillable = function(src) {
                     var res = src;
                     if(!src.nillable){
-                        res.label = res.label + " *";
+                        res.label = res.label.replace(" *","") + " *";
                     }
                     return res;
                 };
