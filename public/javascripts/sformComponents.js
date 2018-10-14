@@ -224,6 +224,13 @@ var salesforceTransferRuleEditComponent = {
             });
         },
         saveSalesforceTransferRule(){
+            var t = this.sfColList.filter(sfCol=>(!sfCol.nillable && !sfCol.defaultedOnCreate));
+            if(t.length > 0){
+                var requiredCols = t.map(sfCol=>sfCol.label.replace("*","")).join("\n")
+                alert("以下のSF項目を割り付ける必要があります。\n" + requiredCols);
+                return;
+            }
+
             if(typeof this.tmpTransferTask.id == 'undefined'){
                 this.tmpTransferTask.id = 0;
                 this.tmpTransferTask.newNum = this.tmpTransferTaskList.length;
