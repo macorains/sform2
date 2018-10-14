@@ -159,7 +159,7 @@ var salesforceTransferRuleEditComponentTemplate = (function () {/*
                           <td>{{c.sfCol}}</td>
                           <td>
                             <button class="btn btn-default" v-on:click="deleteSalesforceConverrtDefinition(index)">
-                            削除</button>
+                            <span class="glyphicon glyphicon-trash" aria-hidden="true">削除</span></button>
                           </td>
                         </tr>
                       </tbody>
@@ -178,13 +178,15 @@ var salesforceTransferRuleEditComponentTemplate = (function () {/*
                     </select>
                   </div>
                   <div class="col-md-2">
-                    <button type="button" class="btn btn-primary" v-on:click="addSalesforceColumnConvertDefinitions">追加</button>
+                    <button type="button" class="btn btn-primary" v-on:click="addSalesforceColumnConvertDefinitions">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true">追加</span>
+                    </button>
                   </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
-                <button type="button" class="btn btn-primary" v-on:click="saveSalesforceTransferRule">保存</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal"><span class="glyphicon glyphicon-remove" aria-hidden="true">キャンセル</span></button>
+                <button type="button" class="btn btn-primary" v-on:click="saveSalesforceTransferRule"><span class="glyphicon glyphicon-ok" aria-hidden="true">変更</span</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
