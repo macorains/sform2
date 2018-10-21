@@ -5,19 +5,15 @@ import play.api._
 import play.api.db.DBApi
 import play.api.mvc._
 import play.api.libs.json._
-import play.api.libs.functional.syntax._
 import play.api.Environment
-import play.api.libs.mailer._
 import models._
-import models.daos.{FormsDAO, TransferTaskDAO, TransfersDAO, UserDAO}
+import models.daos.TransfersDAO
 import models.services.UserService
 import play.api.i18n.I18nSupport
 import utils.auth.DefaultEnv
 import com.mohiva.play.silhouette.api._
-import com.mohiva.play.silhouette.api.util._
 import org.webjars.play.WebJarsUtil
 import com.mohiva.play.silhouette.impl.providers._
-import models.connector.SalesforceConnector
 import models.daos.TransferConfig.BaseTransferConfigDAO
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -31,7 +27,8 @@ class TransferController @Inject()(
                                 userService: UserService,
                                 credentialsProvider: CredentialsProvider,
                                 socialProviderRegistry: SocialProviderRegistry,
-                                configuration: Configuration
+                                configuration: Configuration,
+                                transfersDAO: TransfersDAO
                               )
                               (
                                 implicit
@@ -39,22 +36,81 @@ class TransferController @Inject()(
                                 ex: ExecutionContext
                               ) extends AbstractController(components) with I18nSupport {
 
+  case class transferGetConfigRequest(transferName: String)
+  object transferGetConfigRequest {
+    implicit def jsonTransferGetConfigRequestWrites: Writes[transferGetConfigRequest] = Json.writes[transferGetConfigRequest]
+    implicit def jsonTransferGetConfigRequestReads: Reads[transferGetConfigRequest] = Json.reads[transferGetConfigRequest]
+  }
+  case class transferSaveConfigRequest(transferName: String, config: JsValue)
+  object transferSaveConfigRequest {
+    implicit def jsonTransferSaveConfigRequestWrites: Writes[transferSaveConfigRequest] = Json.writes[transferSaveConfigRequest]
+    implicit def jsonTransferSaveConfigRequestReads: Reads[transferSaveConfigRequest] = Json.reads[transferSaveConfigRequest]
+  }
+
+
   def getList() = silhouette.SecuredAction.async { implicit request =>
     Future.successful(Ok(Json.toJson("Not Implemented.")))
   }
 
   def getConfig() = silhouette.SecuredAction.async { implicit request =>
-    Future.successful(Ok(Json.toJson("Not Implemented.")))
+    val identity = request.identity
+    val jsonBody: Option[JsValue] = request.body.asJson
+    val res = jsonBody.map { json =>
+      val data = (json \ "rcdata").as[JsValue]
+      data.validate[transferGetConfigRequest] match {
+        case s: JsSuccess[transferGetConfigRequest] => {
+          val transferConfig = Class.forName("models.daos.TransferConfig." + s.get.transferName + "TransferConfigDAO")
+            .getDeclaredConstructor(classOf[TransfersDAO])
+            .newInstance(transfersDAO).asInstanceOf[BaseTransferConfigDAO]
+          val config = transferConfig.getTransferConfig
+          RsResultSet("OK", "OK", config)
+        }
+        case e: JsError => {
+          RsResultSet("NG", "NG", Json.parse("""{}"""))
+        }
+      }
+    }.getOrElse {
+      None
+    }
+    res match{
+      case r:RsResultSet => Future.successful(Ok(Json.toJson(r)))
+      case _ => Future.successful(BadRequest("Bad!"))
+    }
   }
 
   def getTransferList() = silhouette.SecuredAction.async { implicit request =>
-    Future.successful(Ok(Json.toJson("Not Implemented.")))
+    // ToDo グループによる制御必要
+    val res = transfersDAO.getTransferList();
+    Future.successful(Ok(Json.toJson(res)))
   }
 
   def saveConfig() = silhouette.SecuredAction.async { implicit request =>
-    Future.successful(Ok(Json.toJson("Not Implemented.")))
+    val identity = request.identity
+    val jsonBody: Option[JsValue] = request.body.asJson
+    val res = jsonBody.map { json =>
+      val data = (json \ "rcdata").as[JsValue]
+      data.validate[transferSaveConfigRequest] match {
+        case s: JsSuccess[transferSaveConfigRequest] => {
+          print(s.get)
+
+          val transferConfig = Class.forName("models.daos.TransferConfig." + s.get.transferName + "TransferConfigDAO")
+            .getDeclaredConstructor(classOf[TransfersDAO])
+            .newInstance(transfersDAO).asInstanceOf[BaseTransferConfigDAO]
+          val config = s.get.config
+          val result = transferConfig.saveTransferConfig(config, identity)
+          RsResultSet("OK", "OK", result)
+        }
+        case e: JsError => {
+          RsResultSet("NG", "NG", Json.parse("""{}"""))
+        }
+      }
+    }.getOrElse {
+      None
+    }
+    res match{
+      case r:RsResultSet => Future.successful(Ok(Json.toJson(r)))
+      case _ => Future.successful(BadRequest("Bad!"))
+    }
+
   }
-
-
-
 }
