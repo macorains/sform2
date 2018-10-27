@@ -16,25 +16,24 @@ import com.mohiva.play.silhouette.impl.providers._
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-
-class UserController @Inject()(
-                                env: Environment,
-                                dbapi: DBApi,
-                                components: ControllerComponents,
-                                silhouette: Silhouette[DefaultEnv],
-                                userService: UserService,
-                                credentialsProvider: CredentialsProvider,
-                                socialProviderRegistry: SocialProviderRegistry,
-                                configuration: Configuration,
-                                userDAO: UserDAO
-                              )
-                              (
-                                implicit
-                                webJarsUtil: WebJarsUtil,
-                                ex: ExecutionContext
-                              ) extends AbstractController(components) with I18nSupport {
+class UserController @Inject() (
+  env: Environment,
+  dbapi: DBApi,
+  components: ControllerComponents,
+  silhouette: Silhouette[DefaultEnv],
+  userService: UserService,
+  credentialsProvider: CredentialsProvider,
+  socialProviderRegistry: SocialProviderRegistry,
+  configuration: Configuration,
+  userDAO: UserDAO
+)(
+  implicit
+  webJarsUtil: WebJarsUtil,
+  ex: ExecutionContext
+) extends AbstractController(components) with I18nSupport {
 
   // ToDo グループによる制御必要
+  // GET /user
   def getList() = silhouette.SecuredAction.async { implicit request =>
     val res = userDAO.getList();
     Future.successful(Ok(Json.toJson(res)))

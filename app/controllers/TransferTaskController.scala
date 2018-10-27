@@ -16,23 +16,21 @@ import com.mohiva.play.silhouette.impl.providers._
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-
-class TransferTaskController @Inject()(
-                                env: Environment,
-                                dbapi: DBApi,
-                                components: ControllerComponents,
-                                silhouette: Silhouette[DefaultEnv],
-                                userService: UserService,
-                                credentialsProvider: CredentialsProvider,
-                                socialProviderRegistry: SocialProviderRegistry,
-                                configuration: Configuration,
-                                transferTaskDAO: TransferTaskDAO
-                              )
-                              (
-                                implicit
-                                webJarsUtil: WebJarsUtil,
-                                ex: ExecutionContext
-                              ) extends AbstractController(components) with I18nSupport {
+class TransferTaskController @Inject() (
+  env: Environment,
+  dbapi: DBApi,
+  components: ControllerComponents,
+  silhouette: Silhouette[DefaultEnv],
+  userService: UserService,
+  credentialsProvider: CredentialsProvider,
+  socialProviderRegistry: SocialProviderRegistry,
+  configuration: Configuration,
+  transferTaskDAO: TransferTaskDAO
+)(
+  implicit
+  webJarsUtil: WebJarsUtil,
+  ex: ExecutionContext
+) extends AbstractController(components) with I18nSupport {
 
   case class transferGetTaskRequest(formId: String)
   object transferGetTaskRequest {
@@ -40,10 +38,12 @@ class TransferTaskController @Inject()(
     implicit def jsonTransferGetConfigRequestReads: Reads[transferGetTaskRequest] = Json.reads[transferGetTaskRequest]
   }
 
+  // GET /transfertask
   def getList() = silhouette.SecuredAction.async { implicit request =>
     Future.successful(Ok(Json.toJson("Not Implemented.")))
   }
 
+  // GET /transfertask/:form_id
   def getTransferTaskListByFormId() = silhouette.SecuredAction.async { implicit request =>
     val jsonBody: Option[JsValue] = request.body.asJson
     val res = jsonBody.map { json =>
@@ -61,9 +61,9 @@ class TransferTaskController @Inject()(
     }.getOrElse {
       None
     }
-    res match{
-        case r:RsResultSet => Future.successful(Ok(Json.toJson(r)))
-        case _ => Future.successful(BadRequest("Bad!"))
+    res match {
+      case r: RsResultSet => Future.successful(Ok(Json.toJson(r)))
+      case _ => Future.successful(BadRequest("Bad!"))
     }
   }
 }

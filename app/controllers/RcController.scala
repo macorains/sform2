@@ -7,12 +7,12 @@ import play.api.db.DBApi
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import play.api.i18n.I18nSupport
 import play.api.Environment
 import play.api.libs.mailer._
 import models._
 import models.daos.{ FormsDAO, TransferTaskDAO, TransfersDAO, UserDAO }
 import models.services.UserService
-import play.api.i18n.I18nSupport
 import utils.auth.DefaultEnv
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.util._

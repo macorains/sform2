@@ -7,7 +7,7 @@ import play.api.mvc._
 import play.api.libs.json._
 import play.api.Environment
 import models._
-import models.daos.{FormsDAO, TransferTaskDAO}
+import models.daos.{ FormsDAO, TransferTaskDAO }
 import models.services.UserService
 import play.api.i18n.I18nSupport
 import utils.auth.DefaultEnv
@@ -17,30 +17,30 @@ import com.mohiva.play.silhouette.impl.providers._
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-
-class FormController @Inject()(
-                                env: Environment,
-                                dbapi: DBApi,
-                                components: ControllerComponents,
-                                silhouette: Silhouette[DefaultEnv],
-                                userService: UserService,
-                                credentialsProvider: CredentialsProvider,
-                                socialProviderRegistry: SocialProviderRegistry,
-                                configuration: Configuration,
-                                formsDAO: FormsDAO,
-                                transferTaskDAO: TransferTaskDAO
-                              )
-(
-implicit
-webJarsUtil: WebJarsUtil,
-ex: ExecutionContext
+class FormController @Inject() (
+  env: Environment,
+  dbapi: DBApi,
+  components: ControllerComponents,
+  silhouette: Silhouette[DefaultEnv],
+  userService: UserService,
+  credentialsProvider: CredentialsProvider,
+  socialProviderRegistry: SocialProviderRegistry,
+  configuration: Configuration,
+  formsDAO: FormsDAO,
+  transferTaskDAO: TransferTaskDAO
+)(
+  implicit
+  webJarsUtil: WebJarsUtil,
+  ex: ExecutionContext
 ) extends AbstractController(components) with I18nSupport {
 
+  // GET /form
   def getList() = silhouette.SecuredAction.async { implicit request =>
     val res = formsDAO.getList(request.identity);
     Future.successful(Ok(Json.toJson(res)))
   }
 
+  // POST /form
   def create() = silhouette.SecuredAction.async { implicit request =>
     val identity = request.identity
     val jsonBody: Option[JsValue] = request.body.asJson
@@ -57,12 +57,13 @@ ex: ExecutionContext
     }.getOrElse {
       None
     }
-    res match{
-      case r:RsResultSet => Future.successful(Ok(Json.toJson(r)))
+    res match {
+      case r: RsResultSet => Future.successful(Ok(Json.toJson(r)))
       case _ => Future.successful(BadRequest("Bad!"))
     }
   }
 
+  // DELETE /form/<form_id>
   def delete() = silhouette.SecuredAction.async { implicit request =>
     val jsonBody: Option[JsValue] = request.body.asJson
     val res = jsonBody.map { json =>
@@ -71,12 +72,13 @@ ex: ExecutionContext
     }.getOrElse {
       None
     }
-    res match{
-      case r:RsResultSet => Future.successful(Ok(Json.toJson(r)))
+    res match {
+      case r: RsResultSet => Future.successful(Ok(Json.toJson(r)))
       case _ => Future.successful(BadRequest("Bad!"))
     }
   }
 
+  // GET /form/html/<form_id>
   def getHtml() = silhouette.SecuredAction.async { implicit request =>
     val jsonBody: Option[JsValue] = request.body.asJson
     val res = jsonBody.map { json =>
@@ -85,11 +87,13 @@ ex: ExecutionContext
     }.getOrElse {
       None
     }
-    res match{
-      case r:RsResultSet => Future.successful(Ok(Json.toJson(r)))
+    res match {
+      case r: RsResultSet => Future.successful(Ok(Json.toJson(r)))
       case _ => Future.successful(BadRequest("Bad!"))
-    }  }
+    }
+  }
 
+  // POST /form/validate
   def validate() = silhouette.SecuredAction.async { implicit request =>
     val jsonBody: Option[JsValue] = request.body.asJson
     val res = jsonBody.map { json =>
@@ -98,24 +102,24 @@ ex: ExecutionContext
     }.getOrElse {
       None
     }
-    res match{
-      case r:RsResultSet => Future.successful(Ok(Json.toJson(r)))
+    res match {
+      case r: RsResultSet => Future.successful(Ok(Json.toJson(r)))
       case _ => Future.successful(BadRequest("Bad!"))
     }
   }
 
   // ToDo 必要性調査の上、不要なら削除
   def getData() = silhouette.SecuredAction.async { implicit request =>
-      val jsonBody: Option[JsValue] = request.body.asJson
-      val res = jsonBody.map { json =>
-        val data = (json \ "rcdata").as[JsValue]
-        formsDAO.getData(data)
-      }.getOrElse {
-        None
-      }
-      res match{
-        case r:RsResultSet => Future.successful(Ok(Json.toJson(r)))
-        case _ => Future.successful(BadRequest("Bad!"))
-      }
+    val jsonBody: Option[JsValue] = request.body.asJson
+    val res = jsonBody.map { json =>
+      val data = (json \ "rcdata").as[JsValue]
+      formsDAO.getData(data)
+    }.getOrElse {
+      None
+    }
+    res match {
+      case r: RsResultSet => Future.successful(Ok(Json.toJson(r)))
+      case _ => Future.successful(BadRequest("Bad!"))
+    }
   }
 }

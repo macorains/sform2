@@ -18,23 +18,21 @@ import models.daos.TransferConfig.BaseTransferConfigDAO
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-
-class TransferController @Inject()(
-                                env: Environment,
-                                dbapi: DBApi,
-                                components: ControllerComponents,
-                                silhouette: Silhouette[DefaultEnv],
-                                userService: UserService,
-                                credentialsProvider: CredentialsProvider,
-                                socialProviderRegistry: SocialProviderRegistry,
-                                configuration: Configuration,
-                                transfersDAO: TransfersDAO
-                              )
-                              (
-                                implicit
-                                webJarsUtil: WebJarsUtil,
-                                ex: ExecutionContext
-                              ) extends AbstractController(components) with I18nSupport {
+class TransferController @Inject() (
+  env: Environment,
+  dbapi: DBApi,
+  components: ControllerComponents,
+  silhouette: Silhouette[DefaultEnv],
+  userService: UserService,
+  credentialsProvider: CredentialsProvider,
+  socialProviderRegistry: SocialProviderRegistry,
+  configuration: Configuration,
+  transfersDAO: TransfersDAO
+)(
+  implicit
+  webJarsUtil: WebJarsUtil,
+  ex: ExecutionContext
+) extends AbstractController(components) with I18nSupport {
 
   case class transferGetConfigRequest(transferName: String)
   object transferGetConfigRequest {
@@ -47,11 +45,12 @@ class TransferController @Inject()(
     implicit def jsonTransferSaveConfigRequestReads: Reads[transferSaveConfigRequest] = Json.reads[transferSaveConfigRequest]
   }
 
-
+  // ?
   def getList() = silhouette.SecuredAction.async { implicit request =>
     Future.successful(Ok(Json.toJson("Not Implemented.")))
   }
 
+  // GET /transfer/config/:transfer_name
   def getConfig() = silhouette.SecuredAction.async { implicit request =>
     val identity = request.identity
     val jsonBody: Option[JsValue] = request.body.asJson
@@ -72,18 +71,20 @@ class TransferController @Inject()(
     }.getOrElse {
       None
     }
-    res match{
-      case r:RsResultSet => Future.successful(Ok(Json.toJson(r)))
+    res match {
+      case r: RsResultSet => Future.successful(Ok(Json.toJson(r)))
       case _ => Future.successful(BadRequest("Bad!"))
     }
   }
 
+  // GET /transfer
   def getTransferList() = silhouette.SecuredAction.async { implicit request =>
     // ToDo グループによる制御必要
     val res = transfersDAO.getTransferList();
     Future.successful(Ok(Json.toJson(res)))
   }
 
+  // POST /transfer
   def saveConfig() = silhouette.SecuredAction.async { implicit request =>
     val identity = request.identity
     val jsonBody: Option[JsValue] = request.body.asJson
@@ -107,8 +108,8 @@ class TransferController @Inject()(
     }.getOrElse {
       None
     }
-    res match{
-      case r:RsResultSet => Future.successful(Ok(Json.toJson(r)))
+    res match {
+      case r: RsResultSet => Future.successful(Ok(Json.toJson(r)))
       case _ => Future.successful(BadRequest("Bad!"))
     }
 
