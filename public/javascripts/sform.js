@@ -11,6 +11,7 @@
           });
 
           // Transferリスト取得
+          /*
           var reqdata = {objtype: "Transfer", action: "getTransferList", rcdata: {}};
           jQuery.ajax({
               type: "POST",
@@ -22,6 +23,16 @@
                   that.transferList = msg.dataset;
               }
           });
+          */
+          jQuery.ajax({
+              type: "GET",
+              url: "transfer",
+              contentType: "application/json",
+              success: function(msg) {
+                  that.transferList = msg.dataset;
+              }
+          });
+
 
         },
         methods: {
@@ -98,24 +109,26 @@
                     objtype: "Form",
                     action: "create",
                     rcdata: {formDef: tmp, transferTasks : {}}
-                };
+                }
+                // todo 要整列
                 jQuery.ajax({
-                    type: "POST",
-                    url: "rc/",
-                    dataType: "json",
-                    contentType: "application/json",
-                    data: JSON.stringify(reqdata),
-                    success: function(msg) {
-                        console.log(msg);
-                        var dt = msg.dataset;
-                        tmp.id = dt.id;
-                        Vue.set(app.formlist,i,tmp);
-                    },
-                    error: function(XMLHttpRequest, textStatus, errorThrown) {
-                        console.log(textStatus);
-                        console.log(errorThrown);
-                    }
-                });
+                                    type: "POST",
+                                    url: "form",
+                                    dataType: "json",
+                                    contentType: "application/json",
+                                    data: JSON.stringify(reqdata),
+                                    success: function(msg) {
+                                        console.log(msg);
+                                        var dt = msg.dataset;
+                                        tmp.id = dt.id;
+                                        Vue.set(app.formlist,i,tmp);
+                                    },
+                                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                                        console.log(textStatus);
+                                        console.log(errorThrown);
+                                    }
+                                });
+
             },
             // フォーム状態変更
             changeFormStatus(idx, st) {
@@ -199,25 +212,28 @@
                             action: "create",
                             rcdata: {formDef: this.tmpFormInput, transferTasks : this.tmpTransferTaskList}
                         };
+
+                        // todo 要整列
                         jQuery.ajax({
-                            type: "POST",
-                            url: "rc/",
-                            dataType: "json",
-                            contentType: "application/json",
-                            data: JSON.stringify(reqdata),
-                            success: function(msg) {
-                                console.log(msg.dataset);
-                                console.log(that.tmpFormInput);
-                                //var dt = JSON.parse(msg.dataset);
-                                var dt = msg.dataset;
-                                that.formlist[idx].id = dt.id;
-                                //app.formlist = JSON.parse(msg.dataset);
-                            },
-                            error: function(XMLHttpRequest, textStatus, errorThrown) {
-                                console.log(textStatus);
-                                console.log(errorThrown);
-                            }
-                        });
+                                                    type: "POST",
+                                                    url: "form",
+                                                    dataType: "json",
+                                                    contentType: "application/json",
+                                                    data: JSON.stringify(reqdata),
+                                                    success: function(msg) {
+                                                        console.log(msg.dataset);
+                                                        console.log(that.tmpFormInput);
+                                                        //var dt = JSON.parse(msg.dataset);
+                                                        var dt = msg.dataset;
+                                                        that.formlist[idx].id = dt.id;
+                                                        //app.formlist = JSON.parse(msg.dataset);
+                                                    },
+                                                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                                                        console.log(textStatus);
+                                                        console.log(errorThrown);
+                                                    }
+                                                });
+
                         break;
                     case 2:
                         break;
@@ -612,6 +628,8 @@
         });
         jQuery(".sfpage").hide();
         jQuery("#formEdit1").hide();
+        // ToDo ユーザー情報は初期表示時には持たない方がよい
+        /*
         var reqdata = {
             objtype: "User",
             action: "list",
@@ -638,17 +656,11 @@
                 console.log(errorThrown);
             }
         })
-        var reqdata = {
-            objtype: "Form",
-            action: "list",
-            rcdata: "iii"
-        };
+        */
         jQuery.ajax({
-            type: "POST",
-            url: "rc/",
-            dataType: "json",
+            type: "GET",
+            url: "form",
             contentType: "application/json",
-            data: JSON.stringify(reqdata),
             success: function(msg) {
                 app.formlist = JSON.parse(msg.dataset);
                 for(var f in app.formlist){

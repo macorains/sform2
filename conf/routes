@@ -41,11 +41,11 @@ GET /forminputjs/*path controllers.FormExecuteController.getjs(path)
 GET /formpost/:hashed_form_id controllers.FormPostDataController.getPostData(hashed_form_id: String)
 
 # form
+POST /form/validate controllers.FormController.validate()
 GET /form controllers.FormController.getList()
 POST /form controllers.FormController.create()
 # DELETE /form/:form_id controllers.FormController.delete(form_id: String)
 # GET /form/html/:form_id controllers.FormController.getHtml(form_id: String)
-POST /form/validate controllers.FormController.validate()
 
 # transfer
 GET /transfer controllers.TransferController.getTransferList()
