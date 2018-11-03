@@ -4,13 +4,10 @@
         components : sformComponents,
         created : function(){
           var that = this;
-          console.log("********************");
-          console.log(that);
           // csrf
           jQuery(document).ajaxSend(function(event,jqxhr,settings){
               jqxhr.setRequestHeader('Csrf-Token', jQuery("input[name=csrfToken]").val());
           });
-
           // Transferリスト取得
           jQuery.ajax({
               type: "GET",
@@ -18,9 +15,7 @@
               contentType: "application/json",
               dataType: "Json",
               success: function(msg) {
-              console.log("-------------------------------------------");
-                    console.log(msg);
-                  that.transferList = msg.dataset;
+                  that.transferList = msg;
               }
           });
         },
@@ -151,31 +146,6 @@
                       this.tmpTransferRuleSetting['sformColConvert'][this.tmpFormCols[col].colId] = this.tmpFormCols[col].name;
                 }
                 // TransferTask取得
-                /*
-                var reqdata = {
-                    objtype: "TransferTask",
-                    action: "getTransferTaskListByFormId",
-                    rcdata: {"formId" : this.tmpFormInput.hashed_id}
-                };
-                jQuery.ajax({
-                    type: "POST",
-                    url: "rc/",
-                    dataType: "json",
-                    contentType: "application/json",
-                    data: JSON.stringify(reqdata),
-                    success: function(msg) {
-                        that.tmpTransferTaskList = Array.isArray(msg.dataset)?msg.dataset:[];
-
-                        for(var task in that.tmpTransferTaskList){
-                            var transferTypeId = that.tmpTransferTaskList[task].transfer_type_id;
-                            var transferName = that.transferList.filter(function(item,index){
-                                if(item.type_id == transferTypeId) return true;
-                            })
-                            that.tmpTransferTaskList[task].transfer_name = transferName[0]['name'];
-                        }
-                    }
-                });
-                */
                 jQuery.ajax({
                     type: "GET",
                     url: "transfertask/" + this.tmpFormInput.hashed_id,
@@ -223,12 +193,8 @@
                             contentType: "application/json",
                             data: JSON.stringify(reqdata),
                             success: function(msg) {
-                                console.log(msg.dataset);
-                                console.log(that.tmpFormInput);
-                                //var dt = JSON.parse(msg.dataset);
                                 var dt = msg.dataset;
                                 that.formlist[idx].id = dt.id;
-                                //app.formlist = JSON.parse(msg.dataset);
                             },
                             error: function(XMLHttpRequest, textStatus, errorThrown) {
                                 console.log(textStatus);

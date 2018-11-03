@@ -11,12 +11,13 @@ class SalesforceConnector {
     val config: ConnectorConfig = new ConnectorConfig()
     config.setUsername(user)
     config.setPassword(password + securityToken)
-    print("[SalesforceLogin] User:" + user + " Password:" + password + securityToken)
     try {
       Some(Connector.newConnection(config))
     } catch {
       case e: Exception => {
-        print("Salesforce Login Failed.")
+        Logger.error("Salesforce Login Failed. user=" + user + " password=" + password + " securityToken=" + securityToken)
+        Logger.error("[StackTrace]")
+        e.getStackTrace.foreach(err => "  " + Logger.error(err.toString))
         None
       }
     }
