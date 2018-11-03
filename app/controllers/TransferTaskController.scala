@@ -39,12 +39,15 @@ class TransferTaskController @Inject() (
   }
 
   // GET /transfertask
-  def getList() = silhouette.SecuredAction.async { implicit request =>
+  def getList: Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
     Future.successful(Ok(Json.toJson("Not Implemented.")))
   }
 
   // GET /transfertask/:form_id
-  def getTransferTaskListByFormId() = silhouette.SecuredAction.async { implicit request =>
+  def getTransferTaskListByFormId(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
+    val res = RsResultSet("OK", "OK", transferTaskDAO.getTransferTaskListByFormId(hashed_form_id))
+    Future.successful(Ok(Json.toJson(res)))
+    /*
     val jsonBody: Option[JsValue] = request.body.asJson
     val res = jsonBody.map { json =>
       val data = (json \ "rcdata").as[JsValue]
@@ -64,6 +67,6 @@ class TransferTaskController @Inject() (
     res match {
       case r: RsResultSet => Future.successful(Ok(Json.toJson(r)))
       case _ => Future.successful(BadRequest("Bad!"))
-    }
+    */
   }
 }

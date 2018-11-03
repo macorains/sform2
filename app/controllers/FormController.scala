@@ -34,24 +34,31 @@ class FormController @Inject() (
   ex: ExecutionContext
 ) extends AbstractController(components) with I18nSupport {
 
-  // GET /form
-  def getList() = silhouette.SecuredAction.async { implicit request =>
-    val res = formsDAO.getList(request.identity);
+  /**
+   * フォーム一覧取得
+   * GET /form
+   * @return
+   */
+  def getList: Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
+    val res = formsDAO.getList(request.identity)
     Future.successful(Ok(Json.toJson(res)))
   }
 
-  // POST /form
-  def create() = silhouette.SecuredAction.async { implicit request =>
+  /**
+   * フォーム登録／更新
+   * POST /form
+   * @return
+   */
+  def create(): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
     val identity = request.identity
     val jsonBody: Option[JsValue] = request.body.asJson
     val res = jsonBody.map { json =>
       val data = (json \ "rcdata").as[JsValue]
       val formInsertResult = formsDAO.insert(data, identity)
       (formInsertResult.getDataset \ "id").as[String] match {
-        case s: String if s != "failed" => {
+        case s: String if s != "failed" =>
           transferTaskDAO.bulkSave(data, identity)
           formInsertResult
-        }
         case _ => formInsertResult
       }
     }.getOrElse {
@@ -63,23 +70,22 @@ class FormController @Inject() (
     }
   }
 
-  // DELETE /form/<form_id>
-  def delete() = silhouette.SecuredAction.async { implicit request =>
-    val jsonBody: Option[JsValue] = request.body.asJson
-    val res = jsonBody.map { json =>
-      val data = (json \ "rcdata").as[JsValue]
-      formsDAO.delete(data)
-    }.getOrElse {
-      None
-    }
-    res match {
-      case r: RsResultSet => Future.successful(Ok(Json.toJson(r)))
-      case _ => Future.successful(BadRequest("Bad!"))
-    }
+  /**
+   * フォーム削除
+   * DELETE /form/<form_id>
+   * @param hashed_form_id フォームハッシュID
+   * @return
+   */
+  def delete(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
+    Future.successful(Ok(Json.toJson(formsDAO.delete(hashed_form_id))))
   }
 
-  // GET /form/html/<form_id>
-  def getHtml() = silhouette.SecuredAction.async { implicit request =>
+  /**
+   * フォームHTML取得
+   * GET /form/html/<form_id>
+   * @return
+   */
+  def getHtml(): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
     val jsonBody: Option[JsValue] = request.body.asJson
     val res = jsonBody.map { json =>
       val data = (json \ "rcdata").as[JsValue]
@@ -93,27 +99,16 @@ class FormController @Inject() (
     }
   }
 
-  // POST /form/validate
-  def validate() = silhouette.SecuredAction.async { implicit request =>
+  /**
+   * フォームバリデート
+   * POST /form/validate
+   * @return
+   */
+  def validate(): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
     val jsonBody: Option[JsValue] = request.body.asJson
     val res = jsonBody.map { json =>
       val data = (json \ "rcdata").as[JsValue]
       formsDAO.validate(data, request.host)
-    }.getOrElse {
-      None
-    }
-    res match {
-      case r: RsResultSet => Future.successful(Ok(Json.toJson(r)))
-      case _ => Future.successful(BadRequest("Bad!"))
-    }
-  }
-
-  // ToDo 必要性調査の上、不要なら削除
-  def getData() = silhouette.SecuredAction.async { implicit request =>
-    val jsonBody: Option[JsValue] = request.body.asJson
-    val res = jsonBody.map { json =>
-      val data = (json \ "rcdata").as[JsValue]
-      formsDAO.getData(data)
     }.getOrElse {
       None
     }

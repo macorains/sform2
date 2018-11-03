@@ -79,51 +79,43 @@ class RcController @Inject() (
       val action = (json \ "action").as[String]
       val data = (json \ "rcdata").as[JsValue]
       val res = (json \ "objtype").as[String] match {
-        case "Form" => {
+        case "Form" =>
           action match {
             case "list" => formsDAO.getList(identity)
-            case "create" => {
+            case "create" =>
               val formInsertResult = formsDAO.insert(data, identity)
               (formInsertResult.getDataset \ "id").as[String] match {
-                case s: String if s != "failed" => {
+                case s: String if s != "failed" =>
                   transferTaskDAO.bulkSave(data, identity)
                   formInsertResult
-                }
                 case _ => formInsertResult
               }
-            }
             case "delete" => formsDAO.delete(data)
             case "gethtml" => formsDAO.getHtml(data, request.host)
             case "validate" => formsDAO.validate(data, request.host)
             case "getdata" => formsDAO.getData(data)
             case _ => RsResultSet("NG", "NG", Json.parse("""{}"""))
           }
-        }
-        case "User" => {
+        case "User" =>
           action match {
             case "list" => formsDAO.getList(identity)
           }
-        }
-        case "Transfer" => {
+        case "Transfer" =>
           action match {
-            case "getConfig" => {
+            case "getConfig" =>
               val data = (json \ "rcdata").as[JsValue]
               data.validate[transferGetConfigRequest] match {
-                case s: JsSuccess[transferGetConfigRequest] => {
+                case s: JsSuccess[transferGetConfigRequest] =>
                   val transferConfig = Class.forName("models.daos.TransferConfig." + s.get.transferName + "TransferConfigDAO")
                     .getDeclaredConstructor(classOf[TransfersDAO])
                     .newInstance(transfersDAO).asInstanceOf[BaseTransferConfigDAO]
                   val config = transferConfig.getTransferConfig
                   RsResultSet("OK", "OK", config)
-                }
-                case e: JsError => {
+                case e: JsError =>
                   RsResultSet("NG", "NG", Json.parse("""{}"""))
-                }
               }
-            }
-            case "getTransferList" => {
+            case "getTransferList" =>
               RsResultSet("OK", "OK", transfersDAO.getTransferList())
-            }
 
             case "saveConfig" => {
               print("***saveConfig***")
@@ -149,7 +141,6 @@ class RcController @Inject() (
               RsResultSet("NG", "NG", Json.parse("""{}"""))
             }
           }
-        }
         case "TransferTask" => {
           action match {
             case "getTransferTaskListByFormId" => {

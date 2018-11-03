@@ -4,36 +4,25 @@
         components : sformComponents,
         created : function(){
           var that = this;
-
+          console.log("********************");
+          console.log(that);
           // csrf
           jQuery(document).ajaxSend(function(event,jqxhr,settings){
               jqxhr.setRequestHeader('Csrf-Token', jQuery("input[name=csrfToken]").val());
           });
 
           // Transferリスト取得
-          /*
-          var reqdata = {objtype: "Transfer", action: "getTransferList", rcdata: {}};
-          jQuery.ajax({
-              type: "POST",
-              url: "rc/",
-              dataType: "json",
-              contentType: "application/json",
-              data: JSON.stringify(reqdata),
-              success: function(msg) {
-                  that.transferList = msg.dataset;
-              }
-          });
-          */
           jQuery.ajax({
               type: "GET",
               url: "transfer",
               contentType: "application/json",
+              dataType: "Json",
               success: function(msg) {
+              console.log("-------------------------------------------");
+                    console.log(msg);
                   that.transferList = msg.dataset;
               }
           });
-
-
         },
         methods: {
             logout(){
@@ -110,25 +99,23 @@
                     action: "create",
                     rcdata: {formDef: tmp, transferTasks : {}}
                 }
-                // todo 要整列
                 jQuery.ajax({
-                                    type: "POST",
-                                    url: "form",
-                                    dataType: "json",
-                                    contentType: "application/json",
-                                    data: JSON.stringify(reqdata),
-                                    success: function(msg) {
-                                        console.log(msg);
-                                        var dt = msg.dataset;
-                                        tmp.id = dt.id;
-                                        Vue.set(app.formlist,i,tmp);
-                                    },
-                                    error: function(XMLHttpRequest, textStatus, errorThrown) {
-                                        console.log(textStatus);
-                                        console.log(errorThrown);
-                                    }
-                                });
-
+                    type: "POST",
+                    url: "form",
+                    dataType: "json",
+                    contentType: "application/json",
+                    data: JSON.stringify(reqdata),
+                    success: function(msg) {
+                        console.log(msg);
+                        var dt = msg.dataset;
+                        tmp.id = dt.id;
+                        Vue.set(app.formlist,i,tmp);
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        console.log(textStatus);
+                        console.log(errorThrown);
+                    }
+                });
             },
             // フォーム状態変更
             changeFormStatus(idx, st) {
@@ -164,6 +151,7 @@
                       this.tmpTransferRuleSetting['sformColConvert'][this.tmpFormCols[col].colId] = this.tmpFormCols[col].name;
                 }
                 // TransferTask取得
+                /*
                 var reqdata = {
                     objtype: "TransferTask",
                     action: "getTransferTaskListByFormId",
@@ -187,7 +175,22 @@
                         }
                     }
                 });
-
+                */
+                jQuery.ajax({
+                    type: "GET",
+                    url: "transfertask/" + this.tmpFormInput.hashed_id,
+                    contentType: "application/json",
+                    success: function(msg) {
+                        that.tmpTransferTaskList = Array.isArray(msg.dataset)?msg.dataset:[];
+                        for(var task in that.tmpTransferTaskList){
+                            var transferTypeId = that.tmpTransferTaskList[task].transfer_type_id;
+                            var transferName = that.transferList.filter(function(item,index){
+                                if(item.type_id == transferTypeId) return true;
+                            })
+                            that.tmpTransferTaskList[task].transfer_name = transferName[0]['name'];
+                        }
+                    }
+                });
                 jQuery(".sfpage,.formColEditOn").hide();
                 jQuery("#formEdit").show();
             },
@@ -207,33 +210,31 @@
                         jQuery(".colEditPanel").hide();
                         jQuery(".sfpage,.formColEditOn").hide();
                         jQuery("#formList,.formColEditOff").show();
+
                         var reqdata = {
                             objtype: "Form",
                             action: "create",
                             rcdata: {formDef: this.tmpFormInput, transferTasks : this.tmpTransferTaskList}
                         };
-
-                        // todo 要整列
                         jQuery.ajax({
-                                                    type: "POST",
-                                                    url: "form",
-                                                    dataType: "json",
-                                                    contentType: "application/json",
-                                                    data: JSON.stringify(reqdata),
-                                                    success: function(msg) {
-                                                        console.log(msg.dataset);
-                                                        console.log(that.tmpFormInput);
-                                                        //var dt = JSON.parse(msg.dataset);
-                                                        var dt = msg.dataset;
-                                                        that.formlist[idx].id = dt.id;
-                                                        //app.formlist = JSON.parse(msg.dataset);
-                                                    },
-                                                    error: function(XMLHttpRequest, textStatus, errorThrown) {
-                                                        console.log(textStatus);
-                                                        console.log(errorThrown);
-                                                    }
-                                                });
-
+                            type: "POST",
+                            url: "form",
+                            dataType: "json",
+                            contentType: "application/json",
+                            data: JSON.stringify(reqdata),
+                            success: function(msg) {
+                                console.log(msg.dataset);
+                                console.log(that.tmpFormInput);
+                                //var dt = JSON.parse(msg.dataset);
+                                var dt = msg.dataset;
+                                that.formlist[idx].id = dt.id;
+                                //app.formlist = JSON.parse(msg.dataset);
+                            },
+                            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                                console.log(textStatus);
+                                console.log(errorThrown);
+                            }
+                        });
                         break;
                     case 2:
                         break;
@@ -241,28 +242,16 @@
             },
             // フォーム削除確認
             deleteFormConfirm(idx,id) {
-                /* Todo */
                 this.deleteId = id;
                 this.deleteIdx = idx;
                 jQuery("#modal_delete_form").modal("show");
             },
             // フォーム削除実行
             deleteForm(idx) {
-                /* Todo */
-                var that = this;
-                var reqdata = {
-                    objtype: "Form",
-                    action: "delete",
-                    rcdata: {
-                        id : this.deleteId + ''
-                    }
-                };
                 jQuery.ajax({
-                    type: "POST",
-                    url: "rc/",
-                    dataType: "json",
+                    type: "DELETE",
+                    url: "form/" + this.deleteId,
                     contentType: "application/json",
-                    data: JSON.stringify(reqdata),
                     success: function(msg) {
                         Vue.delete(app.formlist, that.deleteIdx);
                     },
@@ -271,7 +260,6 @@
                         console.log(errorThrown);
                     }
                 });
-
                 jQuery("#modal_delete_form").modal("hide");
             },
             // フォーム項目追加                

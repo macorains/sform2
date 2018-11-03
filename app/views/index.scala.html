@@ -82,7 +82,7 @@
                                             <li><a href="#" v-on:click="changeFormStatus(form.index,'0')"><span class="glyphicon glyphicon-ban-circle">@messages("sform.action.inactive")</a></li>
                                             <li><a href="#" v-on:click="changeFormStatus(form.index,'1')"><span class="glyphicon glyphicon-play"></span>@messages("sform.action.active")</a></li>
                                             <li><a href="#" v-on:click="changeFormStatus(form.index,'2')"><span class="glyphicon glyphicon-minus-sign">@messages("sform.action.stop")</a></li>
-                                            <li><a href="#" v-on:click="deleteFormConfirm(form.index, form.id)"><span class="glyphicon glyphicon-trash"></span>@messages("sform.action.delete")</a></li>
+                                            <li><a href="#" v-on:click="deleteFormConfirm(form.index, form.hashed_id)"><span class="glyphicon glyphicon-trash"></span>@messages("sform.action.delete")</a></li>
                                         </ul>
                                     </div>
                                 </td>

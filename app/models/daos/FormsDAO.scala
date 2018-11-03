@@ -19,9 +19,9 @@ class FormsDAO extends FormParts {
 
   /**
    * フォームデータ
-   * @param id
-   * @param hashed_id
-   * @param form_data
+   * @param id フォームID
+   * @param hashed_id フォームハッシュID
+   * @param form_data フォームデータ
    */
   case class FormData(id: Int, hashed_id: String, form_data: String, user_group: String)
   object FormData extends SQLSyntaxSupport[FormData] {
@@ -33,9 +33,9 @@ class FormsDAO extends FormParts {
 
   /**
    * フォーム送信データ
-   * @param postdata_id
-   * @param form_hashed_id
-   * @param postdata
+   * @param postdata_id フォーム送信データID
+   * @param form_hashed_id フォームハッシュID
+   * @param postdata 送信データ
    */
   case class FormPostData(postdata_id: Int, form_hashed_id: String, postdata: String)
   object FormPostData extends SQLSyntaxSupport[FormPostData] {
@@ -82,12 +82,12 @@ class FormsDAO extends FormParts {
    * @param confirmHeader フォーム確認画面ヘッダ文面
    * @param completeText フォーム完了画面文面
    * @param formCols フォーム項目定義
-   * @param closeText
-   * @param replymailFrom
-   * @param replymailSubject
-   * @param replymailText,
-   * @param noticemailSend
-   * @param noticemailText
+   * @param closeText 無効時表示文
+   * @param replymailFrom メール返信元アドレス
+   * @param replymailSubject 自動返信メール件名
+   * @param replymailText 自動返信メール文面
+   * @param noticemailSend 通知メール
+   * @param noticemailText 通知メール文面
    */
 
   case class FormDef(index: String, id: Option[String], hashed_id: Option[String], status: String, name: String, title: String,
@@ -123,7 +123,7 @@ class FormsDAO extends FormParts {
    * 選択リスト定義
    * @param index 表示順
    * @param displayText 表示文字列
-   * @param value 値
+   * @param value リスト値
    * @param default デフォルト選択状態にするか
    * @param viewStyle 確認画面時スタイル定義
    * @param editStyle 入力画面時スタイル定義
@@ -157,7 +157,7 @@ class FormsDAO extends FormParts {
 
   /**
    * フォーム送信データ取得リクエスト用クラス
-   * @param formid
+   * @param formid フォームID
    */
   case class FormPostDataRequest(formid: String)
   object FormPostDataRequest {
@@ -218,23 +218,20 @@ class FormsDAO extends FormParts {
 
           val formCols: Map[String, String] = {
             formData match {
-              case c: FormData => {
+              case c: FormData =>
                 Json.parse(c.form_data).validate[FormDef] match {
-                  case s: JsSuccess[FormDef] => {
+                  case s: JsSuccess[FormDef] =>
                     val formDefColValue = s.get.formCols.value
                     formDefColValue.map({
-                      case (k, v) => {
+                      case (k, v) =>
                         val formDefColResult: JsResult[FormDefCol] = v.validate[FormDefCol]
                         formDefColResult match {
                           case f: JsSuccess[FormDefCol] => (f.get.colId.toString, f.get.name.toString)
                           case e: JsError => ("", "")
                         }
-                      }
                     }).toMap
-                  }
                   case e: JsError => Map.empty[String, String]
                 }
-              }
               case _ => Map.empty[String, String]
             }
           }
@@ -266,7 +263,7 @@ class FormsDAO extends FormParts {
     val formId = (dt \ "formid").asOpt[String]
     val receiverPath = (dt \ "receiverPath").asOpt[String]
     formId match {
-      case Some(id) => {
+      case Some(id) =>
         val f = FormData.syntax("f")
         DB localTx { implicit s =>
           val formData =
@@ -283,7 +280,6 @@ class FormsDAO extends FormParts {
               RsResultSet("NG", "NG", Json.toJson("Could not get Formdata."))
           }
         }
-      }
       case None => RsResultSet("NG", "NG", Json.toJson("Invalid Parameter."))
     }
   }
@@ -385,6 +381,17 @@ class FormsDAO extends FormParts {
 
     RsResultSet("NG", "NG", Json.parse("""{}"""))
   }
+  def delete(hashed_form_id: String): RsResultSet = {
+    val f = FormData.syntax("f")
+    DB localTx { implicit s =>
+      withSQL {
+        deleteFrom(FormData)
+          .where
+          .eq(FormData.column.hashed_id, hashed_form_id)
+      }.update.apply()
+    }
+    RsResultSet("OK", "OK", Json.parse("""{}"""))
+  }
 
   /**
    * フォームバリデーション
@@ -453,10 +460,10 @@ class FormsDAO extends FormParts {
 
   /**
    * フォーム項目情報取得
-   * @param hashed_id
-   * @return
+   * @param hashed_id フォームハッシュID
+   * @return フォーム項目情報
    */
-  def getFormCols(hashed_id: String) = {
+  def getFormCols(hashed_id: String): JsValue = {
     val f = FormData.syntax("f")
     DB localTx { implicit s =>
       val formData =
@@ -467,10 +474,9 @@ class FormsDAO extends FormParts {
             .eq(f.hashed_id, hashed_id)
         }.map(rs => FormData(rs)).single.apply()
       formData match {
-        case Some(s: FormData) => {
+        case Some(s: FormData) =>
           val dt = Json.parse(s.form_data)
           (dt \ "formCols").asOpt[JsValue].getOrElse(Json.toJson(""))
-        }
         case _ => Json.toJson("")
       }
     }
@@ -481,7 +487,7 @@ class FormsDAO extends FormParts {
    * 各項目についてバリデーション実行
    * @param fd フォーム定義
    * @param pd 受信データ
-   * @return
+   * @return バリデーション結果
    */
   private def validateCols(fd: Map[String, JsValue], pd: Option[JsValue]): Map[String, String] = {
     pd match {
@@ -503,7 +509,7 @@ class FormsDAO extends FormParts {
    * 各フォーム項目毎のバリデーション結果を返す
    * @param formDefCol フォーム項目定義
    * @param postdata 受信データ
-   * @return
+   * @return バリデーション結果
    */
   private def checkValidateRule(formDefCol: FormDefCol, postdata: JsValue): String = {
 
