@@ -51,6 +51,17 @@ class TransferController @Inject() (
   }
 
   // GET /transfer/config/:transfer_name
+  def getConfig(transfer_name: String) = silhouette.SecuredAction.async { implicit request =>
+    val identity = request.identity
+    val transferConfig = Class.forName("models.daos.TransferConfig." + transfer_name + "TransferConfigDAO")
+      .getDeclaredConstructor(classOf[TransfersDAO])
+      .newInstance(transfersDAO).asInstanceOf[BaseTransferConfigDAO]
+    val config = transferConfig.getTransferConfig
+    val res = RsResultSet("OK", "OK", config)
+    Future.successful(Ok(Json.toJson(res)))
+  }
+
+  @deprecated
   def getConfig() = silhouette.SecuredAction.async { implicit request =>
     val identity = request.identity
     val jsonBody: Option[JsValue] = request.body.asJson
@@ -84,7 +95,7 @@ class TransferController @Inject() (
     Future.successful(Ok(Json.toJson(res)))
   }
 
-  // POST /transfer
+  // POST /transfer/config
   def saveConfig() = silhouette.SecuredAction.async { implicit request =>
     val identity = request.identity
     val jsonBody: Option[JsValue] = request.body.asJson

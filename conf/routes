@@ -49,7 +49,8 @@ DELETE /form/:form_id controllers.FormController.delete(form_id: String)
 
 # transfer
 GET /transfer controllers.TransferController.getTransferList()
-POST /transfer controllers.TransferController.saveConfig()
+GET /transfer/config/:transfer_name controllers.TransferController.getConfig(transfer_name: String)
+POST /transfer/config controllers.TransferController.saveConfig()
 
 # user
 GET /user controllers.UserController.getList()

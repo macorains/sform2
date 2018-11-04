@@ -59,25 +59,14 @@ var salesforceTransferConfigComponent = {
   props: ['transferConfig','transferTaskDefault'],
   created : function(){
     var that = this;
-    // SalesforceTransferの設定情報取得
-    var reqdata = {
-        objtype: "Transfer",
-        action: "getConfig",
-        rcdata: {
-            transferName : "Salesforce"
-        }
-    };
     jQuery(document).ajaxSend(function(event,jqxhr,settings){
         jqxhr.setRequestHeader('Csrf-Token', jQuery("input[name=csrfToken]").val());
     });
     jQuery.ajax({
-        type: "POST",
-        url: "rc/",
-        dataType: "json",
+        type: "GET",
+        url: "transfer/config/Salesforce",
         contentType: "application/json",
-        data: JSON.stringify(reqdata),
         success: function(msg) {
-        console.log(msg);
             that.$emit('set','Salesforce',msg);
             that.transferTaskDefault.Salesforce = {
                 status : 1,
@@ -98,6 +87,25 @@ var salesforceTransferConfigComponent = {
     },
     saveSalesforceTransferConfig(){
         var reqdata = {
+            rcdata: {
+                transferName : "Salesforce",
+                config : this.transferConfig.Salesforce
+            }
+        };
+        jQuery.ajax({
+            type: "POST",
+            url: "transfer/config",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(reqdata),
+            success: function(msg) {
+                console.log(msg);
+            }
+        });
+        jQuery("#SalesforceTransferConfigEditModal").modal('hide');
+
+        /*
+        var reqdata = {
             objtype: "Transfer",
             action: "saveConfig",
             rcdata: {
@@ -116,6 +124,7 @@ var salesforceTransferConfigComponent = {
             }
         });
         jQuery("#SalesforceTransferConfigEditModal").modal('hide');
+        */
     }
   }
 };
