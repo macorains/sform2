@@ -37,15 +37,15 @@ class TransfersDAO {
     implicit def jsonTransferListReads: Reads[TransferListJson] = Json.reads[TransferListJson]
   }
 
-  def getTransfer(transferType: Int) = {
+  def getTransfer(transferType: Int): List[Transfer] = {
     DB localTx { implicit l =>
-      sql"SELECT ID,TYPE_ID,NAME,STATUS,CONFIG,USER_GROUP,MODIFIED FROM M_TRANSFERS WHERE TYPE_ID=${transferType}"
+      sql"SELECT ID,TYPE_ID,NAME,STATUS,CONFIG,USER_GROUP,MODIFIED FROM M_TRANSFERS WHERE TYPE_ID=$transferType"
         .map(rs => Transfer(rs)).list.apply()
       //.map(rs => Transfer(rs)).single.apply()
     }
   }
 
-  def getTransferList(): JsValue = {
+  def getTransferList: JsValue = {
     DB localTx { implicit l =>
       val transferList = sql"SELECT ID,TYPE_ID,NAME FROM M_TRANSFERS"
         .map(rs => TransferList(rs)).list.apply
@@ -54,32 +54,32 @@ class TransfersDAO {
     }
   }
 
-  def save(type_id: Int, name: String, status: Int, config: String) = {
+  def save(type_id: Int, name: String, status: Int, config: String): Int = {
     DB localTx { implicit l =>
       sql"""
       INSERT INTO M_TRANSFES
       (TYPE_ID,NAME,STATUS,CONFIG,CREATED,MODIFIED)
-      VALUES (${type_id},${name},${status},${config},NOW(),NOW())"""
+      VALUES ($type_id,$name,$status,$config,NOW(),NOW())"""
         .update.apply()
     }
   }
 
-  def update(id: Int, type_id: Int, name: String, status: Int, config: String) = {
+  def update(id: Int, type_id: Int, name: String, status: Int, config: String): Int = {
     DB localTx { implicit l =>
       sql"""
       UPDATE M_TRANSFERS
-      SET TYPE_ID=${type_id}, NAME=${name}, STATUS=${status}, CONFIG=${config}, MODIFIED=NOW()
-        WHERE ID = ${id}"""
+      SET TYPE_ID=$type_id, NAME=$name, STATUS=$status, CONFIG=$config, MODIFIED=NOW()
+        WHERE ID = $id"""
         .update.apply()
     }
   }
 
-  def updateByUserIdentity(identity: User, type_id: Int, config: String) = {
+  def updateByUserIdentity(identity: User, type_id: Int, config: String): Int = {
     DB localTx { implicit l =>
       sql"""
       UPDATE M_TRANSFERS
-      SET CONFIG=${config}, MODIFIED_USER=${identity.userID.toString}, MODIFIED=NOW()
-        WHERE TYPE_ID=${type_id} AND USER_GROUP = ${identity.group}"""
+      SET CONFIG=$config, MODIFIED_USER=${identity.userID.toString}, MODIFIED=NOW()
+        WHERE TYPE_ID=$type_id AND USER_GROUP = ${identity.group}"""
         .update.apply()
     }
   }

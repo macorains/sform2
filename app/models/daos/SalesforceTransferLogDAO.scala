@@ -14,11 +14,11 @@ class SalesforceTransferLogDAO {
     }
   }
 
-  def save(postdata_id: Int, postdata: String, modified_postdata: String, result: Int, message: String, created: String, updated: String) = {
+  def save(postdata_id: Int, postdata: String, modified_postdata: String, result: Int, message: String, created: String, updated: String): Int = {
     DB localTx { implicit l =>
       sql"""UPDATE D_SALESFORCE_TRANSFER_LOG SET
       (POSTDATA_ID,POSTDATA,MODIFIED_POSTDATA,RESULT,MESSAGE,CREATED,MODIFIED)
-      VALUES (${postdata_id},${postdata},${modified_postdata},${result},${message},NOW(),NOW())"""
+      VALUES ($postdata_id,$postdata,$modified_postdata,$result,$message,NOW(),NOW())"""
         .update.apply()
     }
   }

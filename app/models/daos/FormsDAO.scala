@@ -317,7 +317,7 @@ class FormsDAO extends FormParts {
                     }
                   case e: JsError =>
                     println("Error1")
-                    e.toString()
+                    e.toString
                 })
             }).toSeq.sortBy(_._1).map(_._2)
           }
@@ -325,7 +325,7 @@ class FormsDAO extends FormParts {
         header(mode, s.get) + htmlStr.mkString("", "", "") + hashed_id_hidden(hashed_id) + validate_result_hidden(resultStr) + buttons(mode, validateResult.nonEmpty) + script1(host, receiverPath)
       case e: JsError =>
         println("Error1")
-        println(e.toString())
+        println(e.toString)
         ""
     }
 
@@ -515,7 +515,7 @@ class FormsDAO extends FormParts {
 
     formDefCol.validations.validate[FormDefColValidation] match {
       case f: JsSuccess[FormDefColValidation] =>
-        (postdata \ formDefCol.colId) match {
+        postdata \ formDefCol.colId match {
           case v: JsLookupResult =>
 
             f.get.inputType match {
@@ -533,18 +533,16 @@ class FormsDAO extends FormParts {
                 if (v.as[String].matches("[0-9]{3}-{0,1}[0-9]{4}")) "" else cValidationErrorMessage.NOT_POSTCODE_ERROR
               case _ => ""
             }
-          case _ => {
+          case _ =>
             println("ppp")
-            println((postdata \ formDefCol.name))
+            println(postdata \ formDefCol.name)
             ""
-          }
         }
-      case e: JsError => {
+      case e: JsError =>
         println("jserror")
         println(formDefCol.validations)
         println(e)
         ""
-      }
     }
   }
 
@@ -572,7 +570,7 @@ class FormsDAO extends FormParts {
           val now: String = "%tY/%<tm/%<td %<tH:%<tM:%<tS" format new Date
           val newid: Long =
             sql"""INSERT INTO D_FORM(FORM_DATA,HASHED_ID,USER_GROUP,CREATED_USER,CREATED)
-                 VALUES(${Json.toJson(f).toString},${hashed_id},${identity.group},${identity.userID.toString},${now})"""
+                 VALUES(${Json.toJson(f).toString},$hashed_id,${identity.group},${identity.userID.toString},$now)"""
               .updateAndReturnGeneratedKey.apply()
           Json.parse("""{"id": """" + newid.toString + """"}""")
         case None =>
@@ -592,7 +590,7 @@ class FormsDAO extends FormParts {
       sql"""UPDATE D_FORM
            SET FORM_DATA=${dt.toString},
            MODIFIED_USER=${identity.userID.toString},
-           MODIFIED=now() WHERE ID=${formId}""".update.apply;
+           MODIFIED=now() WHERE ID=$formId""".update.apply
       Json.parse("""{"id": """" + formId.toString + """"}""")
     }
   }
@@ -606,7 +604,7 @@ class FormsDAO extends FormParts {
     val dbfactory: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
     val docbuilder: DocumentBuilder = dbfactory.newDocumentBuilder()
     val document: Document = docbuilder.newDocument()
-    val coltype = colDef.coltype.getOrElse("");
+    val coltype = colDef.coltype.getOrElse("")
 
     val root: Element = document.createElement("div")
     root.setAttribute("class", coltype match {
@@ -644,7 +642,7 @@ class FormsDAO extends FormParts {
     transformer.setOutputProperty(OutputKeys.INDENT, "yes")
     transformer.setOutputProperty(OutputPropertiesFactory.S_KEY_INDENT_AMOUNT, "2")
     transformer.transform(new DOMSource(root), new StreamResult(sb))
-    sb.toString()
+    sb.toString
 
   }
 
@@ -675,12 +673,10 @@ class FormsDAO extends FormParts {
     })
 
     typ match {
-      case "6" => {
+      case "6" =>
         elem.setAttribute("type", "hidden")
-      }
-      case "7" => {
+      case "7" =>
         elem.setTextContent(colDef.default.getOrElse(""))
-      }
       case _ => None
     }
 
@@ -726,10 +722,9 @@ class FormsDAO extends FormParts {
     val root: Element = document.createElement("div")
 
     colType match {
-      case "6" | "7" => {
+      case "6" | "7" =>
         root.setAttribute("class", "sform-col-none")
-      }
-      case _ => {
+      case _ =>
         root.setAttribute("class", "sform-col")
         val colName: Element = document.createElement("div")
         colName.setAttribute("class", "sform-col-name")
@@ -739,21 +734,19 @@ class FormsDAO extends FormParts {
 
         val postdata_text = (postdata \ colDef.colId).getOrElse(Json.toJson("")).as[String]
         val displayText = colType match {
-          case "2" | "3" | "4" => {
+          case "2" | "3" | "4" =>
             // ラジオ・チェックボックス・コンボの場合はラベルを取ってくる
             val listDef = (colDef.selectList \ postdata_text).asOpt[JsValue]
             listDef match {
               case Some(s) => (s \ "displayText").asOpt[String].getOrElse("")
               case None => ""
             }
-          }
           case _ => postdata_text
         }
         colForm.setTextContent(displayText)
 
         root.appendChild(colName)
         root.appendChild(colForm)
-      }
     }
 
     val sb: StringWriter = new StringWriter()
@@ -766,14 +759,14 @@ class FormsDAO extends FormParts {
     transformer.setOutputProperty(OutputKeys.INDENT, "yes")
     transformer.setOutputProperty(OutputPropertiesFactory.S_KEY_INDENT_AMOUNT, "2")
     transformer.transform(new DOMSource(root), new StreamResult(sb))
-    sb.toString()
+    sb.toString
   }
 
   private def savePostData(hashed_id: String, dt: JsValue): Seq[String] = {
     val f = FormData.syntax("f")
     DB localTx { implicit l =>
       val now: String = "%tY/%<tm/%<td %<tH:%<tM:%<tS" format new Date
-      val newid: Long = sql"INSERT INTO D_POSTDATA(FORM_HASHED_ID,POSTDATA,CREATED,MODIFIED) VALUES(${hashed_id},${Json.toJson(dt).toString},${now},${now})"
+      val newid: Long = sql"INSERT INTO D_POSTDATA(FORM_HASHED_ID,POSTDATA,CREATED,MODIFIED) VALUES($hashed_id,${Json.toJson(dt).toString},$now,$now)"
         .updateAndReturnGeneratedKey.apply()
       Seq("")
     }
@@ -791,8 +784,8 @@ class FormsDAO extends FormParts {
       case cFormMode.REGIST => "sform-header-complete"
     }
     s"""
-       |<div class="sform-header-div ${subClass}">
-       |${text}
+       |<div class="sform-header-div $subClass">
+       |$text
        |</div>
     """.stripMargin
   }

@@ -46,13 +46,12 @@ class TransferController @Inject() (
   }
 
   // ?
-  def getList() = silhouette.SecuredAction.async { implicit request =>
+  def getList: Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
     Future.successful(Ok(Json.toJson("Not Implemented.")))
   }
 
   // GET /transfer/config/:transfer_name
-  def getConfig(transfer_name: String) = silhouette.SecuredAction.async { implicit request =>
-    val identity = request.identity
+  def getConfig(transfer_name: String): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
     val transferConfig = Class.forName("models.daos.TransferConfig." + transfer_name + "TransferConfigDAO")
       .getDeclaredConstructor(classOf[TransfersDAO])
       .newInstance(transfersDAO).asInstanceOf[BaseTransferConfigDAO]
@@ -62,22 +61,19 @@ class TransferController @Inject() (
   }
 
   @deprecated
-  def getConfig() = silhouette.SecuredAction.async { implicit request =>
-    val identity = request.identity
+  def getConfig: Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
     val jsonBody: Option[JsValue] = request.body.asJson
     val res = jsonBody.map { json =>
       val data = (json \ "rcdata").as[JsValue]
       data.validate[transferGetConfigRequest] match {
-        case s: JsSuccess[transferGetConfigRequest] => {
+        case s: JsSuccess[transferGetConfigRequest] =>
           val transferConfig = Class.forName("models.daos.TransferConfig." + s.get.transferName + "TransferConfigDAO")
             .getDeclaredConstructor(classOf[TransfersDAO])
             .newInstance(transfersDAO).asInstanceOf[BaseTransferConfigDAO]
           val config = transferConfig.getTransferConfig
           RsResultSet("OK", "OK", config)
-        }
-        case e: JsError => {
+        case _: JsError =>
           RsResultSet("NG", "NG", Json.parse("""{}"""))
-        }
       }
     }.getOrElse {
       None
@@ -89,32 +85,28 @@ class TransferController @Inject() (
   }
 
   // GET /transfer
-  def getTransferList(): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
+  def getTransferList: Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
     // ToDo グループによる制御必要
-    val res = transfersDAO.getTransferList();
+    val res = transfersDAO.getTransferList()
     Future.successful(Ok(Json.toJson(res)))
   }
 
   // POST /transfer/config
-  def saveConfig() = silhouette.SecuredAction.async { implicit request =>
+  def saveConfig(): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
     val identity = request.identity
     val jsonBody: Option[JsValue] = request.body.asJson
     val res = jsonBody.map { json =>
       val data = (json \ "rcdata").as[JsValue]
       data.validate[transferSaveConfigRequest] match {
-        case s: JsSuccess[transferSaveConfigRequest] => {
-          print(s.get)
-
+        case s: JsSuccess[transferSaveConfigRequest] =>
           val transferConfig = Class.forName("models.daos.TransferConfig." + s.get.transferName + "TransferConfigDAO")
             .getDeclaredConstructor(classOf[TransfersDAO])
             .newInstance(transfersDAO).asInstanceOf[BaseTransferConfigDAO]
           val config = s.get.config
           val result = transferConfig.saveTransferConfig(config, identity)
           RsResultSet("OK", "OK", result)
-        }
-        case e: JsError => {
+        case _: JsError =>
           RsResultSet("NG", "NG", Json.parse("""{}"""))
-        }
       }
     }.getOrElse {
       None

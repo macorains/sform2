@@ -36,5 +36,5 @@ trait UserDAO {
    */
   def save(user: User): Future[User]
 
-  def getList(): models.RsResultSet
+  def getList: models.RsResultSet
 }

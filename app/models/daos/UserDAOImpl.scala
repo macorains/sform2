@@ -1,17 +1,14 @@
 package models.daos
 
-import java.util.{ Date, UUID }
+import java.util.UUID
 
 import com.mohiva.play.silhouette.api.LoginInfo
-import models.{ RsResultSet, SFDBConf, User }
-import models.daos.UserDAOImpl._
+import models.{RsResultSet, SFDBConf, User}
 import play.api.libs.json.Json
 import scalikejdbc._
 
-import scala.concurrent._
 import scala.collection.mutable
-import scala.concurrent.Future
-import ExecutionContext.Implicits.global
+import scala.concurrent.{Future, _}
 import scala.concurrent.duration.Duration
 /**
  * Give access to the user object.
@@ -24,7 +21,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
    * @param loginInfo The login info of the user to find.
    * @return The found user or None if no user for the given login info could be found.
    */
-  def find(loginInfo: LoginInfo) =
+  def find(loginInfo: LoginInfo): Future[Option[User]] =
     Future.successful(
       DB localTx { implicit l =>
         sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED FROM M_USERINFO WHERE PROVIDER_ID=${loginInfo.providerID} AND PROVIDER_KEY=${loginInfo.providerKey}"
@@ -40,7 +37,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
    * @param userID The ID of the user to find.
    * @return The found user or None if no user for the given ID could be found.
    */
-  def find(userID: UUID) =
+  def find(userID: UUID): Future[Option[User]] =
     Future.successful(
       DB localTx { implicit l =>
         sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED FROM M_USERINFO WHERE USER_ID=${userID.toString}"
@@ -56,7 +53,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
    * @param user The user to save.
    * @return The saved user.
    */
-  def save(user: User) = {
+  def save(user: User): Future[User] = {
     Await.result(find(user.userID), Duration.Inf) match {
       case Some(u: User) => update(user)
       case _ => add(user)
@@ -79,7 +76,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
     }
   }
 
-  def getList(): models.RsResultSet = RsResultSet("NG", "NG", Json.parse("""{}"""))
+  def getList: models.RsResultSet = RsResultSet("NG", "NG", Json.parse("""{}"""))
 
 }
 

@@ -38,7 +38,7 @@ class FormExecuteController @Inject() (
   ex: ExecutionContext
 ) extends AbstractController(components) with I18nSupport {
 
-  def test = silhouette.UnsecuredAction.async { implicit request =>
+  def test: Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request =>
     println(CSRF.getToken(request))
     request.body.asJson match {
       case Some(f) =>
@@ -49,7 +49,7 @@ class FormExecuteController @Inject() (
     }
   }
 
-  def getCsrfToken = silhouette.UnsecuredAction.async { implicit request =>
+  def getCsrfToken: Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request =>
     CSRF.getToken(request) match {
       case Some(t: play.filters.csrf.CSRF.Token) =>
         Future.successful(Ok(Json.toJson(t.value)))
@@ -57,7 +57,7 @@ class FormExecuteController @Inject() (
     }
   }
 
-  def auth = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
+  def auth: Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     val body: AnyContent = request.body
     println(body)
     val jsonBody: Option[JsValue] = body.asJson
@@ -94,9 +94,9 @@ class FormExecuteController @Inject() (
    * FormId
    * @return
    */
-  def getForm() = silhouette.UserAwareAction.async { implicit request =>
+  def getForm: Action[AnyContent] = silhouette.UserAwareAction.async { implicit request =>
     request.identity match {
-      case Some(user) =>
+      case Some(_) =>
         request.body.asJson match {
           case Some(f) =>
             val html = formsDAO.getHtml(f, request.host)
@@ -114,9 +114,9 @@ class FormExecuteController @Inject() (
    * FormData
    * @return
    */
-  def validateForm() = silhouette.UserAwareAction.async { implicit request =>
+  def validateForm: Action[AnyContent] = silhouette.UserAwareAction.async { implicit request =>
     request.identity match {
-      case Some(user) =>
+      case Some(_) =>
         request.body.asJson match {
           case Some(f) =>
             val html = formsDAO.validate(f, request.host)
@@ -134,21 +134,19 @@ class FormExecuteController @Inject() (
    * FormData
    * @return
    */
-  def saveForm() = silhouette.UserAwareAction.async { implicit request =>
+  def saveForm: Action[AnyContent] = silhouette.UserAwareAction.async { implicit request =>
     request.identity match {
-      case Some(user) =>
+      case Some(_) =>
         request.body.asJson match {
           case f: Option[JsValue] =>
             f.get match {
-              case f1: JsValue => {
+              case f1: JsValue =>
                 val html = formsDAO.savePost(f1, request.host)
                 Logger.info("FormExecuteController.saveForm sucess.")
                 Future.successful(Ok(Json.toJson(html.getDataset)))
-              }
-              case _ => {
+              case _ =>
                 Logger.error("FormExecuteController.saveForm failed. (1)")
                 Future.successful(Ok(Json.toJson("NG")))
-              }
             }
           case _ =>
             Logger.error("FormExecuteController.saveForm failed. (2)")
@@ -160,7 +158,7 @@ class FormExecuteController @Inject() (
     }
   }
 
-  def getjs(path: String) = silhouette.UserAwareAction.async { implicit request =>
+  def getjs(path: String): Action[AnyContent] = silhouette.UserAwareAction.async { implicit request =>
     Future.successful(Ok(views.js.forminput.render(path)).as("text/javascript"))
 
   }

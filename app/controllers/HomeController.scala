@@ -1,11 +1,9 @@
 package controllers
 
-import javax.inject._
+import com.mohiva.play.silhouette.api.Silhouette
 import com.mohiva.play.silhouette.api.actions.SecuredRequest
-import com.mohiva.play.silhouette.api.{ LogoutEvent, Silhouette }
+import javax.inject._
 import org.webjars.play.WebJarsUtil
-
-import play.api._
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import utils.auth.DefaultEnv
@@ -36,7 +34,7 @@ class HomeController @Inject() (
     Ok(views.html.index("Your new application is ready."))
   }
   */
-  def index = silhouette.SecuredAction.async { implicit request: SecuredRequest[DefaultEnv, AnyContent] =>
+  def index: Action[AnyContent] = silhouette.SecuredAction.async { implicit request: SecuredRequest[DefaultEnv, AnyContent] =>
     Future.successful(Ok(views.html.home(request.identity)))
   }
 

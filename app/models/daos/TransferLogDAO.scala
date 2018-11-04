@@ -20,17 +20,17 @@ class TransferLogDAO {
       sql"""
       INSERT INTO D_TRANSFER_LOG
       (TRANSFER_ID,TRANSFER_TYPE_ID,STATUS,TRANSFER_DATA,RESULT_DATA,CREATED,MODIFIED)
-      VALUES (0,${transfer_type_id},0,'{}','{}',NOW(),NOW())"""
+      VALUES (0,$transfer_type_id,0,'{}','{}',NOW(),NOW())"""
         .updateAndReturnGeneratedKey().apply()
     }
   }
 
-  def start(id: Long, transfer_id: Int, transfer_data: String) = {
+  def start(id: Long, transfer_id: Int, transfer_data: String): Int = {
     DB localTx { implicit l =>
       sql"""
       UPDATE D_TRANSFER_LOG
-      SET TRANSFER_ID = ${transfer_id}, STATUS = 2, TRANSFER_DATA = ${transfer_data}, MODIFIED = NOW()
-      WHERE ID = ${id}"""
+      SET TRANSFER_ID = $transfer_id, STATUS = 2, TRANSFER_DATA = $transfer_data, MODIFIED = NOW()
+      WHERE ID = $id"""
         .update.apply()
     }
   }
@@ -45,12 +45,12 @@ class TransferLogDAO {
   //    }
   //  }
 
-  def update(id: Long, status: Int) = {
+  def update(id: Long, status: Int): Int = {
     DB localTx { implicit l =>
       sql"""
       UPDATE D_TRANSFER_LOG
-      SET STATUS = ${status}
-      WHERE ID = ${id}
+      SET STATUS = $status
+      WHERE ID = $id
         """
         .update.apply()
     }

@@ -2,16 +2,12 @@ package models.daos
 
 import java.util.UUID
 
-import models.{ AuthToken, SFDBConf }
-import models.daos.AuthTokenDAOImpl._
+import models.{AuthToken, SFDBConf}
 import org.joda.time.DateTime
-import play.api._
-import play.api.Play
 import scalikejdbc._
 
 import scala.collection.mutable
 import scala.concurrent.Future
-import com.typesafe.config._
 /**
  * Give access to the [[AuthToken]] object.
  */
@@ -24,7 +20,7 @@ class AuthTokenDAOImpl extends AuthTokenDAO with SFDBConf {
    * @return The found token or None if no token for the given ID could be found.
    */
   //def find(id: UUID) = Future.successful(tokens.get(id))
-  def find(id: UUID) = Future.successful(
+  def find(id: UUID): Future[Option[AuthToken]] = Future.successful(
     sql"SELECT ID,USER_ID,EXPIRY FROM D_AUTHTOKEN WHERE ID=${id.toString}"
       .map(rs => AuthToken(UUID.fromString(rs.string("ID")), UUID.fromString(rs.string("USER_ID")), rs.jodaDateTime("EXPIRY"))).single.apply()
   )
@@ -42,7 +38,7 @@ class AuthTokenDAOImpl extends AuthTokenDAO with SFDBConf {
     }.values.toSeq
     */
     println(dateTime)
-    sql"SELECT ID,USER_ID,EXPIRY FROM D_AUTHTOKEN WHERE EXPIRY<=${dateTime}"
+    sql"SELECT ID,USER_ID,EXPIRY FROM D_AUTHTOKEN WHERE EXPIRY<=$dateTime"
       .map(rs => AuthToken(UUID.fromString(rs.string("ID")), UUID.fromString(rs.string("USER_ID")), rs.jodaDateTime("EXPIRY"))).list.apply()
 
   }
@@ -53,7 +49,7 @@ class AuthTokenDAOImpl extends AuthTokenDAO with SFDBConf {
    * @param token The token to save.
    * @return The saved token.
    */
-  def save(token: AuthToken) = {
+  def save(token: AuthToken): Future[AuthToken] = {
     //tokens += (token.id -> token)
     //println(token.toString)
     sql"INSERT INTO D_AUTHTOKEN(ID,USER_ID,EXPIRY) VALUES(${token.id.toString},${token.userID.toString},${token.expiry})"
@@ -67,9 +63,9 @@ class AuthTokenDAOImpl extends AuthTokenDAO with SFDBConf {
    * @param id The ID for which the token should be removed.
    * @return A future to wait for the process to be completed.
    */
-  def remove(id: UUID) = {
+  def remove(id: UUID): Future[Unit] = {
     //tokens -= id
-    sql"DELETE FROM D_AUTHTOKEN WHERE ID=${id}".update.apply()
+    sql"DELETE FROM D_AUTHTOKEN WHERE ID=$id".update.apply()
     Future.successful(())
   }
 }
