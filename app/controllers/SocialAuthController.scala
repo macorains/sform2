@@ -6,11 +6,11 @@ import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.impl.providers._
 import models.services.UserService
-import play.api.i18n.{I18nSupport, Messages}
+import play.api.i18n.{ I18nSupport, Messages }
 import play.api.mvc._
 import utils.auth.DefaultEnv
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 /**
  * The social auth controller.

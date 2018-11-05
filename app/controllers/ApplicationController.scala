@@ -2,10 +2,10 @@ package controllers
 
 import javax.inject.Inject
 import com.mohiva.play.silhouette.api.actions.SecuredRequest
-import com.mohiva.play.silhouette.api.{LogoutEvent, Silhouette}
+import com.mohiva.play.silhouette.api.{ LogoutEvent, Silhouette }
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
-import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
+import play.api.mvc.{ AbstractController, Action, AnyContent, ControllerComponents }
 import utils.auth.DefaultEnv
 
 import scala.concurrent.Future

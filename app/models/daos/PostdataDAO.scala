@@ -1,6 +1,6 @@
 package models.daos
 
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{ JsValue, Json }
 import scalikejdbc._
 
 class PostdataDAO {
@@ -13,7 +13,7 @@ class PostdataDAO {
     }
   }
 
-  private def getPostdataByFormHashedId(form_hashed_id: String, transfer_type_id: Int) = {
+  def getPostdataByFormHashedId(form_hashed_id: String, transfer_type_id: Int) = {
     DB localTx { implicit l =>
       sql"""SELECT pd.POSTDATA_ID, pd.FORM_HASHED_ID, pd.POSTDATA
            FROM D_POSTDATA pd

@@ -3,12 +3,12 @@ package models.daos
 import java.util.UUID
 
 import com.mohiva.play.silhouette.api.LoginInfo
-import models.{RsResultSet, SFDBConf, User}
+import models.{ RsResultSet, SFDBConf, User }
 import play.api.libs.json.Json
 import scalikejdbc._
 
 import scala.collection.mutable
-import scala.concurrent.{Future, _}
+import scala.concurrent.{ Future, _ }
 import scala.concurrent.duration.Duration
 /**
  * Give access to the user object.

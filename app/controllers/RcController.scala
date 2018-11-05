@@ -115,7 +115,7 @@ class RcController @Inject() (
                   RsResultSet("NG", "NG", Json.parse("""{}"""))
               }
             case "getTransferList" =>
-              RsResultSet("OK", "OK", transfersDAO.getTransferList())
+              RsResultSet("OK", "OK", transfersDAO.getTransferList)
 
             case "saveConfig" => {
               print("***saveConfig***")

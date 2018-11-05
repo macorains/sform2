@@ -286,27 +286,12 @@ var salesforceTransferRuleEditComponent = {
                         sfObjectName = this.tmpTransferTask.config.sfObject;
                     }
 
-                    /*
-                    var sfObjectName = function(){
-                        if(typeof that.tmpTransferTask.config !='undefined' && typeof that.tmpTransferTask.config.sfObject != 'undefined'){
-                            return that.tmpTransferTask.config.sfObject;
-                        }
-                        return '';
-                    }
-                    */
-
                     var sfObjectDefinisions = [];
                     for(s in this.transferConfig.Salesforce.sfObjectDefinition){
                         if(this.transferConfig.Salesforce.sfObjectDefinition[s].name == sfObjectName){
                             sfObjectDefinisions.push(this.transferConfig.Salesforce.sfObjectDefinition[s]);
                         }
                     }
-                    /*
-                    var sfObjectDefinisions = this.transferConfig.Salesforce.sfObjectDefinition.filter(function(item,index){
-                        if(item.name == sfObjectName) return true;
-                    });
-                    */
-
                     if(sfObjectDefinisions.length>0){
                         var sfLabel = "";
                         for(s in sfObjectDefinisions[0]['fields']){
@@ -314,19 +299,10 @@ var salesforceTransferRuleEditComponent = {
                                 sfLabel = sfObjectDefinisions[0]['fields'][s]['label'];
                             }
                         }
-                        /*
-                        var sfObjectFields = sfObjectDefinisions[0]['fields'].filter(function(item,index){
-                            if(item.name == that.tmpTransferTask.config.columnConvertDefinition[d].sfCol) return true;
-                        });
-                        if(sfObjectFields.length>0){
-                            tmp[d]['sfCol'] = sfObjectFields[0]['label'];
-                        }
-                        */
                         tmp[d]['sfCol'] = sfLabel;
                     }
                 }
             }
-            console.log(tmp);
             return tmp;
           },
           formColList(){
@@ -460,24 +436,14 @@ var mailTransferConfigComponent = {
 
     var that = this;
     // MailTransferの設定情報取得
-    var reqdata = {
-        objtype: "Transfer",
-        action: "getConfig",
-        rcdata: {
-            transferName : "Mail"
-        }
-    };
     jQuery(document).ajaxSend(function(event,jqxhr,settings){
         jqxhr.setRequestHeader('Csrf-Token', jQuery("input[name=csrfToken]").val());
     });
     jQuery.ajax({
-        type: "POST",
-        url: "rc/",
-        dataType: "json",
+        type: "GET",
+        url: "transfer/config/Mail",
         contentType: "application/json",
-        data: JSON.stringify(reqdata),
         success: function(msg) {
-            console.log(msg);
             that.$emit('set','Mail',msg);
             that.transferTaskDefault.Mail = {
                 status : 1,
@@ -499,7 +465,9 @@ var mailTransferConfigComponent = {
     MailTransferConfigEditModalShow : function(){
       jQuery("#MailTransferConfigEditModal").modal('show');
     },
-    saveMailTransferConfig : function(){}
+    saveMailTransferConfig : function(){
+      // ToDo
+    }
   },
   computed : {}
 };

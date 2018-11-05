@@ -2,7 +2,7 @@ package models.daos
 
 import java.util.UUID
 
-import models.{AuthToken, SFDBConf}
+import models.{ AuthToken, SFDBConf }
 import org.joda.time.DateTime
 import scalikejdbc._
 
