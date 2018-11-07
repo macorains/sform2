@@ -72,6 +72,7 @@ var salesforceTransferConfigComponent = {
                 status : 1,
                 transfer_name : "Salesforce",
                 transfer_type_id : 1,
+                del_flg : 0,
                 config : {
                     columnConvertDefinition : [],
                     sfObject : msg.dataset.sfObjectDefinition[0]["name"]
@@ -450,6 +451,7 @@ var mailTransferConfigComponent = {
                 transfer_name : "Mail",
                 transfer_type_id : 2,
                 name : "",
+                del_flg : 0,
                 config : {
                     mailSubject : "",
                     mailFrom : "",
