@@ -17,7 +17,7 @@ class Scheduler @Inject() (
 
   QuartzSchedulerExtension(system).schedule("AuthTokenCleaner", authTokenCleaner, AuthTokenCleaner.Clean)
   //Salesforce登録バッチ処理起動
-  QuartzSchedulerExtension(system).schedule("Every5Seconds", salesforceDataRegister, "555")
+  //QuartzSchedulerExtension(system).schedule("Every5Seconds", salesforceDataRegister, "555")
   // MailTransferメール送信バッチ処理起動
   QuartzSchedulerExtension(system).schedule("MailTransferSendMail", mailTransferSendMail, "Mail")
 

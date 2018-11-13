@@ -1,7 +1,6 @@
 package controllers
 
 import javax.inject.Inject
-
 import com.mohiva.play.silhouette.api.Authenticator.Implicits._
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
@@ -14,6 +13,7 @@ import net.ceedubs.ficus.Ficus._
 import org.webjars.play.WebJarsUtil
 import play.api.Configuration
 import play.api.i18n.{ I18nSupport, Messages }
+import play.api.libs.json.{ JsObject, JsString }
 import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
 import utils.auth.DefaultEnv
 
@@ -37,7 +37,7 @@ class SignInController @Inject() (
   silhouette: Silhouette[DefaultEnv],
   userService: UserService,
   credentialsProvider: CredentialsProvider,
-  socialProviderRegistry: SocialProviderRegistry,
+  //socialProviderRegistry: SocialProviderRegistry,
   configuration: Configuration,
   clock: Clock
 )(
@@ -52,17 +52,18 @@ class SignInController @Inject() (
    * @return The result to display.
    */
   def view = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
-    Future.successful(Ok(views.html.signIn(SignInForm.form, socialProviderRegistry)))
+    Future.successful(Ok(views.html.signIn(SignInForm.form)))
   }
 
   /**
    * Handles the submitted form.
-   *
+   * h
    * @return The result to display.
    */
   def submit = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     SignInForm.form.bindFromRequest.fold(
-      form => Future.successful(BadRequest(views.html.signIn(form, socialProviderRegistry))),
+      //form => Future.successful(BadRequest(views.html.signIn(form, socialProviderRegistry))),
+      form => Future.successful(BadRequest(views.html.signIn(form))),
       data => {
         //val credentials = Credentials(data.email, data.password) //ToDo Credentialsを作るときにユーザーグループ名も入るように・・・
         val credentials = Credentials(data.email + ":" + data.group, data.password)
@@ -70,7 +71,9 @@ class SignInController @Inject() (
           val result = Redirect(routes.ApplicationController.index())
           userService.retrieve(loginInfo).flatMap {
             case Some(user) if !user.activated =>
-              Future.successful(Ok(views.html.activateAccount(data.email)))
+              //Future.successful(Ok(views.html.activateAccount(data.email)))
+              Future.successful(BadRequest)
+
             case Some(user) =>
               val c = configuration.underlying
               silhouette.env.authenticatorService.create(loginInfo).map {
@@ -78,7 +81,7 @@ class SignInController @Inject() (
                   authenticator.copy(
                     expirationDateTime = clock.now + c.as[FiniteDuration]("silhouette.authenticator.rememberMe.authenticatorExpiry"),
                     idleTimeout = c.getAs[FiniteDuration]("silhouette.authenticator.rememberMe.authenticatorIdleTimeout"),
-                    cookieMaxAge = c.getAs[FiniteDuration]("silhouette.authenticator.rememberMe.cookieMaxAge")
+                    customClaims = Some(JsObject(Seq("role" -> JsString("operator")))) //ロールを設定する
                   )
                 case authenticator => authenticator
               }.flatMap { authenticator =>
@@ -91,7 +94,8 @@ class SignInController @Inject() (
           }
         }.recover {
           case _: ProviderException =>
-            Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.credentials"))
+            BadRequest
+          //Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.credentials"))
         }
       }
     )

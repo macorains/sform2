@@ -79,16 +79,21 @@ class ActivateAccountController @Inject() (
       Future.successful(Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.activation.link")))
     }
     */
-
+    // HTTPステータスのみを返すように変更
     authTokenService.validate(token).flatMap {
       case Some(authToken) => userService.retrieve(authToken.userID).flatMap {
         case Some(user) if user.loginInfo.providerID == CredentialsProvider.ID =>
           userService.save(user.copy(activated = true)).map { _ =>
-            Redirect(routes.SignInController.view()).flashing("success" -> Messages("account.activated"))
+            Ok
+            //Redirect(routes.SignInController.view()).flashing("success" -> Messages("account.activated"))
           }
-        case _ => Future.successful(Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.activation.link")))
+        case _ =>
+          Future.successful(BadRequest)
+        //Future.successful(Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.activation.link")))
       }
-      case None => Future.successful(Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.activation.link")))
+      case None =>
+        Future.successful(BadRequest)
+      //Future.successful(Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.activation.link")))
     }
 
   }

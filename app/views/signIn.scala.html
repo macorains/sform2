@@ -6,13 +6,13 @@
 @import forms.SignInForm.Data
 @import b3.inline.fieldConstructor
 
-@(signInForm: Form[Data], socialProviders: SocialProviderRegistry)(implicit request: RequestHeader, messages: Messages, webJarsUtil: WebJarsUtil)
+@(signInForm: Form[Data])(implicit request: RequestHeader, messages: Messages, webJarsUtil: WebJarsUtil)
 
 @main(messages("sign.in.title")) {
     <fieldset class="col-md-6 col-md-offset-3">
         <legend><img src="@controllers.routes.Assets.at("/images/sform_logo_1.png ")">@messages("sign.in.credentials")</legend>
         @helper.form(action = controllers.routes.SignInController.submit()) {
-            @helper.CSRF.formField
+
             @b3.email(signInForm("email"), '_hiddenLabel -> messages("email"), 'placeholder -> messages("email"), 'class -> "form-control input-lg")
             @b3.text(signInForm("group"), '_hiddenLabel -> messages("group"), 'placeholder -> messages("group"), 'class -> "form-control input-lg")
             @b3.password(signInForm("password"), '_hiddenLabel -> messages("password"), 'placeholder -> messages("password"), 'class -> "form-control input-lg")
