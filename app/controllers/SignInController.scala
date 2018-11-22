@@ -60,20 +60,16 @@ class SignInController @Inject() (
    * h
    * @return The result to display.
    */
-  def submit = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
+  def submit = silhouette.UnsecuredAction.async { implicit request =>
     SignInForm.form.bindFromRequest.fold(
-      //form => Future.successful(BadRequest(views.html.signIn(form, socialProviderRegistry))),
       form => Future.successful(BadRequest(views.html.signIn(form))),
       data => {
-        //val credentials = Credentials(data.email, data.password) //ToDo Credentialsを作るときにユーザーグループ名も入るように・・・
         val credentials = Credentials(data.email + ":" + data.group, data.password)
         credentialsProvider.authenticate(credentials).flatMap { loginInfo =>
           val result = Redirect(routes.ApplicationController.index())
           userService.retrieve(loginInfo).flatMap {
             case Some(user) if !user.activated =>
-              //Future.successful(Ok(views.html.activateAccount(data.email)))
               Future.successful(BadRequest)
-
             case Some(user) =>
               val c = configuration.underlying
               silhouette.env.authenticatorService.create(loginInfo).map {
@@ -87,15 +83,14 @@ class SignInController @Inject() (
               }.flatMap { authenticator =>
                 silhouette.env.eventBus.publish(LoginEvent(user, request))
                 silhouette.env.authenticatorService.init(authenticator).flatMap { v =>
-                  silhouette.env.authenticatorService.embed(v, result)
+                  silhouette.env.authenticatorService.embed(v, Ok)
                 }
               }
             case None => Future.failed(new IdentityNotFoundException("Couldn't find user"))
           }
         }.recover {
-          case _: ProviderException =>
+          case e: ProviderException =>
             BadRequest
-          //Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.credentials"))
         }
       }
     )

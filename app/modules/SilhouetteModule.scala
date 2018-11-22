@@ -33,7 +33,7 @@ import play.api.libs.openid.OpenIdClient
 import play.api.libs.ws.WSClient
 import play.api.mvc.CookieHeaderEncoding
 import utils.auth.{ CustomSecuredErrorHandler, CustomUnsecuredErrorHandler, DefaultEnv }
-import net.ceedubs.ficus.readers.EnumerationReader._  // Don't erase it!
+import net.ceedubs.ficus.readers.EnumerationReader._ // Don't erase it!
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
