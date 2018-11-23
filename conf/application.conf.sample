@@ -65,13 +65,30 @@ play.mailer {
 }
 
 # Security Filter Configuration - Content Security Policy
-play.filters.headers {
-  contentSecurityPolicy = "default-src 'self';"
-  contentSecurityPolicy = ${play.filters.headers.contentSecurityPolicy}" img-src 'self' *.fbcdn.net *.twimg.com *.googleusercontent.com *.xingassets.com vk.com *.yimg.com secure.gravatar.com;"
-  contentSecurityPolicy = ${play.filters.headers.contentSecurityPolicy}" style-src 'self' 'unsafe-inline' cdnjs.cloudflare.com maxcdn.bootstrapcdn.com cdn.jsdelivr.net fonts.googleapis.com;"
-  contentSecurityPolicy = ${play.filters.headers.contentSecurityPolicy}" font-src 'self' fonts.gstatic.com fonts.googleapis.com cdnjs.cloudflare.com;"
-  contentSecurityPolicy = ${play.filters.headers.contentSecurityPolicy}" script-src 'self' cdnjs.cloudflare.com;"
-  contentSecurityPolicy = ${play.filters.headers.contentSecurityPolicy}" connect-src 'self' twitter.com *.xing.com;"
+play.filters {
+  headers {
+    contentSecurityPolicy = "default-src 'self';"
+    contentSecurityPolicy = ${play.filters.headers.contentSecurityPolicy}" img-src 'self' *.fbcdn.net *.twimg.com *.googleusercontent.com *.xingassets.com vk.com *.yimg.com secure.gravatar.com;"
+    contentSecurityPolicy = ${play.filters.headers.contentSecurityPolicy}" style-src 'self' 'unsafe-inline' cdnjs.cloudflare.com maxcdn.bootstrapcdn.com cdn.jsdelivr.net fonts.googleapis.com;"
+    contentSecurityPolicy = ${play.filters.headers.contentSecurityPolicy}" font-src 'self' fonts.gstatic.com fonts.googleapis.com cdnjs.cloudflare.com;"
+    contentSecurityPolicy = ${play.filters.headers.contentSecurityPolicy}" script-src 'self' cdnjs.cloudflare.com;"
+    contentSecurityPolicy = ${play.filters.headers.contentSecurityPolicy}" connect-src 'self' twitter.com *.xing.com;"
+ }
+  cors {
+    exposedHeaders = ["x-auth-token","X-Auth-Token"]
+    pathPrefixes = ["/"]
+    allowedOrigins = ["http://localhost:8080"]
+    allowedHttpMethods = ["GET", "POST", "OPTIONS"]
+    # allowedHttpHeaders = ["Accept"]
+    preflightMaxAge = 3 days
+  }
+  csrf {
+    header.bypassHeaders {
+      X-Requested-With = "*"
+      Csrf-Token = "nocheck"
+    }
+    bypassCorsTrustedOrigins = false
+  }
 }
 
 ## Evolutions
