@@ -10,7 +10,7 @@ import models._
 import models.daos.{ FormsDAO, TransferTaskDAO }
 import models.services.UserService
 import play.api.i18n.I18nSupport
-import utils.auth.DefaultEnv
+import utils.auth.{ DefaultEnv, WithProvider }
 import com.mohiva.play.silhouette.api._
 import org.webjars.play.WebJarsUtil
 import com.mohiva.play.silhouette.impl.providers._
@@ -35,11 +35,20 @@ class FormController @Inject() (
 ) extends AbstractController(components) with I18nSupport {
 
   /**
-   * フォーム一覧取得
-   * GET /form
-   * @return
+   * フォームデータ取得
+   * @return フォームデータ
    */
-  def getList: Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
+  def get(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID)).async { implicit request =>
+    val res = formsDAO.getData(request.identity, hashed_form_id)
+    Future.successful(Ok(Json.toJson(res)))
+  }
+
+  /**
+   * フォーム一覧取得
+   * GET /form/list
+   * @return フォームデータのリスト
+   */
+  def getList: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID)).async { implicit request =>
     val res = formsDAO.getList(request.identity)
     Future.successful(Ok(Json.toJson(res)))
   }
@@ -49,7 +58,7 @@ class FormController @Inject() (
    * POST /form
    * @return
    */
-  def create(): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
+  def create(): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID)).async { implicit request =>
     val identity = request.identity
     val jsonBody: Option[JsValue] = request.body.asJson
     val res = jsonBody.map { json =>
@@ -76,7 +85,7 @@ class FormController @Inject() (
    * @param hashed_form_id フォームハッシュID
    * @return
    */
-  def delete(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
+  def delete(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID)).async { implicit request =>
     Future.successful(Ok(Json.toJson(formsDAO.delete(hashed_form_id))))
   }
 

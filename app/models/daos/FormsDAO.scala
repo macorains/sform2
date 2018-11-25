@@ -166,6 +166,49 @@ class FormsDAO extends FormParts {
   }
 
   /**
+   * フォームデータ取得
+   * @param identity 認証情報
+   * @param hashed_id フォームのhashed_id
+   * @return フォームデータ
+   */
+  def getData(identity: User, hashed_id: String): RsResultSet = {
+    println(hashed_id)
+    val userGroup = identity.group.getOrElse("")
+    val f = FormData.syntax("f")
+    DB localTx { implicit s =>
+      val formData =
+        withSQL(
+          select(f.id, f.hashed_id, f.form_data, f.user_group)
+            .from(FormData as f)
+            .where
+            .eq(f.hashed_id, hashed_id)
+            .and
+            .eq(f.user_group, userGroup)
+        ).map(rs => FormData(rs)).single.apply()
+
+      val jsString = formData match {
+        case Some(f) => {
+          val formDefResult: JsResult[FormDef] = Json.parse(f.form_data).validate[FormDef]
+          formDefResult match {
+            case s: JsSuccess[FormDef] =>
+              val fd: FormDef = s.get.replaceId(f.id, f.hashed_id)
+              Json.toJson(fd)
+            case _ => {
+              // ToDo 2018/11/24 返り値をどうするか？
+              Json.toJson("{}")
+            }
+          }
+        }
+        case _ => {
+          // ToDo 2018/11/24 返り値をどうするか？
+          Json.toJson("{}")
+        }
+      }
+      RsResultSet("OK", "OK", Json.toJson(jsString))
+    }
+  }
+
+  /**
    * フォーム一覧
    * @return RsResultSet
    */
@@ -201,7 +244,8 @@ class FormsDAO extends FormParts {
    * @param dt 入力データ
    * @return RsResultSet
    */
-  def getData(dt: JsValue): RsResultSet = {
+  /*
+  def getPostData(dt: JsValue): RsResultSet = {
     val req: JsResult[FormPostDataRequest] = dt.validate[FormPostDataRequest]
     val f0 = FormData.syntax("f0")
     val f = FormPostData.syntax("f")
@@ -252,6 +296,7 @@ class FormsDAO extends FormParts {
         RsResultSet("NG", "NG", Json.parse("""{}"""))
     }
   }
+  */
 
   /**
    * フォームHTML取得

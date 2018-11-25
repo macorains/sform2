@@ -9,7 +9,7 @@ import models._
 import models.daos.TransferTaskDAO
 import models.services.UserService
 import play.api.i18n.I18nSupport
-import utils.auth.DefaultEnv
+import utils.auth.{ DefaultEnv, WithProvider }
 import com.mohiva.play.silhouette.api._
 import org.webjars.play.WebJarsUtil
 import com.mohiva.play.silhouette.impl.providers._
@@ -44,7 +44,7 @@ class TransferTaskController @Inject() (
   }
 
   // GET /transfertask/:form_id
-  def getTransferTaskListByFormId(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
+  def getTransferTaskListByFormId(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID)).async { implicit request =>
     val res = RsResultSet("OK", "OK", transferTaskDAO.getTransferTaskListByFormId(hashed_form_id))
     Future.successful(Ok(Json.toJson(res)))
     /*

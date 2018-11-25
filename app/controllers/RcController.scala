@@ -93,7 +93,7 @@ class RcController @Inject() (
             case "delete" => formsDAO.delete(data)
             case "gethtml" => formsDAO.getHtml(data, request.host)
             case "validate" => formsDAO.validate(data, request.host)
-            case "getdata" => formsDAO.getData(data)
+            // case "getdata" => formsDAO.getData(data)
             case _ => RsResultSet("NG", "NG", Json.parse("""{}"""))
           }
         case "User" =>
