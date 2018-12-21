@@ -44,6 +44,17 @@ class TransferTaskDAO {
     }
   }
 
+  def getTransferTask(id: Int): JsValue = {
+    DB localTx { implicit l =>
+      val t = sql"""SELECT ID,TRANSFER_TYPE_ID,NAME,STATUS,CONFIG,CREATED,MODIFIED
+      FROM D_TRANSFER_TASKS
+      WHERE ID=$id"""
+        .map(rs => TransferTask(rs)).single.apply().get
+      val transferTaskJson = TransferTaskJson(t.id, t.transfer_type_id, t.name, t.status, t.config.as[JsObject], t.created, t.modified, 0)
+      Json.toJson(transferTaskJson)
+    }
+  }
+
   def save(transfer_type_id: Int, name: String, status: Int, config: String, user: String, user_group: String): Int = {
     DB localTx { implicit l =>
       sql"""

@@ -9,10 +9,11 @@ import play.api.Environment
 import models.daos.UserDAO
 import models.services.UserService
 import play.api.i18n.I18nSupport
-import utils.auth.DefaultEnv
+import utils.auth.{ DefaultEnv, WithProvider }
 import com.mohiva.play.silhouette.api._
 import org.webjars.play.WebJarsUtil
 import com.mohiva.play.silhouette.impl.providers._
+import models.RsResultSet
 
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -34,8 +35,8 @@ class UserController @Inject() (
 
   // ToDo グループによる制御必要
   // GET /user
-  def getList: Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
-    val res = userDAO.getList
+  def getList: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID)).async { implicit request =>
+    val res = RsResultSet("OK", "OK", userDAO.getList(request.identity))
     Future.successful(Ok(Json.toJson(res)))
   }
 }

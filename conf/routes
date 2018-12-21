@@ -57,5 +57,5 @@ POST /transfer/config controllers.TransferController.saveConfig()
 GET /user controllers.UserController.getList()
 
 # transferTask
-GET /transfertask/:form_id controllers.TransferTaskController.getTransferTaskListByFormId(form_id: String)
-#GET /transfertask/ controllers.TransferTaskController.getList()
+GET /transfertask/list/:form_id controllers.TransferTaskController.getTransferTaskListByFormId(form_id: String)
+GET /transfertask/:id controllers.TransferTaskController.getTransferTask(id: Int)

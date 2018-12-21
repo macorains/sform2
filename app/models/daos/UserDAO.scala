@@ -4,6 +4,7 @@ import java.util.UUID
 
 import com.mohiva.play.silhouette.api.LoginInfo
 import models.User
+import play.api.libs.json.JsValue
 
 import scala.concurrent.Future
 
@@ -36,5 +37,5 @@ trait UserDAO {
    */
   def save(user: User): Future[User]
 
-  def getList: models.RsResultSet
+  def getList(identity: User): JsValue
 }

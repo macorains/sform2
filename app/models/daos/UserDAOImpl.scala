@@ -4,12 +4,20 @@ import java.util.UUID
 
 import com.mohiva.play.silhouette.api.LoginInfo
 import models.{ RsResultSet, SFDBConf, User }
-import play.api.libs.json.Json
+import play.api.libs.json.{ JsValue, Json, Reads, Writes }
 import scalikejdbc._
 
 import scala.collection.mutable
 import scala.concurrent.{ Future, _ }
 import scala.concurrent.duration.Duration
+
+case class UserJson(userId: String, userGroup: String, firstName: String, lastName: String, fullName: String,
+  email: String, avatarUrl: String, activated: Boolean)
+object UserJson {
+  implicit def jsonUserWrites: Writes[UserJson] = Json.writes[UserJson]
+  implicit def jsonUserReads: Reads[UserJson] = Json.reads[UserJson]
+}
+
 /**
  * Give access to the user object.
  */
@@ -76,8 +84,22 @@ class UserDAOImpl extends UserDAO with SFDBConf {
     }
   }
 
-  def getList: models.RsResultSet = RsResultSet("NG", "NG", Json.parse("""{}"""))
-
+  def getList(identity: User): JsValue = {
+    val userGroup = identity.group.getOrElse("")
+    DB localTx { implicit l =>
+      val userList = sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED FROM M_USERINFO WHERE USER_GROUP=${userGroup}"
+        .map(rs => User(UUID.fromString(rs.string("USER_ID")), LoginInfo(rs.string("PROVIDER_ID"), rs.string("PROVIDER_KEY")),
+          Option(rs.string("USER_GROUP")), Option(rs.string("FIRST_NAME")), Option(rs.string("LAST_NAME")), Option(rs.string("FULL_NAME")),
+          Option(rs.string("EMAIL")), Option(rs.string("AVATAR_URL")), rs.boolean("ACTIVATED"))).list.apply()
+      val userListJson = userList.map(
+        u => {
+          UserJson(u.userID.toString, u.group.getOrElse(""), u.firstName.getOrElse(""), u.lastName.getOrElse(""),
+            u.fullName.getOrElse(""), u.email.getOrElse(""), u.avatarURL.getOrElse(""), u.activated)
+        }
+      )
+      Json.toJson(userListJson)
+    }
+  }
 }
 
 /**

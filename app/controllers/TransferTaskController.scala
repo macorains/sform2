@@ -42,8 +42,12 @@ class TransferTaskController @Inject() (
   def getList: Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
     Future.successful(Ok(Json.toJson("Not Implemented.")))
   }
-
-  // GET /transfertask/:form_id
+  // GET /transfertask/id
+  def getTransferTask(id: Int): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID)).async { implicit request =>
+    val res = RsResultSet("OK", "OK", transferTaskDAO.getTransferTask(id))
+    Future.successful(Ok(Json.toJson(res)))
+  }
+  // GET /transfertask/list/:form_id
   def getTransferTaskListByFormId(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID)).async { implicit request =>
     val res = RsResultSet("OK", "OK", transferTaskDAO.getTransferTaskListByFormId(hashed_form_id))
     Future.successful(Ok(Json.toJson(res)))
