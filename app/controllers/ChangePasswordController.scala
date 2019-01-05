@@ -44,7 +44,7 @@ class ChangePasswordController @Inject() (
    *
    * @return The result to display.
    */
-  def view = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID)) {
+  def view = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin"))) {
     implicit request: SecuredRequest[DefaultEnv, AnyContent] =>
       Ok(views.html.changePassword(ChangePasswordForm.form, request.identity))
   }
@@ -54,7 +54,7 @@ class ChangePasswordController @Inject() (
    *
    * @return The result to display.
    */
-  def submit = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID)).async {
+  def submit = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin"))).async {
     implicit request: SecuredRequest[DefaultEnv, AnyContent] =>
       ChangePasswordForm.form.bindFromRequest.fold(
         form => Future.successful(BadRequest(views.html.changePassword(form, request.identity))),

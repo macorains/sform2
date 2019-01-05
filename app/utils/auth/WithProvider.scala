@@ -1,6 +1,7 @@
 package utils.auth
 
 import com.mohiva.play.silhouette.api.{ Authenticator, Authorization }
+import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
 import models.User
 import play.api.mvc.Request
 
@@ -12,7 +13,7 @@ import scala.concurrent.Future
  * @param provider The provider ID the user must authenticated with.
  * @tparam A The type of the authenticator.
  */
-case class WithProvider[A <: Authenticator](provider: String) extends Authorization[User, A] {
+case class WithProvider[A <: Authenticator](provider: String, roles: List[String]) extends Authorization[User, A] {
 
   /**
    * Indicates if a user is authorized to access an action.
@@ -23,9 +24,12 @@ case class WithProvider[A <: Authenticator](provider: String) extends Authorizat
    * @tparam B The type of the request body.
    * @return True if the user is authorized, false otherwise.
    */
-  override def isAuthorized[B](user: User, authenticator: A)(
-    implicit
-    request: Request[B]): Future[Boolean] = {
-    Future.successful(user.loginInfo.providerID == provider)
+  override def isAuthorized[B](user: User, authenticator: A)(implicit request: Request[B]): Future[Boolean] = {
+    val role: String = "operator" // ToDo ユーザー情報からロールを取るように変えること
+    Future.successful(user.loginInfo.providerID == provider && roles.exists(r => r.equals(role)))
+  }
+
+  def hasRole(role: String, roleList: List[String]): Boolean = {
+    roleList.exists(r => r.equals(role))
   }
 }

@@ -35,7 +35,7 @@ class UserController @Inject() (
 
   // ToDo グループによる制御必要
   // GET /user
-  def getList: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID)).async { implicit request =>
+  def getList: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin"))).async { implicit request =>
     val res = RsResultSet("OK", "OK", userDAO.getList(request.identity))
     Future.successful(Ok(Json.toJson(res)))
   }
