@@ -617,7 +617,7 @@ class FormsDAO extends FormParts {
             sql"""INSERT INTO D_FORM(FORM_DATA,HASHED_ID,USER_GROUP,CREATED_USER,CREATED)
                  VALUES(${Json.toJson(f).toString},$hashed_id,${identity.group},${identity.userID.toString},$now)"""
               .updateAndReturnGeneratedKey.apply()
-          Json.parse("""{"id": """" + newid.toString + """"}""")
+          Json.parse("""{"id": """" + newid.toString + """", "hashed_id":"""" + hashed_id + """"}""")
         case None =>
           Json.parse("""{"id": "failed"}""")
       }
