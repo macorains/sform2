@@ -11,7 +11,7 @@ import models._
 import models.daos.TransfersDAO
 import models.services.UserService
 import play.api.i18n.I18nSupport
-import utils.auth.DefaultEnv
+import utils.auth.{ DefaultEnv, WithProvider }
 import com.mohiva.play.silhouette.api._
 import org.webjars.play.WebJarsUtil
 import com.mohiva.play.silhouette.impl.providers._
@@ -36,21 +36,6 @@ class TransferController @Inject() (
 ) extends AbstractController(components) with I18nSupport {
 
   case class transferGetConfigRequest(transferName: String)
-  /*
-  object transferGetConfigRequest {
-    //implicit def jsonTransferGetConfigRequestWrites: Writes[transferGetConfigRequest] = Json.writes[transferGetConfigRequest]
-    //implicit def jsonTransferGetConfigRequestReads: Reads[transferGetConfigRequest] = Json.reads[transferGetConfigRequest]
-
-  }
-  */
-  /*
-  implicit val jsonTransferGetConfigRequestWrites: Writes[transferGetConfigRequest] = (
-    (__ \ "transferName").write[String]
-    )(unlift(transferGetConfigRequest.unapply))
-  implicit val  jsonTransferGetConfigRequestReads: Reads[transferGetConfigRequest] = (
-    (__ \ "transferName").read[String]
-    )(transferGetConfigRequest.apply _)
-  */
 
   case class transferSaveConfigRequest(transferName: String, config: JsValue)
   object transferSaveConfigRequest {
@@ -64,7 +49,7 @@ class TransferController @Inject() (
   }
 
   // GET /transfer/config/:transfer_name
-  def getConfig(transfer_name: String): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
+  def getConfig(transfer_name: String): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
     val transferConfig = Class.forName("models.daos.TransferConfig." + transfer_name + "TransferConfigDAO")
       .getDeclaredConstructor(classOf[TransfersDAO])
       .newInstance(transfersDAO).asInstanceOf[BaseTransferConfigDAO]
@@ -73,40 +58,15 @@ class TransferController @Inject() (
     Future.successful(Ok(Json.toJson(res)))
   }
 
-  /*
-  def getConfig: Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
-    val jsonBody: Option[JsValue] = request.body.asJson
-    val res = jsonBody.map { json =>
-      val data = (json \ "rcdata").as[JsValue]
-      data.validate[transferGetConfigRequest] match {
-        case s: JsSuccess[transferGetConfigRequest] =>
-          val transferConfig = Class.forName("models.daos.TransferConfig." + s.get.transferName + "TransferConfigDAO")
-            .getDeclaredConstructor(classOf[TransfersDAO])
-            .newInstance(transfersDAO).asInstanceOf[BaseTransferConfigDAO]
-          val config = transferConfig.getTransferConfig
-          RsResultSet("OK", "OK", config)
-        case _: JsError =>
-          RsResultSet("NG", "NG", Json.parse("""{}"""))
-      }
-    }.getOrElse {
-      None
-    }
-    res match {
-      case r: RsResultSet => Future.successful(Ok(Json.toJson(r)))
-      case _ => Future.successful(BadRequest("Bad!"))
-    }
-  }
-  */
-
   // GET /transfer
-  def getTransferList: Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
+  def getTransferList: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
     // ToDo グループによる制御必要
     val res = transfersDAO.getTransferList
     Future.successful(Ok(Json.toJson(res)))
   }
 
   // POST /transfer/config
-  def saveConfig(): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
+  def saveConfig(): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
     val identity = request.identity
     val jsonBody: Option[JsValue] = request.body.asJson
     val res = jsonBody.map { json =>

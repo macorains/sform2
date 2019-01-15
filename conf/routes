@@ -55,6 +55,7 @@ POST /transfer/config controllers.TransferController.saveConfig()
 
 # user
 GET /user controllers.UserController.getList()
+GET /user/isadmin controllers.UserController.isAdmin()
 
 # transferTask
 GET /transfertask/list/:form_id controllers.TransferTaskController.getTransferTaskListByFormId(form_id: String)
