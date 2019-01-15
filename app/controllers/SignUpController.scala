@@ -86,6 +86,7 @@ class SignUpController @Inject() (
               userID = UUID.randomUUID(),
               loginInfo = loginInfo,
               group = Some(data.group),
+              role = Some("operator"),
               firstName = Some(data.firstName),
               lastName = Some(data.lastName),
               fullName = Some(data.firstName + " " + data.lastName),

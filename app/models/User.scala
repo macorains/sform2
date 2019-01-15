@@ -9,6 +9,8 @@ import com.mohiva.play.silhouette.api.{ Identity, LoginInfo }
  *
  * @param userID The unique ID of the user.
  * @param loginInfo The linked login info.
+ * @param group Group name of user.
+ * @param role Role of user.
  * @param firstName Maybe the first name of the authenticated user.
  * @param lastName Maybe the last name of the authenticated user.
  * @param fullName Maybe the full name of the authenticated user.
@@ -20,6 +22,7 @@ case class User(
   userID: UUID,
   loginInfo: LoginInfo,
   group: Option[String],
+  role: Option[String],
   firstName: Option[String],
   lastName: Option[String],
   fullName: Option[String],
