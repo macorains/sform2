@@ -25,7 +25,10 @@ case class WithProvider[A <: Authenticator](provider: String, roles: List[String
    * @return True if the user is authorized, false otherwise.
    */
   override def isAuthorized[B](user: User, authenticator: A)(implicit request: Request[B]): Future[Boolean] = {
-    val role: String = "operator" // ToDo ユーザー情報からロールを取るように変えること
+    val role: String = user.role match {
+      case Some(s) => s
+      case _ => ""
+    }
     Future.successful(user.loginInfo.providerID == provider && roles.exists(r => r.equals(role)))
   }
 

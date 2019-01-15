@@ -65,6 +65,7 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
           userID = UUID.randomUUID(),
           loginInfo = profile.loginInfo,
           group = Option(""),
+          role = Option("operator"),
           firstName = profile.firstName,
           lastName = profile.lastName,
           fullName = profile.fullName,
