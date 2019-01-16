@@ -12,7 +12,7 @@ import scala.concurrent.{ Future, _ }
 import scala.concurrent.duration.Duration
 
 case class UserJson(userId: String, userGroup: String, role: String, firstName: String, lastName: String, fullName: String,
-  email: String, avatarUrl: String, activated: Boolean)
+  email: String, avatarUrl: String, activated: Boolean, deletable: Boolean)
 object UserJson {
   implicit def jsonUserWrites: Writes[UserJson] = Json.writes[UserJson]
   implicit def jsonUserReads: Reads[UserJson] = Json.reads[UserJson]
@@ -32,10 +32,22 @@ class UserDAOImpl extends UserDAO with SFDBConf {
   def find(loginInfo: LoginInfo): Future[Option[User]] =
     Future.successful(
       DB localTx { implicit l =>
-        sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED FROM M_USERINFO WHERE PROVIDER_ID=${loginInfo.providerID} AND PROVIDER_KEY=${loginInfo.providerKey}"
-          .map(rs => User(UUID.fromString(rs.string("USER_ID")), LoginInfo(rs.string("PROVIDER_ID"), rs.string("PROVIDER_KEY")),
-            Option(rs.string("USER_GROUP")), Option(rs.string("ROLE")), Option(rs.string("FIRST_NAME")), Option(rs.string("LAST_NAME")),
-            Option(rs.string("FULL_NAME")), Option(rs.string("EMAIL")), Option(rs.string("AVATAR_URL")), rs.boolean("ACTIVATED")))
+        sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE PROVIDER_ID=${loginInfo.providerID} AND PROVIDER_KEY=${loginInfo.providerKey}"
+          .map(rs =>
+            User(
+              UUID.fromString(rs.string("USER_ID")),
+              LoginInfo(rs.string("PROVIDER_ID"), rs.string("PROVIDER_KEY")),
+              Option(rs.string("USER_GROUP")),
+              Option(rs.string("ROLE")),
+              Option(rs.string("FIRST_NAME")),
+              Option(rs.string("LAST_NAME")),
+              Option(rs.string("FULL_NAME")),
+              Option(rs.string("EMAIL")),
+              Option(rs.string("AVATAR_URL")),
+              rs.boolean("ACTIVATED"),
+              rs.boolean("DELETABLE")
+            )
+          )
           .single.apply()
       }
     )
@@ -49,10 +61,22 @@ class UserDAOImpl extends UserDAO with SFDBConf {
   def find(userID: UUID): Future[Option[User]] =
     Future.successful(
       DB localTx { implicit l =>
-        sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED FROM M_USERINFO WHERE USER_ID=${userID.toString}"
-          .map(rs => User(UUID.fromString(rs.string("USER_ID")), LoginInfo(rs.string("PROVIDER_ID"), rs.string("PROVIDER_KEY")),
-            Option(rs.string("USER_GROUP")), Option(rs.string("ROLE")), Option(rs.string("FIRST_NAME")), Option(rs.string("LAST_NAME")),
-            Option(rs.string("FULL_NAME")), Option(rs.string("EMAIL")), Option(rs.string("AVATAR_URL")), rs.boolean("ACTIVATED")))
+        sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE USER_ID=${userID.toString}"
+          .map(rs =>
+            User(
+              UUID.fromString(rs.string("USER_ID")),
+              LoginInfo(rs.string("PROVIDER_ID"), rs.string("PROVIDER_KEY")),
+              Option(rs.string("USER_GROUP")),
+              Option(rs.string("ROLE")),
+              Option(rs.string("FIRST_NAME")),
+              Option(rs.string("LAST_NAME")),
+              Option(rs.string("FULL_NAME")),
+              Option(rs.string("EMAIL")),
+              Option(rs.string("AVATAR_URL")),
+              rs.boolean("ACTIVATED"),
+              rs.boolean("DELETABLE")
+            )
+          )
           .single.apply()
       }
     )
@@ -72,7 +96,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
 
   def update(user: User): Future[User] = {
     DB localTx { implicit l =>
-      sql"UPDATE M_USERINFO SET FIRST_NAME=${user.firstName}, LAST_NAME=${user.lastName} ,EMAIL=${user.email}, AVATAR_URL=${user.avatarURL}, ACTIVATED=${user.activated} WHERE USER_ID=${user.userID.toString}"
+      sql"UPDATE M_USERINFO SET FIRST_NAME=${user.firstName}, LAST_NAME=${user.lastName} ,EMAIL=${user.email}, AVATAR_URL=${user.avatarURL}, ACTIVATED=${user.activated}, DELETABLE=${user.deletable} WHERE USER_ID=${user.userID.toString}"
         .update.apply()
       Future.successful(user)
     }
@@ -80,7 +104,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
 
   def add(user: User): Future[User] = {
     DB localTx { implicit l =>
-      sql"INSERT INTO M_USERINFO(USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,EMAIL,AVATAR_URL,ACTIVATED) VALUES(${user.userID.toString},${user.loginInfo.providerID},${user.loginInfo.providerKey},${user.group},${user.role},${user.firstName},${user.lastName},${user.email},'',0)"
+      sql"INSERT INTO M_USERINFO(USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE) VALUES(${user.userID.toString},${user.loginInfo.providerID},${user.loginInfo.providerKey},${user.group},${user.role},${user.firstName},${user.lastName},${user.email},'',0)"
         .update.apply()
       Future.successful(user)
     }
@@ -89,15 +113,27 @@ class UserDAOImpl extends UserDAO with SFDBConf {
   def getList(identity: User): JsValue = {
     val userGroup = identity.group.getOrElse("")
     DB localTx { implicit l =>
-      val userList = sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED FROM M_USERINFO WHERE USER_GROUP=${userGroup}"
-        .map(rs => User(UUID.fromString(rs.string("USER_ID")), LoginInfo(rs.string("PROVIDER_ID"), rs.string("PROVIDER_KEY")),
-          Option(rs.string("USER_GROUP")), Option(rs.string("ROLE")), Option(rs.string("FIRST_NAME")), Option(rs.string("LAST_NAME")),
-          Option(rs.string("FULL_NAME")), Option(rs.string("EMAIL")), Option(rs.string("AVATAR_URL")), rs.boolean("ACTIVATED")))
+      val userList = sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE USER_GROUP=${userGroup}"
+        .map(rs =>
+          User(
+            UUID.fromString(rs.string("USER_ID")),
+            LoginInfo(rs.string("PROVIDER_ID"), rs.string("PROVIDER_KEY")),
+            Option(rs.string("USER_GROUP")),
+            Option(rs.string("ROLE")),
+            Option(rs.string("FIRST_NAME")),
+            Option(rs.string("LAST_NAME")),
+            Option(rs.string("FULL_NAME")),
+            Option(rs.string("EMAIL")),
+            Option(rs.string("AVATAR_URL")),
+            rs.boolean("ACTIVATED"),
+            rs.boolean("DELETABLE")
+          )
+        )
         .list.apply()
       val userListJson = userList.map(
         u => {
           UserJson(u.userID.toString, u.group.getOrElse(""), u.role.getOrElse(""), u.firstName.getOrElse(""), u.lastName.getOrElse(""),
-            u.fullName.getOrElse(""), u.email.getOrElse(""), u.avatarURL.getOrElse(""), u.activated)
+            u.fullName.getOrElse(""), u.email.getOrElse(""), u.avatarURL.getOrElse(""), u.activated, u.deletable)
         }
       )
       Json.toJson(userListJson)
