@@ -23,6 +23,7 @@ libraryDependencies ++= Seq(
   "mysql" % "mysql-connector-java" % "5.1.40",
   "org.scalikejdbc" %% "scalikejdbc" % "3.1.0",
   "org.scalikejdbc" %% "scalikejdbc-config" % "3.1.0",
+  "org.scalikejdbc" %% "scalikejdbc-syntax-support-macro" % "3.1.0",
   "org.scalikejdbc" %% "scalikejdbc-test" % "3.1.0"  % "test",
 
   "com.mohiva" %% "play-silhouette" % "5.0.0-RC2",

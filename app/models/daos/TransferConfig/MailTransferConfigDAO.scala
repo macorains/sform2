@@ -1,7 +1,7 @@
 package models.daos.TransferConfig
 
 import javax.inject.Inject
-import models.daos.TransfersDAO
+import models.daos.{ Transfer, TransfersDAO }
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
@@ -38,7 +38,7 @@ class MailTransferConfigDAO @Inject() (
   override def getTransferConfig: JsValue = {
     println("MailTransferInfoDAO")
     transfersDao.getTransfer(transferType) match {
-      case t1: List[MailTransferConfigDAO.this.transfersDao.Transfer] => {
+      case t1: List[Transfer] => {
         // 暫定対応
         t1.size match {
           case size1 if size1 > 0 => {

@@ -1,27 +1,29 @@
 package models.daos
 
 import models.User
+import models.json.{ TransferTaskEntry, TransferTaskJson }
+import models.entity.TransferTask
 import play.api.libs.json._
 import scalikejdbc._
 import scalikejdbc.{ DB, WrappedResultSet }
 
-case class TransferTask(id: Int, transfer_type_id: Int, name: String, status: Int, config: JsValue,
-  created: Option[String], modified: Option[String])
-object TransferTask extends SQLSyntaxSupport[TransferTask] {
-  override val tableName = "D_TRANSFER_TASKS"
-  def apply(rs: WrappedResultSet): TransferTask = {
-    TransferTask(rs.int("id"), rs.int("transfer_type_id"), rs.string("name"), rs.int("status"),
-      Json.parse(rs.string("config")), rs.stringOpt("created"), rs.stringOpt("modified"))
-  }
-}
-case class TransferTaskJson(id: Int, transfer_type_id: Int, name: String, status: Int, config: JsObject,
-  created: Option[String], modified: Option[String], del_flg: Int)
-object TransferTaskJson {
-  implicit def jsonTransferTaskWrites: Writes[TransferTaskJson] = Json.writes[TransferTaskJson]
-  implicit def jsonTransferTaskReads: Reads[TransferTaskJson] = Json.reads[TransferTaskJson]
-}
+class TransferTaskDAO extends TransferTaskJson {
 
-class TransferTaskDAO {
+  //  case class TransferTask(id: Int, transfer_type_id: Int, name: String, status: Int, config: JsValue,
+  //    created: Option[String], modified: Option[String])
+  //  object TransferTask extends SQLSyntaxSupport[TransferTask] {
+  //    override val tableName = "D_TRANSFER_TASKS"
+  //    def apply(rs: WrappedResultSet): TransferTask = {
+  //      TransferTask(rs.int("id"), rs.int("transfer_type_id"), rs.string("name"), rs.int("status"),
+  //        Json.parse(rs.string("config")), rs.stringOpt("created"), rs.stringOpt("modified"))
+  //    }
+  //  }
+  //  case class TransferTaskJson(id: Int, transfer_type_id: Int, name: String, status: Int, config: JsObject,
+  //    created: Option[String], modified: Option[String], del_flg: Int)
+  //  object TransferTaskJson {
+  //    implicit def jsonTransferTaskWrites: Writes[TransferTaskJson] = Json.writes[TransferTaskJson]
+  //    implicit def jsonTransferTaskReads: Reads[TransferTaskJson] = Json.reads[TransferTaskJson]
+  //  }
 
   def getTransferTaskList(transferType: Int): List[TransferTask] = {
     DB localTx { implicit l =>
@@ -32,15 +34,24 @@ class TransferTaskDAO {
     }
   }
 
-  def getTransferTaskListByFormId(hashed_form_id: String): JsValue = {
+  def getTransferTaskListByFormId(hashed_form_id: String): List[TransferTask] = {
+    DB localTx { implicit l =>
+      sql"""SELECT ID,TRANSFER_TYPE_ID,NAME,STATUS,CONFIG,CREATED,MODIFIED
+      FROM D_TRANSFER_TASKS
+      WHERE FORM_ID=$hashed_form_id"""
+        .map(rs => TransferTask(rs)).list.apply()
+    }
+  }
+
+  def getTransferTaskListJsonByFormId(hashed_form_id: String): JsValue = {
     DB localTx { implicit l =>
       val transferTaskList = sql"""SELECT ID,TRANSFER_TYPE_ID,NAME,STATUS,CONFIG,CREATED,MODIFIED
       FROM D_TRANSFER_TASKS
       WHERE FORM_ID=$hashed_form_id"""
         .map(rs => TransferTask(rs)).list.apply()
-      val transferTaskListJson = transferTaskList.map(
-        t => { TransferTaskJson(t.id, t.transfer_type_id, t.name, t.status, t.config.as[JsObject], t.created, t.modified, 0) })
-      Json.toJson(transferTaskListJson)
+      val transferTaskEntityList = transferTaskList.map(
+        t => { TransferTaskEntry(t.id, t.transfer_type_id, t.name, t.status, t.config.as[JsObject], t.created, t.modified, t.del_flg) })
+      Json.toJson(transferTaskEntityList)
     }
   }
 
@@ -50,8 +61,8 @@ class TransferTaskDAO {
       FROM D_TRANSFER_TASKS
       WHERE ID=$id"""
         .map(rs => TransferTask(rs)).single.apply().get
-      val transferTaskJson = TransferTaskJson(t.id, t.transfer_type_id, t.name, t.status, t.config.as[JsObject], t.created, t.modified, 0)
-      Json.toJson(transferTaskJson)
+      val transferTaskEntity = TransferTaskEntry(t.id, t.transfer_type_id, t.name, t.status, t.config.as[JsObject], t.created, t.modified, t.del_flg)
+      Json.toJson(transferTaskEntity)
     }
   }
 
@@ -89,8 +100,8 @@ class TransferTaskDAO {
     val transferTaskList = (dt \ "transferTasks").as[JsValue]
     println(transferTaskList)
 
-    transferTaskList.validate[Array[TransferTaskJson]] match {
-      case s: JsSuccess[Array[TransferTaskJson]] =>
+    transferTaskList.validate[Array[TransferTaskEntry]] match {
+      case s: JsSuccess[Array[TransferTaskEntry]] =>
         s.get.map(t => {
           t.id match {
             case 0 =>

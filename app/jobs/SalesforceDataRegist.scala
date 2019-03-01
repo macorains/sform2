@@ -1,3 +1,4 @@
+/*
 package jobs
 
 import javax.inject.Inject
@@ -9,15 +10,15 @@ import models.connector.SalesforceConnector
 import play.api.libs.json._
 import com.sforce.soap.partner.sobject._
 
-case class SalesforceTransferConfig(user: String, password: String, securityToken: String)
-object SalesforceTransferConfig {
-  implicit def jsonSalesforceTransferConfigWrites: Writes[SalesforceTransferConfig] = Json.writes[SalesforceTransferConfig]
-  implicit def jsonSalesforceTransferConfigReads: Reads[SalesforceTransferConfig] = Json.reads[SalesforceTransferConfig]
+case class _SalesforceTransferConfig(user: String, password: String, securityToken: String)
+object _SalesforceTransferConfig {
+  implicit def jsonSalesforceTransferConfigWrites: Writes[_SalesforceTransferConfig] = Json.writes[_SalesforceTransferConfig]
+  implicit def jsonSalesforceTransferConfigReads: Reads[_SalesforceTransferConfig] = Json.reads[_SalesforceTransferConfig]
 }
-case class SalesforceTransferTaskConfig(formId: String, sfObject: String, columnConvertDefinition: List[JsObject])
-object SalesforceTransferTaskConfig {
-  implicit def jsonSalesforceTransferTaskConfigWrites: Writes[SalesforceTransferTaskConfig] = Json.writes[SalesforceTransferTaskConfig]
-  implicit def jsonSalesforceTransferTaskConfigReads: Reads[SalesforceTransferTaskConfig] = Json.reads[SalesforceTransferTaskConfig]
+case class _SalesforceTransferTaskConfig(formId: String, sfObject: String, columnConvertDefinition: List[JsObject])
+object _SalesforceTransferTaskConfig {
+  implicit def jsonSalesforceTransferTaskConfigWrites: Writes[_SalesforceTransferTaskConfig] = Json.writes[_SalesforceTransferTaskConfig]
+  implicit def jsonSalesforceTransferTaskConfigReads: Reads[_SalesforceTransferTaskConfig] = Json.reads[_SalesforceTransferTaskConfig]
 }
 
 class SalesforceDataRegister @Inject() (
@@ -40,7 +41,7 @@ class SalesforceDataRegister @Inject() (
       println(msg)
       val transferTaskList = transfersDao
         .getTransfer(transferType).map(s => getTransferTask(s).getOrElse(None)).filter(s => s != None)
-      transferTaskList.map(s => getPostData(s.asInstanceOf[(List[TransferTask], SalesforceTransferConfig)]))
+      transferTaskList.map(s => getPostData(s.asInstanceOf[(List[TransferTask], _SalesforceTransferConfig)]))
     }
     case _ => {
       Logger.error("SalesforceDataRegister.receive failed.")
@@ -48,11 +49,11 @@ class SalesforceDataRegister @Inject() (
     }
   }
 
-  def getTransferTask(transfer: Any): Option[(List[TransferTask], SalesforceTransferConfig)] = {
+  def getTransferTask(transfer: Any): Option[(List[TransferTask], _SalesforceTransferConfig)] = {
     transfer match {
-      case s: SalesforceDataRegister.this.transfersDao.Transfer => {
-        s.config.validate[SalesforceTransferConfig] match {
-          case t: JsSuccess[SalesforceTransferConfig] =>
+      case s: Transfer => {
+        s.config.validate[_SalesforceTransferConfig] match {
+          case t: JsSuccess[_SalesforceTransferConfig] =>
             Option((transferTaskDao.getTransferTaskList(transferType), t.value))
           case _ =>
             Logger.error("SalesforceDataRegister.getTransferTask failed.")
@@ -63,12 +64,12 @@ class SalesforceDataRegister @Inject() (
     }
   }
 
-  def getPostData(task: (List[TransferTask], SalesforceTransferConfig)) = {
+  def getPostData(task: (List[TransferTask], _SalesforceTransferConfig)) = {
     task match {
-      case t: (List[TransferTask], SalesforceTransferConfig) => {
+      case t: (List[TransferTask], _SalesforceTransferConfig) => {
         t._1.foreach(s => {
-          s.config.validate[SalesforceTransferTaskConfig] match {
-            case c: JsSuccess[SalesforceTransferTaskConfig] => {
+          s.config.validate[_SalesforceTransferTaskConfig] match {
+            case c: JsSuccess[_SalesforceTransferTaskConfig] => {
               createSalesforceDataSet(t._2, c.get, s.id)
             }
             case e: JsError =>
@@ -80,7 +81,7 @@ class SalesforceDataRegister @Inject() (
     }
   }
 
-  def createSalesforceDataSet(transferConfig: SalesforceTransferConfig, taskConfig: SalesforceTransferTaskConfig, taskId: Int) = {
+  def createSalesforceDataSet(transferConfig: _SalesforceTransferConfig, taskConfig: _SalesforceTransferTaskConfig, taskId: Int) = {
     val columnConvertDefinition: List[(String, String)] = taskConfig.columnConvertDefinition
       .map(s => (s.value.get("sfCol").getOrElse("").toString, s.value.get("sformCol").getOrElse("").toString))
     val posts = postdataDao.getPostdataByFormHashedId(taskConfig.formId, transferType)
@@ -110,7 +111,7 @@ class SalesforceDataRegister @Inject() (
     }
   }
 
-  def sendToSalesforce(sfobjArray: Array[SalesforceDataSet], transferConfig: SalesforceTransferConfig, log_id: Long) = {
+  def sendToSalesforce(sfobjArray: Array[SalesforceDataSet], transferConfig: _SalesforceTransferConfig, log_id: Long) = {
     val connection = salesforceConnector.getConnection(transferConfig.user, transferConfig.password, transferConfig.securityToken).getOrElse(None)
     print(connection)
     connection match {
@@ -148,3 +149,4 @@ class SalesforceDataRegister @Inject() (
 
 }
 
+*/ 

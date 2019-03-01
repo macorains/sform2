@@ -88,11 +88,11 @@ var salesforceTransferConfigComponent = {
     },
     saveSalesforceTransferConfig(){
         var reqdata = {
-            rcdata: {
-                transferName : "Salesforce",
-                config : this.transferConfig.Salesforce
-            }
-        };
+                      rcdata: {
+                          transferName : "Salesforce",
+                          config : this.transferConfig.Salesforce
+                      }
+                  };
         jQuery.ajax({
             type: "POST",
             url: "transfer/config",

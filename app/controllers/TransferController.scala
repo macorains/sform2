@@ -61,7 +61,7 @@ class TransferController @Inject() (
   // GET /transfer
   def getTransferList: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
     // ToDo グループによる制御必要
-    val res = transfersDAO.getTransferList
+    val res = transfersDAO.getTransferListJson
     Future.successful(Ok(Json.toJson(res)))
   }
 

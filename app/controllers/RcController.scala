@@ -115,7 +115,7 @@ class RcController @Inject() (
                   RsResultSet("NG", "NG", Json.parse("""{}"""))
               }
             case "getTransferList" =>
-              RsResultSet("OK", "OK", transfersDAO.getTransferList)
+              RsResultSet("OK", "OK", transfersDAO.getTransferListJson)
 
             case "saveConfig" => {
               print("***saveConfig***")
@@ -150,7 +150,7 @@ class RcController @Inject() (
               data.validate[transferGetTaskRequest] match {
                 case s: JsSuccess[transferGetTaskRequest] => {
                   Logger.info("RcController.receive TransferTask.getTransferTaskListByFormId success.")
-                  RsResultSet("OK", "OK", transferTaskDAO.getTransferTaskListByFormId(s.get.formId))
+                  RsResultSet("OK", "OK", Json.parse("""{}"""))
                 }
                 case e: JsError => {
                   Logger.error("RcController.receive TransferTask.getTransferTaskListByFormId failed.(1)")

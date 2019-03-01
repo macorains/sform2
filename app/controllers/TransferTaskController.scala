@@ -7,6 +7,7 @@ import play.api.libs.json._
 import play.api.Environment
 import models._
 import models.daos.TransferTaskDAO
+import models.json.{ TransferTaskEntry, TransferTaskJson }
 import models.services.UserService
 import play.api.i18n.I18nSupport
 import utils.auth.{ DefaultEnv, WithProvider }
@@ -30,7 +31,7 @@ class TransferTaskController @Inject() (
   implicit
   webJarsUtil: WebJarsUtil,
   ex: ExecutionContext
-) extends AbstractController(components) with I18nSupport {
+) extends AbstractController(components) with I18nSupport with TransferTaskJson {
 
   case class transferGetTaskRequest(formId: String)
   object transferGetTaskRequest {
@@ -49,7 +50,11 @@ class TransferTaskController @Inject() (
   }
   // GET /transfertask/list/:form_id
   def getTransferTaskListByFormId(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
-    val res = RsResultSet("OK", "OK", transferTaskDAO.getTransferTaskListByFormId(hashed_form_id))
+    val transferTaskEntryList = transferTaskDAO.getTransferTaskListByFormId(hashed_form_id)
+      .map(
+        t => { TransferTaskEntry(t.id, t.transfer_type_id, t.name, t.status, t.config.as[JsObject], t.created, t.modified, t.del_flg) }
+      )
+    val res = RsResultSet("OK", "OK", Json.toJson(transferTaskEntryList))
     Future.successful(Ok(Json.toJson(res)))
     /*
     val jsonBody: Option[JsValue] = request.body.asJson

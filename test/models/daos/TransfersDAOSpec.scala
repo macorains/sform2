@@ -9,7 +9,7 @@ class TransfersDAOSpec extends Specification with TestDBSettings {
   "getTransferList" should {
     "Test1" in {
       val transfersDao = new TransfersDAO
-      val result = transfersDao.getTransferList()
+      val result = transfersDao.getTransferListJson()
       println(result)
       val v = result.validate[List[transfersDao.TransferListJson]]
       v.isSuccess mustEqual (true)

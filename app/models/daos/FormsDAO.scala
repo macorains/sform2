@@ -23,31 +23,12 @@ class FormsDAO extends FormParts {
    * @param hashed_id フォームハッシュID
    * @param form_data フォームデータ
    */
-  case class FormData(id: Int, hashed_id: String, form_data: String, user_group: String)
-  object FormData extends SQLSyntaxSupport[FormData] {
+  case class Form(id: Int, hashed_id: String, form_data: String, user_group: String)
+  object Form extends SQLSyntaxSupport[Form] {
     override val tableName = "D_FORM"
-    def apply(rs: WrappedResultSet): FormData = {
-      FormData(rs.int("id"), rs.string("hashed_id"), rs.string("form_data"), rs.string("user_group"))
+    def apply(rs: WrappedResultSet): Form = {
+      Form(rs.int("id"), rs.string("hashed_id"), rs.string("form_data"), rs.string("user_group"))
     }
-  }
-
-  /**
-   * フォーム送信データ
-   * @param postdata_id フォーム送信データID
-   * @param form_hashed_id フォームハッシュID
-   * @param postdata 送信データ
-   */
-  case class FormPostData(postdata_id: Int, form_hashed_id: String, postdata: String)
-  object FormPostData extends SQLSyntaxSupport[FormPostData] {
-    override val tableName = "D_POSTDATA"
-    def apply(rs: WrappedResultSet): FormPostData = {
-      FormPostData(rs.int("postdata_id"), rs.string("form_hashed_id"), rs.string("postdata"))
-    }
-  }
-  case class FormPostDataJson(postdata_id: Int, form_hashed_id: String, postdata: String)
-  object FormPostDataJson {
-    implicit def jsonFormPostDataJsonWrites: Writes[FormPostDataJson] = Json.writes[FormPostDataJson]
-    implicit def jsonFormPostDataJsonReads: Reads[FormPostDataJson] = Json.reads[FormPostDataJson]
   }
 
   /**
@@ -156,16 +137,6 @@ class FormsDAO extends FormParts {
   }
 
   /**
-   * フォーム送信データ取得リクエスト用クラス
-   * @param formid フォームID
-   */
-  case class FormPostDataRequest(formid: String)
-  object FormPostDataRequest {
-    implicit def jsonFormPostDataRequestWrites: Writes[FormPostDataRequest] = Json.writes[FormPostDataRequest]
-    implicit def jsonFormPostDataRequestReads: Reads[FormPostDataRequest] = Json.reads[FormPostDataRequest]
-  }
-
-  /**
    * フォームデータ取得
    * @param identity 認証情報
    * @param hashed_id フォームのhashed_id
@@ -174,17 +145,17 @@ class FormsDAO extends FormParts {
   def getData(identity: User, hashed_id: String): RsResultSet = {
     println(hashed_id)
     val userGroup = identity.group.getOrElse("")
-    val f = FormData.syntax("f")
+    val f = Form.syntax("f")
     DB localTx { implicit s =>
       val formData =
         withSQL(
           select(f.id, f.hashed_id, f.form_data, f.user_group)
-            .from(FormData as f)
+            .from(Form as f)
             .where
             .eq(f.hashed_id, hashed_id)
             .and
             .eq(f.user_group, userGroup)
-        ).map(rs => FormData(rs)).single.apply()
+        ).map(rs => Form(rs)).single.apply()
 
       val jsString = formData match {
         case Some(f) => {
@@ -214,15 +185,15 @@ class FormsDAO extends FormParts {
    */
   def getList(identity: User): RsResultSet = {
     val userGroup = identity.group.getOrElse("")
-    val f = FormData.syntax("f")
+    val f = Form.syntax("f")
     DB localTx { implicit s =>
       val formDataList =
         withSQL(
           select(f.id, f.hashed_id, f.form_data, f.user_group)
-            .from(FormData as f)
+            .from(Form as f)
             .where
             .eq(f.user_group, userGroup)
-        ).map(rs => FormData(rs)).list.apply()
+        ).map(rs => Form(rs)).list.apply()
 
       val jsString = formDataList.zipWithIndex.map {
         case (a, b) =>
@@ -240,63 +211,27 @@ class FormsDAO extends FormParts {
   }
 
   /**
-   * フォーム送信データ取得
-   * @param dt 入力データ
-   * @return RsResultSet
+   * TransferJobManagerの処理対象フォームIDリスト取得
+   * @return 処理対象のフォームIDリスト
    */
-  /*
-  def getPostData(dt: JsValue): RsResultSet = {
-    val req: JsResult[FormPostDataRequest] = dt.validate[FormPostDataRequest]
-    val f0 = FormData.syntax("f0")
-    val f = FormPostData.syntax("f")
-    req match {
-      case s: JsSuccess[FormPostDataRequest] =>
-        DB localTx { implicit l =>
-          val formData =
-            withSQL {
-              select(f0.id, f0.hashed_id, f0.form_data)
-                .from(FormData as f0)
-                .where
-                .eq(f0.hashed_id, "11")
-            }.map(rs => FormData(rs)).single.apply().getOrElse(None)
-
-          val formCols: Map[String, String] = {
-            formData match {
-              case c: FormData =>
-                Json.parse(c.form_data).validate[FormDef] match {
-                  case s: JsSuccess[FormDef] =>
-                    val formDefColValue = s.get.formCols.value
-                    formDefColValue.map({
-                      case (k, v) =>
-                        val formDefColResult: JsResult[FormDefCol] = v.validate[FormDefCol]
-                        formDefColResult match {
-                          case f: JsSuccess[FormDefCol] => (f.get.colId.toString, f.get.name.toString)
-                          case e: JsError => ("", "")
-                        }
-                    }).toMap
-                  case e: JsError => Map.empty[String, String]
-                }
-              case _ => Map.empty[String, String]
-            }
-          }
-
-          println(formCols)
-
-          val postData: Seq[FormPostDataJson] =
-            withSQL {
-              select(f.postdata_id, f.form_hashed_id, f.postdata)
-                .from(FormPostData as f)
-                .where
-                .eq(f.form_hashed_id, s.get.formid)
-            }.map(rs => FormPostData(rs)).list().apply().map(f => FormPostDataJson(f.postdata_id, f.form_hashed_id, f.postdata))
-          // RsResultSet("OK", "OK", Json.toJson(postData))
-          RsResultSet("OK", Json.toJson(formCols).toString(), Json.toJson(postData))
-        }
-      case _ =>
-        RsResultSet("NG", "NG", Json.parse("""{}"""))
+  def getListForTransferJobManager: List[String] = {
+    val f = Form.syntax("f")
+    val formlist = DB localTx { implicit s =>
+      withSQL(
+        select(f.id, f.hashed_id, f.form_data, f.user_group)
+          .from(Form as f)
+      ).map(rs => Form(rs)).list.apply()
     }
+    formlist.map(form => {
+      val formdef = Json.parse(form.form_data).validate[FormDef]
+      formdef match {
+        case s: JsSuccess[FormDef] => {
+          s.get.status
+        }
+        case _ => ""
+      }
+    }).filter(formid => formid.nonEmpty).toList
   }
-  */
 
   /**
    * フォームHTML取得
@@ -309,17 +244,17 @@ class FormsDAO extends FormParts {
     val receiverPath = (dt \ "receiverPath").asOpt[String]
     formId match {
       case Some(id) =>
-        val f = FormData.syntax("f")
+        val f = Form.syntax("f")
         DB localTx { implicit s =>
           val formData =
             withSQL {
               select(f.id, f.hashed_id, f.form_data, f.user_group)
-                .from(FormData as f)
+                .from(Form as f)
                 .where
                 .eq(f.hashed_id, formId)
-            }.map(rs => FormData(rs)).single.apply()
+            }.map(rs => Form(rs)).single.apply()
           formData match {
-            case Some(s: FormData) =>
+            case Some(s: Form) =>
               RsResultSet("OK", "OK", Json.toJson(convertFormDefToHtml(id, s, cFormMode.LOAD, None, host, receiverPath.getOrElse(""))))
             case _ =>
               RsResultSet("NG", "NG", Json.toJson("Could not get Formdata."))
@@ -334,7 +269,7 @@ class FormsDAO extends FormParts {
    * @param fd フォーム定義データ
    * @return HTML文字列
    */
-  def convertFormDefToHtml(hashed_id: String, fd: FormData, mode: Int, postdata: Option[JsValue], host: String, receiverPath: String): String = {
+  def convertFormDefToHtml(hashed_id: String, fd: Form, mode: Int, postdata: Option[JsValue], host: String, receiverPath: String): String = {
     val formDefResult: JsResult[FormDef] = Json.parse(fd.form_data).validate[FormDef]
     formDefResult match {
       case s: JsSuccess[FormDef] =>
@@ -415,24 +350,24 @@ class FormsDAO extends FormParts {
    */
   def delete(dt: JsValue): RsResultSet = {
     val id = (dt \ "id").as[String]
-    val f = FormData.syntax("f")
+    val f = Form.syntax("f")
     DB localTx { implicit s =>
       withSQL {
-        deleteFrom(FormData)
+        deleteFrom(Form)
           .where
-          .eq(FormData.column.id, id)
+          .eq(Form.column.id, id)
       }.update.apply()
     }
 
     RsResultSet("NG", "NG", Json.parse("""{}"""))
   }
   def delete(hashed_form_id: String): RsResultSet = {
-    val f = FormData.syntax("f")
+    val f = Form.syntax("f")
     DB localTx { implicit s =>
       withSQL {
-        deleteFrom(FormData)
+        deleteFrom(Form)
           .where
-          .eq(FormData.column.hashed_id, hashed_form_id)
+          .eq(Form.column.hashed_id, hashed_form_id)
       }.update.apply()
     }
     RsResultSet("OK", "OK", Json.parse("""{}"""))
@@ -447,17 +382,17 @@ class FormsDAO extends FormParts {
     val receiverPath = (dt \ "receiverPath").asOpt[String].getOrElse("")
     println("validate!")
     println(dt.toString())
-    val f = FormData.syntax("f")
+    val f = Form.syntax("f")
     val formSaveRequest: JsResult[FormSaveRequest] = dt.validate[FormSaveRequest]
     formSaveRequest match {
       case s: JsSuccess[FormSaveRequest] =>
         DB localTx { implicit l =>
           val formData = withSQL {
             select(f.id, f.hashed_id, f.form_data, f.user_group)
-              .from(FormData as f)
+              .from(Form as f)
               .where
               .eq(f.hashed_id, s.get.formid)
-          }.map(rs => FormData(rs)).single.apply()
+          }.map(rs => Form(rs)).single.apply()
           formData match {
             case Some(d) =>
               RsResultSet("OK", "OK", Json.toJson(convertFormDefToHtml(s.get.formid, d, cFormMode.CONFIRM, Option(s.get.postdata), host, receiverPath)))
@@ -477,17 +412,17 @@ class FormsDAO extends FormParts {
   def savePost(dt: JsValue, host: String): RsResultSet = {
     println("save!")
     println(dt.toString())
-    val f = FormData.syntax("f")
+    val f = Form.syntax("f")
     val formSaveRequest: JsResult[FormSaveRequest] = dt.validate[FormSaveRequest]
     formSaveRequest match {
       case s: JsSuccess[FormSaveRequest] =>
         DB localTx { implicit l =>
           val formData = withSQL {
             select(f.id, f.hashed_id, f.form_data, f.user_group)
-              .from(FormData as f)
+              .from(Form as f)
               .where
               .eq(f.hashed_id, s.get.formid)
-          }.map(rs => FormData(rs)).single.apply()
+          }.map(rs => Form(rs)).single.apply()
           formData match {
             case Some(d) =>
               println("save!!")
@@ -509,17 +444,17 @@ class FormsDAO extends FormParts {
    * @return フォーム項目情報
    */
   def getFormCols(hashed_id: String): JsValue = {
-    val f = FormData.syntax("f")
+    val f = Form.syntax("f")
     DB localTx { implicit s =>
       val formData =
         withSQL {
           select(f.id, f.hashed_id, f.form_data, f.user_group)
-            .from(FormData as f)
+            .from(Form as f)
             .where
             .eq(f.hashed_id, hashed_id)
-        }.map(rs => FormData(rs)).single.apply()
+        }.map(rs => Form(rs)).single.apply()
       formData match {
-        case Some(s: FormData) =>
+        case Some(s: Form) =>
           val dt = Json.parse(s.form_data)
           (dt \ "formCols").asOpt[JsValue].getOrElse(Json.toJson(""))
         case _ => Json.toJson("")
@@ -808,7 +743,7 @@ class FormsDAO extends FormParts {
   }
 
   private def savePostData(hashed_id: String, dt: JsValue): Seq[String] = {
-    val f = FormData.syntax("f")
+    val f = Form.syntax("f")
     DB localTx { implicit l =>
       val now: String = "%tY/%<tm/%<td %<tH:%<tM:%<tS" format new Date
       val newid: Long = sql"INSERT INTO D_POSTDATA(FORM_HASHED_ID,POSTDATA,CREATED,MODIFIED) VALUES($hashed_id,${Json.toJson(dt).toString},$now,$now)"

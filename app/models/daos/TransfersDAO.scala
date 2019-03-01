@@ -6,15 +6,23 @@ import play.api.libs.json._
 import scalikejdbc._
 import scalikejdbc.{ DB, WrappedResultSet }
 
+case class Transfer(id: Int, type_id: Int, name: String, status: Int, config: JsValue, modified: DateTime)
+object Transfer extends SQLSyntaxSupport[Transfer] {
+  override val tableName = "M_TRANSFERS"
+  def apply(rs: WrappedResultSet): Transfer = {
+    Transfer(rs.int("id"), rs.int("type_Id"), rs.string("name"), rs.int("status"), Json.parse(rs.string("config")), rs.jodaDateTime("modified"))
+  }
+}
+
 class TransfersDAO {
 
-  case class Transfer(id: Int, type_id: Int, name: String, status: Int, config: JsValue, modified: DateTime)
-  object Transfer extends SQLSyntaxSupport[Transfer] {
-    override val tableName = "M_TRANSFERS"
-    def apply(rs: WrappedResultSet): Transfer = {
-      Transfer(rs.int("id"), rs.int("type_Id"), rs.string("name"), rs.int("status"), Json.parse(rs.string("config")), rs.jodaDateTime("modified"))
-    }
-  }
+  //  case class Transfer(id: Int, type_id: Int, name: String, status: Int, config: JsValue, modified: DateTime)
+  //  object Transfer extends SQLSyntaxSupport[Transfer] {
+  //    override val tableName = "M_TRANSFERS"
+  //    def apply(rs: WrappedResultSet): Transfer = {
+  //      Transfer(rs.int("id"), rs.int("type_Id"), rs.string("name"), rs.int("status"), Json.parse(rs.string("config")), rs.jodaDateTime("modified"))
+  //    }
+  //  }
   case class TransferList(id: Int, type_id: Int, name: String)
   object TransferList extends SQLSyntaxSupport[Transfer] {
     override val tableName = "M_TRANSFERS"
@@ -45,7 +53,14 @@ class TransfersDAO {
     }
   }
 
-  def getTransferList: JsValue = {
+  def getTransfetList: List[Transfer] = {
+    DB localTx { implicit l =>
+      sql"SELECT ID,TYPE_ID,NAME,STATUS,CONFIG,USER_GROUP,MODIFIED FROM M_TRANSFERS"
+        .map(rs => Transfer(rs)).list.apply()
+    }
+  }
+
+  def getTransferListJson: JsValue = {
     DB localTx { implicit l =>
       val transferList = sql"SELECT ID,TYPE_ID,NAME FROM M_TRANSFERS"
         .map(rs => TransferList(rs)).list.apply

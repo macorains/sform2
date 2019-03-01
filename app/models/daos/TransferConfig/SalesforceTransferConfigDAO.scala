@@ -2,7 +2,7 @@ package models.daos.TransferConfig
 
 import javax.inject.Inject
 import models.connector.SalesforceConnector
-import models.daos.TransfersDAO
+import models.daos.{ Transfer, TransfersDAO }
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
@@ -36,7 +36,7 @@ case class SalesforceTransferConfigDAO @Inject() (
   override def getTransferConfig: JsValue = {
     Logger.debug("SalesforceTransferInfoDAO.getTransferConfig")
     transfersDao.getTransfer(transferType) match {
-      case tx: List[SalesforceTransferConfigDAO.this.transfersDao.Transfer] => {
+      case tx: List[Transfer] => {
         // 暫定対応
         tx.size match {
           case size1 if size1 > 0 => {
