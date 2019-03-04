@@ -20,7 +20,7 @@ class SalesforceTransferInfoDAOSpec extends Specification with TestDBSettings wi
     "Test1" in {
       val transfersDao = new TransfersDAO
       val salesforceConnector = new SalesforceConnector
-      val salesforceTransferInfoDAO = new SalesforceTransferConfigDAO(transfersDao, salesforceConnector)
+      val salesforceTransferInfoDAO = new SalesforceTransferConfigDAO(transfersDao)
       val connection = salesforceConnector.getConnection("mac.rainshrine@macolabo.net", "NIFYttQ07jpM", "O9NxPFFATdgkpaNwMYF7x2ILy")
       val names: List[String] = salesforceConnector.getSObjectNames(connection.get)
       val res = salesforceConnector.getSObjectInfo(connection.get, names)

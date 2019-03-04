@@ -4,8 +4,8 @@ import com.sforce.soap.partner.{ PartnerConnection, SaveResult }
 import com.sforce.soap.partner.sobject.SObject
 import javax.inject.Inject
 import models.connector.SalesforceConnector
-import models.daos.{ Postdata, Transfer, TransferDetailLogDAO, TransferTaskDAO }
-import models.entity.TransferTask
+import models.daos.{ Transfer, TransferDetailLogDAO, TransferTaskDAO }
+import models.entity.{ TransferTask, Postdata }
 import play.api.libs.json._
 import play.api.Logger
 

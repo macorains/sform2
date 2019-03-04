@@ -1,8 +1,8 @@
 package jobs.transfer
 
 import javax.inject.Inject
-import models.daos.{ Postdata, Transfer, TransferDetailLogDAO, TransferTaskDAO }
-import models.entity.TransferTask
+import models.daos.{ Transfer, TransferDetailLogDAO, TransferTaskDAO }
+import models.entity.{ TransferTask, Postdata }
 import play.api.libs.functional.syntax.unlift
 import play.api.libs.json._
 import play.api.libs.functional.syntax._

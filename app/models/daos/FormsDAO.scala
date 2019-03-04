@@ -1,24 +1,24 @@
 package models.daos
 
 import java.io.StringWriter
-import java.util.{Date, UUID}
+import java.util.{ Date, UUID }
 
-import javax.xml.parsers.{DocumentBuilder, DocumentBuilderFactory}
+import javax.xml.parsers.{ DocumentBuilder, DocumentBuilderFactory }
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
-import javax.xml.transform.{OutputKeys, Transformer, TransformerFactory}
+import javax.xml.transform.{ OutputKeys, Transformer, TransformerFactory }
 
-import scala.collection.{Map, Seq}
+import scala.collection.{ Map, Seq }
 import com.sun.org.apache.xml.internal.serializer.OutputPropertiesFactory
-import org.w3c.dom.{Document, Element}
+import org.w3c.dom.{ Document, Element }
 import play.api.libs.json._
 import scalikejdbc._
-import models.{RsResultSet, User}
+import models.{ RsResultSet, User }
 import models.entity.Form
 import models.json.FormJson
 import utils.forms.FormParts
 
-class FormsDAO extends FormParts with FormJson{
+class FormsDAO extends FormParts with FormJson {
 
   /**
    * フォームデータ取得
@@ -103,14 +103,13 @@ class FormsDAO extends FormParts with FormJson{
           .from(Form as f)
       ).map(rs => Form(rs)).list.apply()
     }
-    formlist.map(form => {
-      val formdef = Json.parse(form.form_data).validate[FormDef]
-      formdef match {
-        case s: JsSuccess[FormDef] =>
-          s.get.status
-        case _ => ""
-      }
-    }).filter(formid => formid.nonEmpty)
+
+    formlist
+      .map(form => Json.parse(form.form_data).validate[FormDef])
+      .filter(form => form.isSuccess)
+      .filter(form => form.get.status == 1)
+      .map(form => form.get.hashed_id.getOrElse(""))
+      .filter(formId => formId.nonEmpty)
   }
 
   /**

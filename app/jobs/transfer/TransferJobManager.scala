@@ -3,7 +3,7 @@ package jobs.transfer
 import javax.inject.Inject
 import akka.actor.Actor
 import models.daos._
-import models.entity.TransferTask
+import models.entity._
 import models.json.TransferTaskJson
 import play.api.Logger
 
@@ -19,12 +19,14 @@ class TransferJobManager @Inject() (
   def receive: Receive = {
     // 普通に実行
     case "Exec" => {
+      Logger.info("---------- TransferJobManager Start.")
       // Transferを取得
       val transferList = transfersDao.getTransfetList
       // ステータス有効のフォームを検索
       val formIdList = formsDao.getListForTransferJobManager
 
       formIdList.foreach(formId => {
+        Logger.info(s"  FormId : ${formId}")
         // 処理対象のフォームデータを検索
         val postdataList = postdataDao.getPostdata(formId)
         // 転送タスクを検索
@@ -38,6 +40,7 @@ class TransferJobManager @Inject() (
           // ジョブ実行ログを出力（ジョブ完了ステータスorジョブ異常終了ステータス）
         })
       })
+      Logger.info("---------- TransferJobManager Finish.")
     }
     // 状態表示
     case "Status" => {
