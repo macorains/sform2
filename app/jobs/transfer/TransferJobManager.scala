@@ -24,7 +24,7 @@ class TransferJobManager @Inject() (
       val transferList = transfersDao.getTransfetList
       // ステータス有効のフォームを検索
       val formIdList = formsDao.getListForTransferJobManager
-
+      Logger.info(s"Active Forms: ${formIdList.size.toString}")
       formIdList.foreach(formId => {
         Logger.info(s"  FormId : ${formId}")
         // 処理対象のフォームデータを検索

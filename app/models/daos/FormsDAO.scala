@@ -106,8 +106,7 @@ class FormsDAO extends FormParts with FormJson {
 
     formlist
       .map(form => Json.parse(form.form_data).validate[FormDef])
-      .filter(form => form.isSuccess)
-      .filter(form => form.get.status == 1)
+      .filter(form => form.get.status.equals("1"))
       .map(form => form.get.hashed_id.getOrElse(""))
       .filter(formId => formId.nonEmpty)
   }

@@ -14,15 +14,15 @@ object TransferTaskEntry {
 }
 
 trait TransferTaskJson {
-  implicit val jsonTransferTaskWrites: Writes[TransferTaskEntry] = (transferTask: TransferTaskEntry) => Json.obj(
-    "id" -> transferTask.id,
-    "transfer_type_id" -> transferTask.transfer_type_id,
-    "name" -> transferTask.name,
-    "status" -> transferTask.status,
-    "config" -> transferTask.config,
-    "created" -> transferTask.created,
-    "modified" -> transferTask.modified,
-    "del_flg" -> transferTask.del_flg
+  implicit val jsonTransferTaskWrites: Writes[TransferTaskEntry] = (transferTaskEntry: TransferTaskEntry) => Json.obj(
+    "id" -> transferTaskEntry.id,
+    "transfer_type_id" -> transferTaskEntry.transfer_type_id,
+    "name" -> transferTaskEntry.name,
+    "status" -> transferTaskEntry.status,
+    "config" -> transferTaskEntry.config,
+    "created" -> transferTaskEntry.created,
+    "modified" -> transferTaskEntry.modified,
+    "del_flg" -> transferTaskEntry.del_flg
   )
 
   implicit val jsonTransferTaskReads: Reads[TransferTaskEntry] = (
