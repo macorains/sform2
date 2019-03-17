@@ -22,7 +22,8 @@ class Scheduler @Inject() (
   // MailTransferメール送信バッチ処理起動
   // QuartzSchedulerExtension(system).schedule("MailTransferSendMail", mailTransferSendMail, "Mail")
   // TransferJobManager起動
-  QuartzSchedulerExtension(system).schedule("Every5Seconds", transferJobManager, "Exec")
+  // TODO 検証のため一時停止 (2019/03/15)
+  QuartzSchedulerExtension(system).schedule("Every5Seconds", transferJobManager, "_Exec")
 
   authTokenCleaner ! AuthTokenCleaner.Clean
 }

@@ -24,13 +24,13 @@ class TransferJobManager @Inject() (
       val transferList = transfersDao.getTransfetList
       // ステータス有効のフォームを検索
       val formIdList = formsDao.getListForTransferJobManager
-      Logger.info(s"Active Forms: ${formIdList.size.toString}")
+      Logger.info(s"  Number of Active Forms: ${formIdList.size.toString}")
       formIdList.foreach(formId => {
-        Logger.info(s"  FormId : ${formId}")
         // 処理対象のフォームデータを検索
         val postdataList = postdataDao.getPostdata(formId)
         // 転送タスクを検索
         val transfetTaskList = transferTaskDAO.getTransferTaskListByFormId(formId)
+        Logger.info(s"  FormId: ${formId}  Number of Postdata: ${postdataList.size.toString}  Number of TransferTask: ${transfetTaskList.size.toString}")
 
         transfetTaskList.foreach(transferTask => {
 
@@ -52,7 +52,7 @@ class TransferJobManager @Inject() (
   def dispatchTransferJob(transferTask: TransferTask, transferList: List[Transfer], postdataList: List[Postdata]) = {
     transferList.foreach(transfer => {
       transfer.type_id match {
-        case t: Int if transfer.type_id == transferTask.transfer_type_id => {
+        case t: Int if t == transferTask.transfer_type_id => {
           t match {
             // SalesforceTransfer
             case 1 => {
@@ -69,7 +69,7 @@ class TransferJobManager @Inject() (
           }
         }
         case _ => {
-          Logger.error(s"Could not dispatch transfer job : ${transferTask.id}")
+          //  Logger.error(s"Could not dispatch transfer job.  TransferTask.ID = ${transferTask.id}")
         }
       }
     })

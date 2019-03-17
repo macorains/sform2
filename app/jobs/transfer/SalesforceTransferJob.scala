@@ -29,35 +29,29 @@ class SalesforceTransferJob @Inject() (
 
   def execute(transferTask: TransferTask, transfer: Transfer, postdataList: List[Postdata]): Unit = {
     // 開始ログ
-    Logger.info(s"Start SalesforceTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
+    Logger.info(s"    Start SalesforceTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
 
     getTransferConfig(transfer) match {
-      case transferConfig: JsSuccess[SalesforceTransferConfig] => {
+      case transferConfig: JsSuccess[SalesforceTransferConfig] =>
         getTransferTaskConfig(transferTask) match {
-          case transferTaskConfig: JsSuccess[SalesforceTransferTaskConfig] => {
+          case transferTaskConfig: JsSuccess[SalesforceTransferTaskConfig] =>
             postdataList.size match {
-              case listSize if listSize > 0 => {
+              case listSize if listSize > 0 =>
                 executeTransferTask(transferConfig.get, transferTaskConfig.get, postdataList, transfer.type_id)
-              }
-              case _ => {
+              case _ =>
                 // データが無い
-                Logger.info("No data for transfer.")
-              }
+                Logger.info("    No data for transfer.")
             }
-          }
-          case e2: JsError => {
+          case e2: JsError =>
             // transferTaskConfigが取れない
-            Logger.error("Could not get TransferTaskConfig.")
-          }
+            Logger.error("    Could not get TransferTaskConfig.")
         }
-      }
-      case e1: JsError => {
+      case e1: JsError =>
         // transferConfigが取れない
-        Logger.error("Could not get TransferConfig.")
-      }
+        Logger.error("    Could not get TransferConfig.")
     }
     // 終了ログ
-    Logger.info(s"End SalesforceTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
+    Logger.info(s"    End SalesforceTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
   }
 
   /**
@@ -78,7 +72,7 @@ class SalesforceTransferJob @Inject() (
 
   /**
    * postdataから送信用データ作成
-   * @param postdataList
+   * @param postdataList フォーム投稿データのリスト
    */
   private def convertPostdata(salesforceTransferTaskConfig: SalesforceTransferTaskConfig, postdataList: List[Postdata]) = {
     postdataList.map(postdata => {
@@ -129,16 +123,14 @@ class SalesforceTransferJob @Inject() (
     ).getOrElse(None)
 
     connection match {
-      case pc: PartnerConnection => {
-        var result = salesforceConnector.create(pc, sfobjArray.map(b => b.sobject))
+      case pc: PartnerConnection =>
+        val result = salesforceConnector.create(pc, sfobjArray.map(b => b.sobject))
         createResultLog(sfobjArray, result, transfer_type)
         true
-      }
-      case _ => {
+      case _ =>
         // SFに接続できない
-        Logger.error("Could not connect to Salesforce.")
+        Logger.error("    Could not connect to Salesforce.")
         false
-      }
     }
 
   }

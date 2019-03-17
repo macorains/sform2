@@ -55,36 +55,30 @@ class MailTransferJob @Inject() (
 
   def execute(transferTask: TransferTask, transfer: Transfer, postdataList: List[Postdata]): Unit = {
     // 開始ログ
-    Logger.info(s"Start MailTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
+    Logger.info(s"    Start MailTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
 
     getTransferConfig(transfer) match {
-      case transferConfig: JsSuccess[MailTransferConfig] => {
+      case transferConfig: JsSuccess[MailTransferConfig] =>
         getTransferTaskConfig(transferTask) match {
-          case transferTaskConfig: JsSuccess[MailTransferTaskConfig] => {
+          case transferTaskConfig: JsSuccess[MailTransferTaskConfig] =>
             postdataList.size match {
-              case listSize if listSize > 0 => {
+              case listSize if listSize > 0 =>
                 executeTransferTask(transferConfig.get, transferTaskConfig.get, postdataList, transfer.type_id)
-              }
-              case _ => {
+              case _ =>
                 // データが無い
-                Logger.info("No data for transfer.")
-              }
+                Logger.info("    No data for transfer.")
             }
-          }
-          case e2: JsError => {
+          case e2: JsError =>
             // transferTaskConfigが取れない
-            Logger.error("Could not get TransferTaskConfig.")
-          }
+            Logger.error("    Could not get TransferTaskConfig.")
         }
-      }
-      case e1: JsError => {
+      case e1: JsError =>
         // transferConfigが取れない
-        Logger.error("Could not get TransferConfig.")
-      }
+        Logger.error("    Could not get TransferConfig.")
     }
 
     // 終了ログ
-    Logger.info(s"End MailTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
+    Logger.info(s"    End MailTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
   }
 
   /**
@@ -96,8 +90,10 @@ class MailTransferJob @Inject() (
    */
   private def executeTransferTask(
     mailTransferConfig: MailTransferConfig,
-    mailTransferTaskConfig: MailTransferTaskConfig, postdataList: List[Postdata], transfer_type: Int) = {
-    def result = postdataList.map(postdata => sendMail(mailTransferConfig, mailTransferTaskConfig, postdata, transfer_type))
+    mailTransferTaskConfig: MailTransferTaskConfig, postdataList: List[Postdata], transfer_type: Int): Unit = {
+    val result = postdataList.map(postdata => {
+      sendMail(mailTransferConfig, mailTransferTaskConfig, postdata, transfer_type)
+    })
   }
 
   /**
@@ -122,14 +118,12 @@ class MailTransferJob @Inject() (
       to = Seq(mailTo),
       bodyText = Some(mailBody)
     ))
-
     messageId match {
-      case id: String if id.length > 0 => {
+      case id: String if id.length > 0 =>
         transferDetailLogDAO.save(
           postdata.postdata_id, transfer_type, 1,
           postdata.postdata.toString, "{}", 1, "{}", "", "")
         true
-      }
       case _ => false
     }
   }
@@ -146,15 +140,13 @@ class MailTransferJob @Inject() (
     val r = "\\{%[a-zA-Z0-9]+%\\}".r
 
     r.findFirstIn(template) match {
-      case Some(tag) => {
+      case Some(tag) =>
         val colName = tag.replace("{%", "").replace("%}", "")
         (postdata.postdata \ colName).asOpt[String] match {
           case Some(s) => replaceTag(template.replace(r.findFirstIn(template).getOrElse(""), s), postdata)
           case None => replaceTag(template.replace(r.findFirstIn(template).getOrElse(""), ""), postdata)
         }
-      }
       case None => template
     }
   }
-
 }
