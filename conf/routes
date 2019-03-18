@@ -28,8 +28,6 @@ GET         /account/activate/:token         controllers.ActivateAccountControll
 GET         /assets/*file                    controllers.Assets.at(path="/public", file)
 ->          /webjars                         webjars.Routes
 
-# POST     /rc/           controllers.RcController.receive()
-# GET     /t/           controllers.RcController.t()
 # GET     /test           controllers.FormExecuteController.test()
 GET   /auth   controllers.FormExecuteController.getCsrfToken
 POST   /auth   controllers.FormExecuteController.auth
