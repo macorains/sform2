@@ -56,26 +56,5 @@ class TransferTaskController @Inject() (
       )
     val res = RsResultSet("OK", "OK", Json.toJson(transferTaskEntryList))
     Future.successful(Ok(Json.toJson(res)))
-    /*
-    val jsonBody: Option[JsValue] = request.body.asJson
-    val res = jsonBody.map { json =>
-      val data = (json \ "rcdata").as[JsValue]
-      data.validate[transferGetTaskRequest] match {
-        case s: JsSuccess[transferGetTaskRequest] => {
-          Logger.info("RcController.receive TransferTask.getTransferTaskListByFormId success.")
-          RsResultSet("OK", "OK", transferTaskDAO.getTransferTaskListByFormId(s.get.formId))
-        }
-        case e: JsError => {
-          Logger.error("RcController.receive TransferTask.getTransferTaskListByFormId failed.(1)")
-          RsResultSet("NG", "NG", Json.parse("""{}"""))
-        }
-      }
-    }.getOrElse {
-      None
-    }
-    res match {
-      case r: RsResultSet => Future.successful(Ok(Json.toJson(r)))
-      case _ => Future.successful(BadRequest("Bad!"))
-    */
   }
 }

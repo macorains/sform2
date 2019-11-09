@@ -41,6 +41,7 @@ class ActivateAccountController @Inject() (
    * @param email The email address of the user to send the activation mail to.
    * @return The result to display.
    */
+  // TODO HTTPレスポンスのみ返すように変更すること (2019/03/20)
   def send(email: String) = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     val decodedEmail = URLDecoder.decode(email, "UTF-8")
     val loginInfo = LoginInfo(CredentialsProvider.ID, decodedEmail)
@@ -71,29 +72,17 @@ class ActivateAccountController @Inject() (
    * @return The result to display.
    */
   def activate(token: UUID) = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
-    /*
-    {
-      println("####### token ####### " + token.toString)
-      val a = authTokenService.validate(token)
-      println("####### validate result ####### " + a.toString)
-      Future.successful(Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.activation.link")))
-    }
-    */
-    // HTTPステータスのみを返すように変更
     authTokenService.validate(token).flatMap {
       case Some(authToken) => userService.retrieve(authToken.userID).flatMap {
         case Some(user) if user.loginInfo.providerID == CredentialsProvider.ID =>
           userService.save(user.copy(activated = true)).map { _ =>
             Ok
-            //Redirect(routes.SignInController.view()).flashing("success" -> Messages("account.activated"))
           }
         case _ =>
           Future.successful(BadRequest)
-        //Future.successful(Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.activation.link")))
       }
       case None =>
         Future.successful(BadRequest)
-      //Future.successful(Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.activation.link")))
     }
 
   }

@@ -1,13 +1,13 @@
-import com.typesafe.sbt.SbtScalariform._
+//import com.typesafe.sbt.SbtScalariform._
 
-import scalariform.formatter.preferences._
+//import scalariform.formatter.preferences._
 
 
 name := "sform2s"
 
 version := "1.0-SNAPSHOT"
 
-scalaVersion := "2.12.3"
+scalaVersion := "2.12.8"
 resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/"
 resolvers += Resolver.jcenterRepo
 resolvers += "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
@@ -16,7 +16,6 @@ unmanagedBase := baseDirectory.value / "lib"
 
 libraryDependencies ++= Seq(
   jdbc,
-  cache,
   ws,
   evolutions,
   "org.scala-lang" % "scala-reflect" % "2.12.3",
@@ -78,9 +77,11 @@ scalacOptions ++= Seq(
 // Scalariform settings
 //********************************************************
 
+/*
 defaultScalariformSettings
 
 ScalariformKeys.preferences := ScalariformKeys.preferences.value
   .setPreference(FormatXml, false)
   .setPreference(DoubleIndentClassDeclaration, false)
   .setPreference(DanglingCloseParenthesis, Preserve)
+*/

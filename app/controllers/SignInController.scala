@@ -52,7 +52,8 @@ class SignInController @Inject() (
    * @return The result to display.
    */
   def view = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
-    Future.successful(Ok(views.html.signIn(SignInForm.form)))
+    // Future.successful(Ok(views.html.signIn(SignInForm.form)))
+    Future.successful(Ok(""))
   }
 
   /**
@@ -62,7 +63,8 @@ class SignInController @Inject() (
    */
   def submit = silhouette.UnsecuredAction.async { implicit request =>
     SignInForm.form.bindFromRequest.fold(
-      form => Future.successful(BadRequest(views.html.signIn(form))),
+      // form => Future.successful(BadRequest(views.html.signIn(form))),
+      form => Future.successful(BadRequest("")),
       data => {
         val credentials = Credentials(data.email + ":" + data.group, data.password)
         credentialsProvider.authenticate(credentials).flatMap { loginInfo =>
