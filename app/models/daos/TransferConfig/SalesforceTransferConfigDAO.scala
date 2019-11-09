@@ -46,20 +46,17 @@ case class SalesforceTransferConfigDAO @Inject() (
                 // ToDo configの日付見て古ければ取得しにいく
                 val sfObjectDefinition: Option[List[DescribeSObjectResult]] = salesforceConnector.getConnection(c1.get.user, c1.get.password, c1.get.securityToken) match {
                   case Some(c: PartnerConnection) => {
-                    Logger.info("Salesforce Login Success.")
                     val sObjectNames = salesforceConnector.getSObjectNames(c)
                     Option(salesforceConnector.getSObjectInfo(c, sObjectNames))
                   }
                   case None => {
                     c1.get.sfObjectDefinition match {
                       case Some(s: List[DescribeSObjectResult]) => {
-                        Logger.error("Salesforce Login Failed. user=" + c1.get.user + " password=" + c1.get.password + " securityToken=" + c1.get.securityToken)
-                        Logger.error(" Couldn't get Object Definition from Salesforce. Use previous data.")
+                        Logger.error("Couldn't get Object Definition from Salesforce. Use previous data.")
                         c1.get.sfObjectDefinition
                       }
                       case _ => {
-                        Logger.error("Salesforce Login Failed. user=" + c1.get.user + " password=" + c1.get.password + " securityToken=" + c1.get.securityToken)
-                        Logger.error(" Couldn't get Object Definition from Salesforce. Can't create Object Definition data.")
+                        Logger.error("Couldn't get Object Definition from Salesforce. Can't create Object Definition data.")
                         None
                       }
                     }
