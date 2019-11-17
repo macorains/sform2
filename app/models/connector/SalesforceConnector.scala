@@ -8,6 +8,11 @@ import play.Logger
 
 class SalesforceConnector {
 
+  // 開発時用ダミー
+  def getDummyConnection(user: String, password: String, securityToken: String): Option[PartnerConnection] = {
+    None
+  }
+
   def getConnection(user: String, password: String, securityToken: String): Option[PartnerConnection] = {
     val config: ConnectorConfig = new ConnectorConfig()
     config.setUsername(user)

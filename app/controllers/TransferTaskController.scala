@@ -50,10 +50,11 @@ class TransferTaskController @Inject() (
   }
   // GET /transfertask/list/:form_id
   def getTransferTaskListByFormId(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
-    val transferTaskEntryList = transferTaskDAO.getTransferTaskListByFormId(hashed_form_id)
-      .map(
-        t => { TransferTaskEntry(t.id, t.transfer_type_id, t.name, t.status, t.config.as[JsObject], t.created, t.modified, 0) }
-      )
+    val transferTaskList = transferTaskDAO.getTransferTaskListByFormId(hashed_form_id)
+    val transferTaskEntryList = transferTaskList.map(t => {
+      val config = if(t.config.isInstanceOf[JsValue]) t.config.as[JsObject] else Json.toJson("{}")
+      TransferTaskEntry(t.id, t.transfer_type_id, t.name, t.status, config, t.created, t.modified, 0)
+    })
     val res = RsResultSet("OK", "OK", Json.toJson(transferTaskEntryList))
     Future.successful(Ok(Json.toJson(res)))
   }

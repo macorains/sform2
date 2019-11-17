@@ -4,7 +4,8 @@ import javax.inject._
 import play.api._
 import play.api.db.DBApi
 import play.api.mvc._
-import play.api.libs.json._
+import play.api.libs.json.Json._
+import play.api.libs.json.JsValue
 import play.api.Environment
 import models._
 import models.daos.{ FormsDAO, TransferTaskDAO }
@@ -40,8 +41,13 @@ class FormController @Inject() (
    */
   def get(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
     val res = formsDAO.getData(request.identity, hashed_form_id)
-    Future.successful(Ok(Json.toJson(res)))
+    Future.successful(Ok(toJson(res)))
   }
+
+//  def get2: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
+//    val res = formsDAO.getList(request.identity)
+//    Future.successful(Ok(Json.toJson(res)))
+//                                                                                                                                                  }
 
   /**
    * フォーム一覧取得
@@ -50,7 +56,7 @@ class FormController @Inject() (
    */
   def getList: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
     val res = formsDAO.getList(request.identity)
-    Future.successful(Ok(Json.toJson(res)))
+    Future.successful(Ok(toJson(res)))
   }
 
   /**
@@ -74,7 +80,7 @@ class FormController @Inject() (
       None
     }
     res match {
-      case r: RsResultSet => Future.successful(Ok(Json.toJson(r)))
+      case r: RsResultSet => Future.successful(Ok(toJson(r)))
       case _ => Future.successful(BadRequest("Bad!"))
     }
   }
@@ -86,7 +92,7 @@ class FormController @Inject() (
    * @return
    */
   def delete(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
-    Future.successful(Ok(Json.toJson(formsDAO.delete(hashed_form_id))))
+    Future.successful(Ok(toJson(formsDAO.delete(hashed_form_id))))
   }
 
   /**
@@ -103,7 +109,7 @@ class FormController @Inject() (
       None
     }
     res match {
-      case r: RsResultSet => Future.successful(Ok(Json.toJson(r)))
+      case r: RsResultSet => Future.successful(Ok(toJson(r)))
       case _ => Future.successful(BadRequest("Bad!"))
     }
   }
@@ -122,7 +128,7 @@ class FormController @Inject() (
       None
     }
     res match {
-      case r: RsResultSet => Future.successful(Ok(Json.toJson(r)))
+      case r: RsResultSet => Future.successful(Ok(toJson(r)))
       case _ => Future.successful(BadRequest("Bad!"))
     }
   }

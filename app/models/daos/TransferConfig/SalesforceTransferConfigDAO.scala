@@ -48,6 +48,7 @@ case class SalesforceTransferConfigDAO @Inject() (
                   case Some(c: PartnerConnection) => {
                     val sObjectNames = salesforceConnector.getSObjectNames(c)
                     Option(salesforceConnector.getSObjectInfo(c, sObjectNames))
+                    c1.get.sfObjectDefinition
                   }
                   case None => {
                     c1.get.sfObjectDefinition match {
