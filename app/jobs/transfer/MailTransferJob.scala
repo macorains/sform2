@@ -133,7 +133,8 @@ class MailTransferJob @Inject() (
   }
 
   private def getTransferTaskConfig(transferTask: TransferTask): JsResult[MailTransferTaskConfig] = {
-    transferTask.config.validate[MailTransferTaskConfig]
+    val config = Json.toJson(transferTask.config)
+    config.validate[MailTransferTaskConfig]
   }
 
   private def replaceTag(template: String, postdata: Postdata): String = {

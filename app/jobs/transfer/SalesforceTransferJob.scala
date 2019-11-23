@@ -159,7 +159,8 @@ class SalesforceTransferJob @Inject() (
   }
 
   private def getTransferTaskConfig(transferTask: TransferTask): JsResult[SalesforceTransferTaskConfig] = {
-    transferTask.config.validate[SalesforceTransferTaskConfig]
+    val config = Json.toJson(transferTask.config)
+    config.validate[SalesforceTransferTaskConfig]
   }
 
 }
