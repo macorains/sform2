@@ -11,7 +11,8 @@ import javax.xml.transform.{ OutputKeys, Transformer, TransformerFactory }
 import scala.collection.{ Map, Seq }
 import com.sun.org.apache.xml.internal.serializer.OutputPropertiesFactory
 import org.w3c.dom.{ Document, Element }
-import play.api.libs.json._
+import play.api.libs.json.Json._
+import play.api.libs.json.{Json, JsResult, JsSuccess, JsError, JsValue, JsLookupResult}
 import scalikejdbc._
 import models.{ RsResultSet, User }
 import models.entity.Form
@@ -27,7 +28,7 @@ class FormsDAO extends FormParts with FormJson {
    * @return フォームデータ
    */
   def getData(identity: User, hashed_id: String): RsResultSet = {
-    println(hashed_id)
+    //println(hashed_id)
     val userGroup = identity.group.getOrElse("")
     val f = Form.syntax("f")
     DB localTx { implicit s =>
@@ -47,16 +48,16 @@ class FormsDAO extends FormParts with FormJson {
           formDefResult match {
             case s: JsSuccess[FormDef] =>
               val fd: FormDef = s.get.replaceId(form.id, form.hashed_id)
-              Json.toJson(fd)
+              toJson(fd)
             case _ =>
               // ToDo 2018/11/24 返り値をどうするか？
-              Json.toJson("{}")
+              toJson("{}")
           }
         case _ =>
           // ToDo 2018/11/24 返り値をどうするか？
-          Json.toJson("{}")
+          toJson("{}")
       }
-      RsResultSet("OK", "OK", Json.toJson(jsString))
+      RsResultSet("OK", "OK", toJson(jsString))
     }
   }
 
@@ -82,12 +83,12 @@ class FormsDAO extends FormParts with FormJson {
           formDefResult match {
             case s: JsSuccess[FormDef] =>
               val f: FormDef = s.get.replaceId(a.id, a.hashed_id)
-              "\"" + b + "\":" + Json.toJson(f)
+              "\"" + b + "\":" + toJson(f)
             case _ =>
               "\"" + b + "\":"
           }
       }.mkString("{", ",", "}")
-      RsResultSet("OK", "OK", Json.toJson(jsString))
+      RsResultSet("OK", "OK", toJson(jsString))
     }
   }
 
@@ -133,12 +134,12 @@ class FormsDAO extends FormParts with FormJson {
             }.map(rs => Form(rs)).single.apply()
           formData match {
             case Some(s: Form) =>
-              RsResultSet("OK", "OK", Json.toJson(convertFormDefToHtml(id, s, cFormMode.LOAD, None, host, receiverPath.getOrElse(""))))
+              RsResultSet("OK", "OK", toJson(convertFormDefToHtml(id, s, cFormMode.LOAD, None, host, receiverPath.getOrElse(""))))
             case _ =>
-              RsResultSet("NG", "NG", Json.toJson("Could not get Formdata."))
+              RsResultSet("NG", "NG", toJson("Could not get Formdata."))
           }
         }
-      case None => RsResultSet("NG", "NG", Json.toJson("Invalid Parameter."))
+      case None => RsResultSet("NG", "NG", toJson("Invalid Parameter."))
     }
   }
 
@@ -156,7 +157,7 @@ class FormsDAO extends FormParts with FormJson {
 
         val htmlStr: Seq[String] =
           if (mode == cFormMode.REGIST) {
-            savePostData(hashed_id, postdata.getOrElse(Json.toJson("")))
+            savePostData(hashed_id, postdata.getOrElse(toJson("")))
           } else {
             formDefColValue.map({
               case (k, v) =>
@@ -170,7 +171,7 @@ class FormsDAO extends FormParts with FormJson {
                         if (validateResult.nonEmpty) {
                           getColHtml(f.get, validateResult)
                         } else {
-                          getConfirmColHtml(f.get, postdata.getOrElse(Json.toJson("")))
+                          getConfirmColHtml(f.get, postdata.getOrElse(toJson("")))
                         }
                     }
                   case e: JsError =>
@@ -208,7 +209,7 @@ class FormsDAO extends FormParts with FormJson {
           case _ => RsResultSet("OK", "OK", insertForm(formDefData, identity))
         }
       case e: JsError =>
-        RsResultSet("NG", "JSON Error.", Json.toJson(e.toString))
+        RsResultSet("NG", "JSON Error.", toJson(e.toString))
     }
   }
 
@@ -273,12 +274,12 @@ class FormsDAO extends FormParts with FormJson {
           }.map(rs => Form(rs)).single.apply()
           formData match {
             case Some(d) =>
-              RsResultSet("OK", "OK", Json.toJson(convertFormDefToHtml(s.get.formid, d, cFormMode.CONFIRM, Option(s.get.postdata), host, receiverPath)))
-            case _ => RsResultSet("NG", "NG", Json.toJson("error"))
+              RsResultSet("OK", "OK", toJson(convertFormDefToHtml(s.get.formid, d, cFormMode.CONFIRM, Option(s.get.postdata), host, receiverPath)))
+            case _ => RsResultSet("NG", "NG", toJson("error"))
           }
         }
       case _ =>
-        RsResultSet("NG", "NG", Json.toJson("error"))
+        RsResultSet("NG", "NG", toJson("error"))
     }
   }
 
@@ -304,15 +305,15 @@ class FormsDAO extends FormParts with FormJson {
           formData match {
             case Some(d) =>
               println("save!!")
-              RsResultSet("OK", "OK", Json.toJson(convertFormDefToHtml(s.get.formid, d, cFormMode.REGIST, Option(s.get.postdata), host, "")))
+              RsResultSet("OK", "OK", toJson(convertFormDefToHtml(s.get.formid, d, cFormMode.REGIST, Option(s.get.postdata), host, "")))
             case _ =>
               println("NG!!")
-              RsResultSet("NG", "NG", Json.toJson("error"))
+              RsResultSet("NG", "NG", toJson("error"))
           }
         }
       case _ =>
         println("NG!!!!!")
-        RsResultSet("NG", "NG", Json.toJson("error"))
+        RsResultSet("NG", "NG", toJson("error"))
     }
   }
 
@@ -334,8 +335,8 @@ class FormsDAO extends FormParts with FormJson {
       formData match {
         case Some(s: Form) =>
           val dt = Json.parse(s.form_data)
-          (dt \ "formCols").asOpt[JsValue].getOrElse(Json.toJson(""))
-        case _ => Json.toJson("")
+          (dt \ "formCols").asOpt[JsValue].getOrElse(toJson(""))
+        case _ => toJson("")
       }
     }
 
@@ -428,7 +429,7 @@ class FormsDAO extends FormParts with FormJson {
           val now: String = "%tY/%<tm/%<td %<tH:%<tM:%<tS" format new Date
           val newid: Long =
             sql"""INSERT INTO D_FORM(FORM_DATA,HASHED_ID,USER_GROUP,CREATED_USER,CREATED)
-                 VALUES(${Json.toJson(f).toString},$hashed_id,${identity.group},${identity.userID.toString},$now)"""
+                 VALUES(${toJson(f).toString},$hashed_id,${identity.group},${identity.userID.toString},$now)"""
               .updateAndReturnGeneratedKey.apply()
           Json.parse("""{"id": """" + newid.toString + """", "hashed_id":"""" + hashed_id + """"}""")
         case None =>
@@ -590,7 +591,7 @@ class FormsDAO extends FormParts with FormJson {
         colForm.setAttribute("class", "sform-col-form")
         colName.setTextContent(colDef.name)
 
-        val postdata_text = (postdata \ colDef.colId).getOrElse(Json.toJson("")).as[String]
+        val postdata_text = (postdata \ colDef.colId).getOrElse(toJson("")).as[String]
         val displayText = colType match {
           case "2" | "3" | "4" =>
             // ラジオ・チェックボックス・コンボの場合はラベルを取ってくる
@@ -624,7 +625,7 @@ class FormsDAO extends FormParts with FormJson {
     val f = Form.syntax("f")
     DB localTx { implicit l =>
       val now: String = "%tY/%<tm/%<td %<tH:%<tM:%<tS" format new Date
-      val newid: Long = sql"INSERT INTO D_POSTDATA(FORM_HASHED_ID,POSTDATA,CREATED,MODIFIED) VALUES($hashed_id,${Json.toJson(dt).toString},$now,$now)"
+      val newid: Long = sql"INSERT INTO D_POSTDATA(FORM_HASHED_ID,POSTDATA,CREATED,MODIFIED) VALUES($hashed_id,${toJson(dt).toString},$now,$now)"
         .updateAndReturnGeneratedKey.apply()
       Seq("")
     }
