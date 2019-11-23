@@ -50,7 +50,7 @@ class TransferTaskDAO extends TransferTaskJson {
       WHERE FORM_ID=$hashed_form_id"""
         .map(rs => TransferTask(rs)).list.apply()
       val transferTaskEntityList = transferTaskList.map(
-        t => { TransferTaskEntry(t.id, t.transfer_type_id, t.name, t.status, t.config.as[JsObject], t.created, t.modified, 0) })
+        t => { TransferTaskEntry(t.id, t.transfer_type_id, t.name, t.status, Json.toJson(t.config), t.created, t.modified, 0) })
       Json.toJson(transferTaskEntityList)
     }
   }
@@ -61,7 +61,7 @@ class TransferTaskDAO extends TransferTaskJson {
       FROM D_TRANSFER_TASKS
       WHERE ID=$id"""
         .map(rs => TransferTask(rs)).single.apply().get
-      val transferTaskEntity = TransferTaskEntry(t.id, t.transfer_type_id, t.name, t.status, t.config.as[JsObject], t.created, t.modified, 0)
+      val transferTaskEntity = TransferTaskEntry(t.id, t.transfer_type_id, t.name, t.status, Json.toJson(t.config), t.created, t.modified, 0)
       Json.toJson(transferTaskEntity)
     }
   }
@@ -99,6 +99,7 @@ class TransferTaskDAO extends TransferTaskJson {
   def bulkSave(dt: JsValue, identity: User): Any = {
     val transferTaskList = (dt \ "transferTasks").as[JsValue]
     println(transferTaskList)
+
 
     transferTaskList.validate[Array[TransferTaskEntry]] match {
       case s: JsSuccess[Array[TransferTaskEntry]] =>

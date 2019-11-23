@@ -7,12 +7,6 @@ import play.api.libs.functional.syntax._
 case class TransferTaskEntry(id: Int, transfer_type_id: Int, name: String, status: Int, config: JsValue,
   created: Option[String], modified: Option[String], del_flg: Int)
 
-object TransferTaskEntry {
-  def apply(id: Int, transfer_type_id: Int, name: String, status: Int, config: JsObject, created: Option[String], modified: Option[String], del_flg: Int): TransferTaskEntry = {
-    TransferTaskEntry(id, transfer_type_id, name, status, config, created, modified, del_flg)
-  }
-}
-
 trait TransferTaskJson {
   implicit val jsonTransferTaskWrites: Writes[TransferTaskEntry] = (transferTaskEntry: TransferTaskEntry) => Json.obj(
     "id" -> transferTaskEntry.id,
@@ -30,7 +24,7 @@ trait TransferTaskJson {
     (JsPath \ "transfer_type_id").read[Int] ~
     (JsPath \ "name").read[String] ~
     (JsPath \ "status").read[Int] ~
-    (JsPath \ "config").read[JsObject] ~
+    (JsPath \ "config").read[JsValue] ~
     (JsPath \ "created").readNullable[String] ~
     (JsPath \ "modified").readNullable[String] ~
     (JsPath \ "del_flg").read[Int]
