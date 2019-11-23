@@ -1,6 +1,5 @@
 package models.entity
 
-import play.api.libs.json.{ JsValue, Json }
 import scalikejdbc._
 
 case class TransferTask(id: Int, transfer_type_id: Int, name: String, status: Int, config: String,

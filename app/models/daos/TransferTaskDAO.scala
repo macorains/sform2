@@ -9,22 +9,6 @@ import scalikejdbc.{ DB, WrappedResultSet }
 
 class TransferTaskDAO extends TransferTaskJson {
 
-  //  case class TransferTask(id: Int, transfer_type_id: Int, name: String, status: Int, config: JsValue,
-  //    created: Option[String], modified: Option[String])
-  //  object TransferTask extends SQLSyntaxSupport[TransferTask] {
-  //    override val tableName = "D_TRANSFER_TASKS"
-  //    def apply(rs: WrappedResultSet): TransferTask = {
-  //      TransferTask(rs.int("id"), rs.int("transfer_type_id"), rs.string("name"), rs.int("status"),
-  //        Json.parse(rs.string("config")), rs.stringOpt("created"), rs.stringOpt("modified"))
-  //    }
-  //  }
-  //  case class TransferTaskJson(id: Int, transfer_type_id: Int, name: String, status: Int, config: JsObject,
-  //    created: Option[String], modified: Option[String], del_flg: Int)
-  //  object TransferTaskJson {
-  //    implicit def jsonTransferTaskWrites: Writes[TransferTaskJson] = Json.writes[TransferTaskJson]
-  //    implicit def jsonTransferTaskReads: Reads[TransferTaskJson] = Json.reads[TransferTaskJson]
-  //  }
-
   def getTransferTaskList(transferType: Int): List[TransferTask] = {
     DB localTx { implicit l =>
       sql"""SELECT ID,TRANSFER_TYPE_ID,NAME,FORM_ID,STATUS,CONFIG,CREATED,MODIFIED
@@ -98,9 +82,6 @@ class TransferTaskDAO extends TransferTaskJson {
 
   def bulkSave(dt: JsValue, identity: User): Any = {
     val transferTaskList = (dt \ "transferTasks").as[JsValue]
-    println(transferTaskList)
-
-
     transferTaskList.validate[Array[TransferTaskEntry]] match {
       case s: JsSuccess[Array[TransferTaskEntry]] =>
         s.get.map(t => {
