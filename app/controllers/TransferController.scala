@@ -35,12 +35,12 @@ class TransferController @Inject() (
   ex: ExecutionContext
 ) extends AbstractController(components) with I18nSupport {
 
-  case class transferGetConfigRequest(transferName: String)
+  case class TransferGetConfigRequest(transferName: String)
 
-  case class transferSaveConfigRequest(transferName: String, config: JsValue)
-  object transferSaveConfigRequest {
-    implicit def jsonTransferSaveConfigRequestWrites: Writes[transferSaveConfigRequest] = Json.writes[transferSaveConfigRequest]
-    implicit def jsonTransferSaveConfigRequestReads: Reads[transferSaveConfigRequest] = Json.reads[transferSaveConfigRequest]
+  case class TransferSaveConfigRequest(transferName: String, config: JsValue)
+  object TransferSaveConfigRequest {
+    implicit def jsonTransferSaveConfigRequestWrites: Writes[TransferSaveConfigRequest] = Json.writes[TransferSaveConfigRequest]
+    implicit def jsonTransferSaveConfigRequestReads: Reads[TransferSaveConfigRequest] = Json.reads[TransferSaveConfigRequest]
   }
 
   // ?
@@ -71,12 +71,12 @@ class TransferController @Inject() (
     val jsonBody: Option[JsValue] = request.body.asJson
     val res = jsonBody.map { json =>
       val data = (json \ "rcdata").as[JsValue]
-      data.validate[transferSaveConfigRequest] match {
-        case s: JsSuccess[transferSaveConfigRequest] =>
-          val transferConfig = Class.forName("models.daos.TransferConfig." + s.get.transferName + "TransferConfigDAO")
+      data.validate[TransferSaveConfigRequest] match {
+        case s: JsSuccess[TransferSaveConfigRequest] =>
+          val transferConfig = Class.forName("models.daos.TransferConfig." + s.value.transferName + "TransferConfigDAO")
             .getDeclaredConstructor(classOf[TransfersDAO])
             .newInstance(transfersDAO).asInstanceOf[BaseTransferConfigDAO]
-          val config = s.get.config
+          val config = s.value.config
           val result = transferConfig.saveTransferConfig(config, identity)
           RsResultSet("OK", "OK", result)
         case _: JsError =>
