@@ -1,14 +1,16 @@
 package models.daos.TransferConfig
 
 import javax.inject.Inject
-import models.daos.{ Transfer, TransfersDAO }
+import models.daos.{Transfer, TransfersDAO}
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import models.User
+import play.api.Configuration
 
 class MailTransferConfigDAO @Inject() (
-  transfersDao: TransfersDAO
+  transfersDao: TransfersDAO,
+  configuration: Configuration
 ) extends BaseTransferConfigDAO {
 
   override val transferType = 2
