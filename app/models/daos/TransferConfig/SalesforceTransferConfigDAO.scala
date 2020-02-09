@@ -25,15 +25,15 @@ case class SalesforceTransferConfigDAO @Inject() (
   implicit val jsonSalesforceTransferConfigWrites = (
     (JsPath \ "id").writeNullable[Int] ~
     (JsPath \ "user").write[String] ~
-    (JsPath \ "password").write[String].contramap[String](_ + "a") ~
-    (JsPath \ "securityToken").write[String].contramap[String](_ + "a") ~
+    (JsPath \ "password").write[String] ~
+    (JsPath \ "securityToken").write[String] ~
     (JsPath \ "sfObjectDefinition").writeNullable[List[DescribeSObjectResult]]
   )(unlift(SalesforceTransferConfig.unapply))
   implicit val jsonSalesforceTransferConfigReads: Reads[SalesforceTransferConfig] = (
     (JsPath \ "id").readNullable[Int] ~
     (JsPath \ "user").read[String] ~
-    (JsPath \ "password").read[String].map[String](_ + "a") ~
-    (JsPath \ "securityToken").read[String].map[String](_ + "a") ~
+    (JsPath \ "password").read[String] ~
+    (JsPath \ "securityToken").read[String] ~
     (JsPath \ "sfObjectDefinition").readNullable[List[DescribeSObjectResult]]
   )(SalesforceTransferConfig.apply _)
 
@@ -73,9 +73,6 @@ case class SalesforceTransferConfigDAO @Inject() (
               }
               case e: JsError => {
                 Logger.error("JSON validate[SalesforceTransferConfig] failed. ")
-                Logger.error("[config]")
-                Logger.error(t1.config.toString)
-                Logger.error(e.toString)
                 Json.toJson("""{"error" : "2"}""")
               }
             }
