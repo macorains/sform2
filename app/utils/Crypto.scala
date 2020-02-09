@@ -6,7 +6,7 @@ import javax.crypto.Cipher
 import javax.crypto.spec.{IvParameterSpec, SecretKeySpec}
 import play.api.Configuration
 
-class Crypto @Inject()(config: Configuration){
+case class Crypto @Inject()(config: Configuration){
   private val Algorithm = config.get[String]("sform.crypt.algorithm.cipher")
   private val Key = new SecretKeySpec(Base64.getDecoder.decode(config.get[String]("sform.crypt.key")), config.get[String]("sform.crypt.algorithm.key"))
   private val IvSpec = new IvParameterSpec(new Array[Byte](16))

@@ -2,34 +2,38 @@ package models.daos.TransferConfig
 
 import javax.inject.Inject
 import models.connector.SalesforceConnector
-import models.daos.{ Transfer, TransfersDAO }
+import models.daos.{Transfer, TransfersDAO}
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
-import com.sforce.soap.partner.{ DescribeSObjectResult, Field, PartnerConnection }
+import com.sforce.soap.partner.{DescribeSObjectResult, Field, PartnerConnection}
 import models.User
 import models.json.SalesforceTransferJson
+import utils.Crypto
 import play.Logger
+import play.api.Configuration
 
 case class SalesforceTransferConfigDAO @Inject() (
-  transfersDao: TransfersDAO
+  transfersDao: TransfersDAO,
+  configuration: Configuration
 ) extends BaseTransferConfigDAO with (SalesforceTransferJson) {
   override val transferType = 1
   val salesforceConnector = new SalesforceConnector
+  val crypto = Crypto(configuration)
 
   case class SalesforceTransferConfig(id: Option[Int], user: String, password: String, securityToken: String, sfObjectDefinition: Option[List[DescribeSObjectResult]])
   implicit val jsonSalesforceTransferConfigWrites = (
     (JsPath \ "id").writeNullable[Int] ~
     (JsPath \ "user").write[String] ~
-    (JsPath \ "password").write[String] ~
-    (JsPath \ "securityToken").write[String] ~
+    (JsPath \ "password").write[String].contramap[String](_ + "a") ~
+    (JsPath \ "securityToken").write[String].contramap[String](_ + "a") ~
     (JsPath \ "sfObjectDefinition").writeNullable[List[DescribeSObjectResult]]
   )(unlift(SalesforceTransferConfig.unapply))
   implicit val jsonSalesforceTransferConfigReads: Reads[SalesforceTransferConfig] = (
     (JsPath \ "id").readNullable[Int] ~
     (JsPath \ "user").read[String] ~
-    (JsPath \ "password").read[String] ~
-    (JsPath \ "securityToken").read[String] ~
+    (JsPath \ "password").read[String].map[String](_ + "a") ~
+    (JsPath \ "securityToken").read[String].map[String](_ + "a") ~
     (JsPath \ "sfObjectDefinition").readNullable[List[DescribeSObjectResult]]
   )(SalesforceTransferConfig.apply _)
 
@@ -65,7 +69,7 @@ case class SalesforceTransferConfigDAO @Inject() (
                 }
                 val newSalesforceTransferConfig = SalesforceTransferConfig(Option(t1.id), c1.get.user, c1.get.password, c1.get.securityToken, sfObjectDefinition)
                 transfersDao.update(t1.id, t1.type_id, t1.name, t1.status, Json.toJson(newSalesforceTransferConfig).toString)
-                Json.toJson(newSalesforceTransferConfig)
+                decrypto(Json.toJson(newSalesforceTransferConfig))
               }
               case e: JsError => {
                 Logger.error("JSON validate[SalesforceTransferConfig] failed. ")
@@ -87,8 +91,32 @@ case class SalesforceTransferConfigDAO @Inject() (
 
   override def saveTransferConfig(config: JsValue, identity: User): JsValue = {
     Logger.debug("SalesforceTransferInfoDAO.saveTransferConfig")
-    transfersDao.updateByUserIdentity(identity, transferType, config.toString())
+    transfersDao.updateByUserIdentity(identity, transferType, encrypto(config).toString())
     Json.toJson("""{}""")
+  }
+
+  private def encrypto(config: JsValue) :JsValue = {
+    config.validate[SalesforceTransferConfig] match {
+      case c: SalesforceTransferConfig => {
+        val newConfig = SalesforceTransferConfig(c.id, c.user, crypto.encrypt(c.password), crypto.encrypt(c.securityToken), c.sfObjectDefinition)
+        Json.toJson(newConfig)
+      }
+      case _ => {
+        config
+      }
+    }
+  }
+
+  private def decrypto(config: JsValue) :JsValue = {
+    config.validate[SalesforceTransferConfig] match {
+      case c: SalesforceTransferConfig => {
+        val newConfig = SalesforceTransferConfig(c.id, c.user, crypto.decrypt(c.password), crypto.decrypt(c.securityToken), c.sfObjectDefinition)
+        Json.toJson(newConfig)
+      }
+      case _ => {
+        config
+      }
+    }
   }
 
 }

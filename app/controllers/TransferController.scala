@@ -51,8 +51,8 @@ class TransferController @Inject() (
   // GET /transfer/config/:transfer_name
   def getConfig(transfer_name: String): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
     val transferConfig = Class.forName("models.daos.TransferConfig." + transfer_name + "TransferConfigDAO")
-      .getDeclaredConstructor(classOf[TransfersDAO])
-      .newInstance(transfersDAO).asInstanceOf[BaseTransferConfigDAO]
+      .getDeclaredConstructor(classOf[TransfersDAO], classOf[Configuration])
+      .newInstance(transfersDAO, configuration).asInstanceOf[BaseTransferConfigDAO]
     val config = transferConfig.getTransferConfig
     val res = RsResultSet("OK", "OK", config)
     Future.successful(Ok(Json.toJson(res)))
@@ -74,8 +74,8 @@ class TransferController @Inject() (
       data.validate[TransferSaveConfigRequest] match {
         case s: JsSuccess[TransferSaveConfigRequest] =>
           val transferConfig = Class.forName("models.daos.TransferConfig." + s.value.transferName + "TransferConfigDAO")
-            .getDeclaredConstructor(classOf[TransfersDAO])
-            .newInstance(transfersDAO).asInstanceOf[BaseTransferConfigDAO]
+            .getDeclaredConstructor(classOf[TransfersDAO], classOf[Configuration])
+            .newInstance(transfersDAO, configuration).asInstanceOf[BaseTransferConfigDAO]
           val config = s.value.config
           val result = transferConfig.saveTransferConfig(config, identity)
           RsResultSet("OK", "OK", result)
