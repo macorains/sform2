@@ -97,11 +97,14 @@ case class SalesforceTransferConfigDAO @Inject() (
 
   private def encrypto(config: JsValue) :JsValue = {
     config.validate[SalesforceTransferConfig] match {
-      case c: SalesforceTransferConfig => {
-        val newConfig = SalesforceTransferConfig(c.id, c.user, crypto.encrypt(c.password), crypto.encrypt(c.securityToken), c.sfObjectDefinition)
-        Json.toJson(newConfig)
+      case s: JsSuccess[SalesforceTransferConfig] => {
+        s.map(c => {
+          val newConfig = SalesforceTransferConfig(c.id, c.user, crypto.encrypt(c.password), crypto.encrypt(c.securityToken), c.sfObjectDefinition)
+          Json.toJson(newConfig)
+        }).getOrElse(config)
       }
       case _ => {
+        Logger.error("encrypt failed.")
         config
       }
     }
@@ -109,11 +112,14 @@ case class SalesforceTransferConfigDAO @Inject() (
 
   private def decrypto(config: JsValue) :JsValue = {
     config.validate[SalesforceTransferConfig] match {
-      case c: SalesforceTransferConfig => {
-        val newConfig = SalesforceTransferConfig(c.id, c.user, crypto.decrypt(c.password), crypto.decrypt(c.securityToken), c.sfObjectDefinition)
-        Json.toJson(newConfig)
+      case s: JsSuccess[SalesforceTransferConfig] => {
+        s.map(c => {
+          val newConfig = SalesforceTransferConfig(c.id, c.user, crypto.decrypt(c.password), crypto.decrypt(c.securityToken), c.sfObjectDefinition)
+          Json.toJson(newConfig)
+        }).getOrElse(config)
       }
       case _ => {
+        Logger.error("decrypt failed.")
         config
       }
     }
