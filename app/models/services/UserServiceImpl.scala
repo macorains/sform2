@@ -76,4 +76,12 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
         ))
     }
   }
+
+  /**
+   * Adminグループのユーザー存在チェック
+   * @return Adminグループのユーザー数が0の場合はfalse、1以上でtrue
+   */
+  def checkAdminExists: Boolean = {
+    !userDAO.countAdminUsers().equals(0)
+  }
 }

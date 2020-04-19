@@ -139,6 +139,11 @@ class UserDAOImpl extends UserDAO with SFDBConf {
       Json.toJson(userListJson)
     }
   }
+
+  // Adminグループのユーザーアカウント数を取得
+  def countAdminUsers() :Int = {
+    1
+  }
 }
 
 /**
