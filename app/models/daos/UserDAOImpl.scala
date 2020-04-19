@@ -142,7 +142,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
 
   // Adminグループのユーザーアカウント数を取得
   def countAdminUsers() :Int = {
-    1
+    sql"SELECT count(*) FROM M_USERINFO WHERE USER_GROUP='admin'".map(_.int(1)).first.apply.getOrElse(0)
   }
 }
 
