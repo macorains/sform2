@@ -3,16 +3,16 @@ package models.json
 import play.api.libs.json.{JsPath, Json, Reads, Writes}
 import play.api.libs.functional.syntax._
 
-case class UserSignUpResult(resultCode:Int, activateUrl:Option[String])
+case class UserSignUpResult(resultCode:Int, message:Option[String])
 
-trait userSignUpResultJson {
+trait UserSignUpResultJson {
   implicit val jsonUserSignUpResultWrites: Writes[UserSignUpResult] = (userSignUpResult: UserSignUpResult) => Json.obj(
   "resultCode" -> userSignUpResult.resultCode,
-    "activateUrl" -> userSignUpResult.activateUrl.getOrElse("")
+    "message" -> userSignUpResult.message
   )
 
   implicit val jsonUserSignUpResultReads: Reads[UserSignUpResult] = (
     (JsPath \ "resultCode").read[Int] ~
-      (JsPath \ "activateUrl").readNullable[String]
+      (JsPath \ "message").readNullable[String]
     )(UserSignUpResult.apply _)
 }

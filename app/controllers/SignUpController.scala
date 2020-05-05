@@ -10,6 +10,7 @@ import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
 import com.mohiva.play.silhouette.impl.providers._
 import forms.SignUpForm
 import models.User
+import models.json.{UserSignUpResult, UserSignUpResultJson}
 import models.services.{AuthTokenService, UserService}
 import org.webjars.play.WebJarsUtil
 import play.api.http.HttpEntity
@@ -48,7 +49,7 @@ class SignUpController @Inject() (
   implicit
   webJarsUtil: WebJarsUtil,
   ex: ExecutionContext
-) extends AbstractController(components) with I18nSupport {
+) extends AbstractController(components) with I18nSupport with UserSignUpResultJson {
 
   /**
    * Views the `Sign Up` page.
@@ -69,7 +70,8 @@ class SignUpController @Inject() (
     SignUpForm.form.bindFromRequest.fold(
       form => Future.successful(BadRequest("")), // ToDo 何を返すか検討
       data => {
-        val result = Ok(Json.toJson("")) // ToDo アクティベート用URLを返す
+        val message = Messages("activate.account.text1") + data.email + " " + Messages("activate.account.text2")
+        val result = Ok(Json.toJson(UserSignUpResult(Ok.header.status, Option(message))))
         val loginInfo = LoginInfo(CredentialsProvider.ID, data.email)
         userService.retrieve(loginInfo).flatMap {
           case Some(user) =>
@@ -111,7 +113,6 @@ class SignUpController @Inject() (
                 bodyText = Some(views.txt.emails.signUp(user, url).body),
                 bodyHtml = Some(views.html.emails.signUp(user, url).body)
               ))
-
               silhouette.env.eventBus.publish(SignUpEvent(user, request))
               result
             }
