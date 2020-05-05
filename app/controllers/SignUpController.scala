@@ -10,14 +10,16 @@ import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
 import com.mohiva.play.silhouette.impl.providers._
 import forms.SignUpForm
 import models.User
-import models.services.{ AuthTokenService, UserService }
+import models.services.{AuthTokenService, UserService}
 import org.webjars.play.WebJarsUtil
-import play.api.i18n.{ I18nSupport, Messages }
-import play.api.libs.mailer.{ Email, MailerClient }
+import play.api.http.HttpEntity
+import play.api.i18n.{I18nSupport, Messages}
+import play.api.libs.json.Json
+import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc._
 import utils.auth.DefaultEnv
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * The `Sign Up` controller.
@@ -65,10 +67,9 @@ class SignUpController @Inject() (
    */
   def submit: Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     SignUpForm.form.bindFromRequest.fold(
-      // form => Future.successful(BadRequest(views.html.signUp(form))),
-      form => Future.successful(BadRequest("")),
+      form => Future.successful(BadRequest("")), // ToDo 何を返すか検討
       data => {
-        val result = Redirect(routes.SignUpController.view()).flashing("info" -> Messages("sign.up.email.sent", data.email))
+        val result = Ok(Json.toJson("")) // ToDo アクティベート用URLを返す
         val loginInfo = LoginInfo(CredentialsProvider.ID, data.email)
         userService.retrieve(loginInfo).flatMap {
           case Some(user) =>
@@ -80,7 +81,6 @@ class SignUpController @Inject() (
               bodyText = Some(views.txt.emails.alreadySignedUp(user, url).body),
               bodyHtml = Some(views.html.emails.alreadySignedUp(user, url).body)
             ))
-
             Future.successful(result)
           case None =>
             val authInfo = passwordHasherRegistry.current.hash(data.password)
