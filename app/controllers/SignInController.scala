@@ -13,7 +13,7 @@ import net.ceedubs.ficus.Ficus._
 import org.webjars.play.WebJarsUtil
 import play.api.Configuration
 import play.api.i18n.{ I18nSupport, Messages }
-import play.api.libs.json.{ JsObject, JsString }
+import play.api.libs.json.{ JsObject, JsString, Json }
 import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
 import utils.auth.DefaultEnv
 
@@ -27,7 +27,6 @@ import scala.concurrent.{ ExecutionContext, Future }
  * @param silhouette             The Silhouette stack.
  * @param userService            The user service implementation.
  * @param credentialsProvider    The credentials provider.
- * @param socialProviderRegistry The social provider registry.
  * @param configuration          The Play configuration.
  * @param clock                  The clock instance.
  * @param webJarsUtil            The webjar util.
@@ -37,7 +36,6 @@ class SignInController @Inject() (
   silhouette: Silhouette[DefaultEnv],
   userService: UserService,
   credentialsProvider: CredentialsProvider,
-  //socialProviderRegistry: SocialProviderRegistry,
   configuration: Configuration,
   clock: Clock
 )(
@@ -64,14 +62,14 @@ class SignInController @Inject() (
   def submit = silhouette.UnsecuredAction.async { implicit request =>
     SignInForm.form.bindFromRequest.fold(
       // form => Future.successful(BadRequest(views.html.signIn(form))),
-      form => Future.successful(BadRequest("")),
+      form => Future.successful(BadRequest(Json.parse("""{"message":"Invalid Request"}"""))),
       data => {
         val credentials = Credentials(data.email + ":" + data.group, data.password)
         credentialsProvider.authenticate(credentials).flatMap { loginInfo =>
           val result = Redirect(routes.ApplicationController.index())
           userService.retrieve(loginInfo).flatMap {
             case Some(user) if !user.activated =>
-              Future.successful(BadRequest)
+              Future.successful(BadRequest(Json.parse("""{"message":"User Not Activated"}""")))
             case Some(user) =>
               val c = configuration.underlying
               silhouette.env.authenticatorService.create(loginInfo).map {
@@ -92,7 +90,8 @@ class SignInController @Inject() (
           }
         }.recover {
           case e: ProviderException =>
-            BadRequest
+
+            BadRequest(Json.parse(s"""{"message":"${e.toString}"}"""))
         }
       }
     )
