@@ -69,7 +69,7 @@ class SignUpController @Inject() (
   def submit: Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     if(!userService.checkAdminExists) {
       SignUpForm.form.bindFromRequest.fold(
-        form => Future.successful(BadRequest(s"${Messages("error.invalid.request")}")), // ToDo 何を返すか検討
+        form => Future.successful(BadRequest(s"${Messages("error.invalid.request")}")),
         data => {
           val message = s"""${Messages("activate.account.text1")} ${data.email} ${Messages("activate.account.text2")}"""
           val result = Ok(Json.toJson(UserSignUpResult(Ok.header.status, Option(message))))
