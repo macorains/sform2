@@ -38,4 +38,11 @@ trait UserService extends IdentityService[User] {
    * @return The user for whom the profile was saved.
    */
   def save(profile: CommonSocialProfile): Future[User]
+
+  /**
+   * Adminグループのユーザー存在チェック
+   * @return Adminグループのユーザー数が0の場合はfalse、1以上でtrue
+   */
+  def checkAdminExists: Boolean
+
 }

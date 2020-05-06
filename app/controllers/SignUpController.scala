@@ -10,14 +10,17 @@ import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
 import com.mohiva.play.silhouette.impl.providers._
 import forms.SignUpForm
 import models.User
-import models.services.{ AuthTokenService, UserService }
+import models.json.{UserSignUpResult, UserSignUpResultJson}
+import models.services.{AuthTokenService, UserService}
 import org.webjars.play.WebJarsUtil
-import play.api.i18n.{ I18nSupport, Messages }
-import play.api.libs.mailer.{ Email, MailerClient }
+import play.api.http.HttpEntity
+import play.api.i18n.{I18nSupport, Messages}
+import play.api.libs.json.Json
+import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc._
 import utils.auth.DefaultEnv
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * The `Sign Up` controller.
@@ -46,7 +49,7 @@ class SignUpController @Inject() (
   implicit
   webJarsUtil: WebJarsUtil,
   ex: ExecutionContext
-) extends AbstractController(components) with I18nSupport {
+) extends AbstractController(components) with I18nSupport with UserSignUpResultJson {
 
   /**
    * Views the `Sign Up` page.
@@ -59,64 +62,66 @@ class SignUpController @Inject() (
   }
 
   /**
-   * Handles the submitted form.
-   *
+   * 初期管理ユーザーの登録
+   * （初期管理ユーザー登録後は使わない）
    * @return The result to display.
    */
   def submit: Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
-    SignUpForm.form.bindFromRequest.fold(
-      // form => Future.successful(BadRequest(views.html.signUp(form))),
-      form => Future.successful(BadRequest("")),
-      data => {
-        val result = Redirect(routes.SignUpController.view()).flashing("info" -> Messages("sign.up.email.sent", data.email))
-        val loginInfo = LoginInfo(CredentialsProvider.ID, data.email)
-        userService.retrieve(loginInfo).flatMap {
-          case Some(user) =>
-            val url = routes.SignInController.view().absoluteURL()
-            mailerClient.send(Email(
-              subject = Messages("email.already.signed.up.subject"),
-              from = Messages("email.from"),
-              to = Seq(data.email),
-              bodyText = Some(views.txt.emails.alreadySignedUp(user, url).body),
-              bodyHtml = Some(views.html.emails.alreadySignedUp(user, url).body)
-            ))
-
-            Future.successful(result)
-          case None =>
-            val authInfo = passwordHasherRegistry.current.hash(data.password)
-            val user = User(
-              userID = UUID.randomUUID(),
-              loginInfo = loginInfo,
-              group = Some(data.group),
-              role = Some("operator"),
-              firstName = Some(data.firstName),
-              lastName = Some(data.lastName),
-              fullName = Some(data.firstName + " " + data.lastName),
-              email = Some(data.email),
-              avatarURL = None,
-              activated = false,
-              deletable = false
-            )
-            for {
-              avatar <- avatarService.retrieveURL(data.email)
-              user <- userService.save(user.copy(avatarURL = avatar))
-              _ <- authInfoRepository.add(loginInfo, authInfo)
-              authToken <- authTokenService.create(user.userID)
-            } yield {
-              val url = routes.ActivateAccountController.activate(authToken.id).absoluteURL()
+    if(!userService.checkAdminExists) {
+      SignUpForm.form.bindFromRequest.fold(
+        form => Future.successful(BadRequest(s"${Messages("error.invalid.request")}")),
+        data => {
+          val message = s"""${Messages("activate.account.text1")} ${data.email} ${Messages("activate.account.text2")}"""
+          val result = Ok(Json.toJson(UserSignUpResult(Ok.header.status, Option(message))))
+          val loginInfo = LoginInfo(CredentialsProvider.ID, s"""${data.email}:${data.group}""")
+          userService.retrieve(loginInfo).flatMap {
+            case Some(user) =>
+              val url = routes.SignInController.view().absoluteURL()
               mailerClient.send(Email(
-                subject = Messages("email.sign.up.subject"),
+                subject = Messages("email.already.signed.up.subject"),
                 from = Messages("email.from"),
                 to = Seq(data.email),
-                bodyText = Some(views.txt.emails.signUp(user, url).body),
-                bodyHtml = Some(views.html.emails.signUp(user, url).body)
+                bodyText = Some(views.txt.emails.alreadySignedUp(user, url).body),
+                bodyHtml = Some(views.html.emails.alreadySignedUp(user, url).body)
               ))
-
-              silhouette.env.eventBus.publish(SignUpEvent(user, request))
-              result
-            }
+              Future.successful(result)
+            case None =>
+              val authInfo = passwordHasherRegistry.current.hash(data.password)
+              val user = User(
+                userID = UUID.randomUUID(),
+                loginInfo = loginInfo,
+                group = Some(data.group),
+                role = Some("operator"),
+                firstName = Some(data.firstName),
+                lastName = Some(data.lastName),
+                fullName = Some(data.firstName + " " + data.lastName),
+                email = Some(data.email),
+                avatarURL = None,
+                activated = false,
+                deletable = false
+              )
+              for {
+                avatar <- avatarService.retrieveURL(data.email)
+                user <- userService.save(user.copy(avatarURL = avatar))
+                _ <- authInfoRepository.add(loginInfo, authInfo)
+                authToken <- authTokenService.create(user.userID)
+              } yield {
+                val url = routes.ActivateAccountController.activate(authToken.id).absoluteURL()
+                mailerClient.send(Email(
+                  subject = Messages("email.sign.up.subject"),
+                  from = Messages("email.from"),
+                  to = Seq(data.email),
+                  bodyText = Some(views.txt.emails.signUp(user, url).body),
+                  bodyHtml = Some(views.html.emails.signUp(user, url).body)
+                ))
+                silhouette.env.eventBus.publish(SignUpEvent(user, request))
+                result
+              }
+          }
         }
-      }
-    )
+      )
+    } else {
+      Future.successful(BadRequest(s"${Messages("error.invalid.request")}"))
+    }
   }
 }

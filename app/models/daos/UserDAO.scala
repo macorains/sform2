@@ -38,4 +38,5 @@ trait UserDAO {
   def save(user: User): Future[User]
 
   def getList(identity: User): JsValue
+  def countAdminUsers() :Int
 }

@@ -49,3 +49,6 @@ GET /user/isadmin controllers.UserController.isAdmin()
 # transferTask
 GET /transfertask/list/:form_id controllers.TransferTaskController.getTransferTaskListByFormId(form_id: String)
 GET /transfertask/:id controllers.TransferTaskController.getTransferTask(id: Int)
+
+# adminExistsCheck
+GET /adminExistsCheck controllers.AdminExistsCheckController.check()

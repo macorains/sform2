@@ -1,13 +1,10 @@
-//import com.typesafe.sbt.SbtScalariform._
+import sbt.Resolver
 
-//import scalariform.formatter.preferences._
-
-
-name := "sform2s"
+name := """sform2s"""
 
 version := "1.0-SNAPSHOT"
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.12.11"
 resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/"
 resolvers += Resolver.jcenterRepo
 resolvers += "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
@@ -18,8 +15,8 @@ libraryDependencies ++= Seq(
   jdbc,
   ws,
   evolutions,
-  "org.scala-lang" % "scala-reflect" % "2.12.3",
-  "mysql" % "mysql-connector-java" % "5.1.40",
+  "org.scala-lang" % "scala-reflect" % "2.12.11",
+  "mysql" % "mysql-connector-java" % "5.1.48",
   "org.scalikejdbc" %% "scalikejdbc" % "3.1.0",
   "org.scalikejdbc" %% "scalikejdbc-config" % "3.1.0",
   "org.scalikejdbc" %% "scalikejdbc-syntax-support-macro" % "3.1.0",
@@ -37,7 +34,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-mailer" % "6.0.0",
   "com.typesafe.play" %% "play-mailer-guice" % "6.0.0",
   "com.enragedginger" %% "akka-quartz-scheduler" % "1.6.1-akka-2.5.x",
-  "com.adrianhurt" %% "play-bootstrap" % "1.2-P26-B3-SNAPSHOT",
+  "com.adrianhurt" %% "play-bootstrap" % "1.2-P26-B4",
   "com.mohiva" %% "play-silhouette-testkit" % "5.0.0-RC2" % "test",
   "org.apache.commons" % "commons-lang3" % "3.1",
   "commons-io" % "commons-io" % "2.4" ,

@@ -104,7 +104,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
 
   def add(user: User): Future[User] = {
     DB localTx { implicit l =>
-      sql"INSERT INTO M_USERINFO(USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE) VALUES(${user.userID.toString},${user.loginInfo.providerID},${user.loginInfo.providerKey},${user.group},${user.role},${user.firstName},${user.lastName},${user.email},'',0)"
+      sql"INSERT INTO M_USERINFO(USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE) VALUES(${user.userID.toString},${user.loginInfo.providerID},${user.loginInfo.providerKey},${user.group},${user.role},${user.firstName},${user.lastName},${user.email},'',0,1)"
         .update.apply()
       Future.successful(user)
     }
@@ -138,6 +138,11 @@ class UserDAOImpl extends UserDAO with SFDBConf {
       )
       Json.toJson(userListJson)
     }
+  }
+
+  // Adminグループのユーザーアカウント数を取得
+  def countAdminUsers() :Int = {
+    sql"SELECT count(*) FROM M_USERINFO WHERE USER_GROUP='admin'".map(_.int(1)).first.apply.getOrElse(0)
   }
 }
 
