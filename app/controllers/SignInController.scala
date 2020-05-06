@@ -62,14 +62,14 @@ class SignInController @Inject() (
   def submit = silhouette.UnsecuredAction.async { implicit request =>
     SignInForm.form.bindFromRequest.fold(
       // form => Future.successful(BadRequest(views.html.signIn(form))),
-      form => Future.successful(BadRequest(Json.parse("""{"message":"Invalid Request"}"""))),
+      form => Future.successful(BadRequest(Json.parse(s"""{"message":"${Messages("error.invalid.request")}"}"""))),
       data => {
         val credentials = Credentials(data.email + ":" + data.group, data.password)
         credentialsProvider.authenticate(credentials).flatMap { loginInfo =>
           val result = Redirect(routes.ApplicationController.index())
           userService.retrieve(loginInfo).flatMap {
             case Some(user) if !user.activated =>
-              Future.successful(BadRequest(Json.parse("""{"message":"User Not Activated"}""")))
+              Future.successful(BadRequest(Json.parse(s"""{"message":"${Messages("error.not.activated")}"}""")))
             case Some(user) =>
               val c = configuration.underlying
               silhouette.env.authenticatorService.create(loginInfo).map {
@@ -86,11 +86,10 @@ class SignInController @Inject() (
                   silhouette.env.authenticatorService.embed(v, Ok)
                 }
               }
-            case None => Future.failed(new IdentityNotFoundException("Couldn't find user"))
+            case None => Future.failed(new IdentityNotFoundException(s"${Messages("error.user.not.found")}"))
           }
         }.recover {
           case e: ProviderException =>
-
             BadRequest(Json.parse(s"""{"message":"${e.toString}"}"""))
         }
       }
