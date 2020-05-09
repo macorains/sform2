@@ -18,6 +18,7 @@ import org.webjars.play.WebJarsUtil
 import play.api.Configuration
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.{JsNull, JsObject, JsString, JsValue, Json}
+import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents, Request, RequestHeader}
 import play.cache.SyncCacheApi
 import utils.auth.DefaultEnv
@@ -43,7 +44,8 @@ class SignInController @Inject() (
   credentialsProvider: CredentialsProvider,
   configuration: Configuration,
   clock: Clock,
-  cache: SyncCacheApi
+  cache: SyncCacheApi,
+  mailerClient: MailerClient
 )(
   implicit
   webJarsUtil: WebJarsUtil,
@@ -57,7 +59,6 @@ class SignInController @Inject() (
 
   /**
    * Views the `Sign In` page.
-   *
    * @return The result to display.
    */
   def view = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
@@ -66,7 +67,6 @@ class SignInController @Inject() (
 
   /**
    * Handles the submitted form.
-   * h
    * @return The result to display.
    */
   def submit = silhouette.UnsecuredAction.async { implicit request =>
@@ -96,8 +96,13 @@ class SignInController @Inject() (
                 cache.set(authenticatorPrefix + formToken, authenticator, cacheExpireTime)
                 cache.set(loginEventPrefix + formToken, LoginEvent(user, request), cacheExpireTime)
 
-                // ToDo メール送信処理を追加
-                println(verificationCode)
+                mailerClient.send(Email(
+                  subject = Messages("email.verification.subject"),
+                  from = Messages("email.from"),
+                  to = Seq(data.email),
+                  bodyText = Some(views.txt.emails.verification(verificationCode).body),
+                  bodyHtml = Some(views.html.emails.verification(verificationCode).body)
+                ))
                 Future.successful(Ok(Json.parse(s"""{"message":"OK","formToken":"$formToken"}""")))
               }
             case None => Future.failed(new IdentityNotFoundException(s"${Messages("error.user.not.found")}"))
