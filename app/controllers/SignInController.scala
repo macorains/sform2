@@ -1,24 +1,29 @@
 package controllers
 
+import java.util.UUID
+
 import javax.inject.Inject
 import com.mohiva.play.silhouette.api.Authenticator.Implicits._
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
-import com.mohiva.play.silhouette.api.util.{ Clock, Credentials }
+import com.mohiva.play.silhouette.api.util.{Clock, Credentials}
+import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
 import com.mohiva.play.silhouette.impl.exceptions.IdentityNotFoundException
 import com.mohiva.play.silhouette.impl.providers._
 import forms.SignInForm
+import models.json.{VerificationRequestEntry, VerificationRequestJson}
 import models.services.UserService
 import net.ceedubs.ficus.Ficus._
 import org.webjars.play.WebJarsUtil
 import play.api.Configuration
-import play.api.i18n.{ I18nSupport, Messages }
-import play.api.libs.json.{ JsObject, JsString, Json }
-import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
+import play.api.i18n.{I18nSupport, Messages}
+import play.api.libs.json.{JsNull, JsObject, JsString, JsValue, Json}
+import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents, Request, RequestHeader}
+import play.cache.SyncCacheApi
 import utils.auth.DefaultEnv
 
 import scala.concurrent.duration._
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * The `Sign In` controller.
@@ -37,12 +42,18 @@ class SignInController @Inject() (
   userService: UserService,
   credentialsProvider: CredentialsProvider,
   configuration: Configuration,
-  clock: Clock
+  clock: Clock,
+  cache: SyncCacheApi
 )(
   implicit
   webJarsUtil: WebJarsUtil,
   ex: ExecutionContext
-) extends AbstractController(components) with I18nSupport {
+) extends AbstractController(components) with I18nSupport with VerificationRequestJson {
+
+  val verificationCodePrefix = "VC_"
+  val authenticatorPrefix = "AU_"
+  val loginEventPrefix = "LE_"
+  val cacheExpireTime = 60
 
   /**
    * Views the `Sign In` page.
@@ -50,7 +61,6 @@ class SignInController @Inject() (
    * @return The result to display.
    */
   def view = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
-    // Future.successful(Ok(views.html.signIn(SignInForm.form)))
     Future.successful(Ok(""))
   }
 
@@ -61,7 +71,6 @@ class SignInController @Inject() (
    */
   def submit = silhouette.UnsecuredAction.async { implicit request =>
     SignInForm.form.bindFromRequest.fold(
-      // form => Future.successful(BadRequest(views.html.signIn(form))),
       form => Future.successful(BadRequest(Json.parse(s"""{"message":"${Messages("error.invalid.request")}"}"""))),
       data => {
         val credentials = Credentials(data.email + ":" + data.group, data.password)
@@ -81,10 +90,15 @@ class SignInController @Inject() (
                   )
                 case authenticator => authenticator
               }.flatMap { authenticator =>
-                silhouette.env.eventBus.publish(LoginEvent(user, request))
-                silhouette.env.authenticatorService.init(authenticator).flatMap { v =>
-                  silhouette.env.authenticatorService.embed(v, Ok)
-                }
+                val verificationCode = (Math.floor(Math.random * 899999).toInt + 100000).toString
+                val formToken = UUID.randomUUID().toString
+                cache.set(verificationCodePrefix + formToken, verificationCode, cacheExpireTime)
+                cache.set(authenticatorPrefix + formToken, authenticator, cacheExpireTime)
+                cache.set(loginEventPrefix + formToken, LoginEvent(user, request), cacheExpireTime)
+
+                // ToDo メール送信処理を追加
+                println(verificationCode)
+                Future.successful(Ok(Json.parse(s"""{"message":"OK","formToken":"$formToken"}""")))
               }
             case None => Future.failed(new IdentityNotFoundException(s"${Messages("error.user.not.found")}"))
           }
@@ -94,5 +108,30 @@ class SignInController @Inject() (
         }
       }
     )
+  }
+
+  /**
+   * 認証コードのチェック
+   * @return
+   */
+  def verification: Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request =>
+    request.body.asJson.getOrElse(JsNull).validate[VerificationRequestEntry].asOpt match {
+      case Some(verificationRequest) => {
+        val formToken = verificationRequest.formToken
+        val verificationCode = cache.get[String](verificationCodePrefix + formToken)
+        val loginEvent = cache.get[LoginEvent[Identity]](loginEventPrefix + formToken)
+        val authentication = cache.get[JWTAuthenticator](authenticatorPrefix + formToken)
+
+        if(verificationCode != null && verificationCode.equals(verificationRequest.verificationCode) && loginEvent != null && authentication != null){
+          silhouette.env.eventBus.publish(loginEvent)
+          silhouette.env.authenticatorService.init(authentication).flatMap { v =>
+            silhouette.env.authenticatorService.embed(v, Ok)
+          }
+        } else {
+          Future.successful(BadRequest(Json.parse(s"""{"message":"${Messages("error.invalid.request")}"}""")))
+        }
+      }
+      case None => Future.successful(BadRequest(Json.parse(s"""{"message":"NG!"}"}""")))
+    }
   }
 }
