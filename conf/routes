@@ -13,6 +13,7 @@ POST        /signUp                          controllers.SignUpController.submit
 
 GET         /signIn                          controllers.SignInController.view
 POST        /signIn                          controllers.SignInController.submit
+POST        /verification                    controllers.SignInController.verification
 
 GET         /password/forgot                 controllers.ForgotPasswordController.view
 POST        /password/forgot                 controllers.ForgotPasswordController.submit
