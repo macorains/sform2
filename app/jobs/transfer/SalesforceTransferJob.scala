@@ -129,7 +129,7 @@ class SalesforceTransferJob @Inject() (
         true
       case _ =>
         // SFに接続できない
-        Logger.error("    Could not connect to Salesforce.")
+        Logger.logger.error("    Could not connect to Salesforce.")
         false
     }
 
