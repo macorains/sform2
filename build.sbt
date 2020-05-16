@@ -16,7 +16,7 @@ libraryDependencies ++= Seq(
   ws,
   evolutions,
   "org.scala-lang" % "scala-reflect" % "2.12.11",
-  "mysql" % "mysql-connector-java" % "5.1.48",
+  "mysql" % "mysql-connector-java" % "8.0.20",
   "org.scalikejdbc" %% "scalikejdbc" % "3.1.0",
   "org.scalikejdbc" %% "scalikejdbc-config" % "3.1.0",
   "org.scalikejdbc" %% "scalikejdbc-syntax-support-macro" % "3.1.0",
