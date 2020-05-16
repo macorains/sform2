@@ -38,7 +38,7 @@ case class SalesforceTransferConfigDAO @Inject() (
   )(SalesforceTransferConfig.apply _)
 
   override def getTransferConfig: JsValue = {
-    Logger.debug("SalesforceTransferInfoDAO.getTransferConfig")
+    Logger.logger.debug("SalesforceTransferInfoDAO.getTransferConfig")
     transfersDao.getTransfer(transferType) match {
       case tx: List[Transfer] => {
         // 暫定対応

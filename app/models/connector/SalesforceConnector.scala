@@ -24,7 +24,7 @@ class SalesforceConnector {
       val loginResult = connection.login(user, password + securityToken)
       if(loginResult.isPasswordExpired) {
         // ログインした結果、パスワード有効期限切れならログ出力
-        Logger.error(s"Salesforce Login Failed. Password expired. Please change password and security token. user={$user}")
+        Logger.logger.error(s"Salesforce Login Failed. Password expired. Please change password and security token. user={$user}")
         None
       } else {
         Logger.logger.info(s"Salesforce Login Success. user={$user}")
@@ -42,7 +42,7 @@ class SalesforceConnector {
   def create(connection: PartnerConnection, sObjectArray: Array[SObject]) = {
     val res = connection.create(sObjectArray)
 
-    res.foreach(r => r.getErrors.foreach(e => Logger.debug(e.getMessage)))
+    res.foreach(r => r.getErrors.foreach(e => Logger.logger.debug(e.getMessage)))
     res
   }
 

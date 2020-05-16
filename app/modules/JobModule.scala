@@ -13,7 +13,7 @@ class JobModule extends ScalaModule with AkkaGuiceSupport {
   /**
    * Configures the module.
    */
-  def configure() = {
+  override def configure() = {
     bindActor[AuthTokenCleaner]("auth-token-cleaner")
     // bindActor[SalesforceDataRegister]("salesforce-data-register")
     // bindActor[MailTransferSendMail]("mail-transfer-send-mail")

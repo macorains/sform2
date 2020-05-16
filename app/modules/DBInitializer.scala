@@ -13,7 +13,7 @@ class DBInitializer {
 }
 
 class DBInitializerModule extends AbstractModule {
-  def configure() = {
+  override def configure() = {
     bind(classOf[DBInitializer]).asEagerSingleton()
   }
 }
