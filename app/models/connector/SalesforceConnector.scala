@@ -4,7 +4,7 @@ import com.sforce.soap.partner._
 import com.sforce.soap.partner.sobject._
 import com.sforce.ws._
 import models.json.DescribeSObjectResult
-import play.Logger
+import play.api.Logger
 
 class SalesforceConnector {
 
@@ -27,13 +27,13 @@ class SalesforceConnector {
         Logger.error(s"Salesforce Login Failed. Password expired. Please change password and security token. user={$user}")
         None
       } else {
-        Logger.info(s"Salesforce Login Success. user={$user}")
+        Logger.logger.info(s"Salesforce Login Success. user={$user}")
         Some(connection)
       }
     } catch {
       case e: Exception => {
-        Logger.error(s"Salesforce Login Failed. user={$user} password={$password} securityToken={$securityToken}")
-        Logger.error(e.toString)
+        Logger.logger.error(s"Salesforce Login Failed. user={$user} password={$password} securityToken={$securityToken}")
+        Logger.logger.error(e.toString)
         None
       }
     }

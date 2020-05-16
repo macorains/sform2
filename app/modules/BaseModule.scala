@@ -13,6 +13,7 @@ class BaseModule extends AbstractModule with ScalaModule {
   /**
    * Configures the module.
    */
+  @Override
   def configure(): Unit = {
     bind[AuthTokenDAO].to[AuthTokenDAOImpl]
     bind[AuthTokenService].to[AuthTokenServiceImpl]

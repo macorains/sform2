@@ -9,7 +9,7 @@ import scalikejdbc.config._
  */
 class DBInitializer {
   DBs.setupAll()
-  Logger.debug(s"db setup...")
+  Logger.logger.debug(s"db setup...")
 }
 
 class DBInitializerModule extends AbstractModule {
