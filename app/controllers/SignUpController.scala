@@ -13,6 +13,7 @@ import models.User
 import models.json.{UserSignUpResult, UserSignUpResultJson}
 import models.services.{AuthTokenService, UserService}
 import org.webjars.play.WebJarsUtil
+import play.api.Configuration
 import play.api.http.HttpEntity
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.Json
@@ -37,6 +38,7 @@ import scala.concurrent.{ExecutionContext, Future}
  * @param ex                     The execution context.
  */
 class SignUpController @Inject() (
+  config: Configuration,
   components: ControllerComponents,
   silhouette: Silhouette[DefaultEnv],
   userService: UserService,
@@ -68,6 +70,7 @@ class SignUpController @Inject() (
    */
   def submit: Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     if(!userService.checkAdminExists) {
+      val virtualHostName = config.get[String]("silhouette.virtualHostName")
       SignUpForm.form.bindFromRequest.fold(
         form => Future.successful(BadRequest(s"${Messages("error.invalid.request")}")),
         data => {
@@ -76,7 +79,7 @@ class SignUpController @Inject() (
           val loginInfo = LoginInfo(CredentialsProvider.ID, s"""${data.email}:${data.group}""")
           userService.retrieve(loginInfo).flatMap {
             case Some(user) =>
-              val url = routes.SignInController.view().absoluteURL()
+              val url = routes.SignInController.view().absoluteURL().replaceFirst("https*://[^/]+/", virtualHostName)
               mailerClient.send(Email(
                 subject = Messages("email.already.signed.up.subject"),
                 from = Messages("email.from"),
@@ -106,7 +109,7 @@ class SignUpController @Inject() (
                 _ <- authInfoRepository.add(loginInfo, authInfo)
                 authToken <- authTokenService.create(user.userID)
               } yield {
-                val url = routes.ActivateAccountController.activate(authToken.id).absoluteURL()
+                val url = routes.ActivateAccountController.activate(authToken.id).absoluteURL().replaceFirst("https*://[^/]+/", virtualHostName)
                 mailerClient.send(Email(
                   subject = Messages("email.sign.up.subject"),
                   from = Messages("email.from"),
