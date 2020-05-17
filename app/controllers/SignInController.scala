@@ -127,7 +127,7 @@ class SignInController @Inject() (
         val loginEvent = cache.getOptional[LoginEvent[Identity]](loginEventPrefix + formToken)
         val authentication = cache.getOptional[JWTAuthenticator](authenticatorPrefix + formToken)
 
-        if(verificationCode.isPresent && verificationCode.equals(verificationRequest.verificationCode) && loginEvent.isPresent && authentication.isPresent){
+        if(verificationCode.isPresent && verificationCode.get.equals(verificationRequest.verificationCode) && loginEvent.isPresent && authentication.isPresent){
           silhouette.env.eventBus.publish(loginEvent.get())
           silhouette.env.authenticatorService.init(authentication.get()).flatMap { v =>
             silhouette.env.authenticatorService.embed(v, Ok)
