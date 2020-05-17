@@ -55,7 +55,7 @@ class ActivateAccountController @Inject() (
         authTokenService.create(user.userID).map { authToken =>
           val virtualHostName = config.get[String]("silhouette.virtualHostName")
           val url = routes.ActivateAccountController.activate(authToken.id).absoluteURL()
-            .replaceFirst("https*://(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]):*[0-9]{0,5}/", virtualHostName)
+            .replaceFirst("https*://[^/]+/", virtualHostName)
           mailerClient.send(Email(
             subject = Messages("email.activate.account.subject"),
             from = Messages("email.from"),
