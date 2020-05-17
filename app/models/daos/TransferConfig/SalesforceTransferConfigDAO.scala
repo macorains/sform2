@@ -10,7 +10,7 @@ import com.sforce.soap.partner.{DescribeSObjectResult, Field, PartnerConnection}
 import models.User
 import models.json.SalesforceTransferJson
 import utils.Crypto
-import play.Logger
+import play.api.Logger
 import play.api.Configuration
 
 case class SalesforceTransferConfigDAO @Inject() (
@@ -38,7 +38,7 @@ case class SalesforceTransferConfigDAO @Inject() (
   )(SalesforceTransferConfig.apply _)
 
   override def getTransferConfig: JsValue = {
-    Logger.debug("SalesforceTransferInfoDAO.getTransferConfig")
+    Logger.logger.debug("SalesforceTransferInfoDAO.getTransferConfig")
     transfersDao.getTransfer(transferType) match {
       case tx: List[Transfer] => {
         // 暫定対応
@@ -57,11 +57,11 @@ case class SalesforceTransferConfigDAO @Inject() (
                   case None => {
                     c1.get.sfObjectDefinition match {
                       case Some(s: List[DescribeSObjectResult]) => {
-                        Logger.error("Couldn't get Object Definition from Salesforce. Use previous data.")
+                        Logger.logger.error("Couldn't get Object Definition from Salesforce. Use previous data.")
                         c1.get.sfObjectDefinition
                       }
                       case _ => {
-                        Logger.error("Couldn't get Object Definition from Salesforce. Can't create Object Definition data.")
+                        Logger.logger.error("Couldn't get Object Definition from Salesforce. Can't create Object Definition data.")
                         None
                       }
                     }
@@ -72,7 +72,7 @@ case class SalesforceTransferConfigDAO @Inject() (
                 decrypto(Json.toJson(newSalesforceTransferConfig))
               }
               case e: JsError => {
-                Logger.error("JSON validate[SalesforceTransferConfig] failed. ")
+                Logger.logger.error("JSON validate[SalesforceTransferConfig] failed. ")
                 Json.toJson("""{"error" : "2"}""")
               }
             }
@@ -80,14 +80,14 @@ case class SalesforceTransferConfigDAO @Inject() (
         }
       }
       case _ => {
-        Logger.error("Couldn't get Transfer. ")
+        Logger.logger.error("Couldn't get Transfer. ")
         Json.toJson("""{"error" : "3"}""")
       }
     }
   }
 
   override def saveTransferConfig(config: JsValue, identity: User): JsValue = {
-    Logger.debug("SalesforceTransferInfoDAO.saveTransferConfig")
+    Logger.logger.debug("SalesforceTransferInfoDAO.saveTransferConfig")
     transfersDao.updateByUserIdentity(identity, transferType, encrypto(config).toString())
     Json.toJson("""{}""")
   }
@@ -101,7 +101,7 @@ case class SalesforceTransferConfigDAO @Inject() (
         }).getOrElse(config)
       }
       case _ => {
-        Logger.error("encrypt failed.")
+        Logger.logger.error("encrypt failed.")
         config
       }
     }
@@ -116,7 +116,7 @@ case class SalesforceTransferConfigDAO @Inject() (
         }).getOrElse(config)
       }
       case _ => {
-        Logger.error("decrypt failed.")
+        Logger.logger.error("decrypt failed.")
         config
       }
     }

@@ -55,7 +55,7 @@ class MailTransferJob @Inject() (
 
   def execute(transferTask: TransferTask, transfer: Transfer, postdataList: List[Postdata]): Unit = {
     // 開始ログ
-    Logger.info(s"    Start MailTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
+    Logger.logger.info(s"    Start MailTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
 
     getTransferConfig(transfer) match {
       case transferConfig: JsSuccess[MailTransferConfig] =>
@@ -66,19 +66,19 @@ class MailTransferJob @Inject() (
                 executeTransferTask(transferConfig.get, transferTaskConfig.get, postdataList, transfer.type_id)
               case _ =>
                 // データが無い
-                Logger.info("    No data for transfer.")
+                Logger.logger.info("    No data for transfer.")
             }
           case e2: JsError =>
             // transferTaskConfigが取れない
-            Logger.error("    Could not get TransferTaskConfig.")
+            Logger.logger.error("    Could not get TransferTaskConfig.")
         }
       case e1: JsError =>
         // transferConfigが取れない
-        Logger.error("    Could not get TransferConfig.")
+        Logger.logger.error("    Could not get TransferConfig.")
     }
 
     // 終了ログ
-    Logger.info(s"    End MailTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
+    Logger.logger.info(s"    End MailTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
   }
 
   /**
