@@ -2,21 +2,23 @@ package controllers
 
 import java.net.URLDecoder
 import java.util.UUID
-import javax.inject.Inject
 
+import javax.inject.Inject
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
-import models.services.{ AuthTokenService, UserService }
-import play.api.i18n.{ I18nSupport, Messages }
-import play.api.libs.mailer.{ Email, MailerClient }
-import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
+import models.services.{AuthTokenService, UserService}
+import play.api.Configuration
+import play.api.i18n.{I18nSupport, Messages}
+import play.api.libs.mailer.{Email, MailerClient}
+import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Request}
 import utils.auth.DefaultEnv
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * The `Activate Account` controller.
  *
+ * @param config           Configuration
  * @param components       The Play controller components.
  * @param silhouette       The Silhouette stack.
  * @param userService      The user service implementation.
@@ -25,6 +27,7 @@ import scala.concurrent.{ ExecutionContext, Future }
  * @param ex               The execution context.
  */
 class ActivateAccountController @Inject() (
+  config: Configuration,
   components: ControllerComponents,
   silhouette: Silhouette[DefaultEnv],
   userService: UserService,
@@ -50,8 +53,9 @@ class ActivateAccountController @Inject() (
     userService.retrieve(loginInfo).flatMap {
       case Some(user) if !user.activated =>
         authTokenService.create(user.userID).map { authToken =>
+          val virtualHostName = config.get[String]("silhouette.virtualHostName")
           val url = routes.ActivateAccountController.activate(authToken.id).absoluteURL()
-
+            .replaceFirst("https*://(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]):*[0-9]{0,5}/", virtualHostName)
           mailerClient.send(Email(
             subject = Messages("email.activate.account.subject"),
             from = Messages("email.from"),
