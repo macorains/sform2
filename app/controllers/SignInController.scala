@@ -123,13 +123,13 @@ class SignInController @Inject() (
     request.body.asJson.getOrElse(JsNull).validate[VerificationRequestEntry].asOpt match {
       case Some(verificationRequest) => {
         val formToken = verificationRequest.formToken
-        val verificationCode = cache.get[String](verificationCodePrefix + formToken)
-        val loginEvent = cache.get[LoginEvent[Identity]](loginEventPrefix + formToken)
-        val authentication = cache.get[JWTAuthenticator](authenticatorPrefix + formToken)
+        val verificationCode = cache.getOptional[String](verificationCodePrefix + formToken)
+        val loginEvent = cache.getOptional[LoginEvent[Identity]](loginEventPrefix + formToken)
+        val authentication = cache.getOptional[JWTAuthenticator](authenticatorPrefix + formToken)
 
-        if(verificationCode != null && verificationCode.equals(verificationRequest.verificationCode) && loginEvent != null && authentication != null){
-          silhouette.env.eventBus.publish(loginEvent)
-          silhouette.env.authenticatorService.init(authentication).flatMap { v =>
+        if(verificationCode.ifPresent && verificationCode.equals(verificationRequest.verificationCode) && loginEvent.isPresent && authentication.isPresent){
+          silhouette.env.eventBus.publish(loginEvent.get())
+          silhouette.env.authenticatorService.init(authentication.get()).flatMap { v =>
             silhouette.env.authenticatorService.embed(v, Ok)
           }
         } else {
