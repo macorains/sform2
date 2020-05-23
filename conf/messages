@@ -80,7 +80,7 @@ yahoo = Yahoo
 # Emails
 ##########
 
-email.from = Silhouette <noreply@mohiva.com>
+email.from = Sform <noreply@msform.net>
 
 # Sign Up
 email.sign.up.subject = Welcome
