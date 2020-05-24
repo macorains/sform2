@@ -10,6 +10,7 @@ import com.mohiva.play.silhouette.api.util.{Clock, Credentials}
 import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
 import com.mohiva.play.silhouette.impl.exceptions.IdentityNotFoundException
 import com.mohiva.play.silhouette.impl.providers._
+import com.digitaltangible.playguard._
 import forms.SignInForm
 import models.json.{VerificationRequestEntry, VerificationRequestJson}
 import models.services.UserService
@@ -19,7 +20,7 @@ import play.api.Configuration
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.{JsNull, JsObject, JsString, JsValue, Json}
 import play.api.libs.mailer.{Email, MailerClient}
-import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents, Request, RequestHeader}
+import play.api.mvc.{AbstractController, Action, ActionBuilder, AnyContent, ControllerComponents, Request, RequestHeader, Results}
 import play.cache.SyncCacheApi
 import utils.auth.DefaultEnv
 
@@ -55,6 +56,7 @@ class SignInController @Inject() (
   val verificationCodePrefix = "VC_"
   val authenticatorPrefix = "AU_"
   val loginEventPrefix = "LE_"
+  val failureCheckPrefix = "FC_"
   val cacheExpireTime = 60
 
   /**
@@ -69,7 +71,7 @@ class SignInController @Inject() (
    * Handles the submitted form.
    * @return The result to display.
    */
-  def submit = silhouette.UnsecuredAction.async { implicit request =>
+  def submit = (silhouette.UnsecuredAction andThen httpErrorRateLimitFunction).async { implicit request =>
     SignInForm.form.bindFromRequest.fold(
       form => Future.successful(BadRequest(Json.parse(s"""{"message":"${Messages("error.invalid.request")}"}"""))),
       data => {
@@ -139,4 +141,8 @@ class SignInController @Inject() (
       case None => Future.successful(BadRequest(Json.parse(s"""{"message":"NG!"}"}""")))
     }
   }
+
+  private val httpErrorRateLimitFunction =
+    HttpErrorRateLimitFunction[Request](new RateLimiter(1, 1/7f, "test failure rate limit"), _ => Future.successful(BadRequest("Login failure limit exceeded")))
+
 }
