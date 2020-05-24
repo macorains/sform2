@@ -3,6 +3,7 @@ error.invalid.request = Invalid request
 error.not.activated = User Not Activated
 error.required = This field is required
 error.user.not.found = User Not Found
+error.failure.limit.exceed = Login failure limit exceeded
 invalid.credentials = Invalid credentials!
 access.denied = Access denied!
 could.not.authenticate = Could not authenticate with social provider! Please try again!

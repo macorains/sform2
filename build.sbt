@@ -35,6 +35,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-mailer-guice" % "6.0.0",
   "com.enragedginger" %% "akka-quartz-scheduler" % "1.6.1-akka-2.5.x",
   "com.adrianhurt" %% "play-bootstrap" % "1.2-P26-B4",
+  "com.digitaltangible" %% "play-guard" % "2.4.0",
   "com.mohiva" %% "play-silhouette-testkit" % "5.0.0-RC2" % "test",
   "org.apache.commons" % "commons-lang3" % "3.1",
   "commons-io" % "commons-io" % "2.4" ,
