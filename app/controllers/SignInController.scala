@@ -143,6 +143,6 @@ class SignInController @Inject() (
   }
 
   private val httpErrorRateLimitFunction =
-    HttpErrorRateLimitFunction[Request](new RateLimiter(1, 1/7f, "test failure rate limit"), _ => Future.successful(BadRequest("Login failure limit exceeded")))
+    HttpErrorRateLimitFunction[Request](new RateLimiter(1, 1/7f, "test failure rate limit"), _ => Future.successful(BadRequest(Json.parse(s"""{"message":"LoginFailureLimitExceeded"}"""))))
 
 }
