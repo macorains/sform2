@@ -135,10 +135,10 @@ class SignInController @Inject() (
             silhouette.env.authenticatorService.embed(v, Ok)
           }
         } else {
-          Future.successful(BadRequest(Json.parse(s"""{"message":"${Messages("error.invalid.request")}"}""")))
+          Future.successful(BadRequest(Json.parse(s"""{"message":"${Messages("error.verification.timeout")}"}""")))
         }
       }
-      case None => Future.successful(BadRequest(Json.parse(s"""{"message":"NG!"}"}""")))
+      case None => Future.successful(BadRequest(Json.parse(s"""{"message":"${Messages("error.verification.invalid")}"}"}""")))
     }
   }
 

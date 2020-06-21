@@ -23,6 +23,9 @@ play.http.parser.maxMemoryBuffer = 5MB
 play.http.parser.maxDiskBuffer = 100MB
 parsers.anyContent.maxLength = 100MB
 
+# Session Cookie
+play.http.session.maxAge = 1h
+
 # The application DI modules
 # ~~~~~
 play.modules.enabled += "modules.BaseModule"
