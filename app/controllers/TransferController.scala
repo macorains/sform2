@@ -9,15 +9,15 @@ import play.api.libs.functional.syntax._
 import play.api.Environment
 import models._
 import models.daos.TransfersDAO
-import models.services.UserService
 import play.api.i18n.I18nSupport
-import utils.auth.{ DefaultEnv, WithProvider }
+import utils.auth.{DefaultEnv, WithProvider}
 import com.mohiva.play.silhouette.api._
 import org.webjars.play.WebJarsUtil
 import com.mohiva.play.silhouette.impl.providers._
 import models.daos.TransferConfig.BaseTransferConfigDAO
+import net.macolabo.sform2.services.UserService
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 class TransferController @Inject() (
   env: Environment,

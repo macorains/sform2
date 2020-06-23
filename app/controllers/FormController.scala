@@ -8,15 +8,15 @@ import play.api.libs.json.Json._
 import play.api.libs.json.JsValue
 import play.api.Environment
 import models._
-import models.daos.{ FormsDAO, TransferTaskDAO }
-import models.services.UserService
+import models.daos.{FormsDAO, TransferTaskDAO}
 import play.api.i18n.I18nSupport
-import utils.auth.{ DefaultEnv, WithProvider }
+import utils.auth.{DefaultEnv, WithProvider}
 import com.mohiva.play.silhouette.api._
 import org.webjars.play.WebJarsUtil
 import com.mohiva.play.silhouette.impl.providers._
+import net.macolabo.sform2.services.UserService
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 class FormController @Inject() (
   env: Environment,

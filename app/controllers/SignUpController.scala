@@ -11,8 +11,7 @@ import com.mohiva.play.silhouette.impl.providers._
 import forms.SignUpForm
 import models.User
 import models.json.{UserSignUpResult, UserSignUpResultJson}
-import models.services.UserService
-import net.macolabo.sform2.services.AuthTokenService
+import net.macolabo.sform2.services.{AuthTokenService, UserService}
 import org.webjars.play.WebJarsUtil
 import play.api.Configuration
 import play.api.i18n.{I18nSupport, Messages}

@@ -163,3 +163,4 @@ db {
 
 
 include "silhouette.conf"
+include "sform.conf"

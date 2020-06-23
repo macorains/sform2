@@ -13,8 +13,8 @@ import com.mohiva.play.silhouette.impl.providers._
 import com.digitaltangible.playguard._
 import forms.SignInForm
 import models.json.{VerificationRequestEntry, VerificationRequestJson}
-import models.services.UserService
 import net.ceedubs.ficus.Ficus._
+import net.macolabo.sform2.services.UserService
 import org.webjars.play.WebJarsUtil
 import play.api.Configuration
 import play.api.i18n.{I18nSupport, Messages}
