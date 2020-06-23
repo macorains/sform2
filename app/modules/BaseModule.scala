@@ -1,9 +1,9 @@
 package modules
 
 import com.google.inject.AbstractModule
-import models.daos.{ AuthTokenDAO, AuthTokenDAOImpl }
-import models.services.{ AuthTokenService, AuthTokenServiceImpl }
+import models.daos.{AuthTokenDAO, AuthTokenDAOImpl}
 import net.codingwell.scalaguice.ScalaModule
+import net.macolabo.sform2.services.{AuthTokenService, AuthTokenServiceImpl}
 
 /**
  * The base Guice module.

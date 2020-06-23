@@ -1,4 +1,4 @@
-package models.services
+package net.macolabo.sform2.services
 
 import java.util.UUID
 
