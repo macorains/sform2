@@ -28,11 +28,11 @@ play.http.session.maxAge = 1h
 
 # The application DI modules
 # ~~~~~
-play.modules.enabled += "modules.BaseModule"
-play.modules.enabled += "modules.JobModule"
-play.modules.enabled += "modules.SilhouetteModule"
+play.modules.enabled += "net.macolabo.sform2.modules.BaseModule"
+play.modules.enabled += "net.macolabo.sform2.modules.JobModule"
+play.modules.enabled += "net.macolabo.sform2.modules.SilhouetteModule"
 play.modules.enabled += "play.api.libs.mailer.MailerModule"
-play.modules.enabled += "modules.DBInitializerModule"
+play.modules.enabled += "net.macolabo.sform2.modules.DBInitializerModule"
 
 play.modules.disabled += "com.mohiva.play.silhouette.api.actions.SecuredErrorHandlerModule"
 play.modules.disabled += "com.mohiva.play.silhouette.api.actions.UnsecuredErrorHandlerModule"

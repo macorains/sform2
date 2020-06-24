@@ -1,4 +1,4 @@
-package modules
+package net.macolabo.sform2.modules
 
 import com.google.inject.name.Named
 import com.google.inject.{AbstractModule, Provides}
@@ -13,7 +13,7 @@ import com.mohiva.play.silhouette.impl.authenticators._
 import com.mohiva.play.silhouette.impl.providers._
 import com.mohiva.play.silhouette.impl.providers.oauth1._
 import com.mohiva.play.silhouette.impl.providers.oauth1.secrets.{CookieSecretProvider, CookieSecretSettings}
-import services.PlayOAuth1Service
+import com.mohiva.play.silhouette.impl.providers.oauth1.services.PlayOAuth1Service
 import com.mohiva.play.silhouette.impl.providers.oauth2._
 import com.mohiva.play.silhouette.impl.providers.openid.YahooProvider
 import com.mohiva.play.silhouette.impl.providers.openid.services.PlayOpenIDService
@@ -27,14 +27,12 @@ import models.daos._
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.codingwell.scalaguice.ScalaModule
+import net.macolabo.sform2.services.{UserService, UserServiceImpl}
 import play.api.Configuration
 import play.api.libs.openid.OpenIdClient
 import play.api.libs.ws.WSClient
-import play.api.mvc.CookieHeaderEncoding
 import utils.auth.{CustomSecuredErrorHandler, CustomUnsecuredErrorHandler, DefaultEnv}
 import net.ceedubs.ficus.readers.EnumerationReader._
-import net.macolabo.sform2.services.{UserService, UserServiceImpl}
-
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**

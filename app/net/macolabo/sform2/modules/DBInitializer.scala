@@ -1,4 +1,4 @@
-package modules
+package net.macolabo.sform2.modules
 
 import com.google.inject.AbstractModule
 import play.api.Logger
