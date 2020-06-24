@@ -1,21 +1,20 @@
-package controllers
-import javax.inject._
-import play.api._
-import play.api.db.DBApi
-import play.api.mvc._
-import play.api.libs.json._
-import play.api.libs.json.Reads._
-import play.api.libs.functional.syntax._
-import play.api.Environment
-import models._
-import models.daos.TransfersDAO
-import play.api.i18n.I18nSupport
-import utils.auth.{DefaultEnv, WithProvider}
+package net.macolabo.sform2.controllers
+
 import com.mohiva.play.silhouette.api._
-import org.webjars.play.WebJarsUtil
 import com.mohiva.play.silhouette.impl.providers._
+import javax.inject._
+import models._
 import models.daos.TransferConfig.BaseTransferConfigDAO
+import models.daos.TransfersDAO
 import net.macolabo.sform2.services.UserService
+import org.webjars.play.WebJarsUtil
+import play.api.{Environment, _}
+import play.api.db.DBApi
+import play.api.i18n.I18nSupport
+import play.api.libs.json.Reads._
+import play.api.libs.json._
+import play.api.mvc._
+import utils.auth.{DefaultEnv, WithProvider}
 
 import scala.concurrent.{ExecutionContext, Future}
 

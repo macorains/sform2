@@ -32,24 +32,24 @@ GET         /assets/*file                    controllers.Assets.at(path="/public
 GET /formpost/:hashed_form_id controllers.FormPostDataController.getPostData(hashed_form_id: String)
 
 # form
-GET /form/list controllers.FormController.getList()
-GET /form/:hashed_form_id controllers.FormController.get(hashed_form_id: String)
-POST /form controllers.FormController.create()
-DELETE /form/:form_id controllers.FormController.delete(form_id: String)
-POST /form/validate controllers.FormController.validate()
+GET /form/list net.macolabo.sform2.controllers.FormController.getList()
+GET /form/:hashed_form_id net.macolabo.sform2.controllers.FormController.get(hashed_form_id: String)
+POST /form net.macolabo.sform2.controllers.FormController.create()
+DELETE /form/:form_id net.macolabo.sform2.controllers.FormController.delete(form_id: String)
+POST /form/validate net.macolabo.sform2.controllers.FormController.validate()
 
 # transfer
-GET /transfer controllers.TransferController.getTransferList()
-GET /transfer/config/:transfer_name controllers.TransferController.getConfig(transfer_name: String)
-POST /transfer/config controllers.TransferController.saveConfig()
+GET /transfer net.macolabo.sform2.controllers.TransferController.getTransferList()
+GET /transfer/config/:transfer_name net.macolabo.sform2.controllers.TransferController.getConfig(transfer_name: String)
+POST /transfer/config net.macolabo.sform2.controllers.TransferController.saveConfig()
 
 # user
-GET /user controllers.UserController.getList()
-GET /user/isadmin controllers.UserController.isAdmin()
+GET /user net.macolabo.sform2.controllers.UserController.getList()
+GET /user/isadmin net.macolabo.sform2.controllers.UserController.isAdmin()
 
 # transferTask
-GET /transfertask/list/:form_id controllers.TransferTaskController.getTransferTaskListByFormId(form_id: String)
-GET /transfertask/:id controllers.TransferTaskController.getTransferTask(id: Int)
+GET /transfertask/list/:form_id net.macolabo.sform2.controllers.TransferTaskController.getTransferTaskListByFormId(form_id: String)
+GET /transfertask/:id net.macolabo.sform2.controllers.TransferTaskController.getTransferTask(id: Int)
 
 # adminExistsCheck
-GET /adminExistsCheck controllers.AdminExistsCheckController.check()
+GET /adminExistsCheck net.macolabo.sform2.controllers.AdminExistsCheckController.check()
