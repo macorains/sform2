@@ -229,8 +229,6 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
    *
    * @param signer The signer implementation.
    * @param crypter The crypter implementation.
-   * @param cookieHeaderEncoding Logic for encoding and decoding `Cookie` and `Set-Cookie` headers.
-   * @param fingerprintGenerator The fingerprint generator implementation.
    * @param idGenerator The ID generator implementation.
    * @param configuration The Play configuration.
    * @param clock The clock instance.
@@ -240,8 +238,6 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
   def provideAuthenticatorService(
     @Named("authenticator-signer") signer: Signer,
     @Named("authenticator-crypter") crypter: Crypter,
-    //cookieHeaderEncoding: CookieHeaderEncoding,
-    //fingerprintGenerator: FingerprintGenerator,
     idGenerator: IDGenerator,
     configuration: Configuration,
     clock: Clock): AuthenticatorService[JWTAuthenticator] = {

@@ -45,7 +45,7 @@ class ResetPasswordController @Inject() (
    * @param token The token to identify a user.
    * @return The result to display.
    */
-  def view(token: UUID): Action[AnyContent] = ???
+  def view(token: UUID): Nothing = ???
 //  def view(token: UUID): Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
 //    authTokenService.validate(token).map {
 //      // case Some(_) => Ok(views.html.resetPassword(ResetPasswordForm.form, token))
@@ -60,7 +60,7 @@ class ResetPasswordController @Inject() (
    * @param token The token to identify a user.
    * @return The result to display.
    */
-  def submit(token: UUID): Action[AnyContent] = ???
+  def submit(token: UUID): Nothing = ???
 //  def submit(token: UUID): Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
 //    authTokenService.validate(token).flatMap {
 //      case Some(authToken) =>

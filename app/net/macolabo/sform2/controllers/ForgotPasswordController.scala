@@ -6,7 +6,7 @@ import net.macolabo.sform2.services.{AuthTokenService, UserService}
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.libs.mailer.MailerClient
-import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Request}
+import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents, Request}
 import utils.auth.DefaultEnv
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,7 +39,7 @@ class ForgotPasswordController @Inject() (
    *
    * @return The result to display.
    */
-  def view = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
+  def view: Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     // Future.successful(Ok(views.html.forgotPassword(ForgotPasswordForm.form)))
     Future.successful(Ok(""))
   }
@@ -53,7 +53,7 @@ class ForgotPasswordController @Inject() (
    * @return The result to display.
    */
 
-  def submit = ???
+  def submit: Nothing = ???
 //  def submit = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
 //    ForgotPasswordForm.form.bindFromRequest.fold(
 //      // form => Future.successful(BadRequest(views.html.forgotPassword(form))),

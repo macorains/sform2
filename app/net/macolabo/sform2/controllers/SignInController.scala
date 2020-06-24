@@ -63,7 +63,7 @@ class SignInController @Inject() (
    * Views the `Sign In` page.
    * @return The result to display.
    */
-  def view = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
+  def view: Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     Future.successful(Ok(""))
   }
 
@@ -71,7 +71,7 @@ class SignInController @Inject() (
    * Handles the submitted form.
    * @return The result to display.
    */
-  def submit = (silhouette.UnsecuredAction andThen httpErrorRateLimitFunction).async { implicit request =>
+  def submit: Action[AnyContent] = (silhouette.UnsecuredAction andThen httpErrorRateLimitFunction).async { implicit request =>
     SignInForm.form.bindFromRequest.fold(
       form => Future.successful(BadRequest(Json.parse(s"""{"message":"${Messages("error.invalid.request")}"}"""))),
       data => {
