@@ -1,8 +1,8 @@
-package controllers
+package net.macolabo.sform2.controllers
 
 import java.util.UUID
 
-import javax.inject.Inject
+import com.digitaltangible.playguard._
 import com.mohiva.play.silhouette.api.Authenticator.Implicits._
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
@@ -10,17 +10,17 @@ import com.mohiva.play.silhouette.api.util.{Clock, Credentials}
 import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
 import com.mohiva.play.silhouette.impl.exceptions.IdentityNotFoundException
 import com.mohiva.play.silhouette.impl.providers._
-import com.digitaltangible.playguard._
 import forms.SignInForm
+import javax.inject.Inject
 import models.json.{VerificationRequestEntry, VerificationRequestJson}
 import net.ceedubs.ficus.Ficus._
 import net.macolabo.sform2.services.UserService
 import org.webjars.play.WebJarsUtil
 import play.api.Configuration
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.libs.json.{JsNull, JsObject, JsString, JsValue, Json}
+import play.api.libs.json.{JsNull, JsObject, JsString, Json}
 import play.api.libs.mailer.{Email, MailerClient}
-import play.api.mvc.{AbstractController, Action, ActionBuilder, AnyContent, ControllerComponents, Request, RequestHeader, Results}
+import play.api.mvc._
 import play.cache.SyncCacheApi
 import utils.auth.DefaultEnv
 

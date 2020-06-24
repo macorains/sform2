@@ -1,17 +1,17 @@
-package controllers
+package net.macolabo.sform2.controllers
 
 import com.mohiva.play.silhouette.api.Silhouette
 import javax.inject.Inject
+import models.daos.{FormsDAO, PostdataDAO}
 import org.webjars.play.WebJarsUtil
 import play.api.Environment
 import play.api.db.DBApi
 import play.api.i18n.I18nSupport
 import play.api.libs.json._
-import play.api.mvc.{ AbstractController, Action, AnyContent, ControllerComponents }
+import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
 import utils.auth.DefaultEnv
-import models.daos.{ FormsDAO, PostdataDAO }
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 class FormPostDataController @Inject() (
   env: Environment,

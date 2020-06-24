@@ -1,19 +1,18 @@
-package controllers
+package net.macolabo.sform2.controllers
 
 import java.util.UUID
 
-import javax.inject.Inject
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
-import com.mohiva.play.silhouette.api.util.{PasswordHasherRegistry, PasswordInfo}
-import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
+import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
+import javax.inject.Inject
 import net.macolabo.sform2.services.{AuthTokenService, UserService}
 import org.webjars.play.WebJarsUtil
-import play.api.i18n.{I18nSupport, Messages}
+import play.api.i18n.I18nSupport
 import play.api.mvc._
 import utils.auth.DefaultEnv
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 /**
  * The `Reset Password` controller.

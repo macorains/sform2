@@ -1,19 +1,16 @@
-package controllers
-
-import javax.inject.Inject
+package net.macolabo.sform2.controllers
 
 import com.mohiva.play.silhouette.api._
-import com.mohiva.play.silhouette.api.actions.SecuredRequest
-import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
-import com.mohiva.play.silhouette.api.util.{ Credentials, PasswordHasherRegistry, PasswordInfo }
+import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
+import javax.inject.Inject
 import org.webjars.play.WebJarsUtil
-import play.api.i18n.{ I18nSupport, Messages }
-import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents }
-import utils.auth.{ DefaultEnv, WithProvider }
+import play.api.i18n.I18nSupport
+import play.api.mvc.{AbstractController, ControllerComponents}
+import utils.auth.DefaultEnv
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 
 /**
  * The `Change Password` controller.

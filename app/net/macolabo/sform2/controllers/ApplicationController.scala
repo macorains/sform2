@@ -1,4 +1,4 @@
-package controllers
+package net.macolabo.sform2.controllers
 
 import com.mohiva.play.silhouette.api.actions.SecuredRequest
 import com.mohiva.play.silhouette.api.{LogoutEvent, Silhouette}

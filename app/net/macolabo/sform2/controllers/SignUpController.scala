@@ -1,14 +1,14 @@
-package controllers
+package net.macolabo.sform2.controllers
 
 import java.util.UUID
 
-import javax.inject.Inject
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
-import services.AvatarService
+import com.mohiva.play.silhouette.api.services.AvatarService
 import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
 import com.mohiva.play.silhouette.impl.providers._
 import forms.SignUpForm
+import javax.inject.Inject
 import models.User
 import models.json.{UserSignUpResult, UserSignUpResultJson}
 import net.macolabo.sform2.services.{AuthTokenService, UserService}
