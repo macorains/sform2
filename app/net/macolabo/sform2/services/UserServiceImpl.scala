@@ -5,8 +5,9 @@ import java.util.UUID
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import javax.inject.Inject
-import models.User
-import models.daos.UserDAO
+import net.macolabo.sform2.models
+import net.macolabo.sform2.models.daos.UserDAO
+import net.macolabo.sform2.models.User
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -61,7 +62,7 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
           avatarURL = profile.avatarURL
         ))
       case None => // Insert a new user
-        userDAO.save(User(
+        userDAO.save(models.User(
           userID = UUID.randomUUID(),
           loginInfo = profile.loginInfo,
           group = Option(""),

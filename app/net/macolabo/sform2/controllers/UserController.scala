@@ -3,8 +3,8 @@ package net.macolabo.sform2.controllers
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.impl.providers._
 import javax.inject._
-import models.RsResultSet
-import models.daos.UserDAO
+import net.macolabo.sform2.models.RsResultSet
+import net.macolabo.sform2.models.daos.UserDAO
 import net.macolabo.sform2.services.UserService
 import org.webjars.play.WebJarsUtil
 import play.api.{Environment, _}

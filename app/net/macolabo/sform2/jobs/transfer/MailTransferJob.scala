@@ -1,8 +1,8 @@
 package net.macolabo.sform2.jobs.transfer
 
 import javax.inject.Inject
-import models.daos.{ Transfer, TransferDetailLogDAO, TransferTaskDAO }
-import models.entity.{ TransferTask, Postdata }
+import net.macolabo.sform2.models.daos.{ Transfer, TransferDetailLogDAO, TransferTaskDAO }
+import net.macolabo.sform2.models.entity.{ TransferTask, Postdata }
 import play.api.libs.functional.syntax.unlift
 import play.api.libs.json._
 import play.api.libs.functional.syntax._

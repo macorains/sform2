@@ -8,9 +8,10 @@ import com.mohiva.play.silhouette.api.services.AvatarService
 import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
 import com.mohiva.play.silhouette.impl.providers._
 import javax.inject.Inject
-import models.User
-import models.json.{UserSignUpResult, UserSignUpResultJson}
+import net.macolabo.sform2.models.json.{UserSignUpResult, UserSignUpResultJson}
 import net.macolabo.sform2.forms.SignUpForm
+import net.macolabo.sform2.models
+import net.macolabo.sform2.models.User
 import net.macolabo.sform2.services.{AuthTokenService, UserService}
 import org.webjars.play.WebJarsUtil
 import play.api.Configuration
@@ -89,7 +90,7 @@ class SignUpController @Inject() (
               Future.successful(result)
             case None =>
               val authInfo = passwordHasherRegistry.current.hash(data.password)
-              val user = User(
+              val user = models.User(
                 userID = UUID.randomUUID(),
                 loginInfo = loginInfo,
                 group = Some(data.group),

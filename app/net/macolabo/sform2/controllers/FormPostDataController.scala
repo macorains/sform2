@@ -2,7 +2,7 @@ package net.macolabo.sform2.controllers
 
 import com.mohiva.play.silhouette.api.Silhouette
 import javax.inject.Inject
-import models.daos.{FormsDAO, PostdataDAO}
+import net.macolabo.sform2.models.daos.{FormsDAO, PostdataDAO}
 import org.webjars.play.WebJarsUtil
 import play.api.Environment
 import play.api.db.DBApi

@@ -4,8 +4,9 @@ import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.impl.providers._
 import javax.inject._
 import models._
-import models.daos.TransferConfig.BaseTransferConfigDAO
-import models.daos.TransfersDAO
+import net.macolabo.sform2.models.RsResultSet
+import net.macolabo.sform2.models.daos.TransferConfig.BaseTransferConfigDAO
+import net.macolabo.sform2.models.daos.TransfersDAO
 import net.macolabo.sform2.services.UserService
 import org.webjars.play.WebJarsUtil
 import play.api.{Environment, _}
@@ -49,7 +50,7 @@ class TransferController @Inject() (
 
   // GET /transfer/config/:transfer_name
   def getConfig(transfer_name: String): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
-    val transferConfig = Class.forName("models.daos.TransferConfig." + transfer_name + "TransferConfigDAO")
+    val transferConfig = Class.forName("net.macolabo.sform2.models.daos.TransferConfig." + transfer_name + "TransferConfigDAO")
       .getDeclaredConstructor(classOf[TransfersDAO], classOf[Configuration])
       .newInstance(transfersDAO, configuration).asInstanceOf[BaseTransferConfigDAO]
     val config = transferConfig.getTransferConfig
@@ -72,7 +73,7 @@ class TransferController @Inject() (
       val data = (json \ "rcdata").as[JsValue]
       data.validate[TransferSaveConfigRequest] match {
         case s: JsSuccess[TransferSaveConfigRequest] =>
-          val transferConfig = Class.forName("models.daos.TransferConfig." + s.value.transferName + "TransferConfigDAO")
+          val transferConfig = Class.forName("net.macolabo.sform2.models.daos.TransferConfig." + s.value.transferName + "TransferConfigDAO")
             .getDeclaredConstructor(classOf[TransfersDAO], classOf[Configuration])
             .newInstance(transfersDAO, configuration).asInstanceOf[BaseTransferConfigDAO]
           val config = s.value.config

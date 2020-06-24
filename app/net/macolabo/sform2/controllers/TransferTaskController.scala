@@ -4,8 +4,9 @@ import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.impl.providers._
 import javax.inject._
 import models._
-import models.daos.TransferTaskDAO
-import models.json.{TransferTaskEntry, TransferTaskJson}
+import net.macolabo.sform2.models.RsResultSet
+import net.macolabo.sform2.models.daos.TransferTaskDAO
+import net.macolabo.sform2.models.json.{TransferTaskEntry, TransferTaskJson}
 import net.macolabo.sform2.services.UserService
 import org.webjars.play.WebJarsUtil
 import play.api.{Environment, _}

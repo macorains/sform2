@@ -2,9 +2,9 @@ package net.macolabo.sform2.jobs.transfer
 
 import javax.inject.Inject
 import akka.actor.Actor
-import models.daos._
-import models.entity._
-import models.json.TransferTaskJson
+import net.macolabo.sform2.models.daos._
+import net.macolabo.sform2.models.entity._
+import net.macolabo.sform2.models.json.TransferTaskJson
 import play.api.Logger
 
 class TransferJobManager @Inject() (

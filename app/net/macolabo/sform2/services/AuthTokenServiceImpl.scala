@@ -4,8 +4,9 @@ import java.util.UUID
 
 import com.mohiva.play.silhouette.api.util.Clock
 import javax.inject.Inject
-import models.AuthToken
-import models.daos.AuthTokenDAO
+import net.macolabo.sform2.models
+import net.macolabo.sform2.models.daos.AuthTokenDAO
+import net.macolabo.sform2.models.AuthToken
 import org.joda.time.DateTimeZone
 
 import scala.concurrent.duration._
@@ -35,7 +36,7 @@ class AuthTokenServiceImpl @Inject() (
    * @return The saved auth token.
    */
   def create(userID: UUID, expiry: FiniteDuration = 5 minutes) = {
-    val token = AuthToken(UUID.randomUUID(), userID, clock.now.withZone(DateTimeZone.UTC).plusSeconds(expiry.toSeconds.toInt))
+    val token = models.AuthToken(UUID.randomUUID(), userID, clock.now.withZone(DateTimeZone.UTC).plusSeconds(expiry.toSeconds.toInt))
     authTokenDAO.save(token)
   }
 
