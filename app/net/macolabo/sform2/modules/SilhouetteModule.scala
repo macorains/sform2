@@ -32,7 +32,7 @@ import play.api.Configuration
 import play.api.libs.openid.OpenIdClient
 import play.api.libs.ws.WSClient
 import utils.auth.{CustomSecuredErrorHandler, CustomUnsecuredErrorHandler, DefaultEnv}
-import net.ceedubs.ficus.readers.EnumerationReader._
+import net.ceedubs.ficus.readers.EnumerationReader._ // Don't Erase it!
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
