@@ -2,15 +2,15 @@ package models.daos.TransferConfig
 
 //import org.specs2.mock.Mockito
 //import play.api.test.PlaySpecification
-import com.sforce.soap.partner.{ DescribeSObjectResult, Field }
+import com.sforce.soap.partner.{DescribeSObjectResult, Field}
 import com.typesafe.config.ConfigFactory
-import models.connector.SalesforceConnector
 import models.daos.TransfersDAO
 import models.json.SalesforceTransferJson
+import net.macolabo.sform2.services.transfer.SalesforceConnectionService
 import org.specs2.mock._
 import org.specs2.mutable._
-import play.api.libs.json.{ Json, Writes }
-import scalikejdbc.{ AutoSession, ConnectionPool }
+import play.api.libs.json.{Json, Writes}
+import scalikejdbc.{AutoSession, ConnectionPool}
 import setting.TestDBSettings
 
 class SalesforceTransferInfoDAOSpec extends Specification with TestDBSettings with SalesforceTransferJson {

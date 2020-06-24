@@ -1,12 +1,11 @@
-package models.connector
+package net.macolabo.sform2.services.transfer
 
 import com.sforce.soap.partner._
 import com.sforce.soap.partner.sobject._
 import com.sforce.ws._
-import models.json.DescribeSObjectResult
 import play.api.Logger
 
-class SalesforceConnector {
+class SalesforceConnectionService {
 
   // 開発時用ダミー
   def getDummyConnection(user: String, password: String, securityToken: String): Option[PartnerConnection] = {
@@ -63,6 +62,6 @@ class SalesforceConnector {
     connection.describeSObjects(sObjects.toArray).toList
   }
 }
-object SalesforceConnector {
+object SalesforceConnectionService {
 
 }

@@ -1,7 +1,6 @@
 package models.daos.TransferConfig
 
 import javax.inject.Inject
-import models.connector.SalesforceConnector
 import models.daos.{Transfer, TransfersDAO}
 import play.api.libs.json._
 import play.api.libs.json.Reads._
@@ -9,6 +8,7 @@ import play.api.libs.functional.syntax._
 import com.sforce.soap.partner.{DescribeSObjectResult, Field, PartnerConnection}
 import models.User
 import models.json.SalesforceTransferJson
+import net.macolabo.sform2.services.transfer.SalesforceConnectionService
 import utils.Crypto
 import play.api.Logger
 import play.api.Configuration
@@ -18,7 +18,7 @@ case class SalesforceTransferConfigDAO @Inject() (
   configuration: Configuration
 ) extends BaseTransferConfigDAO with (SalesforceTransferJson) {
   override val transferType = 1
-  val salesforceConnector = new SalesforceConnector
+  val salesforceConnector = new SalesforceConnectionService
   val crypto = Crypto(configuration)
 
   case class SalesforceTransferConfig(id: Option[Int], user: String, password: String, securityToken: String, sfObjectDefinition: Option[List[DescribeSObjectResult]])

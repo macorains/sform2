@@ -1,18 +1,18 @@
 package jobs.transfer
 
-import com.sforce.soap.partner.{ PartnerConnection, SaveResult }
+import com.sforce.soap.partner.{PartnerConnection, SaveResult}
 import com.sforce.soap.partner.sobject.SObject
 import javax.inject.Inject
-import models.connector.SalesforceConnector
-import models.daos.{ Transfer, TransferDetailLogDAO, TransferTaskDAO }
-import models.entity.{ TransferTask, Postdata }
+import models.daos.{Transfer, TransferDetailLogDAO, TransferTaskDAO}
+import models.entity.{Postdata, TransferTask}
+import net.macolabo.sform2.services.transfer.SalesforceConnectionService
 import play.api.libs.json._
 import play.api.Logger
 
 class SalesforceTransferJob @Inject() (
-  salesforceConnector: SalesforceConnector,
-  transferDetailLogDao: TransferDetailLogDAO,
-  transferTaskDAO: TransferTaskDAO
+                                        salesforceConnector: SalesforceConnectionService,
+                                        transferDetailLogDao: TransferDetailLogDAO,
+                                        transferTaskDAO: TransferTaskDAO
 ) {
   case class SalesforceTransferConfig(user: String, password: String, securityToken: String)
   object SalesforceTransferConfig {
