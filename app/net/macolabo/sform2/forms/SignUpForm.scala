@@ -1,4 +1,4 @@
-package forms
+package net.macolabo.sform2.forms
 
 import play.api.data.Form
 import play.api.data.Forms._
