@@ -102,8 +102,8 @@ class SignInController @Inject() (
                   subject = Messages("email.verification.subject"),
                   from = Messages("email.from"),
                   to = Seq(data.email),
-                  bodyText = Some(views.txt.emails.verification(verificationCode).body),
-                  bodyHtml = Some(views.html.emails.verification(verificationCode).body)
+                  bodyText = Some(net.macolabo.sform2.views.txt.emails.verification(verificationCode).body),
+                  bodyHtml = Some(net.macolabo.sform2.views.html.emails.verification(verificationCode).body)
                 ))
                 Future.successful(Ok(Json.parse(s"""{"message":"OK","formToken":"$formToken"}""")))
               }

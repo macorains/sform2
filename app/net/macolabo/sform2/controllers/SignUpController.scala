@@ -83,8 +83,8 @@ class SignUpController @Inject() (
                 subject = Messages("email.already.signed.up.subject"),
                 from = Messages("email.from"),
                 to = Seq(data.email),
-                bodyText = Some(views.txt.emails.alreadySignedUp(user, url).body),
-                bodyHtml = Some(views.html.emails.alreadySignedUp(user, url).body)
+                bodyText = Some(net.macolabo.sform2.views.txt.emails.alreadySignedUp(user, url).body),
+                bodyHtml = Some(net.macolabo.sform2.views.html.emails.alreadySignedUp(user, url).body)
               ))
               Future.successful(result)
             case None =>
@@ -113,8 +113,8 @@ class SignUpController @Inject() (
                   subject = Messages("email.sign.up.subject"),
                   from = Messages("email.from"),
                   to = Seq(data.email),
-                  bodyText = Some(views.txt.emails.signUp(user, url).body),
-                  bodyHtml = Some(views.html.emails.signUp(user, url).body)
+                  bodyText = Some(net.macolabo.sform2.views.txt.emails.signUp(user, url).body),
+                  bodyHtml = Some(net.macolabo.sform2.views.html.emails.signUp(user, url).body)
                 ))
                 silhouette.env.eventBus.publish(SignUpEvent(user, request))
                 result
