@@ -1,8 +1,9 @@
 package modules
 
-import jobs.{ AuthTokenCleaner, Scheduler }
-import jobs.transfer._
+import net.macolabo.sform2.jobs.Scheduler
+import net.macolabo.sform2.jobs.transfer._
 import net.codingwell.scalaguice.ScalaModule
+import net.macolabo.sform2.jobs.{AuthTokenCleaner, Scheduler}
 import play.api.libs.concurrent.AkkaGuiceSupport
 
 /**

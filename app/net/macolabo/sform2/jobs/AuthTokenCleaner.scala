@@ -1,11 +1,11 @@
-package jobs
+package net.macolabo.sform2.jobs
 
-import javax.inject.Inject
 import akka.actor._
 import com.mohiva.play.silhouette.api.util.Clock
-import jobs.AuthTokenCleaner.Clean
+import javax.inject.Inject
 import net.macolabo.sform2.services.AuthTokenService
 import utils.Logger
+import net.macolabo.sform2.jobs.AuthTokenCleaner.Clean
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

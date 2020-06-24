@@ -1,4 +1,4 @@
-package filters
+package net.macolabo.sform2.filters
 
 import akka.stream.Materializer
 import javax.inject._

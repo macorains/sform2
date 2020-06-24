@@ -1,4 +1,4 @@
-package jobs.transfer
+package net.macolabo.sform2.jobs.transfer
 
 import javax.inject.Inject
 import akka.actor.Actor

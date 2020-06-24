@@ -1,6 +1,6 @@
-package jobs
+package net.macolabo.sform2.jobs
 
-import akka.actor.{ ActorRef, ActorSystem }
+import akka.actor.{ActorRef, ActorSystem}
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension

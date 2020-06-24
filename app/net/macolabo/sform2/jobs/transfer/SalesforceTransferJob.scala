@@ -1,4 +1,4 @@
-package jobs.transfer
+package net.macolabo.sform2.jobs.transfer
 
 import com.sforce.soap.partner.{PartnerConnection, SaveResult}
 import com.sforce.soap.partner.sobject.SObject
