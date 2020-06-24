@@ -13,7 +13,7 @@ import play.api.db.DBApi
 import play.api.i18n.I18nSupport
 import play.api.libs.json._
 import play.api.mvc._
-import utils.auth.{DefaultEnv, WithProvider}
+import net.macolabo.sform2.utils.auth.{DefaultEnv, WithProvider}
 
 import scala.concurrent.{ExecutionContext, Future}
 

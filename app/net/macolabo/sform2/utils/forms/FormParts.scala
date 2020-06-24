@@ -1,4 +1,4 @@
-package utils.forms
+package net.macolabo.sform2.utils.forms
 
 import java.net.InetAddress
 

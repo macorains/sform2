@@ -9,7 +9,7 @@ import play.api.db.DBApi
 import play.api.i18n.I18nSupport
 import play.api.libs.json._
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
-import utils.auth.DefaultEnv
+import net.macolabo.sform2.utils.auth.DefaultEnv
 
 import scala.concurrent.{ExecutionContext, Future}
 

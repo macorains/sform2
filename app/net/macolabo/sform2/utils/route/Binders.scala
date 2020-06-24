@@ -1,4 +1,4 @@
-package utils.route
+package net.macolabo.sform2.utils.route
 
 import java.util.UUID
 

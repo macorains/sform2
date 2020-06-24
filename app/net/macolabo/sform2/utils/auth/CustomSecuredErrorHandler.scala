@@ -1,4 +1,4 @@
-package utils.auth
+package net.macolabo.sform2.utils.auth
 
 import javax.inject.Inject
 

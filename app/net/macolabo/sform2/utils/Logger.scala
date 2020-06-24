@@ -1,4 +1,4 @@
-package utils
+package net.macolabo.sform2.utils
 
 /**
  * Implement this to get a named logger in scope.

@@ -1,7 +1,8 @@
-package utils
+package net.macolabo.sform2.utils
+
+import java.util.Base64
 
 import com.google.inject.Inject
-import java.util.Base64
 import javax.crypto.Cipher
 import javax.crypto.spec.{IvParameterSpec, SecretKeySpec}
 import play.api.Configuration

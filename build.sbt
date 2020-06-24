@@ -49,7 +49,7 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 routesGenerator := InjectedRoutesGenerator
 
-routesImport += "utils.route.Binders._"
+routesImport += "net.macolabo.sform2.utils.route.Binders._"
 
 // https://github.com/playframework/twirl/issues/105
 TwirlKeys.templateImports := Seq()

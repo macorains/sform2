@@ -7,7 +7,7 @@ import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.libs.mailer.MailerClient
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents, Request}
-import utils.auth.DefaultEnv
+import net.macolabo.sform2.utils.auth.DefaultEnv
 
 import scala.concurrent.{ExecutionContext, Future}
 

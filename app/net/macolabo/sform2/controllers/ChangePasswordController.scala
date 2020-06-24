@@ -8,7 +8,7 @@ import javax.inject.Inject
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.mvc.{AbstractController, ControllerComponents}
-import utils.auth.DefaultEnv
+import net.macolabo.sform2.utils.auth.DefaultEnv
 
 import scala.concurrent.ExecutionContext
 

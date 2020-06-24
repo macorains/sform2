@@ -18,7 +18,7 @@ import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.Json
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc._
-import utils.auth.DefaultEnv
+import net.macolabo.sform2.utils.auth.DefaultEnv
 
 import scala.concurrent.{ExecutionContext, Future}
 

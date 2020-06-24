@@ -22,7 +22,7 @@ import play.api.libs.json.{JsNull, JsObject, JsString, Json}
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc._
 import play.cache.SyncCacheApi
-import utils.auth.DefaultEnv
+import net.macolabo.sform2.utils.auth.DefaultEnv
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}

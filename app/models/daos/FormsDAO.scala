@@ -17,7 +17,7 @@ import scalikejdbc._
 import models.{ RsResultSet, User }
 import models.entity.Form
 import models.json.FormJson
-import utils.forms.FormParts
+import net.macolabo.sform2.utils.forms.FormParts
 
 class FormsDAO extends FormParts with FormJson {
 

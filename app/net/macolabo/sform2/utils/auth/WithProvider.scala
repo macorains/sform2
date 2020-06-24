@@ -1,4 +1,4 @@
-package utils.auth
+package net.macolabo.sform2.utils.auth
 
 import com.mohiva.play.silhouette.api.{ Authenticator, Authorization }
 import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
