@@ -1,9 +1,11 @@
-package services
+package net.macolabo.sform2.services
 
-import java.time.{ Clock, Instant }
+import java.time.{Clock, Instant}
+
 import javax.inject._
 import play.api.Logger
 import play.api.inject.ApplicationLifecycle
+
 import scala.concurrent.Future
 
 /*

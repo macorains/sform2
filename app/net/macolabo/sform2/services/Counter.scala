@@ -1,6 +1,7 @@
-package services
+package net.macolabo.sform2.services
 
 import java.util.concurrent.atomic.AtomicInteger
+
 import javax.inject._
 
 /**
