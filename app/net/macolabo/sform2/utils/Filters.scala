@@ -7,7 +7,7 @@ import play.filters.cors.CORSFilter
  * Provides filters.
  */
 
-//class Filters @Inject() (csrfFilter: CSRFFilter, securityHeadersFilter: SecurityHeadersFilter) extends HttpFilters {
+//class net.macolabo.sform2.Filters @Inject() (csrfFilter: CSRFFilter, securityHeadersFilter: SecurityHeadersFilter) extends HttpFilters {
 //  override def filters: Seq[EssentialFilter] = Seq(csrfFilter, securityHeadersFilter)
 //}
 

@@ -15,9 +15,9 @@ import scala.concurrent.Future
  * long the application was running for.
  *
  * This class is registered for Guice dependency injection in the
- * [[Module]] class. We want the class to start when the application
+ * [[net.macolabo.sform2.Module]] class. We want the class to start when the application
  * starts, so it is registered as an "eager singleton". See the code
- * in the [[Module]] class to see how this happens.
+ * in the [[net.macolabo.sform2.Module]] class to see how this happens.
  *
  * This class needs to run code when the server stops. It uses the
  * application's [[ApplicationLifecycle]] to register a stop hook.

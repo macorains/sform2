@@ -100,7 +100,7 @@ class FormController @Inject() (
    * GET /form/html/<form_id>
    * @return
    */
-  def getHtml(): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
+  def getHtml: Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
     val jsonBody: Option[JsValue] = request.body.asJson
     val res = jsonBody.map { json =>
       val data = (json \ "rcdata").as[JsValue]

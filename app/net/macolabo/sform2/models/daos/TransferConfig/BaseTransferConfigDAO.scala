@@ -4,7 +4,8 @@ import net.macolabo.sform2.models.User
 import play.api.libs.json.{JsValue, Json}
 
 class BaseTransferConfigDAO {
-  val transferType: Int = 0;
+  val transferType: Int = 0
+
   def getTransferConfig: JsValue = {
     println("BaseTransferInfoDAO")
     Json.toJson("""{}""")
