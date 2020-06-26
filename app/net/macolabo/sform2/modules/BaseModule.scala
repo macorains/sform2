@@ -3,7 +3,7 @@ package net.macolabo.sform2.modules
 import com.google.inject.AbstractModule
 import net.macolabo.sform2.models.daos.{AuthTokenDAO, AuthTokenDAOImpl}
 import net.codingwell.scalaguice.ScalaModule
-import net.macolabo.sform2.services.{AuthTokenService, AuthTokenServiceImpl}
+import net.macolabo.sform2.services.AuthToken.{AuthTokenService, AuthTokenServiceImpl}
 
 /**
  * The base Guice module.

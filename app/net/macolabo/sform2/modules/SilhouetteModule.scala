@@ -27,12 +27,13 @@ import net.macolabo.sform2.models.daos._
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.codingwell.scalaguice.ScalaModule
-import net.macolabo.sform2.services.{UserService, UserServiceImpl}
 import play.api.Configuration
 import play.api.libs.openid.OpenIdClient
 import play.api.libs.ws.WSClient
 import net.macolabo.sform2.utils.auth.{CustomSecuredErrorHandler, CustomUnsecuredErrorHandler, DefaultEnv}
-import net.ceedubs.ficus.readers.EnumerationReader._ // Don't Erase it!
+import net.ceedubs.ficus.readers.EnumerationReader._
+import net.macolabo.sform2.services.User.{UserService, UserServiceImpl}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**

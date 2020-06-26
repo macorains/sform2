@@ -1,4 +1,4 @@
-package net.macolabo.sform2.services.transfer
+package net.macolabo.sform2.services.Transfer
 
 import com.sforce.soap.partner._
 import com.sforce.soap.partner.sobject._

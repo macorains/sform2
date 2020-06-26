@@ -1,4 +1,4 @@
-package net.macolabo.sform2.services
+package net.macolabo.sform2.services.User
 
 import java.util.UUID
 
@@ -6,8 +6,8 @@ import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import javax.inject.Inject
 import net.macolabo.sform2.models
-import net.macolabo.sform2.models.daos.UserDAO
 import net.macolabo.sform2.models.User
+import net.macolabo.sform2.models.daos.UserDAO
 
 import scala.concurrent.{ExecutionContext, Future}
 

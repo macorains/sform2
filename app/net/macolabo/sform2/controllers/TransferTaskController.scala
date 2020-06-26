@@ -7,7 +7,7 @@ import models._
 import net.macolabo.sform2.models.RsResultSet
 import net.macolabo.sform2.models.daos.TransferTaskDAO
 import net.macolabo.sform2.models.json.{TransferTaskEntry, TransferTaskJson}
-import net.macolabo.sform2.services.UserService
+import net.macolabo.sform2.services.User.UserService
 import org.webjars.play.WebJarsUtil
 import play.api.{Environment, _}
 import play.api.db.DBApi

@@ -5,7 +5,7 @@ import com.sforce.soap.partner.sobject.SObject
 import javax.inject.Inject
 import net.macolabo.sform2.models.daos.{Transfer, TransferDetailLogDAO, TransferTaskDAO}
 import net.macolabo.sform2.models.entity.{Postdata, TransferTask}
-import net.macolabo.sform2.services.transfer.SalesforceConnectionService
+import net.macolabo.sform2.services.Transfer.SalesforceConnectionService
 import play.api.libs.json._
 import play.api.Logger
 

@@ -6,7 +6,7 @@ import com.sforce.soap.partner.{DescribeSObjectResult, Field}
 import com.typesafe.config.ConfigFactory
 import net.macolabo.sform2.models.daos.TransfersDAO
 import net.macolabo.sform2.models.json.SalesforceTransferJson
-import net.macolabo.sform2.services.transfer.SalesforceConnectionService
+import net.macolabo.sform2.services.Transfer.SalesforceConnectionService
 import org.specs2.mock._
 import org.specs2.mutable._
 import play.api.libs.json.{Json, Writes}

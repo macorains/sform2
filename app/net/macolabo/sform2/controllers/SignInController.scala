@@ -14,7 +14,7 @@ import javax.inject.Inject
 import net.macolabo.sform2.models.json.{VerificationRequestEntry, VerificationRequestJson}
 import net.ceedubs.ficus.Ficus._
 import net.macolabo.sform2.forms.SignInForm
-import net.macolabo.sform2.services.UserService
+import net.macolabo.sform2.services.User.UserService
 import org.webjars.play.WebJarsUtil
 import play.api.Configuration
 import play.api.i18n.{I18nSupport, Messages}

@@ -3,7 +3,7 @@ package net.macolabo.sform2.controllers
 import com.google.inject.Inject
 import com.mohiva.play.silhouette.api.Silhouette
 import net.macolabo.sform2.models.json.AdminExistsCheckResultJson
-import net.macolabo.sform2.services.UserService
+import net.macolabo.sform2.services.User.UserService
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json

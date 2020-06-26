@@ -2,7 +2,8 @@ package net.macolabo.sform2.controllers
 
 import com.mohiva.play.silhouette.api._
 import javax.inject.Inject
-import net.macolabo.sform2.services.{AuthTokenService, UserService}
+import net.macolabo.sform2.services.AuthToken.AuthTokenService
+import net.macolabo.sform2.services.User.UserService
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.libs.mailer.MailerClient

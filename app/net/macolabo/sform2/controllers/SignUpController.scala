@@ -12,7 +12,8 @@ import net.macolabo.sform2.models.json.{UserSignUpResult, UserSignUpResultJson}
 import net.macolabo.sform2.forms.SignUpForm
 import net.macolabo.sform2.models
 import net.macolabo.sform2.models.User
-import net.macolabo.sform2.services.{AuthTokenService, UserService}
+import net.macolabo.sform2.services.AuthToken.AuthTokenService
+import net.macolabo.sform2.services.User.UserService
 import org.webjars.play.WebJarsUtil
 import play.api.Configuration
 import play.api.i18n.{I18nSupport, Messages}

@@ -3,8 +3,8 @@ package net.macolabo.sform2.jobs
 import akka.actor._
 import com.mohiva.play.silhouette.api.util.Clock
 import javax.inject.Inject
-import net.macolabo.sform2.services.AuthTokenService
 import net.macolabo.sform2.jobs.AuthTokenCleaner.Clean
+import net.macolabo.sform2.services.AuthToken.AuthTokenService
 import net.macolabo.sform2.utils.Logger
 
 import scala.concurrent.ExecutionContext.Implicits.global
