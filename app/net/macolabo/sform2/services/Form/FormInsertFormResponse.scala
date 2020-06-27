@@ -1,5 +1,10 @@
 package net.macolabo.sform2.services.Form
 
-class FormInsertFormResponse {
+case class FormInsertFormResponse(
+                                 id: Long
+                                 ) {
+}
 
+trait FormInsertFormRequestJson {
+  implicit
 }

@@ -62,6 +62,26 @@ class FormsDAO extends FormParts with FormJson {
   }
 
   /**
+    * フォームデータ取得(new)
+    * @param identity 認証情報
+    * @param hashed_id フォームのhashed_id
+    * @return フォームデータ
+    */
+  def _getData(userGroup: String, hashedFormId: String) :Option[Form] = {
+    val f = Form.syntax("f")
+    DB localTx { implicit s =>
+        withSQL(
+          select(f.id, f.hashed_id, f.form_data, f.user_group)
+            .from(Form as f)
+            .where
+            .eq(f.hashed_id, hashedFormId)
+            .and
+            .eq(f.user_group, userGroup)
+        ).map(rs => Form(rs)).single.apply()
+    }
+  }
+
+  /**
    * フォーム一覧
    * @return RsResultSet
    */
@@ -89,6 +109,22 @@ class FormsDAO extends FormParts with FormJson {
           }
       }.mkString("{", ",", "}")
       RsResultSet("OK", "OK", toJson(jsString))
+    }
+  }
+
+  /**
+    * フォーム一覧(new)
+    * @return RsResultSet
+    */
+  def _getList(userGroup: String): List[Form] = {
+    val f = Form.syntax("f")
+    DB localTx { implicit s =>
+        withSQL(
+          select(f.id, f.hashed_id, f.form_data, f.user_group)
+            .from(Form as f)
+            .where
+            .eq(f.user_group, userGroup)
+        ).map(rs => Form(rs)).list.apply()
     }
   }
 
