@@ -172,6 +172,7 @@ trait FormGetFormResponseJson {
       (JsPath \ "name").read[String] ~
       (JsPath \ "col_id").read[String] ~
       (JsPath \ "index").read[Int] ~
+      (JsPath \ "col_type").read[Int] ~
       (JsPath \ "default").read[String] ~
       (JsPath \ "select_list").read[List[FormGetFormResponseFormColSelectList]] ~
       (JsPath \ "validations").read[List[FormGetFormResponseFormColValidation]]

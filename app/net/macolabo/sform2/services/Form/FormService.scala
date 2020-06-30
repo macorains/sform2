@@ -1,13 +1,14 @@
 package net.macolabo.sform2.services.Form
 
 import com.google.inject.Inject
+import net.macolabo.sform2.models.User
 import net.macolabo.sform2.models.daos.FormsDAO
 
 import scala.concurrent.ExecutionContext
 
 class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
 
-  def getForm(hashed_form_id: String): FormGetFormResponse = {
+  def getForm(hashed_form_id: String, identity: User): FormGetFormResponse = {
     ???
   }
 

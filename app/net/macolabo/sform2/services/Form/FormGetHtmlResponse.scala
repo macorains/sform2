@@ -1,6 +1,7 @@
 package net.macolabo.sform2.services.Form
 
 import play.api.libs.json.{JsPath, Json, Reads, Writes}
+import play.api.libs.functional.syntax._
 
 /**
   * HTML取得のレスポンス
@@ -11,7 +12,7 @@ import play.api.libs.json.{JsPath, Json, Reads, Writes}
   */
 case class FormGetHtmlResponse(
                               id: Long,
-                              hashed_form_id: Long,
+                              hashed_form_id: String,
                               html: String
                               ) {
 

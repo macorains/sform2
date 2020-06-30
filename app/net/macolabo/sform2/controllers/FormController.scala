@@ -6,6 +6,7 @@ import javax.inject._
 import models._
 import net.macolabo.sform2.models.RsResultSet
 import net.macolabo.sform2.models.daos.{FormsDAO, TransferTaskDAO}
+import net.macolabo.sform2.services.Form.{FormGetFormResponseJson, FormService}
 import net.macolabo.sform2.services.User.UserService
 import org.webjars.play.WebJarsUtil
 import play.api.{Environment, _}
@@ -28,12 +29,13 @@ class FormController @Inject() (
   socialProviderRegistry: SocialProviderRegistry,
   configuration: Configuration,
   formsDAO: FormsDAO,
-  transferTaskDAO: TransferTaskDAO
+  transferTaskDAO: TransferTaskDAO,
+  formService: FormService
 )(
   implicit
   webJarsUtil: WebJarsUtil,
   ex: ExecutionContext
-) extends AbstractController(components) with I18nSupport {
+) extends AbstractController(components) with I18nSupport with FormGetFormResponseJson {
 
   /**
    * フォームデータ取得
@@ -44,7 +46,17 @@ class FormController @Inject() (
     Future.successful(Ok(toJson(res)))
   }
 
-//  def get2: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
+  /**
+   * フォームデータ取得(new)
+   * @return フォームデータ
+   */
+  def _get(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
+    val res = formService.getForm(hashed_form_id, request.identity)
+    Future.successful(Ok(toJson(res)))
+  }
+
+
+  //  def get2: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
 //    val res = formsDAO.getList(request.identity)
 //    Future.successful(Ok(Json.toJson(res)))
 //                                                                                                                                                  }
