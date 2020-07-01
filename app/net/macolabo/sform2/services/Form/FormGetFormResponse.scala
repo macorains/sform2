@@ -30,23 +30,23 @@ case class FormGetFormResponseFormColValidation(
   * @param id ID
   * @param form_col_id フォーム項目ID
   * @param form_id フォームID
-  * @param index 順番
-  * @param value 値　
-  * @param default デフォルト値とするか
+  * @param select_index 順番
+  * @param select_name 表示テキスト
+  * @param select_value 値　
+  * @param is_default デフォルト値とするか
   * @param edit_style 編集時CSSスタイル
   * @param view_style 参照時CSSスタイル
-  * @param display_text 表示テキスト
   */
-case class FormGetFormResponseFormColSelectList(
+case class FormGetFormResponseFormColSelect(
                                                id: Long,
                                                form_col_id: Long,
                                                form_id: Long,
-                                               index: Int,
-                                               value: String,
-                                               default: Boolean,
+                                               select_index: Int,
+                                               select_name: String,
+                                               select_value: String,
+                                               is_default: Boolean,
                                                edit_style: String,
-                                               view_style: String,
-                                               display_text: String
+                                               view_style: String
                                                )
 
 /**
@@ -55,9 +55,9 @@ case class FormGetFormResponseFormColSelectList(
   * @param form_id フォームID
   * @param name 項目名
   * @param col_id 項目ID
-  * @param index 順番
+  * @param col_index 順番
   * @param col_type 項目種別
-  * @param default 初期値
+  * @param default_value 初期値
   * @param select_list 選択リスト
   * @param validations バリデーション
   */
@@ -66,10 +66,10 @@ case class FormGetFormResponseFormCol(
                                      form_id: Long,
                                      name: String,
                                      col_id: String,
-                                     index: Int,
+                                     col_index: Int,
                                      col_type: Int,
-                                     default: String,
-                                     select_list: List[FormGetFormResponseFormColSelectList],
+                                     default_value: String,
+                                     select_list: List[FormGetFormResponseFormColSelect],
                                      validations: List[FormGetFormResponseFormColValidation]
                                      )
 
@@ -77,7 +77,7 @@ case class FormGetFormResponseFormCol(
   * フォーム取得API・フォームデータ
   * @param id フォームID
   * @param name フォーム名
-  * @param index 順番
+  * @param form_index 順番
   * @param title タイトル
   * @param status ステータス
   * @param cancel_url キャンセル時遷移先URL
@@ -92,7 +92,7 @@ case class FormGetFormResponseFormCol(
 case class FormGetFormResponse(
                               id: Long,
                               name: String,
-                              index: Int,
+                              form_index: Int,
                               title: String,
                               status: Int,
                               cancel_url: String,
@@ -130,38 +130,38 @@ trait FormGetFormResponseJson {
       (JsPath \ "input_type").read[Int]
     )(FormGetFormResponseFormColValidation.apply _)
 
-  implicit val FormGetFormResponseFormColSelectListWrites: Writes[FormGetFormResponseFormColSelectList] = (formGetFormResponseFormColSelectList: FormGetFormResponseFormColSelectList) => Json.obj(
+  implicit val FormGetFormResponseFormColSelectListWrites: Writes[FormGetFormResponseFormColSelect] = (formGetFormResponseFormColSelectList: FormGetFormResponseFormColSelect) => Json.obj(
     "id" -> formGetFormResponseFormColSelectList.id,
     "form_col_id" -> formGetFormResponseFormColSelectList.form_col_id,
     "form_id" -> formGetFormResponseFormColSelectList.form_id,
-    "index" -> formGetFormResponseFormColSelectList.index,
-    "value" -> formGetFormResponseFormColSelectList.value,
-    "default" -> formGetFormResponseFormColSelectList.default,
+    "select_index" -> formGetFormResponseFormColSelectList.select_index,
+    "select_name" -> formGetFormResponseFormColSelectList.select_name,
+    "select_value" -> formGetFormResponseFormColSelectList.select_value,
+    "is_default" -> formGetFormResponseFormColSelectList.is_default,
     "edit_style" -> formGetFormResponseFormColSelectList.edit_style,
-    "view_style" -> formGetFormResponseFormColSelectList.view_style,
-    "display_text" -> formGetFormResponseFormColSelectList.display_text
+    "view_style" -> formGetFormResponseFormColSelectList.view_style
   )
 
-  implicit val FormGetFormResponseFormColSelectListReads: Reads[FormGetFormResponseFormColSelectList] = (
+  implicit val FormGetFormResponseFormColSelectListReads: Reads[FormGetFormResponseFormColSelect] = (
     (JsPath \ "id").read[Long] ~
       (JsPath \ "form_col_id").read[Long] ~
       (JsPath \ "form_id").read[Long] ~
-      (JsPath \ "index").read[Int] ~
-      (JsPath \ "value").read[String] ~
-      (JsPath \ "default").read[Boolean] ~
+      (JsPath \ "select_index").read[Int] ~
+      (JsPath \ "select_name").read[String] ~
+      (JsPath \ "select_value").read[String] ~
+      (JsPath \ "is_default").read[Boolean] ~
       (JsPath \ "edit_style").read[String] ~
-      (JsPath \ "view_style").read[String] ~
-      (JsPath \ "display_text").read[String]
-  )(FormGetFormResponseFormColSelectList.apply _)
+      (JsPath \ "view_style").read[String]
+  )(FormGetFormResponseFormColSelect.apply _)
 
   implicit val FormGetFormResponseFormColWrites: Writes[FormGetFormResponseFormCol] = (formGetFormResponseFormCol: FormGetFormResponseFormCol) => Json.obj(
     "id" -> formGetFormResponseFormCol.id,
     "form_id" -> formGetFormResponseFormCol.form_id,
     "name" -> formGetFormResponseFormCol.name,
     "col_id" -> formGetFormResponseFormCol.col_id,
-    "index" -> formGetFormResponseFormCol.index,
+    "col_index" -> formGetFormResponseFormCol.col_index,
     "col_type" -> formGetFormResponseFormCol.col_type,
-    "default" -> formGetFormResponseFormCol.default,
+    "default_value" -> formGetFormResponseFormCol.default_value,
     "select_list" -> formGetFormResponseFormCol.select_list,
     "validations" -> formGetFormResponseFormCol.validations
   )
@@ -171,17 +171,17 @@ trait FormGetFormResponseJson {
       (JsPath \ "form_id").read[Long] ~
       (JsPath \ "name").read[String] ~
       (JsPath \ "col_id").read[String] ~
-      (JsPath \ "index").read[Int] ~
+      (JsPath \ "col_index").read[Int] ~
       (JsPath \ "col_type").read[Int] ~
-      (JsPath \ "default").read[String] ~
-      (JsPath \ "select_list").read[List[FormGetFormResponseFormColSelectList]] ~
+      (JsPath \ "default_value").read[String] ~
+      (JsPath \ "select_list").read[List[FormGetFormResponseFormColSelect]] ~
       (JsPath \ "validations").read[List[FormGetFormResponseFormColValidation]]
   )(FormGetFormResponseFormCol.apply _)
 
   implicit val FormGetFormResponseWrites: Writes[FormGetFormResponse] = (formGetFormResponse: FormGetFormResponse) => Json.obj(
     "id" -> formGetFormResponse.id,
     "name" -> formGetFormResponse.name,
-    "index" -> formGetFormResponse.index,
+    "form_index" -> formGetFormResponse.form_index,
     "title" -> formGetFormResponse.title,
     "status" -> formGetFormResponse.status,
     "cancel_url" -> formGetFormResponse.cancel_url,
@@ -197,7 +197,7 @@ trait FormGetFormResponseJson {
   implicit val FormGetFormResponseReads: Reads[FormGetFormResponse] = (
     (JsPath \ "id").read[Long] ~
       (JsPath \ "name").read[String] ~
-      (JsPath \ "index").read[Int] ~
+      (JsPath \ "form_index").read[Int] ~
       (JsPath \ "title").read[String] ~
       (JsPath \ "status").read[Int] ~
       (JsPath \ "cancel_url").read[String] ~
