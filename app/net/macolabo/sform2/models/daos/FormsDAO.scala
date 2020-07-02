@@ -63,15 +63,15 @@ class FormsDAO extends FormParts with FormJson {
 
   /**
     * フォームデータ取得(new)
-    * @param identity 認証情報
-    * @param hashed_id フォームのhashed_id
+    * @param userGroup ユーザーグループ
+    * @param hashedFormId フォームのhashed_id
     * @return フォームデータ
     */
-  def _getData(userGroup: String, hashedFormId: String) :Option[Form] = {
+  def getData(userGroup: String, hashedFormId: String) :Option[Form] = {
     val f = Form.syntax("f")
     DB localTx { implicit s =>
         withSQL(
-          select(f.id, f.hashed_id, f.form_data, f.user_group)
+          select
             .from(Form as f)
             .where
             .eq(f.hashed_id, hashedFormId)
@@ -116,11 +116,11 @@ class FormsDAO extends FormParts with FormJson {
     * フォーム一覧(new)
     * @return RsResultSet
     */
-  def _getList(userGroup: String): List[Form] = {
+  def getList(userGroup: String): List[Form] = {
     val f = Form.syntax("f")
     DB localTx { implicit s =>
         withSQL(
-          select(f.id, f.hashed_id, f.form_data, f.user_group)
+          select(f.id, f.hashed_id, f.name, f.title, f.status, f.user_group)
             .from(Form as f)
             .where
             .eq(f.user_group, userGroup)
@@ -246,6 +246,37 @@ class FormsDAO extends FormParts with FormJson {
         }
       case e: JsError =>
         RsResultSet("NG", "JSON Error.", toJson(e.toString))
+    }
+  }
+
+  /**
+   * データ作成(new)
+   * */
+  def insert(form: Form): Int = {
+    DB localTx { implicit s =>
+      withSQL {
+        val c = Form.column
+        insertInto(Form).namedValues(
+          c.id -> form.id,
+          c.hashed_id -> form.hashed_id,
+          c.form_index -> form.form_index,
+          c.name -> form.name,
+          c.title -> form.title,
+          c.status -> form.status,
+          c.cancel_url -> form.cancel_url,
+          c.complete_url -> form.complete_url,
+          c.input_header -> form.input_header,
+          c.confirm_header -> form.confirm_header,
+          c.complete_text -> form.complete_text,
+          c.close_text -> form.close_text,
+          c.form_data -> form.form_data,
+          c.user_group -> form.user_group,
+          c.created_user -> form.created_user,
+          c.modified_user -> form.modified_user,
+          c.created -> form.created,
+          c.modified -> form.modified
+        )
+      }.update().apply()
     }
   }
 

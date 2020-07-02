@@ -44,7 +44,9 @@ case class Form(
                  modified_user: String,
                  created: ZonedDateTime,
                  modified: ZonedDateTime
-               )
+               ){
+  def update()(implicit session: DBSession = Form.autoSession): Int = Form.update(this)(session)
+}
 
 object Form extends SQLSyntaxSupport[Form] {
   override val tableName = "D_FORM"
@@ -69,5 +71,100 @@ object Form extends SQLSyntaxSupport[Form] {
       rs.dateTime("created"),
       rs.dateTime("modified")
     )
+  }
+
+  /**
+   * フォームデータ取得
+   * @param userGroup ユーザーグループ
+   * @param hashedFormId フォームのhashed_id
+   * @return フォームデータ
+   */
+  def get(userGroup: String, hashedFormId: String) :Option[Form] = {
+    val f = Form.syntax("f")
+    DB localTx { implicit s =>
+      withSQL(
+        select
+          .from(Form as f)
+          .where
+          .eq(f.hashed_id, hashedFormId)
+          .and
+          .eq(f.user_group, userGroup)
+      ).map(rs => Form(rs)).single.apply()
+    }
+  }
+
+  /**
+   * フォーム一覧
+   * @return フォームデータのリスト
+   */
+  def getList(userGroup: String): List[Form] = {
+    val f = Form.syntax("f")
+    DB localTx { implicit s =>
+      withSQL(
+        select(f.id, f.hashed_id, f.name, f.title, f.status, f.user_group)
+          .from(Form as f)
+          .where
+          .eq(f.user_group, userGroup)
+      ).map(rs => Form(rs)).list.apply()
+    }
+  }
+
+  /**
+   * データ作成
+   * @param form
+   * @return 作成したフォームのID
+   */
+  def create(form: Form): Int = {
+    DB localTx { implicit s =>
+      withSQL {
+        val c = Form.column
+        insert.into(Form).namedValues(
+          c.hashed_id -> form.hashed_id,
+          c.form_index -> form.form_index,
+          c.name -> form.name,
+          c.title -> form.title,
+          c.status -> form.status,
+          c.cancel_url -> form.cancel_url,
+          c.complete_url -> form.complete_url,
+          c.input_header -> form.input_header,
+          c.confirm_header -> form.confirm_header,
+          c.complete_text -> form.complete_text,
+          c.close_text -> form.close_text,
+          c.form_data -> form.form_data,
+          c.user_group -> form.user_group,
+          c.created_user -> form.created_user,
+          c.modified_user -> form.modified_user,
+          c.created -> form.created,
+          c.modified -> form.modified
+        )
+      }.update().apply()
+    }
+  }
+
+  /**
+   * データ更新
+   * @param form フォームデータ
+   * @param session DBセッション
+   * @return
+   */
+  def save(form: Form)(implicit session: DBSession = autoSession) = {
+      withSQL{
+        update(Form).set(
+          column.form_index -> form.form_index,
+          column.name -> form.name,
+          column.title -> form.title,
+          column.status -> form.status,
+          column.cancel_url -> form.cancel_url,
+          column.complete_url -> form.complete_url,
+          column.input_header -> form.input_header,
+          column.confirm_header -> form.confirm_header,
+          column.complete_text -> form.complete_text,
+          column.close_text -> form.close_text,
+          column.form_data -> form.form_data,
+          column.user_group -> form.user_group,
+          column.modified_user -> form.modified_user,
+          column.modified -> form.modified
+        ).where.eq(column.id, form.id)
+      }.update.apply()
   }
 }
