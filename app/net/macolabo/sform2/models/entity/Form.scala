@@ -45,7 +45,9 @@ case class Form(
                  created: ZonedDateTime,
                  modified: ZonedDateTime
                ){
-  def update()(implicit session: DBSession = Form.autoSession): Int = Form.update(this)(session)
+  import Form._
+  def insert: Int = create(this)
+  def update: Int = save(this)
 }
 
 object Form extends SQLSyntaxSupport[Form] {
@@ -79,9 +81,8 @@ object Form extends SQLSyntaxSupport[Form] {
    * @param hashedFormId フォームのhashed_id
    * @return フォームデータ
    */
-  def get(userGroup: String, hashedFormId: String) :Option[Form] = {
+  def get(userGroup: String, hashedFormId: String)(implicit session: DBSession = autoSession) :Option[Form] = {
     val f = Form.syntax("f")
-    DB localTx { implicit s =>
       withSQL(
         select
           .from(Form as f)
@@ -90,23 +91,20 @@ object Form extends SQLSyntaxSupport[Form] {
           .and
           .eq(f.user_group, userGroup)
       ).map(rs => Form(rs)).single.apply()
-    }
   }
 
   /**
    * フォーム一覧
    * @return フォームデータのリスト
    */
-  def getList(userGroup: String): List[Form] = {
+  def getList(userGroup: String)(implicit session: DBSession = autoSession): List[Form] = {
     val f = Form.syntax("f")
-    DB localTx { implicit s =>
       withSQL(
         select(f.id, f.hashed_id, f.name, f.title, f.status, f.user_group)
           .from(Form as f)
           .where
           .eq(f.user_group, userGroup)
       ).map(rs => Form(rs)).list.apply()
-    }
   }
 
   /**
@@ -114,8 +112,7 @@ object Form extends SQLSyntaxSupport[Form] {
    * @param form
    * @return 作成したフォームのID
    */
-  def create(form: Form): Int = {
-    DB localTx { implicit s =>
+  def create(form: Form)(implicit session: DBSession = autoSession): Int = {
       withSQL {
         val c = Form.column
         insert.into(Form).namedValues(
@@ -137,8 +134,7 @@ object Form extends SQLSyntaxSupport[Form] {
           c.created -> form.created,
           c.modified -> form.modified
         )
-      }.update().apply()
-    }
+      }.update.apply()
   }
 
   /**
@@ -147,7 +143,7 @@ object Form extends SQLSyntaxSupport[Form] {
    * @param session DBセッション
    * @return
    */
-  def save(form: Form)(implicit session: DBSession = autoSession) = {
+  def save(form: Form)(implicit session: DBSession = autoSession): Int = {
       withSQL{
         update(Form).set(
           column.form_index -> form.form_index,
@@ -161,7 +157,6 @@ object Form extends SQLSyntaxSupport[Form] {
           column.complete_text -> form.complete_text,
           column.close_text -> form.close_text,
           column.form_data -> form.form_data,
-          column.user_group -> form.user_group,
           column.modified_user -> form.modified_user,
           column.modified -> form.modified
         ).where.eq(column.id, form.id)

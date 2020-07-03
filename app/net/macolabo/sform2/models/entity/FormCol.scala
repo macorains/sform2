@@ -33,7 +33,12 @@ case class FormCol (
                      modified_user: String,
                      created: ZonedDateTime,
                      modified: ZonedDateTime
-                   )
+                   ){
+  import FormCol._
+  def insert: Int = create(this)
+  def update: Int = save(this)
+
+}
 
 object FormCol extends SQLSyntaxSupport[FormCol] {
   override val tableName = "D_FORM_COL"
@@ -52,5 +57,69 @@ object FormCol extends SQLSyntaxSupport[FormCol] {
       rs.dateTime("created"),
       rs.dateTime("modified")
     )
+  }
+
+  /**
+   * フォーム項目一覧
+   * @param formId フォームID
+   * @param session DB Session
+   * @return フォーム項目のリスト
+   */
+  def getList(userGroup: String, formId: Int)(implicit session: DBSession = autoSession): List[FormCol] = {
+    val f = FormCol.syntax("f")
+    withSQL(
+      select
+        .from(FormCol as f)
+        .where
+        .eq(f.form_id, formId)
+        .and
+        .eq(f.user_group, userGroup)
+    ).map(rs => FormCol(rs)).list.apply()
+  }
+
+  /**
+   * フォーム項目作成
+   * @param formCol フォーム項目
+   * @param session DB Session
+   * @return フォーム項目ID
+   */
+  def create(formCol: FormCol)(implicit session: DBSession = autoSession): Int = {
+    withSQL{
+      val c = FormCol.column
+      insert.into(FormCol).namedValues(
+        c.form_id -> formCol.form_id,
+        c.name -> formCol.name,
+        c.col_id -> formCol.col_id,
+        c.col_index -> formCol.col_index,
+        c.col_type -> formCol.col_type,
+        c.default_value -> formCol.default_value,
+        c.user_group -> formCol.user_group,
+        c.created_user -> formCol.created_user,
+        c.modified_user -> formCol.modified_user,
+        c.created -> formCol.created,
+        c.modified -> formCol.modified
+      )
+    }.update.apply()
+  }
+
+  /**
+   * フォーム項目更新
+   * @param formCol フォーム項目
+   * @param session DB Session
+   * @return
+   */
+  def save(formCol: FormCol)(implicit session: DBSession = autoSession): Int = {
+    withSQL{
+      update(FormCol).set(
+        column.form_id -> formCol.form_id,
+        column.name -> formCol.name,
+        column.col_id -> formCol.col_id,
+        column.col_index -> formCol.col_index,
+        column.col_type -> formCol.col_type,
+        column.default_value -> formCol.default_value,
+        column.modified_user -> formCol.modified_user,
+        column.modified -> formCol.modified
+      ).where.eq(column.id, formCol.id)
+    }.update.apply()
   }
 }

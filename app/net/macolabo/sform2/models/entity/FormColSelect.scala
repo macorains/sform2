@@ -36,11 +36,16 @@ case class FormColSelect(
                           modified_user: String,
                           created: ZonedDateTime,
                           modified: ZonedDateTime
-                        )
+                        ){
+  import FormColSelect._
+  def insert: Int = create(this)
+  def update: Int = save(this)
+
+}
 
 object FormColSelect extends SQLSyntaxSupport[FormColSelect] {
   override val tableName = "D_FORM_COL_SELECT"
-  def appry(rs: WrappedResultSet) :FormColSelect = {
+  def apply(rs: WrappedResultSet) :FormColSelect = {
     FormColSelect(
       rs.int("id"),
       rs.int("form_col_id"),
@@ -59,4 +64,75 @@ object FormColSelect extends SQLSyntaxSupport[FormColSelect] {
     )
   }
 
+  /**
+   * フォーム項目選択項目リスト取得
+   * @param userGroup ユーザーグループ
+   * @param formId フォームID
+   * @param formColId フォーム項目ID
+   * @param session DB Session
+   * @return フォーム項目選択項目のリスト
+   */
+  def getList(userGroup: String, formId: Int, formColId: Int)(implicit session: DBSession = autoSession): List[FormColSelect] = {
+    val f = FormColSelect.syntax("f")
+    withSQL (
+      select
+        .from(FormColSelect as f)
+        .where
+        .eq(f.form_id, formId)
+        .and
+        .eq(f.form_col_id, formColId)
+        .and
+        .eq(f.user_group, userGroup)
+      ).map(rs => FormColSelect(rs)).list.apply()
+  }
+
+  /**
+   * フォーム項目選択項目の作成
+   * @param formColSelect フォーム項目選択項目
+   * @param session DB Session
+   * @return フォーム項目選択項目のID
+   */
+  def create(formColSelect: FormColSelect)(implicit session: DBSession = autoSession): Int = {
+    withSQL {
+      val c = FormColSelect.column
+      insert.into(FormColSelect).namedValues(
+        c.form_col_id -> formColSelect.form_col_id,
+        c.form_id -> formColSelect.form_id,
+        c.select_index -> formColSelect.select_index,
+        c.select_name -> formColSelect.select_name,
+        c.select_value -> formColSelect.select_value,
+        c.is_default -> formColSelect.is_default,
+        c.edit_style -> formColSelect.edit_style,
+        c.view_style -> formColSelect.view_style,
+        c.user_group -> formColSelect.user_group,
+        c.created_user -> formColSelect.created_user,
+        c.modified_user -> formColSelect.modified_user,
+        c.created -> formColSelect.created,
+        c.modified -> formColSelect.modified
+      )
+    }.update.apply()
+  }
+
+  /**
+   * フォーム項目選択項目の更新
+   * @param formColSelect フォーム項目選択項目
+   * @param session DB Session
+   * @return
+   */
+  def save(formColSelect: FormColSelect)(implicit session: DBSession = autoSession) = {
+    withSQL{
+      update(FormColSelect).set(
+        column.form_col_id -> formColSelect.form_col_id,
+        column.form_id -> formColSelect.form_id,
+        column.select_index -> formColSelect.select_index,
+        column.select_name -> formColSelect.select_name,
+        column.select_value -> formColSelect.select_value,
+        column.is_default -> formColSelect.is_default,
+        column.edit_style -> formColSelect.edit_style,
+        column.view_style -> formColSelect.view_style,
+        column.modified_user -> formColSelect.modified_user,
+        column.modified -> formColSelect.modified
+      ).where.eq(column.id, formColSelect.id)
+    }.update.apply()
+  }
 }
