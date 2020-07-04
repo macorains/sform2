@@ -82,7 +82,7 @@ play.filters {
     pathPrefixes = ["/"]
     allowedOrigins = ["http://localhost:8080"]
     allowedHttpMethods = ["GET", "POST", "OPTIONS"]
-    # allowedHttpHeaders = ["Accept"]
+    allowedHttpHeaders = ["Accept", "Content-Type", "Access-Control-Allow-Origin", "Origin", "X-Requested-With", "X-Auth-Token", "Timeout"]
     preflightMaxAge = 3 days
   }
   csrf {
