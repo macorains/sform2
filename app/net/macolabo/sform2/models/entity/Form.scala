@@ -84,7 +84,25 @@ object Form extends SQLSyntaxSupport[Form] {
   def get(userGroup: String, hashedFormId: String)(implicit session: DBSession = autoSession) :Option[Form] = {
     val f = Form.syntax("f")
       withSQL(
-        select
+        select(
+          f.id,
+          f.hashed_id,
+          f.form_index,
+          f.name,
+          f.title,
+          f.status,
+          f.cancel_url,
+          f.complete_url,
+          f.input_header,
+          f.confirm_header,
+          f.complete_text,
+          f.close_text,
+          f.form_data,
+          f.user_group,
+          f.created_user,
+          f.modified_user,
+          f.created,
+          f.modified)
           .from(Form as f)
           .where
           .eq(f.hashed_id, hashedFormId)
@@ -100,7 +118,25 @@ object Form extends SQLSyntaxSupport[Form] {
   def getList(userGroup: String)(implicit session: DBSession = autoSession): List[Form] = {
     val f = Form.syntax("f")
       withSQL(
-        select(f.id, f.hashed_id, f.name, f.title, f.status, f.user_group)
+        select(
+          f.id,
+          f.hashed_id,
+          f.form_index,
+          f.name,
+          f.title,
+          f.status,
+          f.cancel_url,
+          f.complete_url,
+          f.input_header,
+          f.confirm_header,
+          f.complete_text,
+          f.close_text,
+          f.form_data,
+          f.user_group,
+          f.created_user,
+          f.modified_user,
+          f.created,
+          f.modified)
           .from(Form as f)
           .where
           .eq(f.user_group, userGroup)

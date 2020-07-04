@@ -6,7 +6,7 @@ import javax.inject._
 import models._
 import net.macolabo.sform2.models.RsResultSet
 import net.macolabo.sform2.models.daos.{FormsDAO, TransferTaskDAO}
-import net.macolabo.sform2.services.Form.{FormGetFormResponseJson, FormService}
+import net.macolabo.sform2.services.Form.{FormGetFormResponseJson, FormGetListResponseJson, FormService}
 import net.macolabo.sform2.services.User.UserService
 import org.webjars.play.WebJarsUtil
 import play.api.{Environment, _}
@@ -35,7 +35,7 @@ class FormController @Inject() (
   implicit
   webJarsUtil: WebJarsUtil,
   ex: ExecutionContext
-) extends AbstractController(components) with I18nSupport with FormGetFormResponseJson {
+) extends AbstractController(components) with I18nSupport with FormGetFormResponseJson with FormGetListResponseJson {
 
   /**
    * フォームデータ取得
@@ -67,7 +67,7 @@ class FormController @Inject() (
    * @return フォームデータのリスト
    */
   def getList: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
-    val res = formsDAO.getList(request.identity)
+    val res = formService.getList(request.identity)
     Future.successful(Ok(toJson(res)))
   }
 
