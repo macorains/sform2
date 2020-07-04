@@ -31,7 +31,7 @@ class TransferLogDAO {
       UPDATE D_TRANSFER_LOG
       SET TRANSFER_ID = $transfer_id, STATUS = 2, TRANSFER_DATA = $transfer_data, MODIFIED = NOW()
       WHERE ID = $id"""
-        .update.apply()
+        .update().apply()
     }
   }
 
@@ -52,7 +52,7 @@ class TransferLogDAO {
       SET STATUS = $status
       WHERE ID = $id
         """
-        .update.apply()
+        .update().apply()
     }
   }
 

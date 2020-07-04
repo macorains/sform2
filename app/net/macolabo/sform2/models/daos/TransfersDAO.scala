@@ -48,7 +48,7 @@ class TransfersDAO {
   def getTransfer(transferType: Int): List[Transfer] = {
     DB localTx { implicit l =>
       sql"SELECT ID,TYPE_ID,NAME,STATUS,CONFIG,USER_GROUP,MODIFIED FROM M_TRANSFERS WHERE TYPE_ID=$transferType"
-        .map(rs => Transfer(rs)).list.apply()
+        .map(rs => Transfer(rs)).list().apply()
       //.map(rs => Transfer(rs)).single.apply()
     }
   }
@@ -56,14 +56,14 @@ class TransfersDAO {
   def getTransfetList: List[Transfer] = {
     DB localTx { implicit l =>
       sql"SELECT ID,TYPE_ID,NAME,STATUS,CONFIG,USER_GROUP,MODIFIED FROM M_TRANSFERS"
-        .map(rs => Transfer(rs)).list.apply()
+        .map(rs => Transfer(rs)).list().apply()
     }
   }
 
   def getTransferListJson: JsValue = {
     DB localTx { implicit l =>
       val transferList = sql"SELECT ID,TYPE_ID,NAME FROM M_TRANSFERS"
-        .map(rs => TransferList(rs)).list.apply
+        .map(rs => TransferList(rs)).list().apply()
       val transferListJson = transferList.map(t => { TransferListJson(t.type_id, t.name) })
       Json.toJson(transferListJson)
     }
@@ -75,7 +75,7 @@ class TransfersDAO {
       INSERT INTO M_TRANSFES
       (TYPE_ID,NAME,STATUS,CONFIG,CREATED,MODIFIED)
       VALUES ($type_id,$name,$status,$config,NOW(),NOW())"""
-        .update.apply()
+        .update().apply()
     }
   }
 
@@ -85,7 +85,7 @@ class TransfersDAO {
       UPDATE M_TRANSFERS
       SET TYPE_ID=$type_id, NAME=$name, STATUS=$status, CONFIG=$config, MODIFIED=NOW()
         WHERE ID = $id"""
-        .update.apply()
+        .update().apply()
     }
   }
 
@@ -95,7 +95,7 @@ class TransfersDAO {
       UPDATE M_TRANSFERS
       SET CONFIG=$config, MODIFIED_USER=${identity.userID.toString}, MODIFIED=NOW()
         WHERE TYPE_ID=$type_id AND USER_GROUP = ${identity.group}"""
-        .update.apply()
+        .update().apply()
     }
   }
 

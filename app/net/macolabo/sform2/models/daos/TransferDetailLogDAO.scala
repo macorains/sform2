@@ -21,7 +21,7 @@ class TransferDetailLogDAO {
       (POSTDATA_ID,TRANSFER_TYPE_ID,STATUS,POSTDATA,MODIFIED_POSTDATA,RESULT,MESSAGE,CREATED,MODIFIED)
       VALUES ($postdata_id,$transfer_type_id,$status,$postdata,$modified_postdata,$result,$message,
       NOW(),NOW())"""
-        .update.apply()
+        .update().apply()
     }
   }
 

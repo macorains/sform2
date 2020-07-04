@@ -23,7 +23,7 @@ class AuthTokenDAOImpl extends AuthTokenDAO with SFDBConf {
   //def find(id: UUID) = Future.successful(tokens.get(id))
   def find(id: UUID): Future[Option[AuthToken]] = Future.successful(
     sql"SELECT ID,USER_ID,EXPIRY FROM D_AUTHTOKEN WHERE ID=${id.toString}"
-      .map(rs => models.AuthToken(UUID.fromString(rs.string("ID")), UUID.fromString(rs.string("USER_ID")), rs.jodaDateTime("EXPIRY"))).single.apply()
+      .map(rs => models.AuthToken(UUID.fromString(rs.string("ID")), UUID.fromString(rs.string("USER_ID")), rs.jodaDateTime("EXPIRY"))).single().apply()
   )
 
   /**
@@ -40,7 +40,7 @@ class AuthTokenDAOImpl extends AuthTokenDAO with SFDBConf {
     */
     println(dateTime)
     sql"SELECT ID,USER_ID,EXPIRY FROM D_AUTHTOKEN WHERE EXPIRY<=$dateTime"
-      .map(rs => models.AuthToken(UUID.fromString(rs.string("ID")), UUID.fromString(rs.string("USER_ID")), rs.jodaDateTime("EXPIRY"))).list.apply()
+      .map(rs => models.AuthToken(UUID.fromString(rs.string("ID")), UUID.fromString(rs.string("USER_ID")), rs.jodaDateTime("EXPIRY"))).list().apply()
 
   }
 
@@ -54,7 +54,7 @@ class AuthTokenDAOImpl extends AuthTokenDAO with SFDBConf {
     //tokens += (token.id -> token)
     //println(token.toString)
     sql"INSERT INTO D_AUTHTOKEN(ID,USER_ID,EXPIRY) VALUES(${token.id.toString},${token.userID.toString},${token.expiry})"
-      .update.apply()
+      .update().apply()
     Future.successful(token)
   }
 
@@ -66,7 +66,7 @@ class AuthTokenDAOImpl extends AuthTokenDAO with SFDBConf {
    */
   def remove(id: UUID): Future[Unit] = {
     //tokens -= id
-    sql"DELETE FROM D_AUTHTOKEN WHERE ID=$id".update.apply()
+    sql"DELETE FROM D_AUTHTOKEN WHERE ID=$id".update().apply()
     Future.successful(())
   }
 }

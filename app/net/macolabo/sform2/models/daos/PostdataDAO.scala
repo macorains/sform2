@@ -12,7 +12,7 @@ class PostdataDAO {
            LEFT JOIN D_TRANSFER_DETAIL_LOG tdl
              ON pd.POSTDATA_ID = tdl.POSTDATA_ID AND tdl.TRANSFER_TYPE_ID=$transfer_type_id
            WHERE pd.FORM_HASHED_ID=$form_hashed_id  AND tdl.ID IS NULL"""
-        .map(rs => Postdata(rs)).list.apply()
+        .map(rs => Postdata(rs)).list().apply()
     }
   }
 
@@ -21,7 +21,7 @@ class PostdataDAO {
       sql"""SELECT pd.POSTDATA_ID, pd.FORM_HASHED_ID, pd.POSTDATA
            FROM D_POSTDATA pd
            WHERE pd.FORM_HASHED_ID=$form_hashed_id  """
-        .map(rs => Postdata(rs)).list.apply()
+        .map(rs => Postdata(rs)).list().apply()
     }
   }
 

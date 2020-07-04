@@ -40,7 +40,7 @@ class FormsDAO extends FormParts with FormJson {
             .eq(f.hashed_id, hashed_id)
             .and
             .eq(f.user_group, userGroup)
-        ).map(rs => Form(rs)).single.apply()
+        ).map(rs => Form(rs)).single().apply()
 
       val jsString = formData match {
         case Some(form) =>
@@ -77,7 +77,7 @@ class FormsDAO extends FormParts with FormJson {
             .eq(f.hashed_id, hashedFormId)
             .and
             .eq(f.user_group, userGroup)
-        ).map(rs => Form(rs)).single.apply()
+        ).map(rs => Form(rs)).single().apply()
     }
   }
 
@@ -95,7 +95,7 @@ class FormsDAO extends FormParts with FormJson {
             .from(Form as f)
             .where
             .eq(f.user_group, userGroup)
-        ).map(rs => Form(rs)).list.apply()
+        ).map(rs => Form(rs)).list().apply()
 
       val jsString = formDataList.zipWithIndex.map {
         case (a, b) =>
@@ -124,7 +124,7 @@ class FormsDAO extends FormParts with FormJson {
             .from(Form as f)
             .where
             .eq(f.user_group, userGroup)
-        ).map(rs => Form(rs)).list.apply()
+        ).map(rs => Form(rs)).list().apply()
     }
   }
 
@@ -138,7 +138,7 @@ class FormsDAO extends FormParts with FormJson {
       withSQL(
         select(f.id, f.hashed_id, f.form_data, f.user_group)
           .from(Form as f)
-      ).map(rs => Form(rs)).list.apply()
+      ).map(rs => Form(rs)).list().apply()
     }
 
     formlist
@@ -167,7 +167,7 @@ class FormsDAO extends FormParts with FormJson {
                 .from(Form as f)
                 .where
                 .eq(f.hashed_id, formId)
-            }.map(rs => Form(rs)).single.apply()
+            }.map(rs => Form(rs)).single().apply()
           formData match {
             case Some(s: Form) =>
               RsResultSet("OK", "OK", toJson(convertFormDefToHtml(id, s, cFormMode.LOAD, None, host, receiverPath.getOrElse(""))))
@@ -302,7 +302,7 @@ class FormsDAO extends FormParts with FormJson {
         deleteFrom(Form)
           .where
           .eq(Form.column.id, id)
-      }.update.apply()
+      }.update().apply()
     }
 
     RsResultSet("NG", "NG", Json.parse("""{}"""))
@@ -314,7 +314,7 @@ class FormsDAO extends FormParts with FormJson {
         deleteFrom(Form)
           .where
           .eq(Form.column.hashed_id, hashed_form_id)
-      }.update.apply()
+      }.update().apply()
     }
     RsResultSet("OK", "OK", Json.parse("""{}"""))
   }
@@ -338,7 +338,7 @@ class FormsDAO extends FormParts with FormJson {
               .from(Form as f)
               .where
               .eq(f.hashed_id, s.get.formid)
-          }.map(rs => Form(rs)).single.apply()
+          }.map(rs => Form(rs)).single().apply()
           formData match {
             case Some(d) =>
               RsResultSet("OK", "OK", toJson(convertFormDefToHtml(s.get.formid, d, cFormMode.CONFIRM, Option(s.get.postdata), host, receiverPath)))
@@ -368,7 +368,7 @@ class FormsDAO extends FormParts with FormJson {
               .from(Form as f)
               .where
               .eq(f.hashed_id, s.get.formid)
-          }.map(rs => Form(rs)).single.apply()
+          }.map(rs => Form(rs)).single().apply()
           formData match {
             case Some(d) =>
               println("save!!")
@@ -398,7 +398,7 @@ class FormsDAO extends FormParts with FormJson {
             .from(Form as f)
             .where
             .eq(f.hashed_id, hashed_id)
-        }.map(rs => Form(rs)).single.apply()
+        }.map(rs => Form(rs)).single().apply()
       formData match {
         case Some(s: Form) =>
           val dt = Json.parse(s.form_data)
@@ -486,7 +486,7 @@ class FormsDAO extends FormParts with FormJson {
       val id: Option[Long] =
         sql"""SELECT auto_increment
              FROM information_schema.tables
-             WHERE table_name = 'd_form'""".map(_.long(1)).single.apply()
+             WHERE table_name = 'd_form'""".map(_.long(1)).single().apply()
 
       id match {
         case Some(l: Long) =>
@@ -497,7 +497,7 @@ class FormsDAO extends FormParts with FormJson {
           val newid: Long =
             sql"""INSERT INTO D_FORM(FORM_DATA,HASHED_ID,USER_GROUP,CREATED_USER,CREATED)
                  VALUES(${toJson(f).toString},$hashed_id,${identity.group},${identity.userID.toString},$now)"""
-              .updateAndReturnGeneratedKey.apply()
+              .updateAndReturnGeneratedKey().apply()
           Json.parse("""{"id": """" + newid.toString + """", "hashed_id":"""" + hashed_id + """"}""")
         case None =>
           Json.parse("""{"id": "failed"}""")
@@ -516,7 +516,7 @@ class FormsDAO extends FormParts with FormJson {
       sql"""UPDATE D_FORM
            SET FORM_DATA=${dt.toString},
            MODIFIED_USER=${identity.userID.toString},
-           MODIFIED=now() WHERE ID=$formId""".update.apply
+           MODIFIED=now() WHERE ID=$formId""".update().apply()
       Json.parse("""{"id": """" + formId.toString + """"}""")
     }
   }
@@ -693,7 +693,7 @@ class FormsDAO extends FormParts with FormJson {
     DB localTx { implicit l =>
       val now: String = "%tY/%<tm/%<td %<tH:%<tM:%<tS" format new Date
       val newid: Long = sql"INSERT INTO D_POSTDATA(FORM_HASHED_ID,POSTDATA,CREATED,MODIFIED) VALUES($hashed_id,${toJson(dt).toString},$now,$now)"
-        .updateAndReturnGeneratedKey.apply()
+        .updateAndReturnGeneratedKey().apply()
       Seq("")
     }
   }

@@ -64,7 +64,7 @@ object FormColValidation extends SQLSyntaxSupport[FormColValidation] {
         .eq(f.form_col_id, formColId)
         .and
         .eq(f.user_group, userGroup)
-      ).map(rs => FormColValidation(rs)).list.apply()
+      ).map(rs => FormColValidation(rs)).list().apply()
   }
 
   /**
@@ -90,7 +90,7 @@ object FormColValidation extends SQLSyntaxSupport[FormColValidation] {
         c.created -> formColValidation.created,
         c.modified -> formColValidation.modified
       )
-    }.update.apply()
+    }.update().apply()
   }
 
   /**
@@ -111,6 +111,6 @@ object FormColValidation extends SQLSyntaxSupport[FormColValidation] {
         column.modified_user -> formColValidation.modified_user,
         column.modified -> formColValidation.modified
       ).where.eq(column.id, formColValidation.id)
-    }.update.apply()
+    }.update().apply()
   }
 }

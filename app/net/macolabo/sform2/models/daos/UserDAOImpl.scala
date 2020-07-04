@@ -49,7 +49,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
               rs.boolean("DELETABLE")
             )
           )
-          .single.apply()
+          .single().apply()
       }
     )
 
@@ -78,7 +78,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
               rs.boolean("DELETABLE")
             )
           )
-          .single.apply()
+          .single().apply()
       }
     )
 
@@ -98,7 +98,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
   def update(user: User): Future[User] = {
     DB localTx { implicit l =>
       sql"UPDATE M_USERINFO SET FIRST_NAME=${user.firstName}, LAST_NAME=${user.lastName} ,EMAIL=${user.email}, AVATAR_URL=${user.avatarURL}, ACTIVATED=${user.activated}, DELETABLE=${user.deletable} WHERE USER_ID=${user.userID.toString}"
-        .update.apply()
+        .update().apply()
       Future.successful(user)
     }
   }
@@ -106,7 +106,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
   def add(user: User): Future[User] = {
     DB localTx { implicit l =>
       sql"INSERT INTO M_USERINFO(USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE) VALUES(${user.userID.toString},${user.loginInfo.providerID},${user.loginInfo.providerKey},${user.group},${user.role},${user.firstName},${user.lastName},${user.email},'',0,1)"
-        .update.apply()
+        .update().apply()
       Future.successful(user)
     }
   }
@@ -130,7 +130,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
             rs.boolean("DELETABLE")
           )
         )
-        .list.apply()
+        .list().apply()
       val userListJson = userList.map(
         u => {
           UserJson(u.userID.toString, u.group.getOrElse(""), u.role.getOrElse(""), u.firstName.getOrElse(""), u.lastName.getOrElse(""),
@@ -143,7 +143,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
 
   // Adminグループのユーザーアカウント数を取得
   def countAdminUsers() :Int = {
-    sql"SELECT count(*) FROM M_USERINFO WHERE USER_GROUP='admin'".map(_.int(1)).first.apply.getOrElse(0)
+    sql"SELECT count(*) FROM M_USERINFO WHERE USER_GROUP='admin'".map(_.int(1)).first().apply().getOrElse(0)
   }
 }
 

@@ -90,7 +90,7 @@ object Form extends SQLSyntaxSupport[Form] {
           .eq(f.hashed_id, hashedFormId)
           .and
           .eq(f.user_group, userGroup)
-      ).map(rs => Form(rs)).single.apply()
+      ).map(rs => Form(rs)).single().apply()
   }
 
   /**
@@ -104,7 +104,7 @@ object Form extends SQLSyntaxSupport[Form] {
           .from(Form as f)
           .where
           .eq(f.user_group, userGroup)
-      ).map(rs => Form(rs)).list.apply()
+      ).map(rs => Form(rs)).list().apply()
   }
 
   /**
@@ -134,7 +134,7 @@ object Form extends SQLSyntaxSupport[Form] {
           c.created -> form.created,
           c.modified -> form.modified
         )
-      }.update.apply()
+      }.update().apply()
   }
 
   /**
@@ -160,6 +160,6 @@ object Form extends SQLSyntaxSupport[Form] {
           column.modified_user -> form.modified_user,
           column.modified -> form.modified
         ).where.eq(column.id, form.id)
-      }.update.apply()
+      }.update().apply()
   }
 }

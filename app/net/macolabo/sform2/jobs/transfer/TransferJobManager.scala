@@ -5,7 +5,7 @@ import akka.actor.Actor
 import net.macolabo.sform2.models.daos._
 import net.macolabo.sform2.models.entity._
 import net.macolabo.sform2.models.json.TransferTaskJson
-import play.api.Logger
+import net.macolabo.sform2.utils.Logger
 
 class TransferJobManager @Inject() (
   formsDao: FormsDAO,
@@ -14,23 +14,23 @@ class TransferJobManager @Inject() (
   postdataDao: PostdataDAO,
   salesforceTransferJob: SalesforceTransferJob,
   mailTransferJob: MailTransferJob
-) extends Actor {
+) extends Actor with Logger {
 
   def receive: Receive = {
     // 普通に実行
     case "Exec" => {
-      Logger.logger.info("---------- TransferJobManager Start.")
+      logger.info("---------- TransferJobManager Start.")
       // Transferを取得
       val transferList = transfersDao.getTransfetList
       // ステータス有効のフォームを検索
       val formIdList = formsDao.getListForTransferJobManager
-      Logger.logger.info(s"  Number of Active Forms: ${formIdList.size.toString}")
+      logger.info(s"  Number of Active Forms: ${formIdList.size.toString}")
       formIdList.foreach(formId => {
         // 処理対象のフォームデータを検索
         val postdataList = postdataDao.getPostdata(formId)
         // 転送タスクを検索
         val transfetTaskList = transferTaskDAO.getTransferTaskListByFormId(formId)
-        Logger.logger.info(s"  FormId: ${formId}  Number of Postdata: ${postdataList.size.toString}  Number of TransferTask: ${transfetTaskList.size.toString}")
+        logger.info(s"  FormId: ${formId}  Number of Postdata: ${postdataList.size.toString}  Number of TransferTask: ${transfetTaskList.size.toString}")
 
         transfetTaskList.foreach(transferTask => {
 
@@ -40,7 +40,7 @@ class TransferJobManager @Inject() (
           // ジョブ実行ログを出力（ジョブ完了ステータスorジョブ異常終了ステータス）
         })
       })
-      Logger.logger.info("---------- TransferJobManager Finish.")
+      logger.info("---------- TransferJobManager Finish.")
     }
     // 状態表示
     case "Status" => {
@@ -64,7 +64,7 @@ class TransferJobManager @Inject() (
             }
             // 想定外の転送タイプID
             case _ => {
-              Logger.logger.error(s"Illegal transfer_type_id : ${t}")
+              logger.error(s"Illegal transfer_type_id : ${t}")
             }
           }
         }

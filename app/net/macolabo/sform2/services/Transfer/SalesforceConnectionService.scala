@@ -3,9 +3,9 @@ package net.macolabo.sform2.services.Transfer
 import com.sforce.soap.partner._
 import com.sforce.soap.partner.sobject._
 import com.sforce.ws._
-import play.api.Logger
+import net.macolabo.sform2.utils.Logger
 
-class SalesforceConnectionService {
+class SalesforceConnectionService extends Logger {
 
   // 開発時用ダミー
   def getDummyConnection(user: String, password: String, securityToken: String): Option[PartnerConnection] = {
@@ -23,16 +23,16 @@ class SalesforceConnectionService {
       val loginResult = connection.login(user, password + securityToken)
       if(loginResult.isPasswordExpired) {
         // ログインした結果、パスワード有効期限切れならログ出力
-        Logger.logger.error(s"Salesforce Login Failed. Password expired. Please change password and security token. user={$user}")
+        logger.error(s"Salesforce Login Failed. Password expired. Please change password and security token. user={$user}")
         None
       } else {
-        Logger.logger.info(s"Salesforce Login Success. user={$user}")
+        logger.info(s"Salesforce Login Success. user={$user}")
         Some(connection)
       }
     } catch {
       case e: Exception => {
-        Logger.logger.error(s"Salesforce Login Failed. user={$user} password={$password} securityToken={$securityToken}")
-        Logger.logger.error(e.toString)
+        logger.error(s"Salesforce Login Failed. user={$user} password={$password} securityToken={$securityToken}")
+        logger.error(e.toString)
         None
       }
     }
@@ -41,7 +41,7 @@ class SalesforceConnectionService {
   def create(connection: PartnerConnection, sObjectArray: Array[SObject]) = {
     val res = connection.create(sObjectArray)
 
-    res.foreach(r => r.getErrors.foreach(e => Logger.logger.debug(e.getMessage)))
+    res.foreach(r => r.getErrors.foreach(e => logger.debug(e.getMessage)))
     res
   }
 

@@ -14,7 +14,7 @@ class TransferTaskDAO extends TransferTaskJson {
       sql"""SELECT ID,TRANSFER_TYPE_ID,NAME,FORM_ID,STATUS,CONFIG,CREATED,MODIFIED
       FROM D_TRANSFER_TASKS
       WHERE TRANSFER_TYPE_ID=$transferType"""
-        .map(rs => TransferTask(rs)).list.apply()
+        .map(rs => TransferTask(rs)).list().apply()
     }
   }
 
@@ -23,7 +23,7 @@ class TransferTaskDAO extends TransferTaskJson {
       sql"""SELECT ID,TRANSFER_TYPE_ID,NAME,STATUS,CONFIG,CREATED,MODIFIED
       FROM D_TRANSFER_TASKS
       WHERE FORM_ID=$hashed_form_id"""
-        .map(rs => TransferTask(rs)).list.apply()
+        .map(rs => TransferTask(rs)).list().apply()
     }
   }
 
@@ -32,7 +32,7 @@ class TransferTaskDAO extends TransferTaskJson {
       val transferTaskList = sql"""SELECT ID,TRANSFER_TYPE_ID,NAME,STATUS,CONFIG,CREATED,MODIFIED
       FROM D_TRANSFER_TASKS
       WHERE FORM_ID=$hashed_form_id"""
-        .map(rs => TransferTask(rs)).list.apply()
+        .map(rs => TransferTask(rs)).list().apply()
       val transferTaskEntityList = transferTaskList.map(
         t => { TransferTaskEntry(t.id, t.transfer_type_id, t.name, t.status, Json.toJson(t.config), t.created, t.modified, 0) })
       Json.toJson(transferTaskEntityList)
@@ -44,7 +44,7 @@ class TransferTaskDAO extends TransferTaskJson {
       val t = sql"""SELECT ID,TRANSFER_TYPE_ID,NAME,STATUS,CONFIG,CREATED,MODIFIED
       FROM D_TRANSFER_TASKS
       WHERE ID=$id"""
-        .map(rs => TransferTask(rs)).single.apply().get
+        .map(rs => TransferTask(rs)).single().apply().get
       val transferTaskEntity = TransferTaskEntry(t.id, t.transfer_type_id, t.name, t.status, Json.toJson(t.config), t.created, t.modified, 0)
       Json.toJson(transferTaskEntity)
     }
@@ -56,7 +56,7 @@ class TransferTaskDAO extends TransferTaskJson {
       INSERT INTO D_TRANSFER_TASKS
       (TRANSFER_TYPE_ID,NAME,STATUS,CONFIG,USER_GROUP,CREATED_USER,CREATED,MODIFIED_USER,MODIFIED)
       VALUES ($transfer_type_id,$name,$status,$config,$user_group,$user,NOW(),$user,NOW())"""
-        .update.apply()
+        .update().apply()
     }
   }
 
@@ -67,7 +67,7 @@ class TransferTaskDAO extends TransferTaskJson {
       SET TRANSFER_TYPE_ID=$transfer_type_id, NAME=$name, STATUS=$status, CONFIG=$config,
       MODIFIED_USER=$user, MODIFIED=NOW()
         WHERE ID = $id"""
-        .update.apply()
+        .update().apply()
     }
   }
 
@@ -76,7 +76,7 @@ class TransferTaskDAO extends TransferTaskJson {
       sql"""
       DELETE FROM D_TRANSFER_TASKS
       WHERE ID = $id"""
-        .update.apply()
+        .update().apply()
     }
   }
 

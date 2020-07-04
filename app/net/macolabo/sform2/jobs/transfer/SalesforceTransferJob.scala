@@ -6,14 +6,14 @@ import javax.inject.Inject
 import net.macolabo.sform2.models.daos.{Transfer, TransferDetailLogDAO, TransferTaskDAO}
 import net.macolabo.sform2.models.entity.{Postdata, TransferTask}
 import net.macolabo.sform2.services.Transfer.SalesforceConnectionService
+import net.macolabo.sform2.utils.Logger
 import play.api.libs.json._
-import play.api.Logger
 
 class SalesforceTransferJob @Inject() (
                                         salesforceConnector: SalesforceConnectionService,
                                         transferDetailLogDao: TransferDetailLogDAO,
                                         transferTaskDAO: TransferTaskDAO
-) {
+) extends Logger {
   case class SalesforceTransferConfig(user: String, password: String, securityToken: String)
   object SalesforceTransferConfig {
     implicit def jsonSalesforceTransferConfigWrites: Writes[SalesforceTransferConfig] = Json.writes[SalesforceTransferConfig]
@@ -29,7 +29,7 @@ class SalesforceTransferJob @Inject() (
 
   def execute(transferTask: TransferTask, transfer: Transfer, postdataList: List[Postdata]): Unit = {
     // 開始ログ
-    Logger.logger.info(s"    Start SalesforceTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
+    logger.info(s"    Start SalesforceTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
 
     getTransferConfig(transfer) match {
       case transferConfig: JsSuccess[SalesforceTransferConfig] =>
@@ -40,18 +40,18 @@ class SalesforceTransferJob @Inject() (
                 executeTransferTask(transferConfig.get, transferTaskConfig.get, postdataList, transfer.type_id)
               case _ =>
                 // データが無い
-                Logger.logger.info("    No data for transfer.")
+                logger.info("    No data for transfer.")
             }
           case e2: JsError =>
             // transferTaskConfigが取れない
-            Logger.logger.error("    Could not get TransferTaskConfig.")
+            logger.error("    Could not get TransferTaskConfig.")
         }
       case e1: JsError =>
         // transferConfigが取れない
-        Logger.logger.error("    Could not get TransferConfig.")
+        logger.error("    Could not get TransferConfig.")
     }
     // 終了ログ
-    Logger.logger.info(s"    End SalesforceTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
+    logger.info(s"    End SalesforceTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
   }
 
   /**
@@ -129,7 +129,7 @@ class SalesforceTransferJob @Inject() (
         true
       case _ =>
         // SFに接続できない
-        Logger.logger.error("    Could not connect to Salesforce.")
+        logger.error("    Could not connect to Salesforce.")
         false
     }
 

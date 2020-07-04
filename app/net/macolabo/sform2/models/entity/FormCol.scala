@@ -74,7 +74,7 @@ object FormCol extends SQLSyntaxSupport[FormCol] {
         .eq(f.form_id, formId)
         .and
         .eq(f.user_group, userGroup)
-    ).map(rs => FormCol(rs)).list.apply()
+    ).map(rs => FormCol(rs)).list().apply()
   }
 
   /**
@@ -99,7 +99,7 @@ object FormCol extends SQLSyntaxSupport[FormCol] {
         c.created -> formCol.created,
         c.modified -> formCol.modified
       )
-    }.update.apply()
+    }.update().apply()
   }
 
   /**
@@ -120,6 +120,6 @@ object FormCol extends SQLSyntaxSupport[FormCol] {
         column.modified_user -> formCol.modified_user,
         column.modified -> formCol.modified
       ).where.eq(column.id, formCol.id)
-    }.update.apply()
+    }.update().apply()
   }
 }

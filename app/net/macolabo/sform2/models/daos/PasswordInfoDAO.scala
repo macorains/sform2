@@ -13,7 +13,7 @@ class PasswordInfoDAO extends DelegableAuthInfoDAO[PasswordInfo] {
       DB localTx { implicit s =>
         sql"""SELECT HASHER,PASSWORD,SALT FROM M_AUTHINFO WHERE PROVIDER_ID=${loginInfo.providerID}
              AND PROVIDER_KEY=${loginInfo.providerKey}"""
-          .map(rs => PasswordInfo(rs.string("HASHER"), rs.string("PASSWORD"), Option(rs.string("SALT")))).single.apply()
+          .map(rs => PasswordInfo(rs.string("HASHER"), rs.string("PASSWORD"), Option(rs.string("SALT")))).single().apply()
       }
     )
 
@@ -22,7 +22,7 @@ class PasswordInfoDAO extends DelegableAuthInfoDAO[PasswordInfo] {
       DB localTx { implicit s =>
         sql"""INSERT INTO M_AUTHINFO(PROVIDER_ID,PROVIDER_KEY,HASHER,PASSWORD,SALT)
              VALUES('',${loginInfo.providerID},${loginInfo.providerKey},${authInfo.hasher},${authInfo.password},${authInfo.salt})"""
-          .updateAndReturnGeneratedKey.apply()
+          .updateAndReturnGeneratedKey().apply()
         authInfo
       }
     }
@@ -31,7 +31,7 @@ class PasswordInfoDAO extends DelegableAuthInfoDAO[PasswordInfo] {
     Future.successful {
       DB localTx { implicit s =>
         sql"DELETE FROM M_AUTHINFO WHERE PROVIDER_ID=${loginInfo.providerID} AND PROVIDER_KEY=${loginInfo.providerKey}"
-          .update.apply()
+          .update().apply()
       }
     }
 
@@ -46,7 +46,7 @@ class PasswordInfoDAO extends DelegableAuthInfoDAO[PasswordInfo] {
       DB localTx { implicit s =>
         sql"""INSERT INTO M_AUTHINFO(PROVIDER_ID,PROVIDER_KEY,HASHER,PASSWORD,SALT)
              VALUES(${loginInfo.providerID},${loginInfo.providerKey},${authInfo.hasher},${authInfo.password},${authInfo.salt})"""
-          .updateAndReturnGeneratedKey.apply()
+          .updateAndReturnGeneratedKey().apply()
         authInfo
       }
     }

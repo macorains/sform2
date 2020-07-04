@@ -14,7 +14,7 @@ import net.macolabo.sform2.models
 import net.macolabo.sform2.models.User
 import net.macolabo.sform2.services.AuthToken.AuthTokenService
 import net.macolabo.sform2.services.User.UserService
-import org.webjars.play.WebJarsUtil
+import org.webjars.play.{WebJarsUtil, routes}
 import play.api.Configuration
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.Json
@@ -72,7 +72,7 @@ class SignUpController @Inject() (
   def submit: Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     if(!userService.checkAdminExists) {
       val virtualHostName = config.get[String]("silhouette.virtualHostName")
-      SignUpForm.form.bindFromRequest.fold(
+      SignUpForm.form.bindFromRequest().fold(
         form => Future.successful(BadRequest(s"${Messages("error.invalid.request")}")),
         data => {
           val message = s"""${Messages("activate.account.text1")} ${data.email} ${Messages("activate.account.text2")}"""

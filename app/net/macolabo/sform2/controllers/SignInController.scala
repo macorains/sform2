@@ -15,7 +15,7 @@ import net.macolabo.sform2.models.json.{VerificationRequestEntry, VerificationRe
 import net.ceedubs.ficus.Ficus._
 import net.macolabo.sform2.forms.SignInForm
 import net.macolabo.sform2.services.User.UserService
-import org.webjars.play.WebJarsUtil
+import org.webjars.play.{WebJarsUtil, routes}
 import play.api.Configuration
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.{JsNull, JsObject, JsString, Json}
@@ -72,7 +72,7 @@ class SignInController @Inject() (
    * @return The result to display.
    */
   def submit: Action[AnyContent] = (silhouette.UnsecuredAction andThen httpErrorRateLimitFunction).async { implicit request =>
-    SignInForm.form.bindFromRequest.fold(
+    SignInForm.form.bindFromRequest().fold(
       form => Future.successful(BadRequest(Json.parse(s"""{"message":"${Messages("error.invalid.request")}"}"""))),
       data => {
         val credentials = Credentials(data.email + ":" + data.group, data.password)

@@ -1,19 +1,19 @@
 package net.macolabo.sform2.jobs.transfer
 
 import javax.inject.Inject
-import net.macolabo.sform2.models.daos.{ Transfer, TransferDetailLogDAO, TransferTaskDAO }
-import net.macolabo.sform2.models.entity.{ TransferTask, Postdata }
+import net.macolabo.sform2.models.daos.{Transfer, TransferDetailLogDAO, TransferTaskDAO}
+import net.macolabo.sform2.models.entity.{Postdata, TransferTask}
+import net.macolabo.sform2.utils.Logger
 import play.api.libs.functional.syntax.unlift
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-import play.api.Logger
-import play.api.libs.mailer.{ Email, MailerClient }
+import play.api.libs.mailer.{Email, MailerClient}
 
 class MailTransferJob @Inject() (
   mailerClient: MailerClient,
   transferDetailLogDAO: TransferDetailLogDAO,
   transferTaskDAO: TransferTaskDAO
-) {
+) extends Logger {
 
   case class MailTransferAddressList(id: Option[Int], name: Option[String], address: Option[String])
   implicit val jsonMailTransferAddressListWrites: Writes[MailTransferAddressList] = (
@@ -55,7 +55,7 @@ class MailTransferJob @Inject() (
 
   def execute(transferTask: TransferTask, transfer: Transfer, postdataList: List[Postdata]): Unit = {
     // 開始ログ
-    Logger.logger.info(s"    Start MailTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
+    logger.info(s"    Start MailTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
 
     getTransferConfig(transfer) match {
       case transferConfig: JsSuccess[MailTransferConfig] =>
@@ -66,19 +66,19 @@ class MailTransferJob @Inject() (
                 executeTransferTask(transferConfig.get, transferTaskConfig.get, postdataList, transfer.type_id)
               case _ =>
                 // データが無い
-                Logger.logger.info("    No data for transfer.")
+                logger.info("    No data for transfer.")
             }
           case e2: JsError =>
             // transferTaskConfigが取れない
-            Logger.logger.error("    Could not get TransferTaskConfig.")
+            logger.error("    Could not get TransferTaskConfig.")
         }
       case e1: JsError =>
         // transferConfigが取れない
-        Logger.logger.error("    Could not get TransferConfig.")
+        logger.error("    Could not get TransferConfig.")
     }
 
     // 終了ログ
-    Logger.logger.info(s"    End MailTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
+    logger.info(s"    End MailTransferJob [ID=${transferTask.id}, NAME=${transferTask.name}]")
   }
 
   /**
