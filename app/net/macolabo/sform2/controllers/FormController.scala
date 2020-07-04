@@ -3,14 +3,10 @@ package net.macolabo.sform2.controllers
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.impl.providers._
 import javax.inject._
-import models._
 import net.macolabo.sform2.models.RsResultSet
 import net.macolabo.sform2.models.daos.{FormsDAO, TransferTaskDAO}
 import net.macolabo.sform2.services.Form.{FormGetFormResponseJson, FormGetListResponseJson, FormService}
-import net.macolabo.sform2.services.User.UserService
 import org.webjars.play.WebJarsUtil
-import play.api.{Environment, _}
-import play.api.db.DBApi
 import play.api.i18n.I18nSupport
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json._
@@ -20,14 +16,8 @@ import net.macolabo.sform2.utils.auth.{DefaultEnv, WithProvider}
 import scala.concurrent.{ExecutionContext, Future}
 
 class FormController @Inject() (
-  env: Environment,
-  dbapi: DBApi,
   components: ControllerComponents,
   silhouette: Silhouette[DefaultEnv],
-  userService: UserService,
-  credentialsProvider: CredentialsProvider,
-  socialProviderRegistry: SocialProviderRegistry,
-  configuration: Configuration,
   formsDAO: FormsDAO,
   transferTaskDAO: TransferTaskDAO,
   formService: FormService
@@ -35,7 +25,11 @@ class FormController @Inject() (
   implicit
   webJarsUtil: WebJarsUtil,
   ex: ExecutionContext
-) extends AbstractController(components) with I18nSupport with FormGetFormResponseJson with FormGetListResponseJson {
+) extends AbstractController(components)
+  with I18nSupport
+  with FormGetFormResponseJson
+  with FormGetListResponseJson
+{
 
   /**
    * フォームデータ取得
@@ -54,12 +48,6 @@ class FormController @Inject() (
     val res = formService.getForm(hashed_form_id, request.identity)
     Future.successful(Ok(toJson(res)))
   }
-
-
-  //  def get2: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
-//    val res = formsDAO.getList(request.identity)
-//    Future.successful(Ok(Json.toJson(res)))
-//                                                                                                                                                  }
 
   /**
    * フォーム一覧取得
