@@ -5,10 +5,13 @@ import java.util.UUID
 import net.macolabo.sform2.models
 import net.macolabo.sform2.models.{AuthToken, SFDBConf}
 import org.joda.time.DateTime
-import scalikejdbc._
 
 import scala.collection.mutable
 import scala.concurrent.Future
+
+import scalikejdbc._
+import scalikejdbc.jodatime.JodaParameterBinderFactory._
+import scalikejdbc.jodatime.JodaTypeBinder._
 /**
  * Give access to the [[AuthToken]] object.
  */
@@ -23,7 +26,7 @@ class AuthTokenDAOImpl extends AuthTokenDAO with SFDBConf {
   //def find(id: UUID) = Future.successful(tokens.get(id))
   def find(id: UUID): Future[Option[AuthToken]] = Future.successful(
     sql"SELECT ID,USER_ID,EXPIRY FROM D_AUTHTOKEN WHERE ID=${id.toString}"
-      .map(rs => models.AuthToken(UUID.fromString(rs.string("ID")), UUID.fromString(rs.string("USER_ID")), rs.jodaDateTime("EXPIRY"))).single().apply()
+      .map(rs => models.AuthToken(UUID.fromString(rs.string("ID")), UUID.fromString(rs.string("USER_ID")), rs.get("EXPIRY"))).single().apply()
   )
 
   /**
@@ -40,7 +43,7 @@ class AuthTokenDAOImpl extends AuthTokenDAO with SFDBConf {
     */
     println(dateTime)
     sql"SELECT ID,USER_ID,EXPIRY FROM D_AUTHTOKEN WHERE EXPIRY<=$dateTime"
-      .map(rs => models.AuthToken(UUID.fromString(rs.string("ID")), UUID.fromString(rs.string("USER_ID")), rs.jodaDateTime("EXPIRY"))).list().apply()
+      .map(rs => models.AuthToken(UUID.fromString(rs.string("ID")), UUID.fromString(rs.string("USER_ID")), rs.get("EXPIRY"))).list().apply()
 
   }
 

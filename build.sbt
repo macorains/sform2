@@ -21,8 +21,8 @@ libraryDependencies ++= Seq(
   "org.scalikejdbc" %% "scalikejdbc-config" % "3.4.2",
   "org.scalikejdbc" %% "scalikejdbc-play-fixture" % "2.8.0-scalikejdbc-3.4",
   "org.scalikejdbc" %% "scalikejdbc-syntax-support-macro" % "3.4.2",
+  "org.scalikejdbc" %% "scalikejdbc-joda-time" % "3.4.2",
   "org.scalikejdbc" %% "scalikejdbc-test" % "3.4.2"  % "test",
-
   "com.mohiva" %% "play-silhouette" % "7.0.0",
   "com.mohiva" %% "play-silhouette-password-bcrypt" % "7.0.0",
   "com.mohiva" %% "play-silhouette-persistence" % "7.0.0",

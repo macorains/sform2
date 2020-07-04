@@ -80,7 +80,8 @@ class SignUpController @Inject() (
           val loginInfo = LoginInfo(CredentialsProvider.ID, s"""${data.email}:${data.group}""")
           userService.retrieve(loginInfo).flatMap {
             case Some(user) =>
-              val url = routes.SignInController.view().absoluteURL().replaceFirst("https*://[^/]+/", virtualHostName)
+
+              val url = net.macolabo.sform2.controllers.routes.SignInController.view().absoluteURL().replaceFirst("https*://[^/]+/", virtualHostName)
               mailerClient.send(Email(
                 subject = Messages("email.already.signed.up.subject"),
                 from = Messages("email.from"),
@@ -110,7 +111,7 @@ class SignUpController @Inject() (
                 _ <- authInfoRepository.add(loginInfo, authInfo)
                 authToken <- authTokenService.create(user.userID)
               } yield {
-                val url = routes.ActivateAccountController.activate(authToken.id).absoluteURL().replaceFirst("https*://[^/]+/", virtualHostName)
+                val url = net.macolabo.sform2.controllers.routes.ActivateAccountController.activate(authToken.id).absoluteURL().replaceFirst("https*://[^/]+/", virtualHostName)
                 mailerClient.send(Email(
                   subject = Messages("email.sign.up.subject"),
                   from = Messages("email.from"),

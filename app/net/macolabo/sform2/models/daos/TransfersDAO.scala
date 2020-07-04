@@ -5,12 +5,14 @@ import org.joda.time.DateTime
 import play.api.libs.json._
 import scalikejdbc._
 import scalikejdbc.{DB, WrappedResultSet}
+import scalikejdbc.jodatime.JodaParameterBinderFactory._
+import scalikejdbc.jodatime.JodaTypeBinder._
 
 case class Transfer(id: Int, type_id: Int, name: String, status: Int, config: JsValue, modified: DateTime)
 object Transfer extends SQLSyntaxSupport[Transfer] {
   override val tableName = "M_TRANSFERS"
   def apply(rs: WrappedResultSet): Transfer = {
-    Transfer(rs.int("id"), rs.int("type_Id"), rs.string("name"), rs.int("status"), Json.parse(rs.string("config")), rs.jodaDateTime("modified"))
+    Transfer(rs.int("id"), rs.int("type_Id"), rs.string("name"), rs.int("status"), Json.parse(rs.string("config")), rs.get("modified"))
   }
 }
 
