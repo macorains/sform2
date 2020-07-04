@@ -6,8 +6,10 @@ import com.mohiva.play.silhouette.api.util.PasswordInfo
 import com.mohiva.play.silhouette.persistence.daos.DelegableAuthInfoDAO
 import scalikejdbc._
 
-class PasswordInfoDAO extends DelegableAuthInfoDAO[PasswordInfo] {
+import scala.reflect.ClassTag
 
+class PasswordInfoDAO(implicit ct: ClassTag[PasswordInfo]) extends DelegableAuthInfoDAO[PasswordInfo] {
+  val classTag = ct
   override def find(loginInfo: LoginInfo): Future[Option[PasswordInfo]] =
     Future.successful(
       DB localTx { implicit s =>

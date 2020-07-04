@@ -120,7 +120,7 @@ class SalesforceTransferJob @Inject() (
       salesforceTransferConfig.user,
       salesforceTransferConfig.password,
       salesforceTransferConfig.securityToken
-    ).getOrElse(None)
+    ).get
 
     connection match {
       case pc: PartnerConnection =>
