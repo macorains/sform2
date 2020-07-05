@@ -53,13 +53,13 @@ class FormController @Inject() (
   }
 
   /**
-   * フォーム登録／更新(new)
+   * フォーム登録／更新
    * @return
    */
   def save(): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
     val res = request.body.asJson.flatMap(r =>
       r.validate[FormUpdateFormRequest].map(f => {
-        formService.updateForm(request.identity, f)
+        formService.update(request.identity, f)
       }).asOpt)
 
     res match {
@@ -68,31 +68,6 @@ class FormController @Inject() (
     }
   }
 
-  /**
-   * フォーム登録／更新
-   * POST /form
-   * @return
-   */
-  def create(): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
-    val identity = request.identity
-    val jsonBody: Option[JsValue] = request.body.asJson
-    val res = jsonBody.map { json =>
-      val data = (json \ "rcdata").as[JsValue]
-      val formInsertResult = formsDAO.insert(data, identity)
-      (formInsertResult.getDataset \ "id").as[String] match {
-        case s: String if s != "failed" =>
-          transferTaskDAO.bulkSave(data, identity)
-          formInsertResult
-        case _ => formInsertResult
-      }
-    }.getOrElse {
-      None
-    }
-    res match {
-      case r: RsResultSet => Future.successful(Ok(toJson(r)))
-      case _ => Future.successful(BadRequest("Bad!"))
-    }
-  }
 
   /**
    * フォーム削除

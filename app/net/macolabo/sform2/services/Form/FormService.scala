@@ -11,6 +11,12 @@ import scala.concurrent.ExecutionContext
 
 class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
 
+  /**
+   * フォーム詳細データ取得
+   * @param identity 認証情報
+   * @param hashed_form_id フォームhashed ID
+   * @return フォームデータ
+   */
   def getForm(identity: User, hashed_form_id: String): Option[FormGetFormResponse] = {
     val userGroup = identity.group.getOrElse("")
     Form.get(userGroup, hashed_form_id).map(f => {
@@ -32,7 +38,11 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
     })
   }
 
-
+  /**
+   * フォームリスト取得
+   * @param identity 認証情報
+   * @return フォームリスト
+   */
   def getList(identity: User): FormGetListResponse = {
     val userGroup = identity.group.getOrElse("")
     val forms = Form.getList(userGroup).map(f => {
@@ -56,33 +66,28 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
     ???
   }
 
-  def insertForm(identity: User, formInsertFormRequest: FormInsertFormRequest): FormInsertFormResponse = {
+  def insert(identity: User, formInsertFormRequest: FormInsertFormRequest): FormInsertFormResponse = {
     ???
   }
 
-  def updateForm(identity: User, formUpdateFormRequest: FormUpdateFormRequest): FormUpdateFormResponse = {
-    val form = Form(
-      formUpdateFormRequest.id,
-      formUpdateFormRequest.hashed_id,
-      formUpdateFormRequest.form_index,
-      formUpdateFormRequest.name,
-      formUpdateFormRequest.title,
-      formUpdateFormRequest.status,
-      formUpdateFormRequest.cancel_url,
-      formUpdateFormRequest.complete_url,
-      Option(formUpdateFormRequest.input_header),
-      Option(formUpdateFormRequest.confirm_header),
-      Option(formUpdateFormRequest.complete_text),
-      Option(formUpdateFormRequest.close_text),
-      "",
-      "",
-      "",
-      identity.email.getOrElse(""),
-      ZonedDateTime.now(),
-      ZonedDateTime.now()
-    )
-    FormUpdateFormResponse(1)
+  /**
+   * フォーム更新
+   * @param identity 認証情報
+   * @param formUpdateFormRequest フォーム更新リクエストデータ
+   * @return フォーム更新結果レスポンス
+   */
+  def update(identity: User, formUpdateFormRequest: FormUpdateFormRequest): FormUpdateFormResponse = {
+    val formId = updateForm(identity, formUpdateFormRequest)
+    formUpdateFormRequest.form_cols.map(f => {
+      updateFormCol(identity, f)
+      f.select_list.map(s => {
+        updateFormColSelect(identity, s)
+      })
+      f.validations.map(v =>updateFormColValidation(identity, v))
+    })
+    FormUpdateFormResponse(formId)
   }
+
 
   def deleteForm(identity: User, hashed_form_id: String): FormDeleteFormResponse = {
     ???
@@ -96,6 +101,9 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
     ???
   }
 
+  //-------------------------------------------------
+  //  フォーム詳細変換ロジック
+  //-------------------------------------------------
   private def convertToFormGetFormResponseFormCol(userGroup: String, form_id: Int): List[FormGetFormResponseFormCol] = {
     FormCol.getList(userGroup, form_id).map(f => {
       FormGetFormResponseFormCol(
@@ -143,4 +151,87 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
     })
   }
 
+  //-------------------------------------------------
+  //  フォーム更新ロジック
+  //-------------------------------------------------
+  private def updateForm(identity: User, formUpdateFormRequest: FormUpdateFormRequest): Int = {
+    val form = Form(
+      formUpdateFormRequest.id,
+      formUpdateFormRequest.hashed_id,
+      formUpdateFormRequest.form_index,
+      formUpdateFormRequest.name,
+      formUpdateFormRequest.title,
+      formUpdateFormRequest.status,
+      formUpdateFormRequest.cancel_url,
+      formUpdateFormRequest.complete_url,
+      Option(formUpdateFormRequest.input_header),
+      Option(formUpdateFormRequest.confirm_header),
+      Option(formUpdateFormRequest.complete_text),
+      Option(formUpdateFormRequest.close_text),
+      "{}",
+      "",
+      "",
+      identity.userID.toString,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    )
+    form.update
+  }
+
+  private def updateFormCol(identity: User, formUpdateFormRequestFormCol: FormUpdateFormRequestFormCol): Int = {
+    val formCol = FormCol(
+      formUpdateFormRequestFormCol.id,
+      formUpdateFormRequestFormCol.form_id,
+      formUpdateFormRequestFormCol.name,
+      formUpdateFormRequestFormCol.col_id,
+      formUpdateFormRequestFormCol.col_index,
+      formUpdateFormRequestFormCol.col_type,
+      Option(formUpdateFormRequestFormCol.default_value),
+      "",
+      "",
+      identity.userID.toString,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    )
+    formCol.update
+  }
+
+  private def updateFormColSelect(identity: User, formUpdateFormRequestFormColSelect: FormUpdateFormRequestFormColSelect): Int = {
+    val formColSelect = FormColSelect(
+      formUpdateFormRequestFormColSelect.id,
+      formUpdateFormRequestFormColSelect.form_col_id,
+      formUpdateFormRequestFormColSelect.form_id,
+      formUpdateFormRequestFormColSelect.select_index,
+      formUpdateFormRequestFormColSelect.select_name,
+      formUpdateFormRequestFormColSelect.select_value,
+      formUpdateFormRequestFormColSelect.is_default,
+      Option(formUpdateFormRequestFormColSelect.edit_style),
+      Option(formUpdateFormRequestFormColSelect.view_style),
+      "",
+      "",
+      identity.userID.toString,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    )
+    formColSelect.update
+  }
+
+  private def updateFormColValidation(identity: User, formUpdateFormRequestFormColValidation: FormUpdateFormRequestFormColValidation): Int = {
+    val formColValidation = FormColValidation(
+      formUpdateFormRequestFormColValidation.id,
+      formUpdateFormRequestFormColValidation.form_col_id,
+      formUpdateFormRequestFormColValidation.form_id,
+      formUpdateFormRequestFormColValidation.max_value,
+      formUpdateFormRequestFormColValidation.min_value,
+      formUpdateFormRequestFormColValidation.max_length,
+      formUpdateFormRequestFormColValidation.min_length,
+      formUpdateFormRequestFormColValidation.input_type,
+      "",
+      "",
+      identity.userID.toString,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    )
+    formColValidation.update
+  }
 }

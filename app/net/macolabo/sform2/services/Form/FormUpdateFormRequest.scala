@@ -5,7 +5,7 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
 /**
- * フォーム取得API・フォーム項目・バリデーション
+ * フォーム更新API・フォーム項目・バリデーション
  * @param id ID
  * @param form_col_id フォーム項目ID
  * @param form_id フォームID
@@ -27,7 +27,7 @@ case class FormUpdateFormRequestFormColValidation(
                                                )
 
 /**
- * フォーム取得API・フォーム項目・選択リスト
+ * フォーム更新API・フォーム項目・選択リスト
  * @param id ID
  * @param form_col_id フォーム項目ID
  * @param form_id フォームID
@@ -51,7 +51,7 @@ case class FormUpdateFormRequestFormColSelect(
                                            )
 
 /**
- * フォーム取得API・フォーム項目
+ * フォーム更新API・フォーム項目
  * @param id ID
  * @param form_id フォームID
  * @param name 項目名
@@ -75,7 +75,7 @@ case class FormUpdateFormRequestFormCol(
                                      )
 
 /**
- * フォーム取得API・フォームデータ
+ * フォーム更新API・フォームデータ
  * @param id フォームID
  * @param name フォーム名
  * @param form_index 順番
