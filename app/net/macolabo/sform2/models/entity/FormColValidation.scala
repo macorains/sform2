@@ -11,7 +11,7 @@ case class FormColValidation(
                               max_value: Int,
                               min_value: Int,
                               max_length: Int,
-                              min_Length: Int,
+                              min_length: Int,
                               input_type: Int,
                               user_group: String,
                               created_user: String,
@@ -46,17 +46,31 @@ object FormColValidation extends SQLSyntaxSupport[FormColValidation] {
   }
 
   /**
-   * フォーム項目バリデーションのリスト取得
+   * フォーム項目バリデーションの取得
    * @param userGroup ユーザーグループ
    * @param formId フォームID
    * @param formColId フォーム項目ID
    * @param session DB Session
    * @return フォーム項目バリデーションのリスト
    */
-  def getList(userGroup: String, formId: Int, formColId: Int)(implicit session: DBSession = autoSession): List[FormColValidation] = {
+  def get(userGroup: String, formId: Int, formColId: Int)(implicit session: DBSession = autoSession): Option[FormColValidation] = {
     val f = FormColValidation.syntax("f")
     withSQL (
-      select
+      select(
+        f.id,
+        f.form_col_id,
+        f.form_id,
+        f.max_value,
+        f.min_value,
+        f.max_length,
+        f.min_length,
+        f.input_type,
+        f.user_group,
+        f.created_user,
+        f.modified_user,
+        f.created,
+        f.modified
+      )
         .from(FormColValidation as f)
         .where
         .eq(f.form_id, formId)
@@ -64,7 +78,7 @@ object FormColValidation extends SQLSyntaxSupport[FormColValidation] {
         .eq(f.form_col_id, formColId)
         .and
         .eq(f.user_group, userGroup)
-      ).map(rs => FormColValidation(rs)).list().apply()
+      ).map(rs => FormColValidation(rs)).single().apply()
   }
 
   /**
@@ -82,7 +96,7 @@ object FormColValidation extends SQLSyntaxSupport[FormColValidation] {
         c.max_value -> formColValidation.max_value,
         c.min_value -> formColValidation.min_value,
         c.max_length -> formColValidation.max_length,
-        c.min_Length -> formColValidation.min_Length,
+        c.min_length -> formColValidation.min_length,
         c.input_type -> formColValidation.input_type,
         c.user_group -> formColValidation.user_group,
         c.created_user -> formColValidation.created_user,
@@ -106,7 +120,7 @@ object FormColValidation extends SQLSyntaxSupport[FormColValidation] {
         column.max_value -> formColValidation.max_value,
         column.min_value -> formColValidation.min_value,
         column.max_length -> formColValidation.max_length,
-        column.min_Length -> formColValidation.min_Length,
+        column.min_length -> formColValidation.min_length,
         column.input_type -> formColValidation.input_type,
         column.modified_user -> formColValidation.modified_user,
         column.modified -> formColValidation.modified

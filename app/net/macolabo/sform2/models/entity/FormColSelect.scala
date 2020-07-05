@@ -75,7 +75,22 @@ object FormColSelect extends SQLSyntaxSupport[FormColSelect] {
   def getList(userGroup: String, formId: Int, formColId: Int)(implicit session: DBSession = autoSession): List[FormColSelect] = {
     val f = FormColSelect.syntax("f")
     withSQL (
-      select
+      select(
+        f.id,
+        f.form_col_id,
+        f.form_id,
+        f.select_index,
+        f.select_name,
+        f.select_value,
+        f.is_default,
+        f.edit_style,
+        f.view_style,
+        f.user_group,
+        f.created_user,
+        f.modified_user,
+        f.created,
+        f.modified
+      )
         .from(FormColSelect as f)
         .where
         .eq(f.form_id, formId)

@@ -15,9 +15,9 @@ import play.api.libs.functional.syntax._
   * @param input_type 入力種別
   */
 case class FormGetFormResponseFormColValidation(
-                                               id: Long,
-                                               form_col_id: Long,
-                                               form_id: Long,
+                                               id: Int,
+                                               form_col_id: Int,
+                                               form_id: Int,
                                                max_value: Int,
                                                min_value: Int,
                                                max_length: Int,
@@ -38,9 +38,9 @@ case class FormGetFormResponseFormColValidation(
   * @param view_style 参照時CSSスタイル
   */
 case class FormGetFormResponseFormColSelect(
-                                               id: Long,
-                                               form_col_id: Long,
-                                               form_id: Long,
+                                               id: Int,
+                                               form_col_id: Int,
+                                               form_id: Int,
                                                select_index: Int,
                                                select_name: String,
                                                select_value: String,
@@ -62,15 +62,15 @@ case class FormGetFormResponseFormColSelect(
   * @param validations バリデーション
   */
 case class FormGetFormResponseFormCol(
-                                     id: Long,
-                                     form_id: Long,
+                                     id: Int,
+                                     form_id: Int,
                                      name: String,
                                      col_id: String,
                                      col_index: Int,
                                      col_type: Int,
                                      default_value: String,
                                      select_list: List[FormGetFormResponseFormColSelect],
-                                     validations: List[FormGetFormResponseFormColValidation]
+                                     validations: Option[FormGetFormResponseFormColValidation]
                                      )
 
 /**
@@ -90,7 +90,7 @@ case class FormGetFormResponseFormCol(
   * @param form_cols フォーム項目
   */
 case class FormGetFormResponse(
-                              id: Long,
+                              id: Int,
                               name: String,
                               form_index: Int,
                               title: String,
@@ -120,9 +120,9 @@ trait FormGetFormResponseJson {
   )
 
   implicit val FormGetFormResponseFormColValidationReads: Reads[FormGetFormResponseFormColValidation] = (
-    (JsPath \ "id").read[Long] ~
-      (JsPath \ "form_col_id").read[Long] ~
-      (JsPath \ "form_id").read[Long] ~
+    (JsPath \ "id").read[Int] ~
+      (JsPath \ "form_col_id").read[Int] ~
+      (JsPath \ "form_id").read[Int] ~
       (JsPath \ "max_value").read[Int] ~
       (JsPath \ "min_value").read[Int] ~
       (JsPath \ "max_length").read[Int] ~
@@ -143,9 +143,9 @@ trait FormGetFormResponseJson {
   )
 
   implicit val FormGetFormResponseFormColSelectListReads: Reads[FormGetFormResponseFormColSelect] = (
-    (JsPath \ "id").read[Long] ~
-      (JsPath \ "form_col_id").read[Long] ~
-      (JsPath \ "form_id").read[Long] ~
+    (JsPath \ "id").read[Int] ~
+      (JsPath \ "form_col_id").read[Int] ~
+      (JsPath \ "form_id").read[Int] ~
       (JsPath \ "select_index").read[Int] ~
       (JsPath \ "select_name").read[String] ~
       (JsPath \ "select_value").read[String] ~
@@ -167,15 +167,15 @@ trait FormGetFormResponseJson {
   )
 
   implicit val FormGetFormResponseFormColReads: Reads[FormGetFormResponseFormCol] = (
-    (JsPath \ "id").read[Long] ~
-      (JsPath \ "form_id").read[Long] ~
+    (JsPath \ "id").read[Int] ~
+      (JsPath \ "form_id").read[Int] ~
       (JsPath \ "name").read[String] ~
       (JsPath \ "col_id").read[String] ~
       (JsPath \ "col_index").read[Int] ~
       (JsPath \ "col_type").read[Int] ~
       (JsPath \ "default_value").read[String] ~
       (JsPath \ "select_list").read[List[FormGetFormResponseFormColSelect]] ~
-      (JsPath \ "validations").read[List[FormGetFormResponseFormColValidation]]
+      (JsPath \ "validations").readNullable[FormGetFormResponseFormColValidation]
   )(FormGetFormResponseFormCol.apply _)
 
   implicit val FormGetFormResponseWrites: Writes[FormGetFormResponse] = (formGetFormResponse: FormGetFormResponse) => Json.obj(
@@ -195,7 +195,7 @@ trait FormGetFormResponseJson {
   )
 
   implicit val FormGetFormResponseReads: Reads[FormGetFormResponse] = (
-    (JsPath \ "id").read[Long] ~
+    (JsPath \ "id").read[Int] ~
       (JsPath \ "name").read[String] ~
       (JsPath \ "form_index").read[Int] ~
       (JsPath \ "title").read[String] ~

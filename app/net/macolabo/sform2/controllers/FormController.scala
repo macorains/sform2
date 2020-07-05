@@ -36,16 +36,7 @@ class FormController @Inject() (
    * @return フォームデータ
    */
   def get(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
-    val res = formsDAO.getData(request.identity, hashed_form_id)
-    Future.successful(Ok(toJson(res)))
-  }
-
-  /**
-   * フォームデータ取得(new)
-   * @return フォームデータ
-   */
-  def _get(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
-    val res = formService.getForm(hashed_form_id, request.identity)
+    val res = formService.getForm(request.identity, hashed_form_id)
     Future.successful(Ok(toJson(res)))
   }
 
