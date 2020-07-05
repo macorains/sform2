@@ -1,5 +1,7 @@
 package net.macolabo.sform2.services.Form
 
+import java.time.ZonedDateTime
+
 import com.google.inject.Inject
 import net.macolabo.sform2.models.User
 import net.macolabo.sform2.models.daos.FormsDAO
@@ -54,15 +56,35 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
     ???
   }
 
-  def insertForm(formInsertFormRequest: FormInsertFormRequest): FormInsertFormResponse = {
+  def insertForm(identity: User, formInsertFormRequest: FormInsertFormRequest): FormInsertFormResponse = {
     ???
   }
 
-  def updateForm(formUpdateFormRequest: FormUpdateFormRequest): FormUpdateFormResponse = {
-    ???
+  def updateForm(identity: User, formUpdateFormRequest: FormUpdateFormRequest): FormUpdateFormResponse = {
+    val form = Form(
+      formUpdateFormRequest.id,
+      formUpdateFormRequest.hashed_id,
+      formUpdateFormRequest.form_index,
+      formUpdateFormRequest.name,
+      formUpdateFormRequest.title,
+      formUpdateFormRequest.status,
+      formUpdateFormRequest.cancel_url,
+      formUpdateFormRequest.complete_url,
+      Option(formUpdateFormRequest.input_header),
+      Option(formUpdateFormRequest.confirm_header),
+      Option(formUpdateFormRequest.complete_text),
+      Option(formUpdateFormRequest.close_text),
+      "",
+      "",
+      "",
+      identity.email.getOrElse(""),
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    )
+    FormUpdateFormResponse(1)
   }
 
-  def deleteForm(hashed_form_id: String): FormDeleteFormResponse = {
+  def deleteForm(identity: User, hashed_form_id: String): FormDeleteFormResponse = {
     ???
   }
 

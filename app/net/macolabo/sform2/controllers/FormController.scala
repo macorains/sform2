@@ -5,10 +5,10 @@ import com.mohiva.play.silhouette.impl.providers._
 import javax.inject._
 import net.macolabo.sform2.models.RsResultSet
 import net.macolabo.sform2.models.daos.{FormsDAO, TransferTaskDAO}
-import net.macolabo.sform2.services.Form.{FormGetFormResponseJson, FormGetListResponseJson, FormService}
+import net.macolabo.sform2.services.Form.{FormGetFormResponseJson, FormGetListResponseJson, FormService, FormUpdateFormRequest, FormUpdateFormRequestJson, FormUpdateFormResponse, FormUpdateFormResponseJson}
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsResult, JsValue}
 import play.api.libs.json.Json._
 import play.api.mvc._
 import net.macolabo.sform2.utils.auth.{DefaultEnv, WithProvider}
@@ -29,6 +29,8 @@ class FormController @Inject() (
   with I18nSupport
   with FormGetFormResponseJson
   with FormGetListResponseJson
+  with FormUpdateFormRequestJson
+  with FormUpdateFormResponseJson
 {
 
   /**
@@ -48,6 +50,22 @@ class FormController @Inject() (
   def getList: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
     val res = formService.getList(request.identity)
     Future.successful(Ok(toJson(res)))
+  }
+
+  /**
+   * フォーム登録／更新(new)
+   * @return
+   */
+  def save(): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
+    val res = request.body.asJson.flatMap(r =>
+      r.validate[FormUpdateFormRequest].map(f => {
+        formService.updateForm(request.identity, f)
+      }).asOpt)
+
+    res match {
+      case Some(s :FormUpdateFormResponse) => Future.successful(Ok(toJson(s)))
+      case None => Future.successful(BadRequest)
+    }
   }
 
   /**
