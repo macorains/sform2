@@ -109,15 +109,15 @@ case class FormUpdateFormRequest(
 }
 
 trait FormUpdateFormRequestJson {
-  implicit val FormUpdateFormRequestFormColValidationWrites: Writes[FormUpdateFormRequestFormColValidation] = (formGetFormResponseFormColValidation: FormUpdateFormRequestFormColValidation) => Json.obj(
-    "id" -> formGetFormResponseFormColValidation.id,
-    "form_col_id" -> formGetFormResponseFormColValidation.form_col_id,
-    "form_id" -> formGetFormResponseFormColValidation.form_id,
-    "max_value" -> formGetFormResponseFormColValidation.max_value,
-    "min_value" -> formGetFormResponseFormColValidation.min_value,
-    "max_length" -> formGetFormResponseFormColValidation.max_length,
-    "min_length" -> formGetFormResponseFormColValidation.min_length,
-    "input_type" -> formGetFormResponseFormColValidation.input_type
+  implicit val FormUpdateFormRequestFormColValidationWrites: Writes[FormUpdateFormRequestFormColValidation] = (formUpdateFormRequestFormColValidation: FormUpdateFormRequestFormColValidation) => Json.obj(
+    "id" -> formUpdateFormRequestFormColValidation.id,
+    "form_col_id" -> formUpdateFormRequestFormColValidation.form_col_id,
+    "form_id" -> formUpdateFormRequestFormColValidation.form_id,
+    "max_value" -> formUpdateFormRequestFormColValidation.max_value,
+    "min_value" -> formUpdateFormRequestFormColValidation.min_value,
+    "max_length" -> formUpdateFormRequestFormColValidation.max_length,
+    "min_length" -> formUpdateFormRequestFormColValidation.min_length,
+    "input_type" -> formUpdateFormRequestFormColValidation.input_type
   )
 
   implicit val FormUpdateFormRequestFormColValidationReads: Reads[FormUpdateFormRequestFormColValidation] = (
@@ -131,16 +131,16 @@ trait FormUpdateFormRequestJson {
       (JsPath \ "input_type").read[Int]
     )(FormUpdateFormRequestFormColValidation.apply _)
 
-  implicit val FormUpdateFormRequestFormColSelectListWrites: Writes[FormUpdateFormRequestFormColSelect] = (formGetFormResponseFormColSelectList: FormUpdateFormRequestFormColSelect) => Json.obj(
-    "id" -> formGetFormResponseFormColSelectList.id,
-    "form_col_id" -> formGetFormResponseFormColSelectList.form_col_id,
-    "form_id" -> formGetFormResponseFormColSelectList.form_id,
-    "select_index" -> formGetFormResponseFormColSelectList.select_index,
-    "select_name" -> formGetFormResponseFormColSelectList.select_name,
-    "select_value" -> formGetFormResponseFormColSelectList.select_value,
-    "is_default" -> formGetFormResponseFormColSelectList.is_default,
-    "edit_style" -> formGetFormResponseFormColSelectList.edit_style,
-    "view_style" -> formGetFormResponseFormColSelectList.view_style
+  implicit val FormUpdateFormRequestFormColSelectListWrites: Writes[FormUpdateFormRequestFormColSelect] = (FormUpdateFormRequestFormColSelect: FormUpdateFormRequestFormColSelect) => Json.obj(
+    "id" -> FormUpdateFormRequestFormColSelect.id,
+    "form_col_id" -> FormUpdateFormRequestFormColSelect.form_col_id,
+    "form_id" -> FormUpdateFormRequestFormColSelect.form_id,
+    "select_index" -> FormUpdateFormRequestFormColSelect.select_index,
+    "select_name" -> FormUpdateFormRequestFormColSelect.select_name,
+    "select_value" -> FormUpdateFormRequestFormColSelect.select_value,
+    "is_default" -> FormUpdateFormRequestFormColSelect.is_default,
+    "edit_style" -> FormUpdateFormRequestFormColSelect.edit_style,
+    "view_style" -> FormUpdateFormRequestFormColSelect.view_style
   )
 
   implicit val FormUpdateFormRequestFormColSelectListReads: Reads[FormUpdateFormRequestFormColSelect] = (
@@ -155,16 +155,16 @@ trait FormUpdateFormRequestJson {
       (JsPath \ "view_style").read[String]
     )(FormUpdateFormRequestFormColSelect.apply _)
 
-  implicit val FormUpdateFormRequestFormColWrites: Writes[FormUpdateFormRequestFormCol] = (formGetFormResponseFormCol: FormUpdateFormRequestFormCol) => Json.obj(
-    "id" -> formGetFormResponseFormCol.id,
-    "form_id" -> formGetFormResponseFormCol.form_id,
-    "name" -> formGetFormResponseFormCol.name,
-    "col_id" -> formGetFormResponseFormCol.col_id,
-    "col_index" -> formGetFormResponseFormCol.col_index,
-    "col_type" -> formGetFormResponseFormCol.col_type,
-    "default_value" -> formGetFormResponseFormCol.default_value,
-    "select_list" -> formGetFormResponseFormCol.select_list,
-    "validations" -> formGetFormResponseFormCol.validations
+  implicit val FormUpdateFormRequestFormColWrites: Writes[FormUpdateFormRequestFormCol] = (formUpdateFormRequestFormCol: FormUpdateFormRequestFormCol) => Json.obj(
+    "id" -> formUpdateFormRequestFormCol.id,
+    "form_id" -> formUpdateFormRequestFormCol.form_id,
+    "name" -> formUpdateFormRequestFormCol.name,
+    "col_id" -> formUpdateFormRequestFormCol.col_id,
+    "col_index" -> formUpdateFormRequestFormCol.col_index,
+    "col_type" -> formUpdateFormRequestFormCol.col_type,
+    "default_value" -> formUpdateFormRequestFormCol.default_value,
+    "select_list" -> formUpdateFormRequestFormCol.select_list,
+    "validations" -> formUpdateFormRequestFormCol.validations
   )
 
   implicit val FormUpdateFormRequestFormColReads: Reads[FormUpdateFormRequestFormCol] = (
@@ -179,20 +179,20 @@ trait FormUpdateFormRequestJson {
       (JsPath \ "validations").readNullable[FormUpdateFormRequestFormColValidation]
     )(FormUpdateFormRequestFormCol.apply _)
 
-  implicit val FormUpdateFormRequestWrites: Writes[FormUpdateFormRequest] = (formGetFormResponse: FormUpdateFormRequest) => Json.obj(
-    "id" -> formGetFormResponse.id,
-    "name" -> formGetFormResponse.name,
-    "form_index" -> formGetFormResponse.form_index,
-    "title" -> formGetFormResponse.title,
-    "status" -> formGetFormResponse.status,
-    "cancel_url" -> formGetFormResponse.cancel_url,
-    "close_text" -> formGetFormResponse.close_text,
-    "hashed_id" -> formGetFormResponse.hashed_id,
-    "complete_url" -> formGetFormResponse.complete_url,
-    "input_header" -> formGetFormResponse.input_header,
-    "complete_text" -> formGetFormResponse.complete_text,
-    "confirm_header" -> formGetFormResponse.confirm_header,
-    "form_cols" -> formGetFormResponse.form_cols
+  implicit val FormUpdateFormRequestWrites: Writes[FormUpdateFormRequest] = (formUpdateFormRequest: FormUpdateFormRequest) => Json.obj(
+    "id" -> formUpdateFormRequest.id,
+    "name" -> formUpdateFormRequest.name,
+    "form_index" -> formUpdateFormRequest.form_index,
+    "title" -> formUpdateFormRequest.title,
+    "status" -> formUpdateFormRequest.status,
+    "cancel_url" -> formUpdateFormRequest.cancel_url,
+    "close_text" -> formUpdateFormRequest.close_text,
+    "hashed_id" -> formUpdateFormRequest.hashed_id,
+    "complete_url" -> formUpdateFormRequest.complete_url,
+    "input_header" -> formUpdateFormRequest.input_header,
+    "complete_text" -> formUpdateFormRequest.complete_text,
+    "confirm_header" -> formUpdateFormRequest.confirm_header,
+    "form_cols" -> formUpdateFormRequest.form_cols
   )
 
   implicit val FormUpdateFormRequestReads: Reads[FormUpdateFormRequest] = (

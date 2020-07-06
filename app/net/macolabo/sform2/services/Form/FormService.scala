@@ -66,8 +66,22 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
     ???
   }
 
+  /**
+   * フォーム作成
+   * @param identity 認証情報
+   * @param formInsertFormRequest フォーム作成リクエストデータ
+   * @return フォーム作成結果レスポンス
+   */
   def insert(identity: User, formInsertFormRequest: FormInsertFormRequest): FormInsertFormResponse = {
-    ???
+    val formId = insertForm(identity, formInsertFormRequest)
+    formInsertFormRequest.form_cols.map(f => {
+      val formColId = insertFormCol(identity, f, formId);
+      f.select_list.map(s => {
+        insertFormColSelect(identity, s, formId, formColId);
+      })
+      f.validations.map(v => insertFormColValidation(identity, v, formId, formColId))
+    })
+    FormInsertFormResponse(formId)
   }
 
   /**
@@ -233,5 +247,89 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
       ZonedDateTime.now()
     )
     formColValidation.update
+  }
+
+  //-------------------------------------------------
+  //  フォーム作成ロジック
+  //-------------------------------------------------
+  private def insertForm(identity: User, formInsertFormRequest: FormInsertFormRequest): Int = {
+    val form = Form(
+      0,
+      formInsertFormRequest.hashed_id,
+      formInsertFormRequest.form_index,
+      formInsertFormRequest.name,
+      formInsertFormRequest.title,
+      formInsertFormRequest.status,
+      formInsertFormRequest.cancel_url,
+      formInsertFormRequest.complete_url,
+      Option(formInsertFormRequest.input_header),
+      Option(formInsertFormRequest.confirm_header),
+      Option(formInsertFormRequest.complete_text),
+      Option(formInsertFormRequest.close_text),
+      "{}",
+      identity.group.getOrElse(""),
+      identity.userID.toString,
+      identity.userID.toString,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    )
+    form.insert
+  }
+
+  private def insertFormCol(identity: User, formInsertFormRequestFormCol: FormInsertFormRequestFormCol, formId: Int): Int = {
+    val formCol = FormCol(
+      0,
+      formId,
+      formInsertFormRequestFormCol.name,
+      formInsertFormRequestFormCol.col_id,
+      formInsertFormRequestFormCol.col_index,
+      formInsertFormRequestFormCol.col_type,
+      Option(formInsertFormRequestFormCol.default_value),
+      identity.group.getOrElse(""),
+      identity.userID.toString,
+      identity.userID.toString,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    )
+    formCol.insert
+  }
+
+  private def insertFormColSelect(identity: User, formInsertFormRequestFormColSelect: FormInsertFormRequestFormColSelect, formId: Int, formColId: Int): Int = {
+    val formColSelect = FormColSelect(
+      0,
+      formColId,
+      formId,
+      formInsertFormRequestFormColSelect.select_index,
+      formInsertFormRequestFormColSelect.select_name,
+      formInsertFormRequestFormColSelect.select_value,
+      formInsertFormRequestFormColSelect.is_default,
+      Option(formInsertFormRequestFormColSelect.edit_style),
+      Option(formInsertFormRequestFormColSelect.view_style),
+      identity.group.getOrElse(""),
+      identity.userID.toString,
+      identity.userID.toString,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    )
+    formColSelect.insert
+  }
+
+  private def insertFormColValidation(identity: User, formInsertFormRequestFormColValidation: FormInsertFormRequestFormColValidation, formId: Int, formColId: Int): Int = {
+    val formColValidation = FormColValidation(
+      0,
+      formColId,
+      formId,
+      formInsertFormRequestFormColValidation.max_value,
+      formInsertFormRequestFormColValidation.min_value,
+      formInsertFormRequestFormColValidation.max_length,
+      formInsertFormRequestFormColValidation.min_length,
+      formInsertFormRequestFormColValidation.input_type,
+      identity.group.getOrElse(""),
+      identity.userID.toString,
+      identity.userID.toString,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    )
+    formColValidation.insert
   }
 }
