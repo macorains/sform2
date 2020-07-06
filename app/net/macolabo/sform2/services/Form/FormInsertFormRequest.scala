@@ -65,7 +65,6 @@ case class FormInsertFormRequestFormCol(
  * @param status ステータス
  * @param cancel_url キャンセル時遷移先URL
  * @param close_text フォームクローズ時文言
- * @param hashed_id ハッシュ化フォームID
  * @param complete_url 完了時遷移先URL
  * @param input_header 入力画面のヘッダ文言
  * @param complete_text 完了時の文言
@@ -79,7 +78,6 @@ case class FormInsertFormRequest(
                                   status: Int,
                                   cancel_url: String,
                                   close_text: String,
-                                  hashed_id: String,
                                   complete_url: String,
                                   input_header: String,
                                   complete_text: String,
@@ -151,7 +149,6 @@ trait FormInsertFormRequestJson {
     "status" -> formInsertFormRequest.status,
     "cancel_url" -> formInsertFormRequest.cancel_url,
     "close_text" -> formInsertFormRequest.close_text,
-    "hashed_id" -> formInsertFormRequest.hashed_id,
     "complete_url" -> formInsertFormRequest.complete_url,
     "input_header" -> formInsertFormRequest.input_header,
     "complete_text" -> formInsertFormRequest.complete_text,
@@ -166,7 +163,6 @@ trait FormInsertFormRequestJson {
       (JsPath \ "status").read[Int] ~
       (JsPath \ "cancel_url").read[String] ~
       (JsPath \ "close_text").read[String] ~
-      (JsPath \ "hashed_id").read[String] ~
       (JsPath \ "complete_url").read[String] ~
       (JsPath \ "input_header").read[String] ~
       (JsPath \ "complete_text").read[String] ~

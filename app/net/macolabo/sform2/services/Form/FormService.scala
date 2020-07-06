@@ -1,6 +1,7 @@
 package net.macolabo.sform2.services.Form
 
 import java.time.ZonedDateTime
+import java.util.UUID
 
 import com.google.inject.Inject
 import net.macolabo.sform2.models.User
@@ -255,7 +256,7 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
   private def insertForm(identity: User, formInsertFormRequest: FormInsertFormRequest): Int = {
     val form = Form(
       0,
-      formInsertFormRequest.hashed_id,
+      UUID.randomUUID().toString,
       formInsertFormRequest.form_index,
       formInsertFormRequest.name,
       formInsertFormRequest.title,
