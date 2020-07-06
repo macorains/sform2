@@ -76,9 +76,9 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
   def insert(identity: User, formInsertFormRequest: FormInsertFormRequest): FormInsertFormResponse = {
     val formId = insertForm(identity, formInsertFormRequest)
     formInsertFormRequest.form_cols.map(f => {
-      val formColId = insertFormCol(identity, f, formId);
+      val formColId = insertFormCol(identity, f, formId)
       f.select_list.map(s => {
-        insertFormColSelect(identity, s, formId, formColId);
+        insertFormColSelect(identity, s, formId, formColId)
       })
       f.validations.map(v => insertFormColValidation(identity, v, formId, formColId))
     })
