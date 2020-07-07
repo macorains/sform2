@@ -104,7 +104,7 @@ object FormColValidation extends SQLSyntaxSupport[FormColValidation] {
         c.created -> formColValidation.created,
         c.modified -> formColValidation.modified
       )
-    }.update().apply()
+    }.updateAndReturnGeneratedKey().apply().toInt
   }
 
   /**

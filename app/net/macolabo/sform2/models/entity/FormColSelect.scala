@@ -125,7 +125,7 @@ object FormColSelect extends SQLSyntaxSupport[FormColSelect] {
         c.created -> formColSelect.created,
         c.modified -> formColSelect.modified
       )
-    }.update().apply()
+    }.updateAndReturnGeneratedKey().apply().toInt
   }
 
   /**

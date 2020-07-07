@@ -170,7 +170,7 @@ object Form extends SQLSyntaxSupport[Form] {
           c.created -> form.created,
           c.modified -> form.modified
         )
-      }.update().apply()
+      }.updateAndReturnGeneratedKey().apply().toInt
   }
 
   /**
