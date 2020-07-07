@@ -5,7 +5,7 @@ import com.mohiva.play.silhouette.impl.providers._
 import javax.inject._
 import net.macolabo.sform2.models.RsResultSet
 import net.macolabo.sform2.models.daos.{FormsDAO, TransferTaskDAO}
-import net.macolabo.sform2.services.Form.{FormGetFormResponseJson, FormGetListResponseJson, FormInsertFormRequest, FormInsertFormRequestJson, FormInsertFormResponse, FormService, FormUpdateFormRequest, FormUpdateFormRequestJson, FormUpdateFormResponse, FormUpdateFormResponseJson}
+import net.macolabo.sform2.services.Form.{FormGetFormResponseJson, FormGetListResponseJson, FormInsertFormRequest, FormInsertFormRequestJson, FormInsertFormResponse, FormInsertFormResponseJson, FormService, FormUpdateFormRequest, FormUpdateFormRequestJson, FormUpdateFormResponse, FormUpdateFormResponseJson}
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.libs.json.{JsResult, JsValue}
@@ -32,6 +32,7 @@ class FormController @Inject() (
   with FormUpdateFormRequestJson
   with FormUpdateFormResponseJson
   with FormInsertFormRequestJson
+  with FormInsertFormResponseJson
 {
 
   /**
@@ -78,7 +79,6 @@ class FormController @Inject() (
       r.validate[FormInsertFormRequest].map(f => {
         formService.insert(request.identity, f)
       }).asOpt)
-
     res match {
       case Some(s :FormInsertFormResponse) => Future.successful(Ok(toJson(s)))
       case None => Future.successful(BadRequest)

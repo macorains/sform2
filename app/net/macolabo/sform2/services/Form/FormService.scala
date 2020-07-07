@@ -63,10 +63,6 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
     ???
   }
 
-  def getHtml: FormGetHtmlResponse = {
-    ???
-  }
-
   /**
    * フォーム作成
    * @param identity 認証情報
@@ -74,15 +70,15 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
    * @return フォーム作成結果レスポンス
    */
   def insert(identity: User, formInsertFormRequest: FormInsertFormRequest): FormInsertFormResponse = {
-    val formId = insertForm(identity, formInsertFormRequest)
+    val response = insertForm(identity, formInsertFormRequest)
     formInsertFormRequest.form_cols.map(f => {
-      val formColId = insertFormCol(identity, f, formId)
+      val formColId = insertFormCol(identity, f, response.id)
       f.select_list.map(s => {
-        insertFormColSelect(identity, s, formId, formColId)
+        insertFormColSelect(identity, s, response.id, formColId)
       })
-      f.validations.map(v => insertFormColValidation(identity, v, formId, formColId))
+      f.validations.map(v => insertFormColValidation(identity, v, response.id, formColId))
     })
-    FormInsertFormResponse(formId)
+    response
   }
 
   /**
@@ -105,10 +101,6 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
 
 
   def deleteForm(identity: User, hashed_form_id: String): FormDeleteFormResponse = {
-    ???
-  }
-
-  def validateForm(formValidateFormRequest: FormValidateFormRequest): FormValidateFormResponse = {
     ???
   }
 
@@ -253,10 +245,12 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
   //-------------------------------------------------
   //  フォーム作成ロジック
   //-------------------------------------------------
-  private def insertForm(identity: User, formInsertFormRequest: FormInsertFormRequest): Int = {
+  private def insertForm(identity: User, formInsertFormRequest: FormInsertFormRequest): FormInsertFormResponse = {
+    val hashedId = UUID.randomUUID().toString
+
     val form = Form(
       0,
-      UUID.randomUUID().toString,
+      hashedId,
       formInsertFormRequest.form_index,
       formInsertFormRequest.name,
       formInsertFormRequest.title,
@@ -274,7 +268,8 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
       ZonedDateTime.now(),
       ZonedDateTime.now()
     )
-    form.insert
+    val formId = form.insert
+    FormInsertFormResponse(formId, hashedId)
   }
 
   private def insertFormCol(identity: User, formInsertFormRequestFormCol: FormInsertFormRequestFormCol, formId: Int): Int = {
