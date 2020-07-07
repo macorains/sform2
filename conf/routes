@@ -34,6 +34,7 @@ GET /formpost/:hashed_form_id net.macolabo.sform2.controllers.FormPostDataContro
 # form
 GET /form/list net.macolabo.sform2.controllers.FormController.getList()
 GET /form/:hashed_form_id net.macolabo.sform2.controllers.FormController.get(hashed_form_id: String)
+POST /form/new net.macolabo.sform2.controllers.FormController.create()
 POST /form net.macolabo.sform2.controllers.FormController.save()
 DELETE /form/:form_id net.macolabo.sform2.controllers.FormController.delete(form_id: String)
 POST /form/validate net.macolabo.sform2.controllers.FormController.validate()
