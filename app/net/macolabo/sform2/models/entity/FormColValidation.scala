@@ -127,4 +127,17 @@ object FormColValidation extends SQLSyntaxSupport[FormColValidation] {
       ).where.eq(column.id, formColValidation.id)
     }.update().apply()
   }
+
+  /**
+   * フォーム項目バリデーション削除
+   * @param formColValidationId フォーム項目バリデーションID
+   * @param session DB Session
+   * @return
+   */
+  def erase(formColValidationId: Int)(implicit session: DBSession = autoSession): Int = {
+    withSQL {
+      delete.from(FormColValidation).where.eq(Form.column.id, formColValidationId)
+    }.update().apply()
+  }
+
 }

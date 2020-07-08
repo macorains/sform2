@@ -134,7 +134,7 @@ object FormColSelect extends SQLSyntaxSupport[FormColSelect] {
    * @param session DB Session
    * @return
    */
-  def save(formColSelect: FormColSelect)(implicit session: DBSession = autoSession) = {
+  def save(formColSelect: FormColSelect)(implicit session: DBSession = autoSession): Int = {
     withSQL{
       update(FormColSelect).set(
         column.form_col_id -> formColSelect.form_col_id,
@@ -150,4 +150,17 @@ object FormColSelect extends SQLSyntaxSupport[FormColSelect] {
       ).where.eq(column.id, formColSelect.id)
     }.update().apply()
   }
+
+  /**
+   * フォーム項目削除
+   * @param formColSelectId フォーム項目選択項目ID
+   * @param session DB Session
+   * @return
+   */
+  def erase(formColSelectId: Int)(implicit session: DBSession = autoSession): Int = {
+    withSQL {
+      delete.from(FormColSelect).where.eq(Form.column.id, formColSelectId)
+    }.update().apply()
+  }
+
 }

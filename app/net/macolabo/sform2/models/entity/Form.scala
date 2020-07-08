@@ -145,7 +145,7 @@ object Form extends SQLSyntaxSupport[Form] {
 
   /**
    * データ作成
-   * @param form
+   * @param form フォームデータ
    * @return 作成したフォームのID
    */
   def create(form: Form)(implicit session: DBSession = autoSession): Int = {
@@ -197,5 +197,17 @@ object Form extends SQLSyntaxSupport[Form] {
           column.modified -> form.modified
         ).where.eq(column.id, form.id)
       }.update().apply()
+  }
+
+  /**
+   * データ削除
+   * @param formId フォームID
+   * @param session DB Session
+   * @return
+   */
+  def erase(formId: Int)(implicit session: DBSession = autoSession): Int = {
+    withSQL {
+      delete.from(Form).where.eq(Form.column.id, formId)
+    }.update().apply()
   }
 }
