@@ -59,10 +59,6 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
     FormGetListResponse(forms, forms.length)
   }
 
-  def getListForTransferJobManager: FormGetListForTransferJobManagerResponse = {
-    ???
-  }
-
   /**
    * フォーム作成
    * @param identity 認証情報
@@ -99,13 +95,27 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
     FormUpdateFormResponse(formId)
   }
 
-
+  /**
+   * フォーム削除
+   * @param identity 認証情報
+   * @param hashed_form_id ハッシュ化フォームID
+   * @return フォーム削除結果レスポンス
+   */
   def deleteForm(identity: User, hashed_form_id: String): FormDeleteFormResponse = {
-    ???
-  }
-
-  def getFormCols(hashed_form_id: String): FormGetFormColsResponse = {
-    ???
+    val userGroup = identity.group.getOrElse("")
+    val result = Form.get(identity.group.get, hashed_form_id).map(f => {
+      FormCol.getList(userGroup, f.id).map(c => {
+        FormColSelect.getList(userGroup, f.id, c.id).map(s => {
+          FormColSelect.erase(userGroup, s.id)
+        })
+        FormColValidation.get(userGroup, f.id, c.id).map(v => {
+          FormColValidation.erase(userGroup, v.id)
+        })
+        FormCol.erase(userGroup, c.id)
+      })
+      Form.erase(userGroup, f.id)
+    })
+    FormDeleteFormResponse(result)
   }
 
   //-------------------------------------------------

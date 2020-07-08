@@ -201,13 +201,14 @@ object Form extends SQLSyntaxSupport[Form] {
 
   /**
    * データ削除
+   * @param userGroup ユーザーグループ
    * @param formId フォームID
    * @param session DB Session
    * @return
    */
-  def erase(formId: Int)(implicit session: DBSession = autoSession): Int = {
+  def erase(userGroup:String, formId: Int)(implicit session: DBSession = autoSession): Int = {
     withSQL {
-      delete.from(Form).where.eq(Form.column.id, formId)
+      delete.from(Form).where.eq(Form.column.id, formId).and.eq(Form.column.user_group, userGroup)
     }.update().apply()
   }
 }

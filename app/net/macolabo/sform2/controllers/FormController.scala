@@ -5,7 +5,7 @@ import com.mohiva.play.silhouette.impl.providers._
 import javax.inject._
 import net.macolabo.sform2.models.RsResultSet
 import net.macolabo.sform2.models.daos.{FormsDAO, TransferTaskDAO}
-import net.macolabo.sform2.services.Form.{FormGetFormResponseJson, FormGetListResponseJson, FormInsertFormRequest, FormInsertFormRequestJson, FormInsertFormResponse, FormInsertFormResponseJson, FormService, FormUpdateFormRequest, FormUpdateFormRequestJson, FormUpdateFormResponse, FormUpdateFormResponseJson}
+import net.macolabo.sform2.services.Form.{FormDeleteFormResponse, FormGetFormResponseJson, FormGetListResponseJson, FormInsertFormRequest, FormInsertFormRequestJson, FormInsertFormResponse, FormInsertFormResponseJson, FormService, FormUpdateFormRequest, FormUpdateFormRequestJson, FormUpdateFormResponse, FormUpdateFormResponseJson}
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.libs.json.{JsResult, JsValue}
@@ -93,6 +93,11 @@ class FormController @Inject() (
    * @return
    */
   def delete(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
+    val res = formService.deleteForm(request.identity, hashed_form_id)
+    res.id match {
+      case Some(s: Int) => Future.successful(Ok(toJson(s)))
+      case None => Future.successful(BadRequest)
+    }
     Future.successful(Ok(toJson(formsDAO.delete(hashed_form_id))))
   }
 

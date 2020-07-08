@@ -130,13 +130,14 @@ object FormColValidation extends SQLSyntaxSupport[FormColValidation] {
 
   /**
    * フォーム項目バリデーション削除
+   * @param userGroup ユーザーグループ
    * @param formColValidationId フォーム項目バリデーションID
    * @param session DB Session
    * @return
    */
-  def erase(formColValidationId: Int)(implicit session: DBSession = autoSession): Int = {
+  def erase(userGroup: String, formColValidationId: Int)(implicit session: DBSession = autoSession): Int = {
     withSQL {
-      delete.from(FormColValidation).where.eq(Form.column.id, formColValidationId)
+      delete.from(FormColValidation).where.eq(Form.column.id, formColValidationId).and.eq(Form.column.user_group, userGroup)
     }.update().apply()
   }
 

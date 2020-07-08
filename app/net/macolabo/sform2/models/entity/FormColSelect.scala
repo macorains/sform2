@@ -153,13 +153,14 @@ object FormColSelect extends SQLSyntaxSupport[FormColSelect] {
 
   /**
    * フォーム項目削除
+   * @param userGroup ユーザーグループ
    * @param formColSelectId フォーム項目選択項目ID
    * @param session DB Session
    * @return
    */
-  def erase(formColSelectId: Int)(implicit session: DBSession = autoSession): Int = {
+  def erase(userGroup: String, formColSelectId: Int)(implicit session: DBSession = autoSession): Int = {
     withSQL {
-      delete.from(FormColSelect).where.eq(Form.column.id, formColSelectId)
+      delete.from(FormColSelect).where.eq(Form.column.id, formColSelectId).and.eq(Form.column.user_group, userGroup)
     }.update().apply()
   }
 
