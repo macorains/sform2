@@ -1,4 +1,4 @@
-package net.macolabo.sform2.models.entity
+package net.macolabo.sform2.models.form
 
 import java.time.ZonedDateTime
 

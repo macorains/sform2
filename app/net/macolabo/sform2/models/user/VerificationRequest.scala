@@ -1,7 +1,7 @@
-package net.macolabo.sform2.models.json
+package net.macolabo.sform2.models.user
 
-import play.api.libs.json.{JsPath, Json, Reads, Writes}
 import play.api.libs.functional.syntax._
+import play.api.libs.json.{JsPath, Json, Reads, Writes}
 
 case class VerificationRequestEntry(verificationCode: String, formToken: String)
 

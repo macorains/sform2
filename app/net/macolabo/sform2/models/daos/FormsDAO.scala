@@ -10,12 +10,12 @@ import javax.xml.transform.{OutputKeys, Transformer, TransformerFactory}
 
 import scala.collection.{Map, Seq}
 import com.sun.org.apache.xml.internal.serializer.OutputPropertiesFactory
+import net.macolabo.sform2.models.form.Form
 import org.w3c.dom.{Document, Element}
 import play.api.libs.json.Json._
 import play.api.libs.json.{JsError, JsLookupResult, JsResult, JsSuccess, JsValue, Json}
 import scalikejdbc._
 import net.macolabo.sform2.models.{RsResultSet, User}
-import net.macolabo.sform2.models.entity.Form
 import net.macolabo.sform2.models.json.FormJson
 import net.macolabo.sform2.utils.forms.FormParts
 
@@ -517,7 +517,7 @@ class FormsDAO extends FormParts with FormJson {
            SET FORM_DATA=${dt.toString},
            MODIFIED_USER=${identity.userID.toString},
            MODIFIED=now() WHERE ID=$formId""".update().apply()
-      Json.parse("""{"id": """" + formId.toString + """"}""")
+      Json.parse("""{"id": """" + formId + """"}""")
     }
   }
 

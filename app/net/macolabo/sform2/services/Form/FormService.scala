@@ -5,7 +5,7 @@ import java.util.UUID
 
 import com.google.inject.Inject
 import net.macolabo.sform2.models.User
-import net.macolabo.sform2.models.entity.{Form, FormCol, FormColSelect, FormColValidation}
+import net.macolabo.sform2.models.form.{Form, FormCol, FormColSelect, FormColValidation}
 
 import scala.concurrent.ExecutionContext
 
