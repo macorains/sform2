@@ -4,52 +4,53 @@
 
 # Home page
 
-GET         /                                controllers.ApplicationController.index
-GET         /signOut                         controllers.ApplicationController.signOut
-GET         /authenticate/:provider          controllers.SocialAuthController.authenticate(provider)
+GET         /                                net.macolabo.sform2.controllers.ApplicationController.index
+GET         /signOut                         net.macolabo.sform2.controllers.ApplicationController.signOut
+# GET         /authenticate/:provider          controllers.SocialAuthController.authenticate(provider)
 
-GET         /signUp                          controllers.SignUpController.view
-POST        /signUp                          controllers.SignUpController.submit
+GET         /signUp                          net.macolabo.sform2.controllers.SignUpController.view
+POST        /signUp                          net.macolabo.sform2.controllers.SignUpController.submit
 
-GET         /signIn                          controllers.SignInController.view
-POST        /signIn                          controllers.SignInController.submit
-POST        /verification                    controllers.SignInController.verification
+GET         /signIn                          net.macolabo.sform2.controllers.SignInController.view
+POST        /signIn                          net.macolabo.sform2.controllers.SignInController.submit
+POST        /verification                    net.macolabo.sform2.controllers.SignInController.verification
 
-GET         /password/forgot                 controllers.ForgotPasswordController.view
-POST        /password/forgot                 controllers.ForgotPasswordController.submit
-GET         /password/reset/:token           controllers.ResetPasswordController.view(token: java.util.UUID)
-POST        /password/reset/:token           controllers.ResetPasswordController.submit(token: java.util.UUID)
-GET         /password/change                 controllers.ChangePasswordController.view
-POST        /password/change                 controllers.ChangePasswordController.submit
+# GET         /password/forgot                 net.macolabo.sform2.controllers.ForgotPasswordController.view
+# POST        /password/forgot                 net.macolabo.sform2.controllers.ForgotPasswordController.submit
+# GET         /password/reset/:token           net.macolabo.sform2.controllers.ResetPasswordController.view(token: java.util.UUID)
+# POST        /password/reset/:token           net.macolabo.sform2.controllers.ResetPasswordController.submit(token: java.util.UUID)
+# GET         /password/change                 net.macolabo.sform2.controllers.ChangePasswordController.view
+# POST        /password/change                 net.macolabo.sform2.controllers.ChangePasswordController.submit
 
-# GET         /account/email/:email            controllers.ActivateAccountController.send(email: String)
-GET         /account/activate/:token         controllers.ActivateAccountController.activate(token: java.util.UUID)
+# GET         /account/email/:email            net.macolabo.sform2.controllers.ActivateAccountController.send(email: String)
+GET         /account/activate/:token         net.macolabo.sform2.controllers.ActivateAccountController.activate(token: java.util.UUID)
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                    controllers.Assets.at(path="/public", file)
 ->          /webjars                         webjars.Routes
 
-GET /formpost/:hashed_form_id controllers.FormPostDataController.getPostData(hashed_form_id: String)
+GET /formpost/:hashed_form_id net.macolabo.sform2.controllers.FormPostDataController.getPostData(hashed_form_id: String)
 
 # form
-GET /form/list controllers.FormController.getList()
-GET /form/:hashed_form_id controllers.FormController.get(hashed_form_id: String)
-POST /form controllers.FormController.create()
-DELETE /form/:form_id controllers.FormController.delete(form_id: String)
-POST /form/validate controllers.FormController.validate()
+GET /form/list net.macolabo.sform2.controllers.FormController.getList()
+GET /form/:hashed_form_id net.macolabo.sform2.controllers.FormController.get(hashed_form_id: String)
+POST /form/new net.macolabo.sform2.controllers.FormController.create()
+POST /form net.macolabo.sform2.controllers.FormController.save()
+DELETE /form/:hashed_form_id net.macolabo.sform2.controllers.FormController.delete(hashed_form_id: String)
+POST /form/validate net.macolabo.sform2.controllers.FormController.validate()
 
 # transfer
-GET /transfer controllers.TransferController.getTransferList()
-GET /transfer/config/:transfer_name controllers.TransferController.getConfig(transfer_name: String)
-POST /transfer/config controllers.TransferController.saveConfig()
+GET /transfer net.macolabo.sform2.controllers.TransferController.getTransferList()
+GET /transfer/config/:transfer_name net.macolabo.sform2.controllers.TransferController.getConfig(transfer_name: String)
+POST /transfer/config net.macolabo.sform2.controllers.TransferController.saveConfig()
 
 # user
-GET /user controllers.UserController.getList()
-GET /user/isadmin controllers.UserController.isAdmin()
+GET /user net.macolabo.sform2.controllers.UserController.getList()
+GET /user/isadmin net.macolabo.sform2.controllers.UserController.isAdmin()
 
 # transferTask
-GET /transfertask/list/:form_id controllers.TransferTaskController.getTransferTaskListByFormId(form_id: String)
-GET /transfertask/:id controllers.TransferTaskController.getTransferTask(id: Int)
+GET /transfertask/list/:form_id net.macolabo.sform2.controllers.TransferTaskController.getTransferTaskListByFormId(form_id: String)
+GET /transfertask/:id net.macolabo.sform2.controllers.TransferTaskController.getTransferTask(id: Int)
 
 # adminExistsCheck
-GET /adminExistsCheck controllers.AdminExistsCheckController.check()
+GET /adminExistsCheck net.macolabo.sform2.controllers.AdminExistsCheckController.check()
