@@ -5,12 +5,11 @@ import java.util.UUID
 
 import com.google.inject.Inject
 import net.macolabo.sform2.models.User
-import net.macolabo.sform2.models.daos.FormsDAO
 import net.macolabo.sform2.models.entity.{Form, FormCol, FormColSelect, FormColValidation}
 
 import scala.concurrent.ExecutionContext
 
-class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
+class FormService @Inject() (implicit ex: ExecutionContext) {
 
   /**
    * フォーム詳細データ取得

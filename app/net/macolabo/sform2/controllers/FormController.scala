@@ -18,8 +18,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class FormController @Inject() (
   components: ControllerComponents,
   silhouette: Silhouette[DefaultEnv],
-  formsDAO: FormsDAO,
-  transferTaskDAO: TransferTaskDAO,
   formService: FormService
 )(
   implicit
@@ -95,47 +93,10 @@ class FormController @Inject() (
   def delete(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
     val res = formService.deleteForm(request.identity, hashed_form_id)
     res.id match {
-      case Some(s: Int) => Future.successful(Ok(toJson(s)))
+      case Some(s: Int) => Future.successful(Ok(toJson(res)))
       case None => Future.successful(BadRequest)
     }
-    Future.successful(Ok(toJson(formsDAO.delete(hashed_form_id))))
   }
 
-  /**
-   * フォームHTML取得
-   * GET /form/html/<form_id>
-   * @return
-   */
-  def getHtml: Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
-    val jsonBody: Option[JsValue] = request.body.asJson
-    val res = jsonBody.map { json =>
-      val data = (json \ "rcdata").as[JsValue]
-      formsDAO.getHtml(data, request.host)
-    }.getOrElse {
-      None
-    }
-    res match {
-      case r: RsResultSet => Future.successful(Ok(toJson(r)))
-      case _ => Future.successful(BadRequest("Bad!"))
-    }
-  }
 
-  /**
-   * フォームバリデート
-   * POST /form/validate
-   * @return
-   */
-  def validate(): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
-    val jsonBody: Option[JsValue] = request.body.asJson
-    val res = jsonBody.map { json =>
-      val data = (json \ "rcdata").as[JsValue]
-      formsDAO.validate(data, request.host)
-    }.getOrElse {
-      None
-    }
-    res match {
-      case r: RsResultSet => Future.successful(Ok(toJson(r)))
-      case _ => Future.successful(BadRequest("Bad!"))
-    }
-  }
 }
