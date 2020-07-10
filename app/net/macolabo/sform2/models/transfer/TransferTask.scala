@@ -7,6 +7,7 @@ import play.api.libs.json.JsValue
 case class TransferTask(
                        id: Int,
                        transfer_config_id: Int,
+                       task_index: Int,
                        conditions: JsValue,
                        user_group: String,
                        created_user: String,
