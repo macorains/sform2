@@ -59,7 +59,6 @@ class FormController @Inject() (
       r.validate[FormUpdateFormRequest].map(f => {
         formService.update(request.identity, f)
       }).asOpt)
-
     res match {
       case Some(s :FormUpdateFormResponse) => Future.successful(Ok(toJson(s)))
       case None => Future.successful(BadRequest)

@@ -16,8 +16,8 @@ import play.api.libs.functional.syntax._
  * @param input_type 入力種別
  */
 case class FormUpdateFormRequestFormColValidation(
-                                                 id: Int,
-                                                 form_col_id: Int,
+                                                 id: Option[Int],
+                                                 form_col_id: Option[Int],
                                                  form_id: Int,
                                                  max_value: Int,
                                                  min_value: Int,
@@ -39,8 +39,8 @@ case class FormUpdateFormRequestFormColValidation(
  * @param view_style 参照時CSSスタイル
  */
 case class FormUpdateFormRequestFormColSelect(
-                                             id: Int,
-                                             form_col_id: Int,
+                                             id: Option[Int],
+                                             form_col_id: Option[Int],
                                              form_id: Int,
                                              select_index: Int,
                                              select_name: String,
@@ -63,7 +63,7 @@ case class FormUpdateFormRequestFormColSelect(
  * @param validations バリデーション
  */
 case class FormUpdateFormRequestFormCol(
-                                       id: Int,
+                                       id: Option[Int],
                                        form_id: Int,
                                        name: String,
                                        col_id: String,
@@ -121,8 +121,8 @@ trait FormUpdateFormRequestJson {
   )
 
   implicit val FormUpdateFormRequestFormColValidationReads: Reads[FormUpdateFormRequestFormColValidation] = (
-    (JsPath \ "id").read[Int] ~
-      (JsPath \ "form_col_id").read[Int] ~
+    (JsPath \ "id").readNullable[Int] ~
+      (JsPath \ "form_col_id").readNullable[Int] ~
       (JsPath \ "form_id").read[Int] ~
       (JsPath \ "max_value").read[Int] ~
       (JsPath \ "min_value").read[Int] ~
@@ -144,8 +144,8 @@ trait FormUpdateFormRequestJson {
   )
 
   implicit val FormUpdateFormRequestFormColSelectListReads: Reads[FormUpdateFormRequestFormColSelect] = (
-    (JsPath \ "id").read[Int] ~
-      (JsPath \ "form_col_id").read[Int] ~
+    (JsPath \ "id").readNullable[Int] ~
+      (JsPath \ "form_col_id").readNullable[Int] ~
       (JsPath \ "form_id").read[Int] ~
       (JsPath \ "select_index").read[Int] ~
       (JsPath \ "select_name").read[String] ~
@@ -168,7 +168,7 @@ trait FormUpdateFormRequestJson {
   )
 
   implicit val FormUpdateFormRequestFormColReads: Reads[FormUpdateFormRequestFormCol] = (
-    (JsPath \ "id").read[Int] ~
+    (JsPath \ "id").readNullable[Int] ~
       (JsPath \ "form_id").read[Int] ~
       (JsPath \ "name").read[String] ~
       (JsPath \ "col_id").read[String] ~

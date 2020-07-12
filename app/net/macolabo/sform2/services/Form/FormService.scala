@@ -85,12 +85,12 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
    */
   def update(identity: User, formUpdateFormRequest: FormUpdateFormRequest): FormUpdateFormResponse = {
     val formId = updateForm(identity, formUpdateFormRequest)
+    // ToDo DB上のフォーム項目とリクエスト内のフォーム項目を比較して、DB上にあってリクエストに無いものはあらかじめ削除する
     formUpdateFormRequest.form_cols.map(f => {
-      updateFormCol(identity, f)
-      f.select_list.map(s => {
-        updateFormColSelect(identity, s)
-      })
-      f.validations.map(v =>updateFormColValidation(identity, v))
+      f.id match {
+        case Some(i: Int) if i > 0 => updateFormCol(identity, f)
+        case _ => insertFormCol(identity, FormUpdateFormRequestFormColToFormInsertFormRequestFormCol(f), formUpdateFormRequest.id)
+      }
     })
     FormUpdateFormResponse(formId)
   }
@@ -224,7 +224,7 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
 
   private def updateFormCol(identity: User, formUpdateFormRequestFormCol: FormUpdateFormRequestFormCol): Int = {
     val formCol = FormCol(
-      formUpdateFormRequestFormCol.id,
+      formUpdateFormRequestFormCol.id.getOrElse(0),
       formUpdateFormRequestFormCol.form_id,
       formUpdateFormRequestFormCol.name,
       formUpdateFormRequestFormCol.col_id,
@@ -237,13 +237,27 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
       ZonedDateTime.now(),
       ZonedDateTime.now()
     )
-    formCol.update
+    val result = formCol.update
+    // ToDo DB上の選択項目とリクエスト内の選択項目を比較して、DB上にあってリクエストに無いものはあらかじめ削除する
+    formUpdateFormRequestFormCol.select_list.map(s => {
+      s.id match {
+        case Some(i: Int) if i > 0 => updateFormColSelect(identity, s)
+        case _ => insertFormColSelect(identity, FormUpdateFormRequestFormColSelectToFormInsertFormRequestFormColSelect(s), formCol.form_id, formCol.id)
+      }
+    })
+    formUpdateFormRequestFormCol.validations.map(v => {
+      v.id match {
+        case Some(i: Int) if i > 0 => updateFormColValidation(identity, v)
+        case _ => insertFormColValidation(identity, FormUpdateFormRequestFormColValidationToFormInsertFormRequestFormColValidation(v), formCol.form_id, formCol.id)
+      }
+    })
+    result
   }
 
   private def updateFormColSelect(identity: User, formUpdateFormRequestFormColSelect: FormUpdateFormRequestFormColSelect): Int = {
     val formColSelect = FormColSelect(
-      formUpdateFormRequestFormColSelect.id,
-      formUpdateFormRequestFormColSelect.form_col_id,
+      formUpdateFormRequestFormColSelect.id.getOrElse(0),
+      formUpdateFormRequestFormColSelect.form_col_id.getOrElse(0),
       formUpdateFormRequestFormColSelect.form_id,
       formUpdateFormRequestFormColSelect.select_index,
       formUpdateFormRequestFormColSelect.select_name,
@@ -262,8 +276,8 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
 
   private def updateFormColValidation(identity: User, formUpdateFormRequestFormColValidation: FormUpdateFormRequestFormColValidation): Int = {
     val formColValidation = FormColValidation(
-      formUpdateFormRequestFormColValidation.id,
-      formUpdateFormRequestFormColValidation.form_col_id,
+      formUpdateFormRequestFormColValidation.id.getOrElse(0),
+      formUpdateFormRequestFormColValidation.form_col_id.getOrElse(0),
       formUpdateFormRequestFormColValidation.form_id,
       formUpdateFormRequestFormColValidation.max_value,
       formUpdateFormRequestFormColValidation.min_value,
@@ -365,4 +379,41 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
     )
     formColValidation.insert
   }
+
+  //-------------------------------------------------
+  //  更新リクエスト→作成リクエスト変換ロジック
+  //-------------------------------------------------
+  private def FormUpdateFormRequestFormColToFormInsertFormRequestFormCol(src: FormUpdateFormRequestFormCol): FormInsertFormRequestFormCol = {
+    FormInsertFormRequestFormCol(
+      src.name,
+      src.col_id,
+      src.col_index,
+      src.col_type,
+      src.default_value,
+      src.select_list.map(s => FormUpdateFormRequestFormColSelectToFormInsertFormRequestFormColSelect(s)),
+      src.validations.map(v => FormUpdateFormRequestFormColValidationToFormInsertFormRequestFormColValidation(v))
+    )
+  }
+
+  private def FormUpdateFormRequestFormColSelectToFormInsertFormRequestFormColSelect(src: FormUpdateFormRequestFormColSelect): FormInsertFormRequestFormColSelect = {
+    FormInsertFormRequestFormColSelect(
+      src.select_index,
+      src.select_name,
+      src.select_value,
+      src.is_default,
+      src.edit_style,
+      src.view_style
+    )
+  }
+
+  private def FormUpdateFormRequestFormColValidationToFormInsertFormRequestFormColValidation(src: FormUpdateFormRequestFormColValidation): FormInsertFormRequestFormColValidation = {
+    FormInsertFormRequestFormColValidation(
+      src.max_value,
+      src.min_value,
+      src.max_length,
+      src.min_length,
+      src.input_type
+    )
+  }
+
 }
