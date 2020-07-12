@@ -3,15 +3,14 @@ package net.macolabo.sform2.controllers
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.impl.providers._
 import javax.inject._
-import models._
 import net.macolabo.sform2.models.RsResultSet
 import net.macolabo.sform2.models.daos.TransferConfig.BaseTransferConfigDAO
 import net.macolabo.sform2.models.daos.TransfersDAO
-import net.macolabo.sform2.services.User.UserService
+import net.macolabo.sform2.services.Transfer.{TransferGetTransferConfigSelectListJson, TransferService}
 import org.webjars.play.WebJarsUtil
-import play.api.{Environment, _}
-import play.api.db.DBApi
+import play.api._
 import play.api.i18n.I18nSupport
+import play.api.libs.json.Json._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.mvc._
@@ -20,20 +19,16 @@ import net.macolabo.sform2.utils.auth.{DefaultEnv, WithProvider}
 import scala.concurrent.{ExecutionContext, Future}
 
 class TransferController @Inject() (
-  env: Environment,
-  dbapi: DBApi,
   components: ControllerComponents,
   silhouette: Silhouette[DefaultEnv],
-  userService: UserService,
-  credentialsProvider: CredentialsProvider,
-  socialProviderRegistry: SocialProviderRegistry,
   configuration: Configuration,
-  transfersDAO: TransfersDAO
+  transfersDAO: TransfersDAO,
+  transferService: TransferService,
 )(
   implicit
   webJarsUtil: WebJarsUtil,
   ex: ExecutionContext
-) extends AbstractController(components) with I18nSupport {
+) extends AbstractController(components) with I18nSupport with TransferGetTransferConfigSelectListJson{
 
   case class TransferGetConfigRequest(transferName: String)
 
@@ -41,6 +36,16 @@ class TransferController @Inject() (
   object TransferSaveConfigRequest {
     implicit def jsonTransferSaveConfigRequestWrites: Writes[TransferSaveConfigRequest] = Json.writes[TransferSaveConfigRequest]
     implicit def jsonTransferSaveConfigRequestReads: Reads[TransferSaveConfigRequest] = Json.reads[TransferSaveConfigRequest]
+  }
+
+  /**
+   * フォーム作成画面のTransferConfig選択リスト生成用のデータ取得
+   * GET /transfer/selectlist
+   * @return TransferConfigのid,nameのリスト
+   */
+  def getSelectList: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
+    val res = transferService.getTransferConfigSelectList(request.identity)
+    Future.successful(Ok(toJson(res)))
   }
 
   // ?

@@ -37,12 +37,12 @@ GET /form/:hashed_form_id net.macolabo.sform2.controllers.FormController.get(has
 POST /form/new net.macolabo.sform2.controllers.FormController.create()
 POST /form net.macolabo.sform2.controllers.FormController.save()
 DELETE /form/:hashed_form_id net.macolabo.sform2.controllers.FormController.delete(hashed_form_id: String)
-POST /form/validate net.macolabo.sform2.controllers.FormController.validate()
 
 # transfer
 GET /transfer net.macolabo.sform2.controllers.TransferController.getTransferList()
 GET /transfer/config/:transfer_name net.macolabo.sform2.controllers.TransferController.getConfig(transfer_name: String)
 POST /transfer/config net.macolabo.sform2.controllers.TransferController.saveConfig()
+GET /transfer/selectlist net.macolabo.sform2.controllers.TransferController.getSelectList()
 
 # user
 GET /user net.macolabo.sform2.controllers.UserController.getList()

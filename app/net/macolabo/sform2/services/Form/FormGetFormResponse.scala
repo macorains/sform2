@@ -1,4 +1,6 @@
 package net.macolabo.sform2.services.Form
+import java.time.ZonedDateTime
+
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
@@ -48,6 +50,41 @@ case class FormGetFormResponseFormColSelect(
                                                edit_style: String,
                                                view_style: String
                                                )
+
+/**
+ * フォーム取得API・FormTransferTask
+ * @param id FormTransferTask ID
+ * @param transfer_config_id TransferConfig ID
+ * @param form_id フォームID
+ * @param task_index 順番
+ * @param form_transfer_task_conditions FormTransferTaskConditionのリスト
+ */
+case class FormGetFormResponseFormTransferTask(
+                                            id: Int,
+                                            transfer_config_id: Int,
+                                            form_id: Int,
+                                            task_index: Int,
+                                            name: String,
+                                            form_transfer_task_conditions: List[FormGetFormResponseFormTransferTaskCondition]
+                                          )
+
+/**i
+ * フォーム取得API・FormTransferTask・FormTransferTaskCondition
+ * @param id FormTransferTaskCondition ID
+ * @param form_transfer_task_id FormTransferTask ID
+ * @param form_id フォームID
+ * @param form_col_id フォーム項目ID
+ * @param operator 演算子
+ * @param cond_value 値 
+ */
+case class FormGetFormResponseFormTransferTaskCondition(
+                                                         id: Int,
+                                                         form_transfer_task_id: Int,
+                                                         form_id: Int,
+                                                         form_col_id: Int,
+                                                         operator: String,
+                                                         cond_value: String,
+                                                       )
 
 /**
   * フォーム取得API・フォーム項目
@@ -102,7 +139,8 @@ case class FormGetFormResponse(
                               input_header: String,
                               complete_text: String,
                               confirm_header: String,
-                              form_cols: List[FormGetFormResponseFormCol]
+                              form_cols: List[FormGetFormResponseFormCol],
+                              transfer_tasks: List[FormGetFormResponseFormTransferTask]
                               ) {
 
 }
@@ -154,6 +192,42 @@ trait FormGetFormResponseJson {
       (JsPath \ "view_style").read[String]
   )(FormGetFormResponseFormColSelect.apply _)
 
+  implicit val formGetFormResponseFormTransferTaskWrites: Writes[FormGetFormResponseFormTransferTask] = (formGetFormResponseFormTransferTask: FormGetFormResponseFormTransferTask) => Json.obj(
+    "id" -> formGetFormResponseFormTransferTask.id,
+    "transfer_config_id" -> formGetFormResponseFormTransferTask.transfer_config_id,
+    "form_id" -> formGetFormResponseFormTransferTask.form_id,
+    "task_index" -> formGetFormResponseFormTransferTask.task_index,
+    "name" -> formGetFormResponseFormTransferTask.name,
+    "form_transfer_task_conditions" -> formGetFormResponseFormTransferTask.form_transfer_task_conditions
+  )
+
+  implicit val formGetFormResponseFormTransferTaskReads: Reads[FormGetFormResponseFormTransferTask] = (
+    (JsPath \ "id").read[Int] ~
+      (JsPath \ "transfer_config_id").read[Int] ~
+      (JsPath \ "form_id").read[Int] ~
+      (JsPath \ "task_index").read[Int] ~
+      (JsPath \ "name").read[String] ~
+      (JsPath \ "form_transfer_task_condition").read[List[FormGetFormResponseFormTransferTaskCondition]]
+  )(FormGetFormResponseFormTransferTask.apply _)
+
+  implicit val formGetFormResponseFormTransferTaskConditionWrites: Writes[FormGetFormResponseFormTransferTaskCondition] = (formGetFormResponseFormTransferTaskCondition: FormGetFormResponseFormTransferTaskCondition) => Json.obj(
+    "id" -> formGetFormResponseFormTransferTaskCondition.id,
+    "form_transfer_task_id" -> formGetFormResponseFormTransferTaskCondition.form_transfer_task_id,
+    "form_id" -> formGetFormResponseFormTransferTaskCondition.form_id,
+    "form_col_id" -> formGetFormResponseFormTransferTaskCondition.form_col_id,
+    "operator" -> formGetFormResponseFormTransferTaskCondition.operator,
+    "cond_value" -> formGetFormResponseFormTransferTaskCondition.cond_value
+  )
+
+  implicit val formGetFormResponseFormTransferTaskConditionReads: Reads[FormGetFormResponseFormTransferTaskCondition] = (
+    (JsPath \ "id").read[Int] ~
+      (JsPath \ "form_transfer_task_id").read[Int] ~
+      (JsPath \ "form_id").read[Int] ~
+      (JsPath \ "form_col_id").read[Int] ~
+      (JsPath \ "operator").read[String] ~
+      (JsPath \ "cond_value").read[String]
+  )(FormGetFormResponseFormTransferTaskCondition.apply _)
+
   implicit val FormGetFormResponseFormColWrites: Writes[FormGetFormResponseFormCol] = (formGetFormResponseFormCol: FormGetFormResponseFormCol) => Json.obj(
     "id" -> formGetFormResponseFormCol.id,
     "form_id" -> formGetFormResponseFormCol.form_id,
@@ -191,7 +265,8 @@ trait FormGetFormResponseJson {
     "input_header" -> formGetFormResponse.input_header,
     "complete_text" -> formGetFormResponse.complete_text,
     "confirm_header" -> formGetFormResponse.confirm_header,
-    "form_cols" -> formGetFormResponse.form_cols
+    "form_cols" -> formGetFormResponse.form_cols,
+    "transfer_tasks" -> formGetFormResponse.transfer_tasks
   )
 
   implicit val FormGetFormResponseReads: Reads[FormGetFormResponse] = (
@@ -207,6 +282,7 @@ trait FormGetFormResponseJson {
       (JsPath \ "input_header").read[String] ~
       (JsPath \ "complete_text").read[String] ~
       (JsPath \ "confirm_header").read[String] ~
-      (JsPath \ "form_cols").read[List[FormGetFormResponseFormCol]]
+      (JsPath \ "form_cols").read[List[FormGetFormResponseFormCol]] ~
+      (JsPath \ "transfer_tasks").read[List[FormGetFormResponseFormTransferTask]]
   )(FormGetFormResponse.apply _)
 }

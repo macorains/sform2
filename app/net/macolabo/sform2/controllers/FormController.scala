@@ -3,12 +3,9 @@ package net.macolabo.sform2.controllers
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.impl.providers._
 import javax.inject._
-import net.macolabo.sform2.models.RsResultSet
-import net.macolabo.sform2.models.daos.{FormsDAO, TransferTaskDAO}
-import net.macolabo.sform2.services.Form.{FormDeleteFormResponse, FormGetFormResponseJson, FormGetListResponseJson, FormInsertFormRequest, FormInsertFormRequestJson, FormInsertFormResponse, FormInsertFormResponseJson, FormService, FormUpdateFormRequest, FormUpdateFormRequestJson, FormUpdateFormResponse, FormUpdateFormResponseJson}
+import net.macolabo.sform2.services.Form.{FormDeleteFormResponseJson, FormGetFormResponseJson, FormGetListResponseJson, FormInsertFormRequest, FormInsertFormRequestJson, FormInsertFormResponse, FormInsertFormResponseJson, FormService, FormUpdateFormRequest, FormUpdateFormRequestJson, FormUpdateFormResponse, FormUpdateFormResponseJson}
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
-import play.api.libs.json.{JsResult, JsValue}
 import play.api.libs.json.Json._
 import play.api.mvc._
 import net.macolabo.sform2.utils.auth.{DefaultEnv, WithProvider}
@@ -31,6 +28,7 @@ class FormController @Inject() (
   with FormUpdateFormResponseJson
   with FormInsertFormRequestJson
   with FormInsertFormResponseJson
+  with FormDeleteFormResponseJson
 {
 
   /**

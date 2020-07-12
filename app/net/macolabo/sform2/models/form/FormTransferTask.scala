@@ -10,6 +10,7 @@ import scalikejdbc._
  * @param transfer_config_id TransferConfig ID
  * @param form_id フォームID
  * @param task_index 順序
+ * @param name タスク名
  * @param user_group ユーザーグループ
  * @param created_user 作成ユーザー
  * @param modified_user 更新ユーザー
@@ -21,6 +22,7 @@ case class FormTransferTask(
                        transfer_config_id: Int,
                        form_id: Int,
                        task_index: Int,
+                       name: String,
                        user_group: String,
                        created_user: String,
                        modified_user: String,
@@ -36,6 +38,7 @@ object FormTransferTask extends SQLSyntaxSupport[FormTransferTask] {
       rs.int("transfer_config_id"),
       rs.int("form_id"),
       rs.int("task_index"),
+      rs.string("name"),
       rs.string("user_group"),
       rs.string("created_user"),
       rs.string("modified_user"),
@@ -58,6 +61,7 @@ object FormTransferTask extends SQLSyntaxSupport[FormTransferTask] {
         f.transfer_config_id,
         f.form_id,
         f.task_index,
+        f.name,
         f.user_group,
         f.created_user,
         f.modified_user,
@@ -86,6 +90,7 @@ object FormTransferTask extends SQLSyntaxSupport[FormTransferTask] {
         f.transfer_config_id,
         f.form_id,
         f.task_index,
+        f.name,
         f.user_group,
         f.created_user,
         f.modified_user,
@@ -115,6 +120,7 @@ object FormTransferTask extends SQLSyntaxSupport[FormTransferTask] {
           c.transfer_config_id -> formTransferTask.transfer_config_id,
           c.form_id -> formTransferTask.form_id,
           c.task_index -> formTransferTask.task_index,
+          c.name -> formTransferTask.name,
           c.user_group -> formTransferTask.user_group,
           c.created_user -> formTransferTask.created_user,
           c.modified_user -> formTransferTask.modified_user,
@@ -139,6 +145,7 @@ object FormTransferTask extends SQLSyntaxSupport[FormTransferTask] {
           c.form_id -> formTransferTask.form_id,
           c.task_index -> formTransferTask.task_index,
           c.user_group -> formTransferTask.user_group,
+          c.name -> formTransferTask.name,
           c.created_user -> formTransferTask.created_user,
           c.modified_user -> formTransferTask.modified_user,
           c.created -> formTransferTask.created,

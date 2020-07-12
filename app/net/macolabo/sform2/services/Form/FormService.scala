@@ -5,7 +5,7 @@ import java.util.UUID
 
 import com.google.inject.Inject
 import net.macolabo.sform2.models.User
-import net.macolabo.sform2.models.form.{Form, FormCol, FormColSelect, FormColValidation}
+import net.macolabo.sform2.models.form.{Form, FormCol, FormColSelect, FormColValidation, FormTransferTask, FormTransferTaskCondition}
 
 import scala.concurrent.ExecutionContext
 
@@ -33,7 +33,8 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
         f.input_header.getOrElse(""),
         f.complete_text.getOrElse(""),
         f.confirm_header.getOrElse(""),
-        convertToFormGetFormResponseFormCol(userGroup, f.id)
+        convertToFormGetFormResponseFormCol(userGroup, f.id),
+        convertToFormGetFormResponseTransferTask(userGroup, f.id)
       )
     })
   }
@@ -165,6 +166,33 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
         f.input_type
       )
     })
+  }
+
+  private def convertToFormGetFormResponseTransferTask(userGroup: String, formId: Int) = {
+    FormTransferTask.getList(userGroup, formId).map(f => {
+      FormGetFormResponseFormTransferTask(
+        f.id,
+        f.transfer_config_id,
+        f.form_id,
+        f.task_index,
+        f.name,
+        convertToFormGetFormResponseTransferTaskCondition(userGroup, formId, f.id)
+      )
+    })
+  }
+
+  private def convertToFormGetFormResponseTransferTaskCondition(userGroup: String, formId: Int, formTransferTaskId: Int) = {
+    FormTransferTaskCondition.getList(userGroup, formId, formTransferTaskId).map(f => {
+      FormGetFormResponseFormTransferTaskCondition(
+        f.id,
+        f.form_transfer_task_id,
+        f.form_id,
+        f.form_col_id,
+        f.operator,
+        f.cond_value
+      )
+    })
+
   }
 
   //-------------------------------------------------
