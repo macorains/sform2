@@ -136,18 +136,19 @@ object FormColSelect extends SQLSyntaxSupport[FormColSelect] {
    */
   def save(formColSelect: FormColSelect)(implicit session: DBSession = autoSession): Int = {
     withSQL{
+      val c = FormColSelect.column
       update(FormColSelect).set(
-        column.form_col_id -> formColSelect.form_col_id,
-        column.form_id -> formColSelect.form_id,
-        column.select_index -> formColSelect.select_index,
-        column.select_name -> formColSelect.select_name,
-        column.select_value -> formColSelect.select_value,
-        column.is_default -> formColSelect.is_default,
-        column.edit_style -> formColSelect.edit_style,
-        column.view_style -> formColSelect.view_style,
-        column.modified_user -> formColSelect.modified_user,
-        column.modified -> formColSelect.modified
-      ).where.eq(column.id, formColSelect.id)
+        c.form_col_id -> formColSelect.form_col_id,
+        c.form_id -> formColSelect.form_id,
+        c.select_index -> formColSelect.select_index,
+        c.select_name -> formColSelect.select_name,
+        c.select_value -> formColSelect.select_value,
+        c.is_default -> formColSelect.is_default,
+        c.edit_style -> formColSelect.edit_style,
+        c.view_style -> formColSelect.view_style,
+        c.modified_user -> formColSelect.modified_user,
+        c.modified -> formColSelect.modified
+      ).where.eq(c.id, formColSelect.id)
     }.update().apply()
   }
 

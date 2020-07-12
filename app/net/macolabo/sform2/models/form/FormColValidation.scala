@@ -27,7 +27,7 @@ case class FormColValidation(
 
 object FormColValidation extends SQLSyntaxSupport[FormColValidation] {
   override val tableName = "D_FORM_COL_VALIDATION"
-  def apply(rs: WrappedResultSet) :FormColValidation = {
+  def apply(rs: WrappedResultSet): FormColValidation = {
     FormColValidation(
       rs.int("id"),
       rs.int("form_col_id"),
@@ -114,17 +114,18 @@ object FormColValidation extends SQLSyntaxSupport[FormColValidation] {
    */
   def save(formColValidation: FormColValidation)(implicit session: DBSession = autoSession): Int = {
     withSQL{
+      val c = FormColValidation.column
       update(FormColValidation).set(
-        column.form_col_id -> formColValidation.form_col_id,
-        column.form_id -> formColValidation.form_id,
-        column.max_value -> formColValidation.max_value,
-        column.min_value -> formColValidation.min_value,
-        column.max_length -> formColValidation.max_length,
-        column.min_length -> formColValidation.min_length,
-        column.input_type -> formColValidation.input_type,
-        column.modified_user -> formColValidation.modified_user,
-        column.modified -> formColValidation.modified
-      ).where.eq(column.id, formColValidation.id)
+        c.form_col_id -> formColValidation.form_col_id,
+        c.form_id -> formColValidation.form_id,
+        c.max_value -> formColValidation.max_value,
+        c.min_value -> formColValidation.min_value,
+        c.max_length -> formColValidation.max_length,
+        c.min_length -> formColValidation.min_length,
+        c.input_type -> formColValidation.input_type,
+        c.modified_user -> formColValidation.modified_user,
+        c.modified -> formColValidation.modified
+      ).where.eq(c.id, formColValidation.id)
     }.update().apply()
   }
 

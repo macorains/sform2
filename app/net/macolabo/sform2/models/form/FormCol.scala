@@ -123,16 +123,17 @@ object FormCol extends SQLSyntaxSupport[FormCol] {
    */
   def save(formCol: FormCol)(implicit session: DBSession = autoSession): Int = {
     withSQL{
+      val c = FormCol.column
       update(FormCol).set(
-        column.form_id -> formCol.form_id,
-        column.name -> formCol.name,
-        column.col_id -> formCol.col_id,
-        column.col_index -> formCol.col_index,
-        column.col_type -> formCol.col_type,
-        column.default_value -> formCol.default_value,
-        column.modified_user -> formCol.modified_user,
-        column.modified -> formCol.modified
-      ).where.eq(column.id, formCol.id)
+        c.form_id -> formCol.form_id,
+        c.name -> formCol.name,
+        c.col_id -> formCol.col_id,
+        c.col_index -> formCol.col_index,
+        c.col_type -> formCol.col_type,
+        c.default_value -> formCol.default_value,
+        c.modified_user -> formCol.modified_user,
+        c.modified -> formCol.modified
+      ).where.eq(c.id, formCol.id)
     }.update().apply()
   }
 

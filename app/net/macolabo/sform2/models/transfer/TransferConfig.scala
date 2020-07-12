@@ -2,6 +2,8 @@ package net.macolabo.sform2.models.transfer
 
 import java.time.ZonedDateTime
 
+import scalikejdbc._
+
 /**
  * Transfer設定
  * @param id Transfer設定ID
@@ -27,3 +29,65 @@ case class TransferConfig(
                            created: ZonedDateTime,
                            modified: ZonedDateTime
                          )
+
+object TransferConfig extends SQLSyntaxSupport[TransferConfig] {
+  override val tableName = "D_TRANSFER_CONFIG"
+  def apply(rs: WrappedResultSet): TransferConfig = {
+    TransferConfig(
+      rs.int("id"),
+      rs.string("type_code"),
+      rs.int("config_index"),
+      rs.string("name"),
+      rs.int("status"),
+      rs.string("user_group"),
+      rs.string("created_user"),
+      rs.string("modified_user"),
+      rs.dateTime("created"),
+      rs.dateTime("modified")
+    )
+  }
+
+  def get(userGroup: String, transferConfigId: Int)(implicit session: DBSession = autoSession): Option[TransferConfig] = {
+    val f = TransferConfig.syntax("f")
+    withSQL(
+      select(
+        f.id,
+        f.type_code,
+        f.config_index,
+        f.name,
+        f.status,
+        f.user_group,
+        f.created_user,
+        f.modified_user,
+        f.created,
+        f.modified
+      )
+        .from(TransferConfig as f)
+        .where
+        .eq(f.id, transferConfigId)
+        .and
+        .eq(f.user_group, userGroup)
+    ).map(rs => TransferConfig(rs)).single().apply()
+  }
+
+  def getList(userGroup: String)(implicit session: DBSession = autoSession): List[TransferConfig] = {
+    val f = TransferConfig.syntax("f")
+    withSQL(
+      select(
+        f.id,
+        f.type_code,
+        f.config_index,
+        f.name,
+        f.status,
+        f.user_group,
+        f.created_user,
+        f.modified_user,
+        f.created,
+        f.modified
+      )
+        .from(TransferConfig as f)
+        .where
+        .eq(f.user_group, userGroup)
+    ).map(rs => TransferConfig(rs)).list().apply()
+  }
+}
