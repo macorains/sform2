@@ -75,7 +75,7 @@ case class FormGetFormResponseFormTransferTask(
  * @param form_id フォームID
  * @param form_col_id フォーム項目ID
  * @param operator 演算子
- * @param cond_value 値 
+ * @param cond_value 値　
  */
 case class FormGetFormResponseFormTransferTaskCondition(
                                                          id: Int,
