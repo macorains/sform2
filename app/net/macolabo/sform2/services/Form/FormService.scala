@@ -85,13 +85,21 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
    */
   def update(identity: User, formUpdateFormRequest: FormUpdateFormRequest): FormUpdateFormResponse = {
     val formId = updateForm(identity, formUpdateFormRequest)
-    // ToDo DB上のフォーム項目とリクエスト内のフォーム項目を比較して、DB上にあってリクエストに無いものはあらかじめ削除する
-    formUpdateFormRequest.form_cols.map(f => {
+    val updatedColIds = formUpdateFormRequest.form_cols.map(f => {
       f.id match {
         case Some(i: Int) if i > 0 => updateFormCol(identity, f)
         case _ => insertFormCol(identity, FormUpdateFormRequestFormColToFormInsertFormRequestFormCol(f), formUpdateFormRequest.id)
       }
     })
+
+    // 削除対象のフォーム項目を抽出、削除
+    val userGroup = identity.group.getOrElse("")
+    FormCol
+      .getList(userGroup,formUpdateFormRequest.id)
+      .filterNot(c => updatedColIds.contains(c.id) )
+      .map(c => c.id)
+      .foreach(c => FormCol.erase(userGroup, c))
+
     FormUpdateFormResponse(formId)
   }
 
@@ -237,21 +245,30 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
       ZonedDateTime.now(),
       ZonedDateTime.now()
     )
-    val result = formCol.update
-    // ToDo DB上の選択項目とリクエスト内の選択項目を比較して、DB上にあってリクエストに無いものはあらかじめ削除する
-    formUpdateFormRequestFormCol.select_list.map(s => {
+    formCol.update
+
+    val updatedSelectListIds = formUpdateFormRequestFormCol.select_list.map(s => {
       s.id match {
         case Some(i: Int) if i > 0 => updateFormColSelect(identity, s)
         case _ => insertFormColSelect(identity, FormUpdateFormRequestFormColSelectToFormInsertFormRequestFormColSelect(s), formCol.form_id, formCol.id)
       }
     })
+
+    // 削除対象のフォーム項目・選択項目IDを抽出、削除
+    val userGroup = identity.group.getOrElse("")
+    FormColSelect
+      .getList(userGroup, formUpdateFormRequestFormCol.form_id, formUpdateFormRequestFormCol.id.getOrElse(0))
+      .filterNot(c => updatedSelectListIds.contains(c.id))
+      .map(c => c.id)
+      .foreach(c => FormColSelect.erase(userGroup, c))
+
     formUpdateFormRequestFormCol.validations.map(v => {
       v.id match {
         case Some(i: Int) if i > 0 => updateFormColValidation(identity, v)
         case _ => insertFormColValidation(identity, FormUpdateFormRequestFormColValidationToFormInsertFormRequestFormColValidation(v), formCol.form_id, formCol.id)
       }
     })
-    result
+    formCol.id
   }
 
   private def updateFormColSelect(identity: User, formUpdateFormRequestFormColSelect: FormUpdateFormRequestFormColSelect): Int = {
@@ -272,6 +289,7 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
       ZonedDateTime.now()
     )
     formColSelect.update
+    formColSelect.id
   }
 
   private def updateFormColValidation(identity: User, formUpdateFormRequestFormColValidation: FormUpdateFormRequestFormColValidation): Int = {
