@@ -87,6 +87,8 @@ object FormCol extends SQLSyntaxSupport[FormCol] {
         .eq(f.form_id, formId)
         .and
         .eq(f.user_group, userGroup)
+        .orderBy(f.col_index)
+        .asc
     ).map(rs => FormCol(rs)).list().apply()
   }
 
