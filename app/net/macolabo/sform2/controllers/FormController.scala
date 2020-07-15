@@ -55,6 +55,7 @@ class FormController @Inject() (
    * @return
    */
   def save(): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
+    println(request.body.asJson.get.validate[FormUpdateFormRequest].toString)
     val res = request.body.asJson.flatMap(r =>
       r.validate[FormUpdateFormRequest].map(f => {
         formService.update(request.identity, f)
