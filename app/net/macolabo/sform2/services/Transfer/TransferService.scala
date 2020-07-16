@@ -6,7 +6,7 @@ import net.macolabo.sform2.models.transfer.TransferConfig
 
 import scala.concurrent.ExecutionContext
 
-class TransferService @Inject() (implicit ex: ExecutionContext) extends TransferGetTransferConfigSelectListJson {
+class TransferService @Inject() (implicit ex: ExecutionContext) extends TransferGetTransferConfigSelectListJson with TransferGetTransferConfigListJson {
 
   def getTransferConfigSelectList(identity: User): List[TransferGetTransferConfigSelectList] = {
     val userGroup = identity.group.getOrElse("")
@@ -14,6 +14,19 @@ class TransferService @Inject() (implicit ex: ExecutionContext) extends Transfer
       TransferGetTransferConfigSelectList(
         f.id,
         f.name
+      )
+    })
+  }
+
+  def getTransferConfigList(identity: User): List[TransferGetTransferConfigList] = {
+    val userGroup = identity.group.getOrElse("")
+    TransferConfig.getList(userGroup).map(f => {
+      TransferGetTransferConfigList(
+        f.id,
+        f.type_code,
+        f.config_index,
+        f.name,
+        f.status
       )
     })
   }

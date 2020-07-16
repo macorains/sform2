@@ -6,7 +6,7 @@ import javax.inject._
 import net.macolabo.sform2.models.RsResultSet
 import net.macolabo.sform2.models.daos.TransferConfig.BaseTransferConfigDAO
 import net.macolabo.sform2.models.daos.TransfersDAO
-import net.macolabo.sform2.services.Transfer.{TransferGetTransferConfigSelectListJson, TransferService}
+import net.macolabo.sform2.services.Transfer.{TransferGetTransferConfigListJson, TransferGetTransferConfigSelectListJson, TransferService}
 import org.webjars.play.WebJarsUtil
 import play.api._
 import play.api.i18n.I18nSupport
@@ -28,7 +28,10 @@ class TransferController @Inject() (
   implicit
   webJarsUtil: WebJarsUtil,
   ex: ExecutionContext
-) extends AbstractController(components) with I18nSupport with TransferGetTransferConfigSelectListJson{
+) extends AbstractController(components)
+  with I18nSupport
+  with TransferGetTransferConfigSelectListJson
+  with TransferGetTransferConfigListJson {
 
   case class TransferGetConfigRequest(transferName: String)
 
@@ -45,6 +48,16 @@ class TransferController @Inject() (
    */
   def getSelectList: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
     val res = transferService.getTransferConfigSelectList(request.identity)
+    Future.successful(Ok(toJson(res)))
+  }
+
+  /**
+   * TransferConfigの一覧を返す
+   * GET /transfer/config/list
+   * @return TransferConfigのリスト
+   */
+  def getTransferConfigList: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
+    val res = transferService.getTransferConfigList(request.identity)
     Future.successful(Ok(toJson(res)))
   }
 

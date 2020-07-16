@@ -9,7 +9,7 @@ case class TransferGetTransferConfigSelectList(
                                               )
 
 trait TransferGetTransferConfigSelectListJson {
-  implicit val transferGetTransferConfigSelectListWrites: Writes[TransferGetTransferConfigSelectList] = (transferGetTransferConfigSelectList: TransferGetTransferConfigSelectList) => Json.obj(
+  implicit val TransferGetTransferConfigSelectListWrites: Writes[TransferGetTransferConfigSelectList] = (transferGetTransferConfigSelectList: TransferGetTransferConfigSelectList) => Json.obj(
     "id" -> transferGetTransferConfigSelectList.id,
     "name" -> transferGetTransferConfigSelectList.name
   )
