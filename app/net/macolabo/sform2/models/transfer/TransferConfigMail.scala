@@ -15,7 +15,11 @@ case class TransferConfigMail(
                              modified_user: String,
                              created: ZonedDateTime,
                              modified: ZonedDateTime
-                             )
+                             ){
+  import TransferConfigMail._
+  def insert: Int = create(this)
+  def update: Int = save(this)
+}
 
 object TransferConfigMail extends SQLSyntaxSupport[TransferConfigMail] {
   override val tableName = "D_TRANSFER_CONFIG_MAIL"
@@ -34,6 +38,13 @@ object TransferConfigMail extends SQLSyntaxSupport[TransferConfigMail] {
     )
   }
 
+  /**
+   * TransferConfigMail取得
+   * @param userGroup ユーザーグループ
+   * @param transferConfigId TransferConfig ID
+   * @param session DB Session
+   * @return TransferConfigMail
+   */
   def get(userGroup: String, transferConfigId: Int)(implicit session: DBSession = autoSession): Option[TransferConfigMail] = {
     val f = TransferConfigMail.syntax("f")
     withSQL(
@@ -55,5 +66,51 @@ object TransferConfigMail extends SQLSyntaxSupport[TransferConfigMail] {
         .and
         .eq(f.user_group, userGroup)
     ).map(rs=>TransferConfigMail(rs)).single().apply()
+  }
+
+  /**
+   * TransferConfigMail作成
+   * @param transferConfigMail TransferConfigMail
+   * @param session DB Session
+   * @return 作成したレコードのID
+   */
+  def create(transferConfigMail:TransferConfigMail)(implicit session: DBSession = autoSession): Int = {
+    withSQL {
+      val c = TransferConfig.column
+      insert.into(TransferConfigMail).namedValues(
+        c.transfer_config_id -> transferConfigMail.transfer_config_id,
+        c.use_cc -> transferConfigMail.use_cc,
+        c.use_bcc -> transferConfigMail.use_bcc,
+        c.use_replyto -> transferConfigMail.use_replyto,
+        c.user_group -> transferConfigMail.user_group,
+        c.created_user -> transferConfigMail.created_user,
+        c.modified_user -> transferConfigMail.modified_user,
+        c.created -> transferConfigMail.created,
+        c.modified -> transferConfigMail.modified
+      )
+    }.updateAndReturnGeneratedKey().apply().toInt
+  }
+
+  /**
+   * TransferConfigMail更新
+   * @param transferConfigMail TransferConfigMail
+   * @param session DB Session
+   * @return Result
+   */
+  def save(transferConfigMail:TransferConfigMail)(implicit session: DBSession = autoSession): Int = {
+    withSQL {
+      val c = TransferConfig.column
+      update(TransferConfigMail).set(
+        c.transfer_config_id -> transferConfigMail.transfer_config_id,
+        c.use_cc -> transferConfigMail.use_cc,
+        c.use_bcc -> transferConfigMail.use_bcc,
+        c.use_replyto -> transferConfigMail.use_replyto,
+        c.user_group -> transferConfigMail.user_group,
+        c.created_user -> transferConfigMail.created_user,
+        c.modified_user -> transferConfigMail.modified_user,
+        c.created -> transferConfigMail.created,
+        c.modified -> transferConfigMail.modified
+      ).where.eq(c.id, transferConfigMail.id)
+    }.update().apply()
   }
 }

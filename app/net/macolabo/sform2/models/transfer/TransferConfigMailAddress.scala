@@ -15,7 +15,11 @@ case class TransferConfigMailAddress(
                                     modified_user: String,
                                     created: ZonedDateTime,
                                     modified: ZonedDateTime
-                                    )
+                                    ){
+  import TransferConfigMailAddress._
+  def insert: Int = create(this)
+  def update: Int = save(this)
+}
 
 object TransferConfigMailAddress extends SQLSyntaxSupport[TransferConfigMailAddress] {
   override val tableName = "D_TRANSFER_CONFIG_MAIL_ADDRESS"
@@ -34,6 +38,13 @@ object TransferConfigMailAddress extends SQLSyntaxSupport[TransferConfigMailAddr
     )
   }
 
+  /**
+   * TansferConfigMailAddressのリスト取得
+   * @param userGroup ユーザーグループ
+   * @param transferConfigMailId TransferConfigMail ID
+   * @param session DB Session
+   * @return TransferCongirMailAddressのリスト
+   */
   def getList(userGroup: String, transferConfigMailId: Int)(implicit session: DBSession = autoSession): List[TransferConfigMailAddress] = {
     val f = TransferConfigMailAddress.syntax("f")
     withSQL(
@@ -56,5 +67,51 @@ object TransferConfigMailAddress extends SQLSyntaxSupport[TransferConfigMailAddr
         .eq(f.user_group, userGroup)
         .orderBy(f.address_index)
     ).map(rs => TransferConfigMailAddress(rs)).list().apply()
+  }
+
+  /**
+   * TransferCOnfigMailAddress作成
+   * @param transferConfigMailAddress TransferConfigMailAddress
+   * @param session DB Session
+   * @return 作成したレコードのID
+   */
+  def create(transferConfigMailAddress: TransferConfigMailAddress)(implicit session: DBSession = autoSession): Int = {
+    withSQL {
+      val c = TransferConfigMailAddress.column
+      insert.into(TransferConfigMailAddress).namedValues(
+        c.transfer_config_mail_id -> transferConfigMailAddress.transfer_config_mail_id,
+        c.address_index -> transferConfigMailAddress.address_index,
+        c.name -> transferConfigMailAddress.name,
+        c.address -> transferConfigMailAddress.address,
+        c.user_group -> transferConfigMailAddress.user_group,
+        c.created_user -> transferConfigMailAddress.created_user,
+        c.modified_user -> transferConfigMailAddress.modified_user,
+        c.created -> transferConfigMailAddress.created,
+        c.modified-> transferConfigMailAddress.modified
+      )
+    }.updateAndReturnGeneratedKey().apply().toInt
+  }
+
+  /**
+   * TransferConfigMailAddress更新
+   * @param transferConfigMailAddress TransferConfigMailAddress
+   * @param session DB Session
+   * @return Result
+   */
+  def save(transferConfigMailAddress: TransferConfigMailAddress)(implicit session: DBSession = autoSession): Int = {
+    withSQL {
+      val c = TransferConfigMailAddress.column
+      update(TransferConfigMailAddress).set(
+        c.transfer_config_mail_id -> transferConfigMailAddress.transfer_config_mail_id,
+        c.address_index -> transferConfigMailAddress.address_index,
+        c.name -> transferConfigMailAddress.name,
+        c.address -> transferConfigMailAddress.address,
+        c.user_group -> transferConfigMailAddress.user_group,
+        c.created_user -> transferConfigMailAddress.created_user,
+        c.modified_user -> transferConfigMailAddress.modified_user,
+        c.created -> transferConfigMailAddress.created,
+        c.modified-> transferConfigMailAddress.modified
+      ).where.eq(c.id, transferConfigMailAddress.id)
+    }.update().apply()
   }
 }
