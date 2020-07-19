@@ -3,16 +3,20 @@ package net.macolabo.sform2.services.Transfer
 import play.api.libs.json.{JsPath, Json, Reads, Writes}
 import play.api.libs.functional.syntax._
 
+case class TransferGetTransferResponseMailTransferConfigMailAddress(
+                                                                     id: Int,
+                                                                     transfer_config_mail_id: Int,
+                                                                     address_index: Int,
+                                                                     name: String,
+                                                                     address: String
+                                                                   )
 case class TransferGetTransferResponseMailTransferConfig(
                                                           id: Int,
                                                           transfer_config_id: Int,
-                                                          subject: String,
-                                                          reply_to: String,
-                                                          from_address: String,
-                                                          to_address: String,
-                                                          cc_address: String,
-                                                          bcc_address: String,
-                                                          body: String,
+                                                          use_cc: Boolean,
+                                                          use_bcc: Boolean,
+                                                          use_replyto: Boolean,
+                                                          mail_address_list: List[TransferGetTransferResponseMailTransferConfigMailAddress]
                                                        )
 
 case class TransferGetTransferResponseSalesforceTransferConfig(
@@ -38,29 +42,40 @@ case class TransferGetTransferConfigResponse(
                                       )
 
 trait TransferGetTransferConfigResponseJson {
+  implicit val TransferGetTransferResponseMailTransferConfigMailAddressWrites: Writes[TransferGetTransferResponseMailTransferConfigMailAddress] =
+    (transferGetTransferResponseMailTransferConfigMailAddress:TransferGetTransferResponseMailTransferConfigMailAddress) =>Json.obj(
+        "id" -> transferGetTransferResponseMailTransferConfigMailAddress.id,
+    "transfer_config_mail_id" -> transferGetTransferResponseMailTransferConfigMailAddress.transfer_config_mail_id,
+    "address_index" -> transferGetTransferResponseMailTransferConfigMailAddress.address_index,
+    "name" -> transferGetTransferResponseMailTransferConfigMailAddress.name,
+    "address" -> transferGetTransferResponseMailTransferConfigMailAddress.address
+    )
+
+  implicit val TransferGetTransferResponseMailTransferConfigMailAddressReads: Reads[TransferGetTransferResponseMailTransferConfigMailAddress] = (
+    (JsPath \ "id").read[Int] ~
+      (JsPath \ "transfer_config_mail_id").read[Int] ~
+      (JsPath \ "address_index").read[Int] ~
+      (JsPath \ "name").read[String] ~
+      (JsPath \ "address").read[String]
+  )(TransferGetTransferResponseMailTransferConfigMailAddress.apply _)
+
   implicit val TransferGetTransferResponseMailTransferConfigWrites: Writes[TransferGetTransferResponseMailTransferConfig] =
     (transferGetTransferResponseMailTransferConfig:TransferGetTransferResponseMailTransferConfig) => Json.obj(
     "id" -> transferGetTransferResponseMailTransferConfig.id,
     "transfer_config_id" -> transferGetTransferResponseMailTransferConfig.transfer_config_id,
-    "subject" -> transferGetTransferResponseMailTransferConfig.subject,
-    "reply_to" -> transferGetTransferResponseMailTransferConfig.reply_to,
-    "from_address" -> transferGetTransferResponseMailTransferConfig.from_address,
-    "to_address" -> transferGetTransferResponseMailTransferConfig.to_address,
-    "cc_address" -> transferGetTransferResponseMailTransferConfig.cc_address,
-    "bcc_address" -> transferGetTransferResponseMailTransferConfig.bcc_address,
-    "body" -> transferGetTransferResponseMailTransferConfig.body,
+    "use_cc" -> transferGetTransferResponseMailTransferConfig.use_cc,
+    "uce_bcc" -> transferGetTransferResponseMailTransferConfig.use_bcc,
+    "use_replyto" -> transferGetTransferResponseMailTransferConfig.use_replyto,
+      "mail_address_list" -> transferGetTransferResponseMailTransferConfig.mail_address_list
   )
 
   implicit val TransferGetTransferResponseMailTransferConfigReads: Reads[TransferGetTransferResponseMailTransferConfig] = (
     (JsPath \ "id").read[Int] ~
       (JsPath \ "transfer_config_id").read[Int] ~
-      (JsPath \ "subject").read[String] ~
-      (JsPath \ "reply_to").read[String] ~
-      (JsPath \ "from_address").read[String] ~
-      (JsPath \ "to_address").read[String] ~
-      (JsPath \ "cc_address").read[String] ~
-      (JsPath \ "bcc_address").read[String] ~
-      (JsPath \ "body").read[String]
+      (JsPath \ "use_cc").read[Boolean] ~
+      (JsPath \ "use_bcc").read[Boolean] ~
+      (JsPath \ "use_replyto").read[Boolean] ~
+      (JsPath \ "mail_address_list").read[List[TransferGetTransferResponseMailTransferConfigMailAddress]]
   )(TransferGetTransferResponseMailTransferConfig.apply _)
 
   implicit val TransferGetTransferResponseSalesforceTransferConfigWrites: Writes[TransferGetTransferResponseSalesforceTransferConfig] =

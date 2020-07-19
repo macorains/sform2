@@ -2,7 +2,7 @@ package net.macolabo.sform2.services.Transfer
 
 import com.google.inject.Inject
 import net.macolabo.sform2.models.User
-import net.macolabo.sform2.models.transfer.{TransferConfig, TransferConfigMail, TransferConfigSalesforce}
+import net.macolabo.sform2.models.transfer.{TransferConfig, TransferConfigMail, TransferConfigMailAddress, TransferConfigSalesforce}
 
 import scala.concurrent.ExecutionContext
 
@@ -53,13 +53,22 @@ class TransferService @Inject() (implicit ex: ExecutionContext) extends Transfer
       TransferGetTransferResponseMailTransferConfig(
         f.id,
         f.transfer_config_id,
-        f.subject,
-        f.reply_to,
-        f.from_address,
-        f.to_address,
-        f.cc_address,
-        f.bcc_address,
-        f.body
+        f.use_cc,
+        f.use_bcc,
+        f.use_replyto,
+        getTransferConfigMailAddress(userGroup, f.id)
+      )
+    })
+  }
+  
+  private def getTransferConfigMailAddress(userGroup: String, transferConfigMailId: Int): List[TransferGetTransferResponseMailTransferConfigMailAddress] = {
+    TransferConfigMailAddress.getList(userGroup, transferConfigMailId).map(f => {
+      TransferGetTransferResponseMailTransferConfigMailAddress(
+        f.id,
+        f.transfer_config_mail_id,
+        f.address_index,
+        f.name,
+        f.address
       )
     })
   }

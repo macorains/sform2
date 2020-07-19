@@ -7,13 +7,9 @@ import scalikejdbc._
 case class TransferConfigMail(
                              id: Int,
                              transfer_config_id: Int,
-                             subject: String,
-                             reply_to: String,
-                             from_address: String,
-                             to_address: String,
-                             cc_address: String,
-                             bcc_address: String,
-                             body: String,
+                             use_cc: Boolean,
+                             use_bcc: Boolean,
+                             use_replyto: Boolean,
                              user_group: String,
                              created_user: String,
                              modified_user: String,
@@ -27,13 +23,9 @@ object TransferConfigMail extends SQLSyntaxSupport[TransferConfigMail] {
     TransferConfigMail(
       rs.int("id"),
       rs.int("transfer_config_id"),
-      rs.string("subject"),
-      rs.string("reply_to"),
-      rs.string("from_address"),
-      rs.string("to_address"),
-      rs.string("cc_address"),
-      rs.string("bcc_address"),
-      rs.string("body"),
+      rs.boolean("use_cc"),
+      rs.boolean("use_bcc"),
+      rs.boolean("use_replyto"),
       rs.string("user_group"),
       rs.string("created_user"),
       rs.string("modified_user"),
@@ -48,13 +40,14 @@ object TransferConfigMail extends SQLSyntaxSupport[TransferConfigMail] {
       select(
         f.id,
         f.transfer_config_id,
-        f.subject,
-        f.reply_to,
-        f.from_address,
-        f.to_address,
-        f.cc_address,
-        f.bcc_address,
-        f.body
+        f.use_cc,
+        f.use_bcc,
+        f.use_replyto,
+        f.user_group,
+        f.created_user,
+        f.modified_user,
+        f.created,
+        f.modified
       )
         .from(TransferConfigMail as f)
         .where
