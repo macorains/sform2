@@ -1,3 +1,4 @@
+/*
 package net.macolabo.sform2.models.daos.TransferConfig
 
 import javax.inject.Inject
@@ -122,5 +123,7 @@ case class SalesforceTransferConfigDAO @Inject() (
     }
   }
 
+
 }
+ */
 

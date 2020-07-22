@@ -1,3 +1,4 @@
+/*
 package net.macolabo.sform2.jobs.transfer
 
 import javax.inject.Inject
@@ -76,3 +77,4 @@ class TransferJobManager @Inject() (
   }
 
 }
+*/

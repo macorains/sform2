@@ -1,3 +1,4 @@
+/*
 package net.macolabo.sform2.models.daos.TransferConfig
 
 import net.macolabo.sform2.models.User
@@ -18,3 +19,6 @@ class BaseTransferConfigDAO {
 object BaseTransferConfigDAO {
 
 }
+
+
+ */

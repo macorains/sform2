@@ -49,8 +49,8 @@ GET /user net.macolabo.sform2.controllers.UserController.getList()
 GET /user/isadmin net.macolabo.sform2.controllers.UserController.isAdmin()
 
 # transferTask
-GET /transfertask/list/:form_id net.macolabo.sform2.controllers.TransferTaskController.getTransferTaskListByFormId(form_id: String)
-GET /transfertask/:id net.macolabo.sform2.controllers.TransferTaskController.getTransferTask(id: Int)
+# GET /transfertask/list/:form_id net.macolabo.sform2.controllers.TransferTaskController.getTransferTaskListByFormId(form_id: String)
+# GET /transfertask/:id net.macolabo.sform2.controllers.TransferTaskController.getTransferTask(id: Int)
 
 # adminExistsCheck
 GET /adminExistsCheck net.macolabo.sform2.controllers.AdminExistsCheckController.check()

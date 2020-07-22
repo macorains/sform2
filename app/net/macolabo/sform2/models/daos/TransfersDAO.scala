@@ -1,3 +1,4 @@
+/*
 package net.macolabo.sform2.models.daos
 
 import net.macolabo.sform2.models.User
@@ -106,3 +107,6 @@ class TransfersDAO {
 object TransfersDAO {
 
 }
+
+
+ */
