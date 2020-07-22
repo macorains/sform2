@@ -3,15 +3,10 @@ package net.macolabo.sform2.controllers
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.impl.providers._
 import javax.inject._
-import net.macolabo.sform2.models.RsResultSet
-import net.macolabo.sform2.models.daos.TransferConfig.BaseTransferConfigDAO
-import net.macolabo.sform2.models.daos.TransfersDAO
 import net.macolabo.sform2.services.Transfer.{TransferGetTransferConfigListJson, TransferGetTransferConfigResponseJson, TransferGetTransferConfigSelectListJson, TransferService, TransferUpdateTransferConfigRequest, TransferUpdateTransferConfigRequestJson, TransferUpdateTransferConfigResponse, TransferUpdateTransferConfigResponseJson}
 import org.webjars.play.WebJarsUtil
-import play.api._
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json._
-import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.mvc._
 import net.macolabo.sform2.utils.auth.{DefaultEnv, WithProvider}
@@ -21,8 +16,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class TransferController @Inject() (
   components: ControllerComponents,
   silhouette: Silhouette[DefaultEnv],
-  configuration: Configuration,
-  transfersDAO: TransfersDAO,
   transferService: TransferService,
 )(
   implicit
