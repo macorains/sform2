@@ -146,9 +146,7 @@ object TransferConfig extends SQLSyntaxSupport[TransferConfig] {
         c.name -> transferConfig.name,
         c.status -> transferConfig.status,
         c.user_group -> transferConfig.user_group,
-        c.created_user -> transferConfig.created_user,
         c.modified_user -> transferConfig.modified_user,
-        c.created -> transferConfig.created,
         c.modified -> transferConfig.modified
       ).where.eq(c.id, transferConfig.id)
     }.update().apply()

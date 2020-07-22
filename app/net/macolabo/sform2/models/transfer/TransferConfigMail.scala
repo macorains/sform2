@@ -76,7 +76,7 @@ object TransferConfigMail extends SQLSyntaxSupport[TransferConfigMail] {
    */
   def create(transferConfigMail:TransferConfigMail)(implicit session: DBSession = autoSession): Int = {
     withSQL {
-      val c = TransferConfig.column
+      val c = TransferConfigMail.column
       insert.into(TransferConfigMail).namedValues(
         c.transfer_config_id -> transferConfigMail.transfer_config_id,
         c.use_cc -> transferConfigMail.use_cc,
@@ -99,7 +99,7 @@ object TransferConfigMail extends SQLSyntaxSupport[TransferConfigMail] {
    */
   def save(transferConfigMail:TransferConfigMail)(implicit session: DBSession = autoSession): Int = {
     withSQL {
-      val c = TransferConfig.column
+      val c = TransferConfigMail.column
       update(TransferConfigMail).set(
         c.transfer_config_id -> transferConfigMail.transfer_config_id,
         c.use_cc -> transferConfigMail.use_cc,

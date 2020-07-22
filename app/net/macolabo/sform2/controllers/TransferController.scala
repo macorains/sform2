@@ -6,7 +6,7 @@ import javax.inject._
 import net.macolabo.sform2.models.RsResultSet
 import net.macolabo.sform2.models.daos.TransferConfig.BaseTransferConfigDAO
 import net.macolabo.sform2.models.daos.TransfersDAO
-import net.macolabo.sform2.services.Transfer.{TransferGetTransferConfigListJson, TransferGetTransferConfigResponseJson, TransferGetTransferConfigSelectListJson, TransferService}
+import net.macolabo.sform2.services.Transfer.{TransferGetTransferConfigListJson, TransferGetTransferConfigResponseJson, TransferGetTransferConfigSelectListJson, TransferService, TransferUpdateTransferConfigRequest, TransferUpdateTransferConfigRequestJson, TransferUpdateTransferConfigResponse, TransferUpdateTransferConfigResponseJson}
 import org.webjars.play.WebJarsUtil
 import play.api._
 import play.api.i18n.I18nSupport
@@ -32,10 +32,12 @@ class TransferController @Inject() (
   with I18nSupport
   with TransferGetTransferConfigSelectListJson
   with TransferGetTransferConfigListJson
-  with TransferGetTransferConfigResponseJson {
+  with TransferGetTransferConfigResponseJson
+  with TransferUpdateTransferConfigRequestJson
+  with TransferUpdateTransferConfigResponseJson
+{
 
   case class TransferGetConfigRequest(transferName: String)
-
   case class TransferSaveConfigRequest(transferName: String, config: JsValue)
   object TransferSaveConfigRequest {
     implicit def jsonTransferSaveConfigRequestWrites: Writes[TransferSaveConfigRequest] = Json.writes[TransferSaveConfigRequest]
@@ -70,6 +72,21 @@ class TransferController @Inject() (
   def getTransferConfig(transferConfigId: Int): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
     val res = transferService.getTransferConfig(request.identity, transferConfigId)
     Future.successful(Ok(toJson(res)))
+  }
+
+  /**
+   * TransferConfig更新
+   * @return Result
+   */
+  def saveTransferConfig: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
+    val res = request.body.asJson.flatMap(r =>
+      r.validate[TransferUpdateTransferConfigRequest].map(f => {
+        transferService.updateTransferConfig(request.identity, f)
+      }).asOpt)
+    res match {
+      case Some(s: TransferUpdateTransferConfigResponse) => Future.successful(Ok(toJson(s)))
+      case None => Future.successful(BadRequest)
+    }
   }
 
   // ?

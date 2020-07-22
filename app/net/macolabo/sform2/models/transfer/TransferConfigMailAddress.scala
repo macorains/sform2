@@ -114,4 +114,21 @@ object TransferConfigMailAddress extends SQLSyntaxSupport[TransferConfigMailAddr
       ).where.eq(c.id, transferConfigMailAddress.id)
     }.update().apply()
   }
+
+  /**
+   * TransferConfigMailAddress削除
+   * @param userGroup ユーザーグループ
+   * @param transferConfigMailAddressId TransferConfigMailAddress ID
+   * @param session DB Session
+   * @return Result
+   */
+  def erase(userGroup: String, transferConfigMailAddressId: Int)(implicit session: DBSession = autoSession): Int = {
+    withSQL {
+      delete.from(TransferConfigMailAddress)
+        .where
+        .eq(TransferConfigMailAddress.column.id, transferConfigMailAddressId)
+        .and
+        .eq(TransferConfigMailAddress.column.user_group, userGroup)
+    }.update().apply()
+  }
 }

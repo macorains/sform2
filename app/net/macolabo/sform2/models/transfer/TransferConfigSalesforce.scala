@@ -15,7 +15,12 @@ case class TransferConfigSalesforce(
                                    modified_user: String,
                                    created: ZonedDateTime,
                                    modified: ZonedDateTime
-                                   )
+                                   ){
+  import TransferConfigSalesforce._
+  def insert: Int = create(this)
+  def update: Int = save(this)
+}
+
 
 object TransferConfigSalesforce extends SQLSyntaxSupport[TransferConfigSalesforce] {
   override val tableName = "D_TRANSFER_CONFIG_SALESFORCE"
@@ -34,6 +39,13 @@ object TransferConfigSalesforce extends SQLSyntaxSupport[TransferConfigSalesforc
     )
   }
 
+  /**
+   * TransferConfigSalesforce取得
+   * @param userGroup ユーザーグループ
+   * @param transferConfigId TransferConfig ID
+   * @param session DB Session
+   * @return TransferConfigSalesforce
+   */
   def get(userGroup: String, transferConfigId: Int)(implicit session: DBSession = autoSession): Option[TransferConfigSalesforce] = {
     val f = TransferConfigSalesforce.syntax("f")
     withSQL(
@@ -50,5 +62,51 @@ object TransferConfigSalesforce extends SQLSyntaxSupport[TransferConfigSalesforc
         .and
         .eq(f.user_group, userGroup)
     ).map(rs=>TransferConfigSalesforce(rs)).single().apply()
+  }
+
+  /**
+   * TransferConfigSalesforce作成
+   * @param transferConfigSalesforce TransferConfigSalesforce
+   * @param session DB Session
+   * @return 作成したレコードのID
+   */
+  def create(transferConfigSalesforce: TransferConfigSalesforce)(implicit session: DBSession = autoSession): Int = {
+    withSQL{
+      val c = TransferConfigSalesforce.column
+      insert.into(TransferConfigSalesforce).namedValues(
+        c.transfer_config_id -> transferConfigSalesforce.transfer_config_id,
+        c.sf_user_name -> transferConfigSalesforce.sf_user_name,
+        c.sf_password -> transferConfigSalesforce.sf_password,
+        c.sf_security_token -> transferConfigSalesforce.sf_security_token,
+        c.user_group -> transferConfigSalesforce.user_group,
+        c.created_user -> transferConfigSalesforce.created_user,
+        c.modified_user -> transferConfigSalesforce.modified_user,
+        c.created -> transferConfigSalesforce.created,
+        c.modified -> transferConfigSalesforce.modified
+      )
+    }.updateAndReturnGeneratedKey().apply().toInt
+  }
+
+  /**
+   * TransferConfigSalesforce更新
+   * @param transferConfigSalesforce TransferConfigSalesforce
+   * @param session DB Session
+   * @return Result
+   */
+  def save(transferConfigSalesforce: TransferConfigSalesforce)(implicit session: DBSession = autoSession): Int = {
+    withSQL{
+      val c = TransferConfigSalesforce.column
+      update(TransferConfigSalesforce).set(
+        c.transfer_config_id -> transferConfigSalesforce.transfer_config_id,
+        c.sf_user_name -> transferConfigSalesforce.sf_user_name,
+        c.sf_password -> transferConfigSalesforce.sf_password,
+        c.sf_security_token -> transferConfigSalesforce.sf_security_token,
+        c.user_group -> transferConfigSalesforce.user_group,
+        c.created_user -> transferConfigSalesforce.created_user,
+        c.modified_user -> transferConfigSalesforce.modified_user,
+        c.created -> transferConfigSalesforce.created,
+        c.modified -> transferConfigSalesforce.modified
+      ).where.eq(c.id, transferConfigSalesforce.id)
+    }.update().apply()
   }
 }
