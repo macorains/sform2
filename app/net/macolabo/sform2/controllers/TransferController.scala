@@ -7,7 +7,6 @@ import net.macolabo.sform2.services.Transfer.{TransferGetTransferConfigListJson,
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json._
-import play.api.libs.json._
 import play.api.mvc._
 import net.macolabo.sform2.utils.auth.{DefaultEnv, WithProvider}
 
@@ -29,13 +28,6 @@ class TransferController @Inject() (
   with TransferUpdateTransferConfigRequestJson
   with TransferUpdateTransferConfigResponseJson
 {
-
-  case class TransferGetConfigRequest(transferName: String)
-  case class TransferSaveConfigRequest(transferName: String, config: JsValue)
-  object TransferSaveConfigRequest {
-    implicit def jsonTransferSaveConfigRequestWrites: Writes[TransferSaveConfigRequest] = Json.writes[TransferSaveConfigRequest]
-    implicit def jsonTransferSaveConfigRequestReads: Reads[TransferSaveConfigRequest] = Json.reads[TransferSaveConfigRequest]
-  }
 
   /**
    * フォーム作成画面のTransferConfig選択リスト生成用のデータ取得
@@ -72,6 +64,7 @@ class TransferController @Inject() (
    * @return Result
    */
   def saveTransferConfig: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
+    println(request.body.asJson.get.validate[TransferUpdateTransferConfigRequest])
     val res = request.body.asJson.flatMap(r =>
       r.validate[TransferUpdateTransferConfigRequest].map(f => {
         transferService.updateTransferConfig(request.identity, f)

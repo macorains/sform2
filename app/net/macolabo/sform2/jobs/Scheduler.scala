@@ -13,7 +13,7 @@ class Scheduler @Inject() (
   @Named("auth-token-cleaner") authTokenCleaner: ActorRef,
   //@Named("salesforce-data-register") salesforceDataRegister: ActorRef,
   //@Named("mail-transfer-send-mail") mailTransferSendMail: ActorRef
-  @Named("transfer-job-manager") transferJobManager: ActorRef
+  //@Named("transfer-job-manager") transferJobManager: ActorRef
 ) {
 
   QuartzSchedulerExtension(system).schedule("AuthTokenCleaner", authTokenCleaner, AuthTokenCleaner.Clean)
@@ -23,7 +23,7 @@ class Scheduler @Inject() (
   // QuartzSchedulerExtension(system).schedule("MailTransferSendMail", mailTransferSendMail, "Mail")
   // TransferJobManager起動
   // TODO 検証のため一時停止 (2019/03/15)
-  QuartzSchedulerExtension(system).schedule("Every5Seconds", transferJobManager, "_Exec")
+  // QuartzSchedulerExtension(system).schedule("Every5Seconds", transferJobManager, "_Exec")
 
   authTokenCleaner ! AuthTokenCleaner.Clean
 }

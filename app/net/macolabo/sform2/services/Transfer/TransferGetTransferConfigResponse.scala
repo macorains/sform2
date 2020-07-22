@@ -64,7 +64,7 @@ trait TransferGetTransferConfigResponseJson {
     "id" -> transferGetTransferResponseMailTransferConfig.id,
     "transfer_config_id" -> transferGetTransferResponseMailTransferConfig.transfer_config_id,
     "use_cc" -> transferGetTransferResponseMailTransferConfig.use_cc,
-    "uce_bcc" -> transferGetTransferResponseMailTransferConfig.use_bcc,
+    "use_bcc" -> transferGetTransferResponseMailTransferConfig.use_bcc,
     "use_replyto" -> transferGetTransferResponseMailTransferConfig.use_replyto,
       "mail_address_list" -> transferGetTransferResponseMailTransferConfig.mail_address_list
   )
