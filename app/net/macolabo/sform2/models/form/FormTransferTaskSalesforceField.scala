@@ -5,15 +5,15 @@ import java.time.ZonedDateTime
 import scalikejdbc._
 
 case class FormTransferTaskSalesforceField(
-                                          id: Int,
-                                          transfer_task_salesforce_id: Int,
-                                          form_column_id: String,
-                                          field_name: String,
-                                          user_group: String,
-                                          created_user: String,
-                                          modified_user: String,
-                                          created: ZonedDateTime,
-                                          modified: ZonedDateTime
+                                            id: Int,
+                                            form_transfer_task_salesforce_id: Int,
+                                            form_column_id: String,
+                                            field_name: String,
+                                            user_group: String,
+                                            created_user: String,
+                                            modified_user: String,
+                                            created: ZonedDateTime,
+                                            modified: ZonedDateTime
                                           ){
   import FormTransferTaskSalesforceField._
   def insert: Int = create(this)
@@ -25,7 +25,7 @@ object FormTransferTaskSalesforceField extends SQLSyntaxSupport[FormTransferTask
   def apply(rs:WrappedResultSet): FormTransferTaskSalesforceField = {
     FormTransferTaskSalesforceField(
       rs.int("id"),
-      rs.int("transfer_task_salesforce_id"),
+      rs.int("form_transfer_task_salesforce_id"),
       rs.string("form_column_id"),
       rs.string("field_name"),
       rs.string("user_group"),
@@ -39,16 +39,16 @@ object FormTransferTaskSalesforceField extends SQLSyntaxSupport[FormTransferTask
   /**
    * FormTransferTaskSalesforceFieldのリスト取得
    * @param userGroup ユーザーグループ
-   * @param transferTaskSalesforceId　TransferTaskSalesforce ID
+   * @param formTransferTaskSalesforceId　TransferTaskSalesforce ID
    * @param session DB Session
    * @return FormTransferTaskSalesforceFieldのリスト
    */
-  def getList(userGroup: String, transferTaskSalesforceId: Int)(implicit session: DBSession = autoSession): List[FormTransferTaskSalesforceField] = {
+  def getList(userGroup: String, formTransferTaskSalesforceId: Int)(implicit session: DBSession = autoSession): List[FormTransferTaskSalesforceField] = {
     val f = FormTransferTaskSalesforceField.syntax("f")
     withSQL(
       select(
         f.id,
-        f.transfer_task_salesforce_id,
+        f.form_transfer_task_salesforce_id,
         f.form_column_id,
         f.field_name,
         f.user_group,
@@ -59,7 +59,7 @@ object FormTransferTaskSalesforceField extends SQLSyntaxSupport[FormTransferTask
       )
         .from(FormTransferTaskSalesforceField as f)
         .where
-        .eq(f.transfer_task_salesforce_id, transferTaskSalesforceId)
+        .eq(f.form_transfer_task_salesforce_id, formTransferTaskSalesforceId)
         .and
         .eq(f.user_group, userGroup)
     ).map(rs=>FormTransferTaskSalesforceField(rs)).list().apply()
@@ -75,7 +75,7 @@ object FormTransferTaskSalesforceField extends SQLSyntaxSupport[FormTransferTask
     withSQL {
       val c = FormTransferTaskSalesforceField.column
       insert.into(FormTransferTaskSalesforceField).namedValues(
-        c.transfer_task_salesforce_id -> formTransferTaskSalesforceField.transfer_task_salesforce_id,
+        c.form_transfer_task_salesforce_id -> formTransferTaskSalesforceField.form_transfer_task_salesforce_id,
         c.form_column_id -> formTransferTaskSalesforceField.form_column_id,
         c.field_name -> formTransferTaskSalesforceField.field_name,
         c.user_group -> formTransferTaskSalesforceField.user_group,
@@ -97,7 +97,7 @@ object FormTransferTaskSalesforceField extends SQLSyntaxSupport[FormTransferTask
     withSQL {
       val c = FormTransferTaskSalesforceField.column
       update(FormTransferTaskSalesforceField).set(
-        c.transfer_task_salesforce_id -> formTransferTaskSalesforceField.transfer_task_salesforce_id,
+        c.form_transfer_task_salesforce_id -> formTransferTaskSalesforceField.form_transfer_task_salesforce_id,
         c.form_column_id -> formTransferTaskSalesforceField.form_column_id,
         c.field_name -> formTransferTaskSalesforceField.field_name,
         c.user_group -> formTransferTaskSalesforceField.user_group,

@@ -5,7 +5,7 @@ import java.util.UUID
 
 import com.google.inject.Inject
 import net.macolabo.sform2.models.User
-import net.macolabo.sform2.models.form.{Form, FormCol, FormColSelect, FormColValidation, FormTransferTask, FormTransferTaskCondition}
+import net.macolabo.sform2.models.form.{Form, FormCol, FormColSelect, FormColValidation, FormTransferTask, FormTransferTaskCondition, FormTransferTaskMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField}
 
 import scala.concurrent.ExecutionContext
 
@@ -185,12 +185,14 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
         f.form_id,
         f.task_index,
         f.name,
-        convertToFormGetFormResponseTransferTaskCondition(userGroup, formId, f.id)
+        convertToFormGetFormResponseTransferTaskCondition(userGroup, formId, f.id),
+        convertToFormGetFormResponseTransferTaskMail(userGroup, f.id),
+        convertToFormGetFormResponseTransferTaskSalesforce(userGroup, f.id)
       )
     })
   }
 
-  private def convertToFormGetFormResponseTransferTaskCondition(userGroup: String, formId: Int, formTransferTaskId: Int) = {
+  private def convertToFormGetFormResponseTransferTaskCondition(userGroup: String, formId: Int, formTransferTaskId: Int): List[FormGetFormResponseFormTransferTaskCondition] = {
     FormTransferTaskCondition.getList(userGroup, formId, formTransferTaskId).map(f => {
       FormGetFormResponseFormTransferTaskCondition(
         f.id,
@@ -201,7 +203,45 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
         f.cond_value
       )
     })
+  }
 
+  private def convertToFormGetFormResponseTransferTaskMail(userGroup: String, formTransferTaskId: Int): Option[FormGetFormResponseFormTransferTaskMail] = {
+    FormTransferTaskMail.get(userGroup, formTransferTaskId).map(f => {
+      FormGetFormResponseFormTransferTaskMail(
+        f.id,
+        f.form_transfer_task_id,
+        f.from_address_id,
+        f.to_address,
+        f.cc_address,
+        f.bcc_address_id,
+        f.replyto_address_id,
+        f.subject,
+        f.body
+      )
+    })
+  }
+
+  private def convertToFormGetFormResponseTransferTaskSalesforce(userGroup: String, formTransferTaskId: Int) = {
+    FormTransferTaskSalesforce.get(userGroup, formTransferTaskId).map(f => {
+      FormGetFormResponseFormTransferTaskSalesforce(
+        f.id,
+        f.form_transfer_task_id,
+        f.object_name,
+        convertToFormGetFormResponseTransferTaskSalesforceField(userGroup, f.id)
+      )
+    })
+  }
+
+
+  private def convertToFormGetFormResponseTransferTaskSalesforceField(userGroup: String, formTransferTaskSalesforceId: Int) = {
+    FormTransferTaskSalesforceField.getList(userGroup, formTransferTaskSalesforceId).map(f => {
+      FormGetFormResponseFormTransferTaskSalesforceField(
+        f.id,
+        f.form_transfer_task_salesforce_id,
+        f.form_column_id,
+        f.field_name
+      )
+    })
   }
 
   //-------------------------------------------------
@@ -312,6 +352,12 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
     )
     formColValidation.update
   }
+
+  // private def updateFormTransferTask
+  // private def updateFormTransferTaskCondition
+  // private def updateFormTransferTaskMail
+  // private def updateFormTransferTaskSalesforce
+  // private def updateFormTransferTaskSalesforceField
 
   //-------------------------------------------------
   //  フォーム作成ロジック

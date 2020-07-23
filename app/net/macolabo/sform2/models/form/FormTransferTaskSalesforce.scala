@@ -6,7 +6,7 @@ import scalikejdbc._
 
 case class FormTransferTaskSalesforce(
                                        id: Int,
-                                       transfer_task_id: Int,
+                                       form_transfer_task_id: Int,
                                        object_name: String,
                                        user_group: String,
                                        created_user: String,
@@ -24,7 +24,7 @@ object FormTransferTaskSalesforce extends SQLSyntaxSupport[FormTransferTaskSales
   def apply(rs:WrappedResultSet): FormTransferTaskSalesforce = {
     FormTransferTaskSalesforce(
       rs.int("id"),
-      rs.int("transfer_task_id"),
+      rs.int("form_transfer_task_id"),
       rs.string("object_name"),
       rs.string("user_group"),
       rs.string("created_user"),
@@ -37,16 +37,16 @@ object FormTransferTaskSalesforce extends SQLSyntaxSupport[FormTransferTaskSales
   /**
    * FormTransferTaskSalesforce取得
    * @param userGroup ユーザーグループ
-   * @param transferTaskId TransferTask ID
+   * @param formTransferTaskId TransferTask ID
    * @param session DB Session
    * @return FormTransferTaskSalesforce
    */
-  def get(userGroup: String, transferTaskId: Int)(implicit session: DBSession = autoSession): Option[FormTransferTaskSalesforce] = {
+  def get(userGroup: String, formTransferTaskId: Int)(implicit session: DBSession = autoSession): Option[FormTransferTaskSalesforce] = {
     val f = FormTransferTaskSalesforce.syntax("f")
     withSQL(
       select(
         f.id,
-        f.transfer_task_id,
+        f.form_transfer_task_id,
         f.object_name,
         f.user_group,
         f.created_user,
@@ -56,7 +56,7 @@ object FormTransferTaskSalesforce extends SQLSyntaxSupport[FormTransferTaskSales
       )
         .from(FormTransferTaskSalesforce as f)
         .where
-        .eq(f.transfer_task_id, transferTaskId)
+        .eq(f.form_transfer_task_id, formTransferTaskId)
         .and
         .eq(f.user_group, userGroup)
     ).map(rs=>FormTransferTaskSalesforce(rs)).single().apply()
@@ -72,7 +72,7 @@ object FormTransferTaskSalesforce extends SQLSyntaxSupport[FormTransferTaskSales
     withSQL{
       val c = FormTransferTaskSalesforce.column
       insert.into(FormTransferTaskSalesforce).namedValues(
-        c.transfer_task_id -> formTransferTaskSalesforce.transfer_task_id,
+        c.form_transfer_task_id -> formTransferTaskSalesforce.form_transfer_task_id,
         c.object_name -> formTransferTaskSalesforce.object_name,
         c.user_group -> formTransferTaskSalesforce.user_group,
         c.created_user -> formTransferTaskSalesforce.created_user,
@@ -93,7 +93,7 @@ object FormTransferTaskSalesforce extends SQLSyntaxSupport[FormTransferTaskSales
     withSQL{
       val c = FormTransferTaskSalesforce.column
       update(FormTransferTaskSalesforce).set(
-        c.transfer_task_id -> formTransferTaskSalesforce.transfer_task_id,
+        c.form_transfer_task_id -> formTransferTaskSalesforce.form_transfer_task_id,
         c.object_name -> formTransferTaskSalesforce.object_name,
         c.user_group -> formTransferTaskSalesforce.user_group,
         c.modified_user -> formTransferTaskSalesforce.modified_user,

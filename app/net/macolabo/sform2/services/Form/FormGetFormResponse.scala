@@ -67,10 +67,12 @@ case class FormGetFormResponseFormTransferTask(
                                             form_id: Int,
                                             task_index: Int,
                                             name: String,
-                                            form_transfer_task_conditions: List[FormGetFormResponseFormTransferTaskCondition]
+                                            form_transfer_task_conditions: List[FormGetFormResponseFormTransferTaskCondition],
+                                            mail: Option[FormGetFormResponseFormTransferTaskMail],
+                                            salesforce: Option[FormGetFormResponseFormTransferTaskSalesforce]
                                           )
 
-/**i
+/**
  * フォーム取得API・FormTransferTask・FormTransferTaskCondition
  * @param id FormTransferTaskCondition ID
  * @param form_transfer_task_id FormTransferTask ID
@@ -87,6 +89,58 @@ case class FormGetFormResponseFormTransferTaskCondition(
                                                          operator: String,
                                                          cond_value: String,
                                                        )
+
+/**
+ * フォーム取得API・FormTransferTask・FormTransferTaskMail
+ * @param id FormTransferTaskMail ID
+ * @param form_transfer_task_id FormTransferTask ID
+ * @param from_address_id FROMに使うメールアドレスのID
+ * @param to_address Toアドレス
+ * @param cc_address Ccアドレス
+ * @param bcc_address_id Bccに使うメールアドレスのID
+ * @param replyto_address_id replyToに使うメールアドレスのID
+ * @param subject 件名
+ * @param body 本文
+ */
+case class FormGetFormResponseFormTransferTaskMail(
+                                                    id: Int,
+                                                    form_transfer_task_id: Int,
+                                                    from_address_id: Int,
+                                                    to_address: String,
+                                                    cc_address: String,
+                                                    bcc_address_id: Int,
+                                                    replyto_address_id: Int,
+                                                    subject: String,
+                                                    body: String
+                                                  )
+
+/**
+ * フォーム取得API・FormTransferTask・FormTransferTaskSalesforce
+ * @param id FormTransferTaskSalesforce ID
+ * @param form_transfer_task_id FormTransferTask ID
+ * @param object_name Salesforceオブジェクト名
+ * @param fields フィールド割り当てリスト
+ */
+case class FormGetFormResponseFormTransferTaskSalesforce(
+                                                          id: Int,
+                                                          form_transfer_task_id: Int,
+                                                          object_name: String,
+                                                          fields: List[FormGetFormResponseFormTransferTaskSalesforceField]
+                                                        )
+
+/**
+ * フォーム取得API・FormTransferTask・FormTransferTaskSalesforceField
+ * @param id FormTransferTaskSalesforceField ID
+ * @param form_transfer_task_salesforce_id FormTransferTaskSalesforce ID
+ * @param form_column_id フォーム項目ID
+ * @param field_name Salesforceフィールド名
+ */
+case class FormGetFormResponseFormTransferTaskSalesforceField(
+                                                               id: Int,
+                                                               form_transfer_task_salesforce_id: Int,
+                                                               form_column_id: String,
+                                                               field_name: String
+                                                             )
 
 /**
   * フォーム取得API・フォーム項目
@@ -202,7 +256,9 @@ trait FormGetFormResponseJson {
     "form_id" -> formGetFormResponseFormTransferTask.form_id,
     "task_index" -> formGetFormResponseFormTransferTask.task_index,
     "name" -> formGetFormResponseFormTransferTask.name,
-    "form_transfer_task_conditions" -> formGetFormResponseFormTransferTask.form_transfer_task_conditions
+    "form_transfer_task_conditions" -> formGetFormResponseFormTransferTask.form_transfer_task_conditions,
+    "mail" -> formGetFormResponseFormTransferTask.mail,
+    "salesforce" -> formGetFormResponseFormTransferTask.salesforce
   )
 
   implicit val formGetFormResponseFormTransferTaskReads: Reads[FormGetFormResponseFormTransferTask] = (
@@ -211,7 +267,9 @@ trait FormGetFormResponseJson {
       (JsPath \ "form_id").read[Int] ~
       (JsPath \ "task_index").read[Int] ~
       (JsPath \ "name").read[String] ~
-      (JsPath \ "form_transfer_task_condition").read[List[FormGetFormResponseFormTransferTaskCondition]]
+      (JsPath \ "form_transfer_task_condition").read[List[FormGetFormResponseFormTransferTaskCondition]] ~
+      (JsPath \ "mail").readNullable[FormGetFormResponseFormTransferTaskMail] ~
+      (JsPath \ "salesforce").readNullable[FormGetFormResponseFormTransferTaskSalesforce]
   )(FormGetFormResponseFormTransferTask.apply _)
 
   implicit val formGetFormResponseFormTransferTaskConditionWrites: Writes[FormGetFormResponseFormTransferTaskCondition] = (formGetFormResponseFormTransferTaskCondition: FormGetFormResponseFormTransferTaskCondition) => Json.obj(
@@ -231,6 +289,59 @@ trait FormGetFormResponseJson {
       (JsPath \ "operator").read[String] ~
       (JsPath \ "cond_value").read[String]
   )(FormGetFormResponseFormTransferTaskCondition.apply _)
+
+  implicit val FormGetFormResponseFormTransferTaskMailWrites: Writes[FormGetFormResponseFormTransferTaskMail] = (formGetFormResponseFormTransferTaskMail:FormGetFormResponseFormTransferTaskMail) => Json.obj(
+    "id" -> formGetFormResponseFormTransferTaskMail.id,
+    "form_transfer_task_id" -> formGetFormResponseFormTransferTaskMail.form_transfer_task_id,
+    "from_address_id" -> formGetFormResponseFormTransferTaskMail.from_address_id,
+    "to_address" -> formGetFormResponseFormTransferTaskMail.to_address,
+    "cc_address" -> formGetFormResponseFormTransferTaskMail.cc_address,
+    "bcc_address_id" -> formGetFormResponseFormTransferTaskMail.bcc_address_id,
+    "replyto_address_id" -> formGetFormResponseFormTransferTaskMail.replyto_address_id,
+    "subject" -> formGetFormResponseFormTransferTaskMail.subject,
+    "body" -> formGetFormResponseFormTransferTaskMail.body
+  )
+
+  implicit val FormGetFormResponseFormTransferTaskMailReads: Reads[FormGetFormResponseFormTransferTaskMail] = (
+    (JsPath \ "id").read[Int] ~
+      (JsPath \ "form_transfer_task_id").read[Int] ~
+      (JsPath \ "from_address_id").read[Int] ~
+      (JsPath \ "to_address").read[String] ~
+      (JsPath \ "cc_address").read[String] ~
+      (JsPath \ "bcc_address_id").read[Int] ~
+      (JsPath \ "replyto_address_id").read[Int] ~
+      (JsPath \ "subject").read[String] ~
+      (JsPath \ "body").read[String]
+  )(FormGetFormResponseFormTransferTaskMail.apply _)
+
+  implicit val FormGetFormResponseFormTransferTaskSalesforceFieldWrites: Writes[FormGetFormResponseFormTransferTaskSalesforceField]
+  = (formGetFormResponseFormTransferTaskSalesforceField:FormGetFormResponseFormTransferTaskSalesforceField) => Json.obj(
+    "id" -> formGetFormResponseFormTransferTaskSalesforceField.id,
+    "transfer_task_salesforce_id" -> formGetFormResponseFormTransferTaskSalesforceField.form_transfer_task_salesforce_id,
+    "form_column_id" -> formGetFormResponseFormTransferTaskSalesforceField.form_column_id,
+    "field_name" -> formGetFormResponseFormTransferTaskSalesforceField.field_name
+  )
+
+  implicit val FormGetFormResponseFormTransferTaskSalesforceFieldReads: Reads[FormGetFormResponseFormTransferTaskSalesforceField] = (
+    (JsPath \ "id").read[Int] ~
+      (JsPath \ "transfer_task_salesforce_id").read[Int] ~
+      (JsPath \ "form_column_id").read[String] ~
+      (JsPath \ "field_name").read[String]
+  )(FormGetFormResponseFormTransferTaskSalesforceField.apply _)
+
+  implicit val FormGetFormResponseFormTransferTaskSalesforceWrites: Writes[FormGetFormResponseFormTransferTaskSalesforce] = (formGetFormResponseFormTransferTaskSalesforce:FormGetFormResponseFormTransferTaskSalesforce) => Json.obj(
+    "id" -> formGetFormResponseFormTransferTaskSalesforce.id,
+    "form_transfer_task_id" -> formGetFormResponseFormTransferTaskSalesforce.form_transfer_task_id,
+    "object_name" -> formGetFormResponseFormTransferTaskSalesforce.object_name,
+    "fields" -> formGetFormResponseFormTransferTaskSalesforce.fields
+  )
+
+  implicit val FormGetFormResponseFormTransferTaskSalesforceReads: Reads[FormGetFormResponseFormTransferTaskSalesforce] = (
+    (JsPath \ "id").read[Int] ~
+      (JsPath \ "form_transfer_task_id").read[Int] ~
+      (JsPath \ "object_name").read[String] ~
+      (JsPath \ "fields").read[List[FormGetFormResponseFormTransferTaskSalesforceField]]
+  )(FormGetFormResponseFormTransferTaskSalesforce.apply _)
 
   implicit val FormGetFormResponseFormColWrites: Writes[FormGetFormResponseFormCol] = (formGetFormResponseFormCol: FormGetFormResponseFormCol) => Json.obj(
     "id" -> formGetFormResponseFormCol.id,

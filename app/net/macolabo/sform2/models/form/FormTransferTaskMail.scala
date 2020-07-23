@@ -6,7 +6,7 @@ import scalikejdbc._
 
 case class FormTransferTaskMail(
                                id: Int,
-                               transfer_task_id: Int,
+                               form_transfer_task_id: Int,
                                from_address_id: Int,
                                to_address: String,
                                cc_address: String,
@@ -30,7 +30,7 @@ object FormTransferTaskMail extends SQLSyntaxSupport[FormTransferTaskMail] {
   def apply(rs:WrappedResultSet): FormTransferTaskMail = {
     FormTransferTaskMail(
       rs.int("id"),
-      rs.int("transfer_task_id"),
+      rs.int("form_transfer_task_id"),
       rs.int("from_address_id"),
       rs.string("to_address"),
       rs.string("cc_address"),
@@ -49,16 +49,16 @@ object FormTransferTaskMail extends SQLSyntaxSupport[FormTransferTaskMail] {
   /**
    * FormTransferTaskMail取得
    * @param userGroup ユーザーグループ
-   * @param transferTaskId TransferTask ID
+   * @param formTransferTaskId TransferTask ID
    * @param session DB Session
    * @return FormTransferTaskMail
    */
-  def get(userGroup: String, transferTaskId: Int)(implicit session: DBSession = autoSession): Option[FormTransferTaskMail] = {
+  def get(userGroup: String, formTransferTaskId: Int)(implicit session: DBSession = autoSession): Option[FormTransferTaskMail] = {
     val f = FormTransferTaskMail.syntax("f")
     withSQL(
     select(
       f.id,
-      f.transfer_task_id,
+      f.form_transfer_task_id,
       f.from_address_id,
       f.to_address,
       f.cc_address,
@@ -74,7 +74,7 @@ object FormTransferTaskMail extends SQLSyntaxSupport[FormTransferTaskMail] {
     )
       .from(FormTransferTaskMail as f)
       .where
-      .eq(f.transfer_task_id, transferTaskId)
+      .eq(f.form_transfer_task_id, formTransferTaskId)
       .and
       .eq(f.user_group, userGroup)
     ).map(rs=>FormTransferTaskMail(rs)).single().apply()
@@ -90,7 +90,7 @@ object FormTransferTaskMail extends SQLSyntaxSupport[FormTransferTaskMail] {
     withSQL{
       val c = FormTransferTaskMail.column
       insert.into(FormTransferTaskMail).namedValues(
-        c.transfer_task_id -> formTransferTaskMail.transfer_task_id,
+        c.form_transfer_task_id -> formTransferTaskMail.form_transfer_task_id,
         c.from_address_id -> formTransferTaskMail.from_address_id,
         c.to_address -> formTransferTaskMail.to_address,
         c.cc_address -> formTransferTaskMail.cc_address,
@@ -117,7 +117,7 @@ object FormTransferTaskMail extends SQLSyntaxSupport[FormTransferTaskMail] {
     withSQL{
       val c = FormTransferTaskMail.column
       update(FormTransferTaskMail).set(
-        c.transfer_task_id -> formTransferTaskMail.transfer_task_id,
+        c.form_transfer_task_id -> formTransferTaskMail.form_transfer_task_id,
         c.from_address_id -> formTransferTaskMail.from_address_id,
         c.to_address -> formTransferTaskMail.to_address,
         c.cc_address -> formTransferTaskMail.cc_address,
