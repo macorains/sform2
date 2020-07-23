@@ -4,7 +4,7 @@ import java.time.ZonedDateTime
 
 import com.google.inject.Inject
 import net.macolabo.sform2.models.User
-import net.macolabo.sform2.models.transfer.{TransferConfig, TransferConfigMail, TransferConfigMailAddress, TransferConfigSalesforce}
+import net.macolabo.sform2.models.transfer.{TransferConfig, TransferConfigMail, TransferConfigMailAddress, TransferConfigSalesforce, TransferConfigSalesforceObject, TransferConfigSalesforceObjectField}
 
 import scala.concurrent.ExecutionContext
 
@@ -248,7 +248,46 @@ class TransferService @Inject() (implicit ex: ExecutionContext) extends Transfer
         f.transfer_config_id,
         f.sf_user_name,
         f.sf_password,
-        f.sf_security_token
+        f.sf_security_token,
+        getTransferConfigSalesforceObject(userGroup, f.id)
+      )
+    })
+  }
+
+  /**
+   * SalesforceTransfer用のconfig Object 取得
+   * @param userGroup ユーザーグループ
+   * @param transferConfigSalesforceId TransferConfigSalesforce ID
+   * @return SalesforceTransfer用のconfig Object リスト
+   */
+  private def getTransferConfigSalesforceObject(userGroup: String, transferConfigSalesforceId: Int): List[TransferGetTransferResponseSalesforceTransferConfigObject] = {
+    TransferConfigSalesforceObject.getList(userGroup, transferConfigSalesforceId).map(f => {
+      TransferGetTransferResponseSalesforceTransferConfigObject(
+        f.id,
+        f.transfer_config_salesforce_id,
+        f.name,
+        f.label,
+        f.active,
+        getTransferConfigSalesforceObjectField(userGroup, f.id)
+      )
+    })
+  }
+
+  /**
+   * SalesforceTransfer用のconfig Object Field 取得
+   * @param userGroup ユーザーグループ
+   * @param transferConfigSalesforceObjectId TransferConfigSalesforceObject ID
+   * @return SalesforceTransfer用のconfig Object Field リスト
+   */
+  private def getTransferConfigSalesforceObjectField(userGroup: String, transferConfigSalesforceObjectId: Int): List[TransferGetTransferResponseSalesforceTransferConfigObjectField] = {
+    TransferConfigSalesforceObjectField.getList(userGroup, transferConfigSalesforceObjectId).map(f => {
+      TransferGetTransferResponseSalesforceTransferConfigObjectField(
+        f.id,
+        f.transfer_config_salesforce_object_id,
+        f.name,
+        f.label,
+        f.field_type,
+        f.active
       )
     })
   }

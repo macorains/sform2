@@ -3,6 +3,7 @@ package net.macolabo.sform2.services.Transfer
 import play.api.libs.json.{JsPath, Json, Reads, Writes}
 import play.api.libs.functional.syntax._
 
+
 case class TransferGetTransferResponseMailTransferConfigMailAddress(
                                                                      id: Int,
                                                                      transfer_config_mail_id: Int,
@@ -19,12 +20,31 @@ case class TransferGetTransferResponseMailTransferConfig(
                                                           mail_address_list: List[TransferGetTransferResponseMailTransferConfigMailAddress]
                                                        )
 
+case class TransferGetTransferResponseSalesforceTransferConfigObjectField(
+                                                                    id: Int,
+                                                                    transfer_config_salesforce_object_id: Int,
+                                                                    name: String,
+                                                                    label: String,
+                                                                    field_type: String,
+                                                                    active: Boolean
+                                                                    )
+
+case class TransferGetTransferResponseSalesforceTransferConfigObject(
+                                                                      id: Int,
+                                                                      transfer_config_salesforce_id: Int,
+                                                                      name: String,
+                                                                      label: String,
+                                                                      active: Boolean,
+                                                                      fields: List[TransferGetTransferResponseSalesforceTransferConfigObjectField]
+                                                                    )
+
 case class TransferGetTransferResponseSalesforceTransferConfig(
                                                                 id: Int,
                                                                 transfer_config_id: Int,
                                                                 sf_user_name: String,
                                                                 sf_password: String,
                                                                 sf_security_token: String,
+                                                                objects: List[TransferGetTransferResponseSalesforceTransferConfigObject]
                                                              )
 
 case class TransferGetTransferResponseConfigDetail(
@@ -78,13 +98,52 @@ trait TransferGetTransferConfigResponseJson {
       (JsPath \ "mail_address_list").read[List[TransferGetTransferResponseMailTransferConfigMailAddress]]
   )(TransferGetTransferResponseMailTransferConfig.apply _)
 
+  implicit val TransferGetTransferResponseSalesforceTransferConfigObjectFieldWrites: Writes[TransferGetTransferResponseSalesforceTransferConfigObjectField] =
+    (transferGetTransferResponseSalesforceTransferConfigObjectField: TransferGetTransferResponseSalesforceTransferConfigObjectField) => Json.obj(
+      "id" -> transferGetTransferResponseSalesforceTransferConfigObjectField.id,
+      "transfer_config_salesforce_object_id" -> transferGetTransferResponseSalesforceTransferConfigObjectField.transfer_config_salesforce_object_id,
+      "name" -> transferGetTransferResponseSalesforceTransferConfigObjectField.name,
+      "label" -> transferGetTransferResponseSalesforceTransferConfigObjectField.label,
+      "field_type" -> transferGetTransferResponseSalesforceTransferConfigObjectField.field_type,
+      "active" -> transferGetTransferResponseSalesforceTransferConfigObjectField.active
+    )
+
+  implicit val TransferGetTransferResponseSalesforceTransferConfigObjectFieldReads: Reads[TransferGetTransferResponseSalesforceTransferConfigObjectField] = (
+    (JsPath \ "id").read[Int] ~
+      (JsPath \ "transfer_config_salesforce_object_id").read[Int] ~
+      (JsPath \ "name").read[String] ~
+      (JsPath \ "label").read[String] ~
+      (JsPath \ "field_type").read[String] ~
+      (JsPath \ "active").read[Boolean]
+    )(TransferGetTransferResponseSalesforceTransferConfigObjectField.apply _)
+
+  implicit val TransferGetTransferResponseSalesforceTransferConfigObjectWrites: Writes[TransferGetTransferResponseSalesforceTransferConfigObject] =
+    (transferGetTransferResponseSalesforceTransferConfigObject: TransferGetTransferResponseSalesforceTransferConfigObject) => Json.obj(
+      "id" -> transferGetTransferResponseSalesforceTransferConfigObject.id,
+      "transfer_config_salesforce_id" -> transferGetTransferResponseSalesforceTransferConfigObject.transfer_config_salesforce_id,
+      "name" -> transferGetTransferResponseSalesforceTransferConfigObject.name,
+      "label" -> transferGetTransferResponseSalesforceTransferConfigObject.label,
+      "active" -> transferGetTransferResponseSalesforceTransferConfigObject.active,
+      "fields" -> transferGetTransferResponseSalesforceTransferConfigObject.fields
+    )
+
+  implicit val TransferGetTransferResponseSalesforceTransferConfigObjectReads: Reads[TransferGetTransferResponseSalesforceTransferConfigObject] = (
+    (JsPath \ "id").read[Int] ~
+      (JsPath \ "transfer_config_salesforce_id").read[Int] ~
+      (JsPath \ "name").read[String] ~
+      (JsPath \ "label").read[String] ~
+      (JsPath \ "active").read[Boolean] ~
+      (JsPath \ "fields").read[List[TransferGetTransferResponseSalesforceTransferConfigObjectField]]
+  )(TransferGetTransferResponseSalesforceTransferConfigObject.apply _)
+
   implicit val TransferGetTransferResponseSalesforceTransferConfigWrites: Writes[TransferGetTransferResponseSalesforceTransferConfig] =
     (transferGetTransferResponseSalesforceTransferConfig: TransferGetTransferResponseSalesforceTransferConfig) => Json.obj(
     "id" -> transferGetTransferResponseSalesforceTransferConfig.id,
     "transfer_config_id" -> transferGetTransferResponseSalesforceTransferConfig.transfer_config_id,
     "sf_user_name" -> transferGetTransferResponseSalesforceTransferConfig.sf_user_name,
     "sf_password" -> transferGetTransferResponseSalesforceTransferConfig.sf_password,
-    "sf_security_token" -> transferGetTransferResponseSalesforceTransferConfig.sf_security_token
+    "sf_security_token" -> transferGetTransferResponseSalesforceTransferConfig.sf_security_token,
+    "objects" -> transferGetTransferResponseSalesforceTransferConfig.objects
   )
 
   implicit val TransferGetTransferResponseSalesforceTransferConfigReads: Reads[TransferGetTransferResponseSalesforceTransferConfig] = (
@@ -92,7 +151,8 @@ trait TransferGetTransferConfigResponseJson {
       (JsPath \ "transfer_config_id").read[Int] ~
       (JsPath \ "sf_user_name").read[String] ~
       (JsPath \ "sf_password").read[String] ~
-      (JsPath \ "sf_security_token").read[String]
+      (JsPath \ "sf_security_token").read[String] ~
+      (JsPath \ "objects").read[List[TransferGetTransferResponseSalesforceTransferConfigObject]]
   )(TransferGetTransferResponseSalesforceTransferConfig.apply _)
 
   implicit val TransferGetTransferResponseConfigDetailWrites: Writes[TransferGetTransferResponseConfigDetail] = (transferGetTransferResponseConfigDetail: TransferGetTransferResponseConfigDetail) => Json.obj(

@@ -23,7 +23,8 @@ case class FormUpdateFormRequestFormColValidation(
                                                  min_value: Int,
                                                  max_length: Int,
                                                  min_length: Int,
-                                                 input_type: Int
+                                                 input_type: Int,
+                                                 required: Boolean
                                                )
 
 /**
@@ -128,7 +129,8 @@ trait FormUpdateFormRequestJson {
       (JsPath \ "min_value").read[Int] ~
       (JsPath \ "max_length").read[Int] ~
       (JsPath \ "min_length").read[Int] ~
-      (JsPath \ "input_type").read[Int]
+      (JsPath \ "input_type").read[Int] ~
+      (JsPath \ "required").read[Boolean]
     )(FormUpdateFormRequestFormColValidation.apply _)
 
   implicit val FormUpdateFormRequestFormColSelectListWrites: Writes[FormUpdateFormRequestFormColSelect] = (FormUpdateFormRequestFormColSelect: FormUpdateFormRequestFormColSelect) => Json.obj(

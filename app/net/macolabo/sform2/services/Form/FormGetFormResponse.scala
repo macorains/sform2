@@ -15,6 +15,7 @@ import play.api.libs.functional.syntax._
   * @param max_length 最大長
   * @param min_length 最小長
   * @param input_type 入力種別
+  * @param required 入力必須
   */
 case class FormGetFormResponseFormColValidation(
                                                id: Int,
@@ -24,7 +25,8 @@ case class FormGetFormResponseFormColValidation(
                                                min_value: Int,
                                                max_length: Int,
                                                min_length: Int,
-                                               input_type: Int
+                                               input_type: Int,
+                                               required: Boolean
                                                )
 
 /**
@@ -154,7 +156,8 @@ trait FormGetFormResponseJson {
     "min_value" -> formGetFormResponseFormColValidation.min_value,
     "max_length" -> formGetFormResponseFormColValidation.max_length,
     "min_length" -> formGetFormResponseFormColValidation.min_length,
-    "input_type" -> formGetFormResponseFormColValidation.input_type
+    "input_type" -> formGetFormResponseFormColValidation.input_type,
+    "required" -> formGetFormResponseFormColValidation.required
   )
 
   implicit val FormGetFormResponseFormColValidationReads: Reads[FormGetFormResponseFormColValidation] = (
@@ -165,7 +168,8 @@ trait FormGetFormResponseJson {
       (JsPath \ "min_value").read[Int] ~
       (JsPath \ "max_length").read[Int] ~
       (JsPath \ "min_length").read[Int] ~
-      (JsPath \ "input_type").read[Int]
+      (JsPath \ "input_type").read[Int] ~
+      (JsPath \ "required").read[Boolean]
     )(FormGetFormResponseFormColValidation.apply _)
 
   implicit val FormGetFormResponseFormColSelectListWrites: Writes[FormGetFormResponseFormColSelect] = (formGetFormResponseFormColSelectList: FormGetFormResponseFormColSelect) => Json.obj(

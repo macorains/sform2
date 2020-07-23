@@ -171,7 +171,8 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
         f.min_value,
         f.max_length,
         f.min_length,
-        f.input_type
+        f.input_type,
+        f.required
       )
     })
   }
@@ -302,6 +303,7 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
       formUpdateFormRequestFormColValidation.max_length,
       formUpdateFormRequestFormColValidation.min_length,
       formUpdateFormRequestFormColValidation.input_type,
+      formUpdateFormRequestFormColValidation.required,
       "",
       "",
       identity.userID.toString,
@@ -389,6 +391,7 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
       formInsertFormRequestFormColValidation.max_length,
       formInsertFormRequestFormColValidation.min_length,
       formInsertFormRequestFormColValidation.input_type,
+      formInsertFormRequestFormColValidation.required,
       identity.group.getOrElse(""),
       identity.userID.toString,
       identity.userID.toString,
@@ -430,7 +433,8 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
       src.min_value,
       src.max_length,
       src.min_length,
-      src.input_type
+      src.input_type,
+      src.required
     )
   }
 

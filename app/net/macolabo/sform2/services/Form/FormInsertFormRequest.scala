@@ -10,13 +10,15 @@ import play.api.libs.functional.syntax._
  * @param max_length 最大長
  * @param min_length 最小長
  * @param input_type 入力種別
+ * @param required 必須項目
  */
 case class FormInsertFormRequestFormColValidation(
                                                    max_value: Int,
                                                    min_value: Int,
                                                    max_length: Int,
                                                    min_length: Int,
-                                                   input_type: Int
+                                                   input_type: Int,
+                                                   required: Boolean
                                                  )
 
 /**
@@ -93,7 +95,8 @@ trait FormInsertFormRequestJson {
     "min_value" -> formInsertFormRequestFormColValidation.min_value,
     "max_length" -> formInsertFormRequestFormColValidation.max_length,
     "min_length" -> formInsertFormRequestFormColValidation.min_length,
-    "input_type" -> formInsertFormRequestFormColValidation.input_type
+    "input_type" -> formInsertFormRequestFormColValidation.input_type,
+    "required" -> formInsertFormRequestFormColValidation.required
   )
 
   implicit val FormInsertFormRequestFormColValidationReads: Reads[FormInsertFormRequestFormColValidation] = (
@@ -101,7 +104,8 @@ trait FormInsertFormRequestJson {
       (JsPath \ "min_value").read[Int] ~
       (JsPath \ "max_length").read[Int] ~
       (JsPath \ "min_length").read[Int] ~
-      (JsPath \ "input_type").read[Int]
+      (JsPath \ "input_type").read[Int] ~
+      (JsPath \ "required").read[Boolean]
     )(FormInsertFormRequestFormColValidation.apply _)
 
   implicit val FormInsertFormRequestFormColSelectListWrites: Writes[FormInsertFormRequestFormColSelect] = (formInsertFormRequestFormColSelectList: FormInsertFormRequestFormColSelect) => Json.obj(
