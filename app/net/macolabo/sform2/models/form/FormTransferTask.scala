@@ -28,7 +28,11 @@ case class FormTransferTask(
                        modified_user: String,
                        created: ZonedDateTime,
                        modified: ZonedDateTime
-                       )
+                       ){
+  import FormTransferTask._
+  def insert: Int = create(this)
+  def update: Int = save(this)
+}
 
 object FormTransferTask extends SQLSyntaxSupport[FormTransferTask] {
   override val tableName = "D_FORM_TRANSFER_TASK"
