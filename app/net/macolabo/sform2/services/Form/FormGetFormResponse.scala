@@ -87,7 +87,7 @@ case class FormGetFormResponseFormTransferTaskCondition(
                                                          form_id: Int,
                                                          form_col_id: Int,
                                                          operator: String,
-                                                         cond_value: String,
+                                                         cond_value: String
                                                        )
 
 /**
