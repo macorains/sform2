@@ -138,7 +138,7 @@ object FormTransferTask extends SQLSyntaxSupport[FormTransferTask] {
    * TransferTaskの更新
    * @param formTransferTask TransferTaskのデータ
    * @param session DB Session
-   * @return
+   * @return Result
    */
   def save(formTransferTask: FormTransferTask)(implicit session: DBSession = autoSession): Int = {
     withSQL {
@@ -155,6 +155,20 @@ object FormTransferTask extends SQLSyntaxSupport[FormTransferTask] {
           c.created -> formTransferTask.created,
           c.modified -> formTransferTask.modified
         ).where.eq(c.id, formTransferTask.id)
+    }.update().apply()
+  }
+
+  /**
+   * TransferTaskの削除
+   * @param userGroup ユーザーグループ
+   * @param formTransferTaskId FormTransferTask ID
+   * @param session DB Session
+   * @return Result
+   */
+  def erase(userGroup: String, formTransferTaskId: Int)(implicit session: DBSession = autoSession): Int = {
+    withSQL{
+      val c = FormTransferTask.column
+      delete.from(FormTransferTask).where.eq(c.id, formTransferTaskId).and.eq(c.user_group, userGroup)
     }.update().apply()
   }
 }

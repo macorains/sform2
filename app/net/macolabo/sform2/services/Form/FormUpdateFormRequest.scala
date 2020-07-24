@@ -83,7 +83,7 @@ case class FormUpdateFormRequestFormCol(
  * @param field_name Salesforceフィールド名
  */
 case class FormUpdateFormRequestFormTransferTaskSalesforceField(
-                                                            id: Int,
+                                                            id: Option[Int],
                                                             form_transfer_task_salesforce_id: Int,
                                                             form_column_id: String,
                                                             field_name: String
@@ -99,7 +99,7 @@ case class FormUpdateFormRequestFormTransferTaskSalesforceField(
  * @param cond_value 値　
  */
 case class FormUpdateFormRequestFormTransferTaskCondition(
-                                                           id: Int,
+                                                           id: Option[Int],
                                                            form_transfer_task_id: Int,
                                                            form_id: Int,
                                                            form_col_id: Int,
@@ -120,7 +120,7 @@ case class FormUpdateFormRequestFormTransferTaskCondition(
  * @param body 本文
  */
 case class FormUpdateFormRequestFormTransferTaskMail(
-                                                      id: Int,
+                                                      id: Option[Int],
                                                       form_transfer_task_id: Int,
                                                       from_address_id: Int,
                                                       to_address: String,
@@ -139,7 +139,7 @@ case class FormUpdateFormRequestFormTransferTaskMail(
  * @param fields フィールド割り当て情報
  */
 case class FormUpdateFormRequestFormTransferTaskSalesforce(
-                                                            id: Int,
+                                                            id: Option[Int],
                                                             form_transfer_task_id: Int,
                                                             object_name: String,
                                                             fields: List[FormUpdateFormRequestFormTransferTaskSalesforceField]
@@ -158,7 +158,7 @@ case class FormUpdateFormRequestFormTransferTaskSalesforce(
  * @param salesforce SalesforceTransfer設定
  */
 case class FormUpdateFormRequestFormTransferTask(
-                                                  id: Int,
+                                                  id: Option[Int],
                                                   transfer_config_id: Int,
                                                   form_id: Int,
                                                   task_index: Int,
@@ -212,7 +212,7 @@ trait FormUpdateFormRequestJson {
   )
 
   implicit val FormUpdateFormRequestFormTransferTaskSalesforceFieldReads: Reads[FormUpdateFormRequestFormTransferTaskSalesforceField] = (
-    (JsPath \ "id").read[Int] ~
+    (JsPath \ "id").readNullable[Int] ~
       (JsPath \ "form_transfer_task_salesforce_id").read[Int] ~
       (JsPath \ "form_column_id").read[String] ~
       (JsPath \ "field_name").read[String]
@@ -228,7 +228,7 @@ trait FormUpdateFormRequestJson {
   )
 
   implicit val FormUpdateFormRequestFormTransferTaskConditionReads: Reads[FormUpdateFormRequestFormTransferTaskCondition] = (
-    (JsPath \ "id").read[Int] ~
+    (JsPath \ "id").readNullable[Int] ~
       (JsPath \ "form_transfer_task_id").read[Int] ~
       (JsPath \ "form_id").read[Int] ~
       (JsPath \ "form_col_id").read[Int] ~
@@ -249,7 +249,7 @@ trait FormUpdateFormRequestJson {
   )
 
   implicit val FormUpdateFormRequestFormTransferTaskMailReads: Reads[FormUpdateFormRequestFormTransferTaskMail] = (
-    (JsPath \ "id").read[Int] ~
+    (JsPath \ "id").readNullable[Int] ~
       (JsPath \ "form_transfer_task_id").read[Int] ~
       (JsPath \ "from_address_id").read[Int] ~
       (JsPath \ "to_address").read[String] ~
@@ -268,7 +268,7 @@ trait FormUpdateFormRequestJson {
   )
 
   implicit val FormUpdateFormRequestFormTransferTaskSalesforceReads: Reads[FormUpdateFormRequestFormTransferTaskSalesforce] = (
-    (JsPath \ "id").read[Int] ~
+    (JsPath \ "id").readNullable[Int] ~
       (JsPath \ "form_transfer_task_id").read[Int] ~
       (JsPath \ "object_name").read[String] ~
       (JsPath \ "fields").read[List[FormUpdateFormRequestFormTransferTaskSalesforceField]]
@@ -286,7 +286,7 @@ trait FormUpdateFormRequestJson {
   )
 
   implicit val FormUpdateFormRequestFormTransferTaskReads: Reads[FormUpdateFormRequestFormTransferTask] = (
-    (JsPath \ "id").read[Int] ~
+    (JsPath \ "id").readNullable[Int] ~
       (JsPath \ "transfer_config_id").read[Int] ~
       (JsPath \ "form_id").read[Int] ~
       (JsPath \ "task_index").read[Int] ~

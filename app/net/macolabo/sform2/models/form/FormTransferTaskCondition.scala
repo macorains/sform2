@@ -15,7 +15,11 @@ case class FormTransferTaskCondition(
                                     modified_user: String,
                                     created: ZonedDateTime,
                                     modified: ZonedDateTime
-                                    )
+                                    ){
+  import FormTransferTaskCondition._
+  def insert: Int = create(this)
+  def update: Int = save(this)
+}
 
 object FormTransferTaskCondition extends SQLSyntaxSupport[FormTransferTaskCondition] {
   override val tableName = "D_FORM_TRANSFER_TASK_CONDITION"
@@ -145,6 +149,20 @@ object FormTransferTaskCondition extends SQLSyntaxSupport[FormTransferTaskCondit
           c.created -> formTransferTaskCondition.created,
           c.modified -> formTransferTaskCondition.modified
         )
+    }.update().apply()
+  }
+
+  /**
+   * FormTransferTaskConditionの削除
+   * @param userGroup ユーザーグループ
+   * @param formTransferTaskConditionId FormTransferTaskCondition ID
+   * @param session DB Session
+   * @return Result
+   */
+  def erase(userGroup: String, formTransferTaskConditionId: Int)(implicit session: DBSession = autoSession): Int = {
+    withSQL{
+      val c = FormTransferTaskCondition.column
+      delete.from(FormTransferTaskCondition).where.eq(c.id, formTransferTaskConditionId).and.eq(c.user_group, userGroup)
     }.update().apply()
   }
 }

@@ -106,4 +106,18 @@ object FormTransferTaskSalesforceField extends SQLSyntaxSupport[FormTransferTask
       )
     }.update().apply()
   }
+
+  /**
+   * FormTransferTaskSalesforceField削除
+   * @param userGroup ユーザーグループ
+   * @param formTransferTaskSalesforceFieldId FormTransferTaskSalesforceField ID
+   * @param session DB Session
+   * @return Result
+   */
+  def erase(userGroup: String, formTransferTaskSalesforceFieldId: Int)(implicit session: DBSession = autoSession): Int = {
+    withSQL{
+      val c = FormTransferTaskSalesforceField.column
+      delete.from(FormTransferTaskSalesforceField).where.eq(c.id, formTransferTaskSalesforceFieldId).and.eq(c.user_group, userGroup)
+    }.update().apply()
+  }
 }

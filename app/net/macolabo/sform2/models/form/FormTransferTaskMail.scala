@@ -133,4 +133,18 @@ object FormTransferTaskMail extends SQLSyntaxSupport[FormTransferTaskMail] {
       )
     }.update().apply()
   }
+
+  /**
+   * FormTransferTaskMailの削除
+   * @param userGroup ユーザーグループ
+   * @param formTransferTaskMailId FormTransferTaskMail ID
+   * @param session DB Session
+   * @return Result
+   */
+  def erase(userGroup: String, formTransferTaskMailId: Int)(implicit session: DBSession = autoSession): Int = {
+    withSQL{
+      val c = FormTransferTaskMail.column
+      delete.from(FormTransferTaskMail).where.eq(c.id, formTransferTaskMailId).and.eq(c.user_group, userGroup)
+    }.update().apply()
+  }
 }
