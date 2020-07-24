@@ -3,6 +3,7 @@ package net.macolabo.sform2.controllers
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.impl.providers._
 import javax.inject._
+import net.macolabo.sform2.services.External.Salesforce.{SalesforceCheckConnectionRequest, SalesforceCheckConnectionRequestJson, SalesforceCheckConnectionResponse, SalesforceCheckConnectionResponseJson, SalesforceConnectionService}
 import net.macolabo.sform2.services.Transfer.{TransferGetTransferConfigListJson, TransferGetTransferConfigResponseJson, TransferGetTransferConfigSelectListJson, TransferService, TransferUpdateTransferConfigRequest, TransferUpdateTransferConfigRequestJson, TransferUpdateTransferConfigResponse, TransferUpdateTransferConfigResponseJson}
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
@@ -16,6 +17,7 @@ class TransferController @Inject() (
   components: ControllerComponents,
   silhouette: Silhouette[DefaultEnv],
   transferService: TransferService,
+  salesforceConnectionService: SalesforceConnectionService
 )(
   implicit
   webJarsUtil: WebJarsUtil,
@@ -27,6 +29,8 @@ class TransferController @Inject() (
   with TransferGetTransferConfigResponseJson
   with TransferUpdateTransferConfigRequestJson
   with TransferUpdateTransferConfigResponseJson
+  with SalesforceCheckConnectionRequestJson
+  with SalesforceCheckConnectionResponseJson
 {
 
   /**
@@ -73,5 +77,22 @@ class TransferController @Inject() (
       case Some(s: TransferUpdateTransferConfigResponse) => Future.successful(Ok(toJson(s)))
       case None => Future.successful(BadRequest)
     }
+  }
+
+  /**
+   * Salesforce疎通チェック
+   * @return Result
+   */
+  def checkTransferSalesforce: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin"))).async { implicit request =>
+    val res = request.body.asJson.flatMap(r =>
+      r.validate[SalesforceCheckConnectionRequest].map(f => {
+        salesforceConnectionService.checkConnection(f)
+      }).asOpt)
+    res match {
+      case Some(s: SalesforceCheckConnectionResponse) => Future.successful(Ok(toJson(s)))
+      case None => Future.successful(BadRequest)
+    }
+
+
   }
 }

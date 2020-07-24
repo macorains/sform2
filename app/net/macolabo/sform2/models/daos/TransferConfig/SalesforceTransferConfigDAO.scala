@@ -9,7 +9,7 @@ import play.api.libs.functional.syntax._
 import com.sforce.soap.partner.{DescribeSObjectResult, Field, PartnerConnection}
 import net.macolabo.sform2.models.User
 import net.macolabo.sform2.models.json.SalesforceTransferJson
-import net.macolabo.sform2.services.Transfer.SalesforceConnectionService
+import net.macolabo.sform2.services.External.Salesforce.SalesforceConnectionService
 import net.macolabo.sform2.utils
 import net.macolabo.sform2.utils.{Crypto, Logger}
 import play.api.Configuration
