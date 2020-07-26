@@ -54,7 +54,12 @@ object TransferConfigSalesforce extends SQLSyntaxSupport[TransferConfigSalesforc
         f.transfer_config_id,
         f.sf_user_name,
         f.sf_password,
-        f.sf_security_token
+        f.sf_security_token,
+        f.user_group,
+        f.created_user,
+        f.modified_user,
+        f.created,
+        f.modified
       )
         .from(TransferConfigSalesforce as f)
         .where

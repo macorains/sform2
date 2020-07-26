@@ -3,7 +3,7 @@ package net.macolabo.sform2.controllers
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.impl.providers._
 import javax.inject._
-import net.macolabo.sform2.services.External.Salesforce.{SalesforceCheckConnectionRequest, SalesforceCheckConnectionRequestJson, SalesforceCheckConnectionResponse, SalesforceCheckConnectionResponseJson, SalesforceConnectionService}
+import net.macolabo.sform2.services.External.Salesforce.{SalesforceCheckConnectionRequest, SalesforceCheckConnectionRequestJson, SalesforceCheckConnectionResponse, SalesforceCheckConnectionResponseJson, SalesforceConnectionService, SalesforceGetFieldResponse, SalesforceGetFieldResponseJson, SalesforceGetObjectResponse, SalesforceGetObjectResponseJson}
 import net.macolabo.sform2.services.Transfer.{TransferGetTransferConfigListJson, TransferGetTransferConfigResponseJson, TransferGetTransferConfigSelectListJson, TransferService, TransferUpdateTransferConfigRequest, TransferUpdateTransferConfigRequestJson, TransferUpdateTransferConfigResponse, TransferUpdateTransferConfigResponseJson}
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
@@ -31,6 +31,8 @@ class TransferController @Inject() (
   with TransferUpdateTransferConfigResponseJson
   with SalesforceCheckConnectionRequestJson
   with SalesforceCheckConnectionResponseJson
+  with SalesforceGetObjectResponseJson
+  with SalesforceGetFieldResponseJson
 {
 
   /**
@@ -92,7 +94,40 @@ class TransferController @Inject() (
       case Some(s: SalesforceCheckConnectionResponse) => Future.successful(Ok(toJson(s)))
       case None => Future.successful(BadRequest)
     }
+  }
 
+  /**
+   * Salesforce Object取得
+   * @param transferConfigId TransferConfig ID
+   * @return SalesforceのObject情報リスト
+   */
+  def getTransferSalesforceObject(transferConfigId: Int): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin"))).async { implicit request =>
+    val res = transferService.getTransferConfig(request.identity,transferConfigId).flatMap(c => {
+      c.detail.salesforce.flatMap(s => {
+        salesforceConnectionService.getObject(s)
+      })
+    })
+    res match {
+      case Some(s: List[SalesforceGetObjectResponse]) => Future.successful(Ok(toJson(s)))
+      case None => Future.successful(BadRequest)
+    }
+  }
 
+  /**
+   * Salesforce Field取得
+   * @param transferConfigId TransferConfig ID
+   * @param objectName オブジェクト名
+   * @return SalesforceのField情報リスト
+   */
+  def getTransferSalesforceField(transferConfigId: Int, objectName: String): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin"))).async { implicit request =>
+    val res = transferService.getTransferConfig(request.identity,transferConfigId).flatMap(c => {
+      c.detail.salesforce.flatMap(s => {
+        salesforceConnectionService.getField(s, objectName)
+      })
+    })
+    res match {
+      case Some(s: List[SalesforceGetFieldResponse]) => Future.successful(Ok(toJson(s)))
+      case None => Future.successful(BadRequest)
+    }
   }
 }

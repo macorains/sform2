@@ -196,7 +196,131 @@ class TransferService @Inject() (implicit ex: ExecutionContext) extends Transfer
       ZonedDateTime.now(),
       ZonedDateTime.now()
     ).update
+
+    val updatedObjects = transferUpdateTransferRequestSalesforceTransferConfig.objects.map(o => {
+      o.id match {
+        case Some(i: Int) if i>0 => updateTransferConfigSalesforceObject(userGroup, userId, o)
+        case _ => insertTransferConfigSalesforceObject(userGroup, userId, transferUpdateTransferRequestSalesforceTransferConfig.id, TransferUpdateTransferRequestSalesforceTransferConfigObjectToTransferInsertTransferRequestSalesforceTransferConfigObject(o))
+      }
+    })
+
+    TransferConfigSalesforceObject
+      .getList(userGroup, transferUpdateTransferRequestSalesforceTransferConfig.id)
+      .filterNot(o => updatedObjects.contains(o.id))
+      .map(o => o.id)
+      .foreach(o => TransferConfigSalesforceObject.erase(userGroup, o))
+
+    transferUpdateTransferRequestSalesforceTransferConfig.id
   }
+
+  /**
+   * TransferConfigSalesforceObject更新
+   * @param userGroup ユーザーグループ
+   * @param userId ユーザーID
+   * @param transferUpdateTransferRequestSalesforceTransferConfigObject　TransferUpdateTransferRequestSalesforceTransferConfigObject
+   * @return 更新したID
+   */
+  private def updateTransferConfigSalesforceObject(userGroup: String, userId: String, transferUpdateTransferRequestSalesforceTransferConfigObject: TransferUpdateTransferRequestSalesforceTransferConfigObject): Int = {
+    TransferConfigSalesforceObject(
+      transferUpdateTransferRequestSalesforceTransferConfigObject.id.getOrElse(0),
+      transferUpdateTransferRequestSalesforceTransferConfigObject.transfer_config_salesforce_id,
+      transferUpdateTransferRequestSalesforceTransferConfigObject.name,
+      transferUpdateTransferRequestSalesforceTransferConfigObject.label,
+      transferUpdateTransferRequestSalesforceTransferConfigObject.active,
+      userGroup,
+      userId,
+      userId,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    ).update
+
+    val updatedFields = transferUpdateTransferRequestSalesforceTransferConfigObject.fields.map(f => {
+      f.id match {
+        case Some(i: Int) if i>0 => updateTransferConfigSalesforceObjectField(userGroup, userId, f)
+        case _ => insertTransferConfigSalesforceObjectField(userGroup, userId, transferUpdateTransferRequestSalesforceTransferConfigObject.id.getOrElse(0), TransferUpdateTransferRequestSalesforceTransferConfigObjectFieldToTransferInsertTransferRequestSalesforceTransferConfigObjectField(f))
+      }
+    })
+
+    TransferConfigSalesforceObjectField
+      .getList(userGroup, transferUpdateTransferRequestSalesforceTransferConfigObject.id.getOrElse(0))
+        .filterNot(f => updatedFields.contains(f.id))
+        .map(f => f.id)
+        .foreach(f => TransferConfigSalesforceObject.erase(userGroup, f))
+
+    transferUpdateTransferRequestSalesforceTransferConfigObject.id.getOrElse(0)
+  }
+
+  /**
+   * TransferConfigSalesforceObject作成
+   * @param userGroup ユーザーグループ
+   * @param userId ユーザーID
+   * @param transferConfigSalesforceId TransferConfigSalesforce ID
+   * @param transferInsertTransferRequestSalesforceTransferConfigObject TransferInsertTransferRequestSalesforceTransferConfigObject
+   * @return 作成したレコードのID
+   */
+  private def insertTransferConfigSalesforceObject(userGroup: String, userId: String, transferConfigSalesforceId: Int, transferInsertTransferRequestSalesforceTransferConfigObject: TransferInsertTransferRequestSalesforceTransferConfigObject): Int = {
+    TransferConfigSalesforceObject(
+      0,
+      transferConfigSalesforceId,
+      transferInsertTransferRequestSalesforceTransferConfigObject.name,
+      transferInsertTransferRequestSalesforceTransferConfigObject.label,
+      transferInsertTransferRequestSalesforceTransferConfigObject.active,
+      userGroup,
+      userId,
+      userId,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    ).insert
+  }
+
+  /**
+   * TransferConfigSalesforceObject更新
+   * @param userGroup ユーザーグループ
+   * @param userId ユーザーID
+   * @param transferUpdateTransferRequestSalesforceTransferConfigObjectField TransferUpdateTransferRequestSalesforceTransferConfigObjectField
+   * @return 更新したID
+   */
+  private def updateTransferConfigSalesforceObjectField(userGroup: String, userId: String, transferUpdateTransferRequestSalesforceTransferConfigObjectField: TransferUpdateTransferRequestSalesforceTransferConfigObjectField): Int = {
+    TransferConfigSalesforceObjectField(
+      transferUpdateTransferRequestSalesforceTransferConfigObjectField.id.getOrElse(0),
+      transferUpdateTransferRequestSalesforceTransferConfigObjectField.transfer_config_salesforce_object_id,
+      transferUpdateTransferRequestSalesforceTransferConfigObjectField.name,
+      transferUpdateTransferRequestSalesforceTransferConfigObjectField.label,
+      transferUpdateTransferRequestSalesforceTransferConfigObjectField.field_type,
+      transferUpdateTransferRequestSalesforceTransferConfigObjectField.active,
+      userGroup,
+      userId,
+      userId,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    ).update
+    transferUpdateTransferRequestSalesforceTransferConfigObjectField.id.getOrElse(0)
+  }
+
+  /**
+   * TransferConfigSalesforceObject作成
+   * @param userGroup ユーザーグループ
+   * @param userId ユーザーID
+   * @param transferConfigSalesforceObjectId TransferConfigSalesforceObject ID
+   * @param transferInsertTransferRequestSalesforceTransferConfigObjectField TransferInsertTransferRequestSalesforceTransferConfigObjectField
+   * @return 作成したレコードのID
+   */
+  private def insertTransferConfigSalesforceObjectField(userGroup: String, userId: String, transferConfigSalesforceObjectId: Int, transferInsertTransferRequestSalesforceTransferConfigObjectField: TransferInsertTransferRequestSalesforceTransferConfigObjectField): Int = {
+    TransferConfigSalesforceObjectField(
+      0,
+      transferConfigSalesforceObjectId,
+      transferInsertTransferRequestSalesforceTransferConfigObjectField.name,
+      transferInsertTransferRequestSalesforceTransferConfigObjectField.label,
+      transferInsertTransferRequestSalesforceTransferConfigObjectField.field_type,
+      transferInsertTransferRequestSalesforceTransferConfigObjectField.active,
+      userGroup,
+      userId,
+      userId,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    ).insert
+  }
+
 
   /**
    * MailTransfer用のconfig取得
@@ -292,4 +416,26 @@ class TransferService @Inject() (implicit ex: ExecutionContext) extends Transfer
     })
   }
 
+  /*
+  Update -> Insert変換
+   */
+  def TransferUpdateTransferRequestSalesforceTransferConfigObjectToTransferInsertTransferRequestSalesforceTransferConfigObject(src: TransferUpdateTransferRequestSalesforceTransferConfigObject): TransferInsertTransferRequestSalesforceTransferConfigObject = {
+    TransferInsertTransferRequestSalesforceTransferConfigObject(
+      src.transfer_config_salesforce_id,
+      src.name,
+      src.label,
+      src.active,
+      src.fields.map(f => TransferUpdateTransferRequestSalesforceTransferConfigObjectFieldToTransferInsertTransferRequestSalesforceTransferConfigObjectField(f))
+    )
+  }
+
+  def TransferUpdateTransferRequestSalesforceTransferConfigObjectFieldToTransferInsertTransferRequestSalesforceTransferConfigObjectField(src: TransferUpdateTransferRequestSalesforceTransferConfigObjectField): TransferInsertTransferRequestSalesforceTransferConfigObjectField = {
+    TransferInsertTransferRequestSalesforceTransferConfigObjectField(
+      src.transfer_config_salesforce_object_id,
+      src.name,
+      src.label,
+      src.field_type,
+      src.active
+    )
+  }
 }

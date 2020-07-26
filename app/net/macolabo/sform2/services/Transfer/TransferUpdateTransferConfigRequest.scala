@@ -19,12 +19,31 @@ case class TransferUpdateTransferRequestMailTransferConfig(
                                                           mail_address_list: List[TransferUpdateTransferRequestMailTransferConfigMailAddress]
                                                         )
 
+case class TransferUpdateTransferRequestSalesforceTransferConfigObject(
+                                                                      id: Option[Int],
+                                                                      transfer_config_salesforce_id: Int,
+                                                                      name: String,
+                                                                      label: String,
+                                                                      active: Boolean,
+                                                                      fields: List[TransferUpdateTransferRequestSalesforceTransferConfigObjectField]
+                                                                      )
+
+case class TransferUpdateTransferRequestSalesforceTransferConfigObjectField(
+                                                                             id: Option[Int],
+                                                                             transfer_config_salesforce_object_id: Int,
+                                                                             name: String,
+                                                                             label: String,
+                                                                             field_type: String,
+                                                                             active: Boolean
+                                                                           )
+
 case class TransferUpdateTransferRequestSalesforceTransferConfig(
                                                                 id: Int,
                                                                 transfer_config_id: Int,
                                                                 sf_user_name: String,
                                                                 sf_password: String,
                                                                 sf_security_token: String,
+                                                                objects: List[TransferUpdateTransferRequestSalesforceTransferConfigObject]
                                                               )
 
 case class TransferUpdateTransferRequestConfigDetail(
@@ -79,13 +98,53 @@ trait TransferUpdateTransferConfigRequestJson {
       (JsPath \ "mail_address_list").read[List[TransferUpdateTransferRequestMailTransferConfigMailAddress]]
     )(TransferUpdateTransferRequestMailTransferConfig.apply _)
 
+  implicit val TransferUpdateTransferRequestSalesforceTransferConfigObjectFieldWrites: Writes[TransferUpdateTransferRequestSalesforceTransferConfigObjectField] =
+    (transferUpdateTransferRequestSalesforceTransferConfigObjectField:TransferUpdateTransferRequestSalesforceTransferConfigObjectField) => Json.obj(
+      "id" -> transferUpdateTransferRequestSalesforceTransferConfigObjectField.id,
+    "transfer_config_salesforce_object_id" -> transferUpdateTransferRequestSalesforceTransferConfigObjectField.transfer_config_salesforce_object_id,
+    "name" -> transferUpdateTransferRequestSalesforceTransferConfigObjectField.name,
+    "label" -> transferUpdateTransferRequestSalesforceTransferConfigObjectField.label,
+    "field_type" -> transferUpdateTransferRequestSalesforceTransferConfigObjectField.field_type,
+    "active" -> transferUpdateTransferRequestSalesforceTransferConfigObjectField.active
+  )
+
+  implicit val TransferUpdateTransferRequestSalesforceTransferConfigObjectFieldReads: Reads[TransferUpdateTransferRequestSalesforceTransferConfigObjectField] = (
+    (JsPath \ "id").readNullable[Int] ~
+      (JsPath \ "transfer_config_salesforce_object_id").read[Int] ~
+      (JsPath \ "name").read[String] ~
+      (JsPath \ "label").read[String] ~
+      (JsPath \ "field_type").read[String] ~
+      (JsPath \ "active").read[Boolean]
+  )(TransferUpdateTransferRequestSalesforceTransferConfigObjectField.apply _)
+
+  implicit val TransferUpdateTransferRequestSalesforceTransferConfigObjectWrites: Writes[TransferUpdateTransferRequestSalesforceTransferConfigObject] =
+    (transferUpdateTransferRequestSalesforceTransferConfigObject:TransferUpdateTransferRequestSalesforceTransferConfigObject) => Json.obj(
+      "id" -> transferUpdateTransferRequestSalesforceTransferConfigObject.id,
+      "transfer_config_salesforce_object_id" -> transferUpdateTransferRequestSalesforceTransferConfigObject.transfer_config_salesforce_id,
+      "name" -> transferUpdateTransferRequestSalesforceTransferConfigObject.name,
+      "label" -> transferUpdateTransferRequestSalesforceTransferConfigObject.label,
+      "active" -> transferUpdateTransferRequestSalesforceTransferConfigObject.active,
+      "fields" -> transferUpdateTransferRequestSalesforceTransferConfigObject.fields
+    )
+
+  implicit val TransferUpdateTransferRequestSalesforceTransferConfigObjectReads: Reads[TransferUpdateTransferRequestSalesforceTransferConfigObject] = (
+    (JsPath \ "id").readNullable[Int] ~
+      (JsPath \ "transfer_config_salesforce_id").read[Int] ~
+      (JsPath \ "name").read[String] ~
+      (JsPath \ "label").read[String] ~
+      (JsPath \ "active").read[Boolean] ~
+      (JsPath \ "fields").read[List[TransferUpdateTransferRequestSalesforceTransferConfigObjectField]]
+    )(TransferUpdateTransferRequestSalesforceTransferConfigObject.apply _)
+
+
   implicit val TransferUpdateTransferRequestSalesforceTransferConfigWrites: Writes[TransferUpdateTransferRequestSalesforceTransferConfig] =
     (transferUpdateTransferRequestSalesforceTransferConfig: TransferUpdateTransferRequestSalesforceTransferConfig) => Json.obj(
       "id" -> transferUpdateTransferRequestSalesforceTransferConfig.id,
       "transfer_config_id" -> transferUpdateTransferRequestSalesforceTransferConfig.transfer_config_id,
       "sf_user_name" -> transferUpdateTransferRequestSalesforceTransferConfig.sf_user_name,
       "sf_password" -> transferUpdateTransferRequestSalesforceTransferConfig.sf_password,
-      "sf_security_token" -> transferUpdateTransferRequestSalesforceTransferConfig.sf_security_token
+      "sf_security_token" -> transferUpdateTransferRequestSalesforceTransferConfig.sf_security_token,
+      "objects" -> transferUpdateTransferRequestSalesforceTransferConfig.objects
     )
 
   implicit val TransferUpdateTransferRequestSalesforceTransferConfigReads: Reads[TransferUpdateTransferRequestSalesforceTransferConfig] = (
@@ -93,7 +152,8 @@ trait TransferUpdateTransferConfigRequestJson {
       (JsPath \ "transfer_config_id").read[Int] ~
       (JsPath \ "sf_user_name").read[String] ~
       (JsPath \ "sf_password").read[String] ~
-      (JsPath \ "sf_security_token").read[String]
+      (JsPath \ "sf_security_token").read[String] ~
+      (JsPath \ "objects").read[List[TransferUpdateTransferRequestSalesforceTransferConfigObject]]
     )(TransferUpdateTransferRequestSalesforceTransferConfig.apply _)
 
   implicit val TransferUpdateTransferRequestConfigDetailWrites: Writes[TransferUpdateTransferRequestConfigDetail] = (transferUpdateTransferRequestConfigDetail: TransferUpdateTransferRequestConfigDetail) => Json.obj(

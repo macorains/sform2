@@ -3,6 +3,8 @@ package net.macolabo.sform2.services.External.Salesforce
 import com.sforce.soap.partner._
 import com.sforce.soap.partner.sobject._
 import com.sforce.ws._
+import net.macolabo.sform2.models.transfer.TransferConfigSalesforce
+import net.macolabo.sform2.services.Transfer.TransferGetTransferResponseSalesforceTransferConfig
 import net.macolabo.sform2.utils.Logger
 
 class SalesforceConnectionService extends Logger {
@@ -19,6 +21,49 @@ class SalesforceConnectionService extends Logger {
       case _ => "NG"
     }
     SalesforceCheckConnectionResponse(resultCode, result._2)
+  }
+
+  /**
+   * sObjectのname,labelのリスト取得
+   * @param config TransferConfigSalesforce
+   * @return SalesforceGetObjectResponseのリスト
+   */
+  def getObject(config: TransferGetTransferResponseSalesforceTransferConfig): Option[List[SalesforceGetObjectResponse]] = {
+    getConnection(config.sf_user_name, config.sf_password, config.sf_security_token)._1.map(connection => {
+      connection.describeGlobal().getSobjects()
+        .filter(o => { o.getCreateable })
+        .filter(o => { o.getDeletable })
+        .filter(o => { o.getQueryable })
+        .filter(o => { o.getSearchable })
+        .map(o => {
+          SalesforceGetObjectResponse(
+            o.getName,
+            o.getLabel
+          )
+        }).toList
+    })
+  }
+
+  /**
+   * sObjectフィールドの情報取得
+   * @param config TransferConfigSalesforce
+   * @param objectName オブジェクト名
+   * @return SalesforceGetFieldResponseのリスト
+   */
+  def getField(config: TransferGetTransferResponseSalesforceTransferConfig, objectName: String): Option[List[SalesforceGetFieldResponse]] = {
+    getConnection(config.sf_user_name, config.sf_password, config.sf_security_token)._1.map(connection => {
+      connection.describeSObject(objectName).getFields
+        .filter(f => f.isCreateable)
+        .filter(f => !f.isAutoNumber)
+        .filter(f => !f.isCalculated)
+        .map(f => {
+          SalesforceGetFieldResponse(
+            f.getName,
+            f.getLabel,
+            f.getType.toString
+          )
+        }).toList
+    })
   }
 
   // 開発時用ダミー
@@ -60,8 +105,6 @@ class SalesforceConnectionService extends Logger {
   }
 
   def getSObjectNames(connection: PartnerConnection): List[String] = {
-    // val objects = connection.describeGlobal().getSobjects()
-
     connection.describeGlobal().getSobjects()
       .filter(o => { o.getCreateable })
       .filter(o => { o.getDeletable })

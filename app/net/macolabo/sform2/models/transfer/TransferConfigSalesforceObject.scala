@@ -16,7 +16,9 @@ case class TransferConfigSalesforceObject(
                                          created: ZonedDateTime,
                                          modified: ZonedDateTime
                                          ) {
-
+  import TransferConfigSalesforceObject._
+  def insert: Int = create(this)
+  def update: Int = save(this)
 }
 
 object TransferConfigSalesforceObject extends SQLSyntaxSupport[TransferConfigSalesforceObject] {
@@ -110,6 +112,19 @@ object TransferConfigSalesforceObject extends SQLSyntaxSupport[TransferConfigSal
     }.update().apply()
   }
 
+  /**
+   * TransferConfigSalesforceObject削除
+   * @param userGroup ユーザーグループ
+   * @param transferConfigSalesforceObjectId TransferConfigSalesforceObject ID
+   * @param session DB Session
+   * @return Result
+   */
+  def erase(userGroup: String, transferConfigSalesforceObjectId: Int)(implicit session: DBSession = autoSession): Int = {
+    withSQL {
+      val c = TransferConfigSalesforceObject.column
+      delete.from(TransferConfigSalesforceObject).where.eq(c.id, transferConfigSalesforceObjectId).and.eq(c.user_group, userGroup)
+    }.update().apply()
+  }
 }
 
 
