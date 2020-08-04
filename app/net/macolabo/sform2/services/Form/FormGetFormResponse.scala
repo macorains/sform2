@@ -196,7 +196,7 @@ case class FormGetFormResponse(
                               complete_text: String,
                               confirm_header: String,
                               form_cols: List[FormGetFormResponseFormCol],
-                              transfer_tasks: List[FormGetFormResponseFormTransferTask]
+                              form_transfer_tasks: List[FormGetFormResponseFormTransferTask]
                               ) {
 
 }
@@ -381,7 +381,7 @@ trait FormGetFormResponseJson {
     "complete_text" -> formGetFormResponse.complete_text,
     "confirm_header" -> formGetFormResponse.confirm_header,
     "form_cols" -> formGetFormResponse.form_cols,
-    "transfer_tasks" -> formGetFormResponse.transfer_tasks
+    "form_transfer_tasks" -> formGetFormResponse.form_transfer_tasks
   )
 
   implicit val FormGetFormResponseReads: Reads[FormGetFormResponse] = (
@@ -398,6 +398,6 @@ trait FormGetFormResponseJson {
       (JsPath \ "complete_text").read[String] ~
       (JsPath \ "confirm_header").read[String] ~
       (JsPath \ "form_cols").read[List[FormGetFormResponseFormCol]] ~
-      (JsPath \ "transfer_tasks").read[List[FormGetFormResponseFormTransferTask]]
+      (JsPath \ "form_transfer_tasks").read[List[FormGetFormResponseFormTransferTask]]
   )(FormGetFormResponse.apply _)
 }
