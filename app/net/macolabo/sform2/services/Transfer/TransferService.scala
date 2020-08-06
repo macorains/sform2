@@ -20,7 +20,8 @@ class TransferService @Inject() (implicit ex: ExecutionContext) extends Transfer
     TransferConfig.getList(userGroup).map(f => {
       TransferGetTransferConfigSelectList(
         f.id,
-        f.name
+        f.name,
+        f.type_code
       )
     })
   }
