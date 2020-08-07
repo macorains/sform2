@@ -29,7 +29,7 @@ GET         /account/activate/:token         net.macolabo.sform2.controllers.Act
 GET         /assets/*file                    controllers.Assets.at(path="/public", file)
 ->          /webjars                         webjars.Routes
 
-GET /formpost/:hashed_form_id net.macolabo.sform2.controllers.FormPostDataController.getPostData(hashed_form_id: String)
+# GET /formpost/:hashed_form_id net.macolabo.sform2.controllers.FormPostDataController.getPostData(hashed_form_id: String)
 
 # form
 GET /form/list net.macolabo.sform2.controllers.FormController.getList()

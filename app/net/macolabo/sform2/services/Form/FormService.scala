@@ -433,7 +433,7 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
   private def updateFormTransferTaskMail(identity: User, formUpdateFormRequestFormTransferTaskMail: FormUpdateFormRequestFormTransferTaskMail): Int = {
     val formTransferTaskMail = FormTransferTaskMail(
       formUpdateFormRequestFormTransferTaskMail.id.getOrElse(0),
-      formUpdateFormRequestFormTransferTaskMail.form_transfer_task_id,
+      formUpdateFormRequestFormTransferTaskMail.form_transfer_task_id.getOrElse(0),
       formUpdateFormRequestFormTransferTaskMail.from_address_id,
       formUpdateFormRequestFormTransferTaskMail.to_address,
       formUpdateFormRequestFormTransferTaskMail.cc_address,
@@ -454,7 +454,7 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
   private def updateFormTransferTaskSalesforce(identity :User, formUpdateFormRequestFormTransferTaskSalesforce: FormUpdateFormRequestFormTransferTaskSalesforce): Int = {
     val formTransferTaskSalesforce = FormTransferTaskSalesforce(
       formUpdateFormRequestFormTransferTaskSalesforce.id.getOrElse(0),
-      formUpdateFormRequestFormTransferTaskSalesforce.form_transfer_task_id,
+      formUpdateFormRequestFormTransferTaskSalesforce.form_transfer_task_id.getOrElse(0),
       formUpdateFormRequestFormTransferTaskSalesforce.object_name,
       identity.group.getOrElse(""),
       identity.userID.toString,
@@ -603,6 +603,16 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
     formInsertFormRequestFormTransferTask.form_transfer_task_conditions.map(c => {
       insertFormTransferTaskCondition(identity, c, formTransferTaskId)
     })
+
+    formInsertFormRequestFormTransferTask.mail.map(m => {
+      insertFormTransferTaskMail(identity, m, formTransferTaskId)
+    })
+
+    formInsertFormRequestFormTransferTask.salesforce.map(s => {
+      insertFormTransferTaskSalesforce(identity, s, formTransferTaskId)
+    })
+
+    formTransferTaskId
   }
 
   private def insertFormTransferTaskCondition(identity: User, formInsertFormRequestFormTransferTaskCondition: FormInsertFormRequestFormTransferTaskCondition, formTransferTaskId: Int): Int = {
@@ -737,7 +747,7 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
 
   private def FormUpdateFormRequestFormTransferTaskMailToFormInsertFormRequestFormTransferTaskMail(src: FormUpdateFormRequestFormTransferTaskMail): FormInsertFormRequestFormTransferTaskMail = {
     FormInsertFormRequestFormTransferTaskMail(
-      src.form_transfer_task_id,
+      src.form_transfer_task_id.getOrElse(0),
       src.from_address_id,
       src.to_address,
       src.cc_address,
@@ -750,7 +760,7 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
 
   private def FormUpdateFormRequestFormTransferTaskSalesforceToFormInsertFormRequestFormTransferTaskSalesforce(src: FormUpdateFormRequestFormTransferTaskSalesforce): FormInsertFormRequestFormTransferTaskSalesforce = {
     FormInsertFormRequestFormTransferTaskSalesforce(
-      src.form_transfer_task_id,
+      src.form_transfer_task_id.getOrElse(0),
       src.object_name,
       src.fields.map(f => FormUpdateFormRequestFormTransferTaskSalesforceFieldToFormInsertFormRequestFormTransferTaskSalesforceField(f))
     )
