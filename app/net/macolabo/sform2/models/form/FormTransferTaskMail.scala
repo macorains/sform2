@@ -55,6 +55,7 @@ object FormTransferTaskMail extends SQLSyntaxSupport[FormTransferTaskMail] {
    */
   def get(userGroup: String, formTransferTaskId: Int)(implicit session: DBSession = autoSession): Option[FormTransferTaskMail] = {
     val f = FormTransferTaskMail.syntax("f")
+    println("FormTransferTaskMail.get")
     withSQL(
     select(
       f.id,
@@ -130,7 +131,7 @@ object FormTransferTaskMail extends SQLSyntaxSupport[FormTransferTaskMail] {
         c.modified_user -> formTransferTaskMail.modified_user,
         c.created -> formTransferTaskMail.created,
         c.modified -> formTransferTaskMail.modified
-      )
+      ).where.eq(c.id, formTransferTaskMail.id)
     }.update().apply()
   }
 

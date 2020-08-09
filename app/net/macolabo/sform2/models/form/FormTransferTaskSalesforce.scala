@@ -43,6 +43,7 @@ object FormTransferTaskSalesforce extends SQLSyntaxSupport[FormTransferTaskSales
    */
   def get(userGroup: String, formTransferTaskId: Int)(implicit session: DBSession = autoSession): Option[FormTransferTaskSalesforce] = {
     val f = FormTransferTaskSalesforce.syntax("f")
+    println("FormTransferTaskSalesforce.get")
     withSQL(
       select(
         f.id,
@@ -98,7 +99,7 @@ object FormTransferTaskSalesforce extends SQLSyntaxSupport[FormTransferTaskSales
         c.user_group -> formTransferTaskSalesforce.user_group,
         c.modified_user -> formTransferTaskSalesforce.modified_user,
         c.modified -> formTransferTaskSalesforce.modified
-      )
+      ).where.eq(c.id, formTransferTaskSalesforce.id)
     }.update().apply()
   }
 

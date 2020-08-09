@@ -103,7 +103,7 @@ object FormTransferTaskSalesforceField extends SQLSyntaxSupport[FormTransferTask
         c.user_group -> formTransferTaskSalesforceField.user_group,
         c.modified_user -> formTransferTaskSalesforceField.modified_user,
         c.modified -> formTransferTaskSalesforceField.modified
-      )
+      ).where.eq(c.id, formTransferTaskSalesforceField.id)
     }.update().apply()
   }
 
