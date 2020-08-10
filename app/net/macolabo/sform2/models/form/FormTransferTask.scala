@@ -59,7 +59,6 @@ object FormTransferTask extends SQLSyntaxSupport[FormTransferTask] {
    */
   def get(userGroup: String, transferTaskId: Int)(implicit session: DBSession = autoSession): Option[FormTransferTask] = {
     val f = FormTransferTask.syntax("f")
-    println("FormTransferTask.get")
     withSQL(
       select(
         f.id,

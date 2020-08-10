@@ -47,7 +47,6 @@ object FormTransferTaskCondition extends SQLSyntaxSupport[FormTransferTaskCondit
    */
   def get(formTransferTaskConditionId: Int)(implicit session: DBSession = autoSession): Option[FormTransferTaskCondition] = {
     val f = FormTransferTaskCondition.syntax("f")
-    println("FormTransferTaskCondition.get")
     withSQL(
       select(
         f.id,

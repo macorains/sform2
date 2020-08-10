@@ -55,7 +55,6 @@ object FormTransferTaskMail extends SQLSyntaxSupport[FormTransferTaskMail] {
    */
   def get(userGroup: String, formTransferTaskId: Int)(implicit session: DBSession = autoSession): Option[FormTransferTaskMail] = {
     val f = FormTransferTaskMail.syntax("f")
-    println("FormTransferTaskMail.get")
     withSQL(
     select(
       f.id,

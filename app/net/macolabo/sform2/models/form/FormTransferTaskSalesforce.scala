@@ -43,7 +43,6 @@ object FormTransferTaskSalesforce extends SQLSyntaxSupport[FormTransferTaskSales
    */
   def get(userGroup: String, formTransferTaskId: Int)(implicit session: DBSession = autoSession): Option[FormTransferTaskSalesforce] = {
     val f = FormTransferTaskSalesforce.syntax("f")
-    println("FormTransferTaskSalesforce.get")
     withSQL(
       select(
         f.id,
