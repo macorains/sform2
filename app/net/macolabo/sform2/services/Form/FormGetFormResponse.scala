@@ -317,7 +317,7 @@ trait FormGetFormResponseJson {
   implicit val FormGetFormResponseFormTransferTaskSalesforceFieldWrites: Writes[FormGetFormResponseFormTransferTaskSalesforceField]
   = (formGetFormResponseFormTransferTaskSalesforceField:FormGetFormResponseFormTransferTaskSalesforceField) => Json.obj(
     "id" -> formGetFormResponseFormTransferTaskSalesforceField.id,
-    "transfer_task_salesforce_id" -> formGetFormResponseFormTransferTaskSalesforceField.form_transfer_task_salesforce_id,
+    "form_transfer_task_salesforce_id" -> formGetFormResponseFormTransferTaskSalesforceField.form_transfer_task_salesforce_id,
     "form_column_id" -> formGetFormResponseFormTransferTaskSalesforceField.form_column_id,
     "field_name" -> formGetFormResponseFormTransferTaskSalesforceField.field_name
   )
