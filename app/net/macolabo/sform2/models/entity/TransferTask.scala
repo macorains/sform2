@@ -1,3 +1,4 @@
+/*
 package net.macolabo.sform2.models.entity
 
 import scalikejdbc._
@@ -14,3 +15,6 @@ object TransferTask extends SQLSyntaxSupport[TransferTask] {
   }
 
 }
+
+
+ */

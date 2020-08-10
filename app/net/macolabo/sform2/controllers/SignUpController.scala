@@ -8,10 +8,9 @@ import com.mohiva.play.silhouette.api.services.AvatarService
 import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
 import com.mohiva.play.silhouette.impl.providers._
 import javax.inject.Inject
-import net.macolabo.sform2.models.json.{UserSignUpResult, UserSignUpResultJson}
 import net.macolabo.sform2.forms.SignUpForm
 import net.macolabo.sform2.models
-import net.macolabo.sform2.models.User
+import net.macolabo.sform2.models.user.{UserSignUpResult, UserSignUpResultJson}
 import net.macolabo.sform2.services.AuthToken.AuthTokenService
 import net.macolabo.sform2.services.User.UserService
 import org.webjars.play.{WebJarsUtil, routes}

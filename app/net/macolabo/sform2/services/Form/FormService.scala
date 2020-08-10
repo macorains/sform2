@@ -5,12 +5,11 @@ import java.util.UUID
 
 import com.google.inject.Inject
 import net.macolabo.sform2.models.User
-import net.macolabo.sform2.models.daos.FormsDAO
-import net.macolabo.sform2.models.entity.{Form, FormCol, FormColSelect, FormColValidation}
+import net.macolabo.sform2.models.form.{Form, FormCol, FormColSelect, FormColValidation, FormTransferTask, FormTransferTaskCondition, FormTransferTaskMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField}
 
 import scala.concurrent.ExecutionContext
 
-class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
+class FormService @Inject() (implicit ex: ExecutionContext) {
 
   /**
    * フォーム詳細データ取得
@@ -34,7 +33,8 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
         f.input_header.getOrElse(""),
         f.complete_text.getOrElse(""),
         f.confirm_header.getOrElse(""),
-        convertToFormGetFormResponseFormCol(userGroup, f.id)
+        convertToFormGetFormResponseFormCol(userGroup, f.id),
+        convertToFormGetFormResponseTransferTask(userGroup, f.id)
       )
     })
   }
@@ -85,13 +85,34 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
    */
   def update(identity: User, formUpdateFormRequest: FormUpdateFormRequest): FormUpdateFormResponse = {
     val formId = updateForm(identity, formUpdateFormRequest)
-    formUpdateFormRequest.form_cols.map(f => {
-      updateFormCol(identity, f)
-      f.select_list.map(s => {
-        updateFormColSelect(identity, s)
-      })
-      f.validations.map(v =>updateFormColValidation(identity, v))
+
+    val updatedColIds = formUpdateFormRequest.form_cols.map(f => {
+      f.id match {
+        case Some(i: Int) if i > 0 => updateFormCol(identity, f)
+        case _ => insertFormCol(identity, FormUpdateFormRequestFormColToFormInsertFormRequestFormCol(f), formUpdateFormRequest.id)
+      }
     })
+
+    val updatedTransferTasks = formUpdateFormRequest.form_transfer_tasks.map(f => {
+      f.id match {
+        case Some(i: Int) if i > 0 => updateFormTransferTask(identity, f)
+        case _ => insertFormTransferTask(identity, FormUpdateFormRequestFormTransferTaskToFormInsertFormRequestFormTransferTask(f), formUpdateFormRequest.id)
+      }
+    })
+
+    // 削除対象のフォーム項目及び転送タスクを抽出、削除
+    val userGroup = identity.group.getOrElse("")
+    FormCol
+        .getList(userGroup, formUpdateFormRequest.id)
+        .filterNot(c => updatedColIds.contains(c.id) )
+        .map(c => c.id)
+        .foreach(c => FormCol.erase(userGroup, c))
+    FormTransferTask
+        .getList(userGroup, formUpdateFormRequest.id)
+        .filterNot(c => updatedTransferTasks.contains(c.id))
+        .map(c => c.id)
+        .foreach(c => FormTransferTask.erase(userGroup, c))
+
     FormUpdateFormResponse(formId)
   }
 
@@ -153,7 +174,7 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
     })
   }
 
-  private def convertToFormGetFormResponseFormColValidation(userGroup: String, form_id: Int, form_col_id: Int) = {
+  private def convertToFormGetFormResponseFormColValidation(userGroup: String, form_id: Int, form_col_id: Int): Option[FormGetFormResponseFormColValidation] = {
     FormColValidation.get(userGroup, form_id, form_col_id).map(f => {
       FormGetFormResponseFormColValidation(
         f.id,
@@ -163,7 +184,75 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
         f.min_value,
         f.max_length,
         f.min_length,
-        f.input_type
+        f.input_type,
+        f.required
+      )
+    })
+  }
+
+  private def convertToFormGetFormResponseTransferTask(userGroup: String, formId: Int): List[FormGetFormResponseFormTransferTask] = {
+    FormTransferTask.getList(userGroup, formId).map(f => {
+      FormGetFormResponseFormTransferTask(
+        f.id,
+        f.transfer_config_id,
+        f.form_id,
+        f.task_index,
+        f.name,
+        convertToFormGetFormResponseTransferTaskCondition(userGroup, formId, f.id),
+        convertToFormGetFormResponseTransferTaskMail(userGroup, f.id),
+        convertToFormGetFormResponseTransferTaskSalesforce(userGroup, f.id)
+      )
+    })
+  }
+
+  private def convertToFormGetFormResponseTransferTaskCondition(userGroup: String, formId: Int, formTransferTaskId: Int): List[FormGetFormResponseFormTransferTaskCondition] = {
+    FormTransferTaskCondition.getList(userGroup, formId, formTransferTaskId).map(f => {
+      FormGetFormResponseFormTransferTaskCondition(
+        f.id,
+        f.form_transfer_task_id,
+        f.form_id,
+        f.form_col_id,
+        f.operator,
+        f.cond_value
+      )
+    })
+  }
+
+  private def convertToFormGetFormResponseTransferTaskMail(userGroup: String, formTransferTaskId: Int): Option[FormGetFormResponseFormTransferTaskMail] = {
+    FormTransferTaskMail.get(userGroup, formTransferTaskId).map(f => {
+      FormGetFormResponseFormTransferTaskMail(
+        f.id,
+        f.form_transfer_task_id,
+        f.from_address_id,
+        f.to_address,
+        f.cc_address,
+        f.bcc_address_id,
+        f.replyto_address_id,
+        f.subject,
+        f.body
+      )
+    })
+  }
+
+  private def convertToFormGetFormResponseTransferTaskSalesforce(userGroup: String, formTransferTaskId: Int): Option[FormGetFormResponseFormTransferTaskSalesforce] = {
+    FormTransferTaskSalesforce.get(userGroup, formTransferTaskId).map(f => {
+      FormGetFormResponseFormTransferTaskSalesforce(
+        f.id,
+        f.form_transfer_task_id,
+        f.object_name,
+        convertToFormGetFormResponseTransferTaskSalesforceField(userGroup, f.id)
+      )
+    })
+  }
+
+
+  private def convertToFormGetFormResponseTransferTaskSalesforceField(userGroup: String, formTransferTaskSalesforceId: Int): List[FormGetFormResponseFormTransferTaskSalesforceField] = {
+    FormTransferTaskSalesforceField.getList(userGroup, formTransferTaskSalesforceId).map(f => {
+      FormGetFormResponseFormTransferTaskSalesforceField(
+        f.id,
+        f.form_transfer_task_salesforce_id,
+        f.form_column_id,
+        f.field_name
       )
     })
   }
@@ -197,7 +286,7 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
 
   private def updateFormCol(identity: User, formUpdateFormRequestFormCol: FormUpdateFormRequestFormCol): Int = {
     val formCol = FormCol(
-      formUpdateFormRequestFormCol.id,
+      formUpdateFormRequestFormCol.id.getOrElse(0),
       formUpdateFormRequestFormCol.form_id,
       formUpdateFormRequestFormCol.name,
       formUpdateFormRequestFormCol.col_id,
@@ -211,12 +300,35 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
       ZonedDateTime.now()
     )
     formCol.update
+
+    val updatedSelectListIds = formUpdateFormRequestFormCol.select_list.map(s => {
+      s.id match {
+        case Some(i: Int) if i > 0 => updateFormColSelect(identity, s)
+        case _ => insertFormColSelect(identity, FormUpdateFormRequestFormColSelectToFormInsertFormRequestFormColSelect(s), formCol.form_id, formCol.id)
+      }
+    })
+
+    // 削除対象のフォーム項目・選択項目IDを抽出、削除
+    val userGroup = identity.group.getOrElse("")
+    FormColSelect
+      .getList(userGroup, formUpdateFormRequestFormCol.form_id, formUpdateFormRequestFormCol.id.getOrElse(0))
+      .filterNot(c => updatedSelectListIds.contains(c.id))
+      .map(c => c.id)
+      .foreach(c => FormColSelect.erase(userGroup, c))
+
+    formUpdateFormRequestFormCol.validations.map(v => {
+      v.id match {
+        case Some(i: Int) if i > 0 => updateFormColValidation(identity, v)
+        case _ => insertFormColValidation(identity, FormUpdateFormRequestFormColValidationToFormInsertFormRequestFormColValidation(v), formCol.form_id, formCol.id)
+      }
+    })
+    formCol.id
   }
 
   private def updateFormColSelect(identity: User, formUpdateFormRequestFormColSelect: FormUpdateFormRequestFormColSelect): Int = {
     val formColSelect = FormColSelect(
-      formUpdateFormRequestFormColSelect.id,
-      formUpdateFormRequestFormColSelect.form_col_id,
+      formUpdateFormRequestFormColSelect.id.getOrElse(0),
+      formUpdateFormRequestFormColSelect.form_col_id.getOrElse(0),
       formUpdateFormRequestFormColSelect.form_id,
       formUpdateFormRequestFormColSelect.select_index,
       formUpdateFormRequestFormColSelect.select_name,
@@ -231,18 +343,20 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
       ZonedDateTime.now()
     )
     formColSelect.update
+    formColSelect.id
   }
 
   private def updateFormColValidation(identity: User, formUpdateFormRequestFormColValidation: FormUpdateFormRequestFormColValidation): Int = {
     val formColValidation = FormColValidation(
-      formUpdateFormRequestFormColValidation.id,
-      formUpdateFormRequestFormColValidation.form_col_id,
+      formUpdateFormRequestFormColValidation.id.getOrElse(0),
+      formUpdateFormRequestFormColValidation.form_col_id.getOrElse(0),
       formUpdateFormRequestFormColValidation.form_id,
       formUpdateFormRequestFormColValidation.max_value,
       formUpdateFormRequestFormColValidation.min_value,
       formUpdateFormRequestFormColValidation.max_length,
       formUpdateFormRequestFormColValidation.min_length,
       formUpdateFormRequestFormColValidation.input_type,
+      formUpdateFormRequestFormColValidation.required,
       "",
       "",
       identity.userID.toString,
@@ -250,6 +364,137 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
       ZonedDateTime.now()
     )
     formColValidation.update
+  }
+
+  private def updateFormTransferTask(identity: User, formUpdateFormRequestFormTransferTask: FormUpdateFormRequestFormTransferTask): Int = {
+    val formTransferTask = FormTransferTask(
+      formUpdateFormRequestFormTransferTask.id.getOrElse(0),
+      formUpdateFormRequestFormTransferTask.transfer_config_id,
+      formUpdateFormRequestFormTransferTask.form_id,
+      formUpdateFormRequestFormTransferTask.task_index,
+      formUpdateFormRequestFormTransferTask.name,
+      identity.group.getOrElse(""),
+      identity.userID.toString,
+      identity.userID.toString,
+      ZonedDateTime.now(),
+      ZonedDateTime.now(),
+    )
+    formTransferTask.update
+
+    val updatedConditions = formUpdateFormRequestFormTransferTask.form_transfer_task_conditions.map(t => {
+      t.id match {
+        case Some(i: Int) if i>0 => updateFormTransferTaskCondition(identity, t)
+        case _ => insertFormTransferTaskCondition(identity, FormUpdateFormRequestFormTransferTaskConditionToFormInsertFormRequestFormTransferTaskCondition(t), formTransferTask.id)
+      }
+    })
+
+    val userGroup = identity.group.getOrElse("")
+    FormTransferTaskCondition
+      .getList(userGroup, formTransferTask.form_id, formTransferTask.id)
+        .filterNot(c => updatedConditions.contains(c.id))
+        .map(c => c.id)
+        .foreach(c => FormTransferTaskCondition.erase(userGroup, c))
+
+    formUpdateFormRequestFormTransferTask.mail.map(m => {
+      m.id match {
+        case Some(i: Int) if i>0 => updateFormTransferTaskMail(identity, m)
+        case _ => insertFormTransferTaskMail(identity, FormUpdateFormRequestFormTransferTaskMailToFormInsertFormRequestFormTransferTaskMail(m), formTransferTask.id)
+      }
+    })
+
+    formUpdateFormRequestFormTransferTask.salesforce.map(s => {
+      s.id match {
+        case Some(i: Int) if i>0 => updateFormTransferTaskSalesforce(identity, s)
+        case _ => insertFormTransferTaskSalesforce(identity, FormUpdateFormRequestFormTransferTaskSalesforceToFormInsertFormRequestFormTransferTaskSalesforce(s), formTransferTask.id)
+      }
+    })
+
+    formUpdateFormRequestFormTransferTask.id.getOrElse(0)
+  }
+
+  private def updateFormTransferTaskCondition(identity: User, formUpdateFormRequestFormTransferTaskCondition: FormUpdateFormRequestFormTransferTaskCondition): Int = {
+    val formTransferTaskCondition = FormTransferTaskCondition(
+      formUpdateFormRequestFormTransferTaskCondition.id.getOrElse(0),
+      formUpdateFormRequestFormTransferTaskCondition.form_transfer_task_id,
+      formUpdateFormRequestFormTransferTaskCondition.form_id,
+      formUpdateFormRequestFormTransferTaskCondition.form_col_id,
+      formUpdateFormRequestFormTransferTaskCondition.operator,
+      formUpdateFormRequestFormTransferTaskCondition.cond_value,
+      identity.group.getOrElse(""),
+      identity.userID.toString,
+      identity.userID.toString,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    )
+    formTransferTaskCondition.update
+    formUpdateFormRequestFormTransferTaskCondition.id.getOrElse(0)
+  }
+
+  private def updateFormTransferTaskMail(identity: User, formUpdateFormRequestFormTransferTaskMail: FormUpdateFormRequestFormTransferTaskMail): Int = {
+    val formTransferTaskMail = FormTransferTaskMail(
+      formUpdateFormRequestFormTransferTaskMail.id.getOrElse(0),
+      formUpdateFormRequestFormTransferTaskMail.form_transfer_task_id.getOrElse(0),
+      formUpdateFormRequestFormTransferTaskMail.from_address_id,
+      formUpdateFormRequestFormTransferTaskMail.to_address,
+      formUpdateFormRequestFormTransferTaskMail.cc_address,
+      formUpdateFormRequestFormTransferTaskMail.bcc_address_id,
+      formUpdateFormRequestFormTransferTaskMail.replyto_address_id,
+      formUpdateFormRequestFormTransferTaskMail.subject,
+      formUpdateFormRequestFormTransferTaskMail.body,
+      identity.group.getOrElse(""),
+      identity.userID.toString,
+      identity.userID.toString,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    )
+    formTransferTaskMail.update
+    formUpdateFormRequestFormTransferTaskMail.id.getOrElse(0)
+  }
+
+  private def updateFormTransferTaskSalesforce(identity :User, formUpdateFormRequestFormTransferTaskSalesforce: FormUpdateFormRequestFormTransferTaskSalesforce): Int = {
+    val formTransferTaskSalesforce = FormTransferTaskSalesforce(
+      formUpdateFormRequestFormTransferTaskSalesforce.id.getOrElse(0),
+      formUpdateFormRequestFormTransferTaskSalesforce.form_transfer_task_id.getOrElse(0),
+      formUpdateFormRequestFormTransferTaskSalesforce.object_name,
+      identity.group.getOrElse(""),
+      identity.userID.toString,
+      identity.userID.toString,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    )
+    formTransferTaskSalesforce.update
+
+    val updateFields = formUpdateFormRequestFormTransferTaskSalesforce.fields.map(f => {
+      f.id match {
+        case Some(i :Int) if i<0 => updateFormTransferTaskSalesforceField(identity, f)
+        case _ => insertFormTransferTaskSalesforceField(identity, FormUpdateFormRequestFormTransferTaskSalesforceFieldToFormInsertFormRequestFormTransferTaskSalesforceField(f), formTransferTaskSalesforce.id)
+      }
+    })
+
+    val userGroup = identity.group.getOrElse("")
+    FormTransferTaskSalesforceField
+      .getList(userGroup, formTransferTaskSalesforce.id)
+        .filterNot(c => updateFields.contains(c.id))
+        .map(c => c.id)
+        .foreach(c => FormTransferTaskSalesforceField.erase(userGroup, c))
+
+    formUpdateFormRequestFormTransferTaskSalesforce.id.getOrElse(0)
+  }
+
+  private def updateFormTransferTaskSalesforceField(identity: User, formUpdateFormRequestFormTransferTaskSalesforceField: FormUpdateFormRequestFormTransferTaskSalesforceField): Int = {
+    val formTransferTaskSalesforceField = FormTransferTaskSalesforceField(
+      formUpdateFormRequestFormTransferTaskSalesforceField.id.getOrElse(0),
+      formUpdateFormRequestFormTransferTaskSalesforceField.form_transfer_task_salesforce_id,
+      formUpdateFormRequestFormTransferTaskSalesforceField.form_column_id,
+      formUpdateFormRequestFormTransferTaskSalesforceField.field_name,
+      identity.group.getOrElse(""),
+      identity.userID.toString,
+      identity.userID.toString,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    )
+    formTransferTaskSalesforceField.update
+    formUpdateFormRequestFormTransferTaskSalesforceField.id.getOrElse(0)
   }
 
   //-------------------------------------------------
@@ -330,6 +575,7 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
       formInsertFormRequestFormColValidation.max_length,
       formInsertFormRequestFormColValidation.min_length,
       formInsertFormRequestFormColValidation.input_type,
+      formInsertFormRequestFormColValidation.required,
       identity.group.getOrElse(""),
       identity.userID.toString,
       identity.userID.toString,
@@ -338,4 +584,194 @@ class FormService @Inject() (userDAO: FormsDAO)(implicit ex: ExecutionContext) {
     )
     formColValidation.insert
   }
+
+  private def insertFormTransferTask(identity:User, formInsertFormRequestFormTransferTask: FormInsertFormRequestFormTransferTask, formId: Int) = {
+    val formTransferTask = FormTransferTask(
+      0,
+      formInsertFormRequestFormTransferTask.transfer_config_id,
+      formId,
+      formInsertFormRequestFormTransferTask.task_index,
+      formInsertFormRequestFormTransferTask.name,
+      identity.group.getOrElse(""),
+      identity.userID.toString,
+      identity.userID.toString,
+      ZonedDateTime.now(),
+      ZonedDateTime.now(),
+    )
+    val formTransferTaskId = formTransferTask.insert
+
+    formInsertFormRequestFormTransferTask.form_transfer_task_conditions.map(c => {
+      insertFormTransferTaskCondition(identity, c, formTransferTaskId)
+    })
+
+    formInsertFormRequestFormTransferTask.mail.map(m => {
+      insertFormTransferTaskMail(identity, m, formTransferTaskId)
+    })
+
+    formInsertFormRequestFormTransferTask.salesforce.map(s => {
+      insertFormTransferTaskSalesforce(identity, s, formTransferTaskId)
+    })
+
+    formTransferTaskId
+  }
+
+  private def insertFormTransferTaskCondition(identity: User, formInsertFormRequestFormTransferTaskCondition: FormInsertFormRequestFormTransferTaskCondition, formTransferTaskId: Int): Int = {
+    val formTransferTaskCondition = FormTransferTaskCondition(
+      0,
+      formTransferTaskId,
+      formInsertFormRequestFormTransferTaskCondition.form_id,
+      formInsertFormRequestFormTransferTaskCondition.form_col_id,
+      formInsertFormRequestFormTransferTaskCondition.operator,
+      formInsertFormRequestFormTransferTaskCondition.cond_value,
+      identity.group.getOrElse(""),
+      identity.userID.toString,
+      identity.userID.toString,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    )
+    formTransferTaskCondition.insert
+  }
+
+  private def insertFormTransferTaskMail(identity: User, formInsertFormRequestFormTransferTaskMail: FormInsertFormRequestFormTransferTaskMail, formTransferTaskId: Int): Int = {
+    val formTransferTaskMail = FormTransferTaskMail(
+      0,
+      formTransferTaskId,
+      formInsertFormRequestFormTransferTaskMail.from_address_id,
+      formInsertFormRequestFormTransferTaskMail.to_address,
+      formInsertFormRequestFormTransferTaskMail.cc_address,
+      formInsertFormRequestFormTransferTaskMail.bcc_address_id,
+      formInsertFormRequestFormTransferTaskMail.replyto_address_id,
+      formInsertFormRequestFormTransferTaskMail.subject,
+      formInsertFormRequestFormTransferTaskMail.body,
+      identity.group.getOrElse(""),
+      identity.userID.toString,
+      identity.userID.toString,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    )
+    formTransferTaskMail.insert
+  }
+
+  private def insertFormTransferTaskSalesforce(identity: User, formInsertFormRequestFormTransferTaskSalesforce: FormInsertFormRequestFormTransferTaskSalesforce, formTransferTaskId: Int): Int = {
+    val formTransferTaskSalesforce = FormTransferTaskSalesforce(
+      0,
+      formTransferTaskId,
+      formInsertFormRequestFormTransferTaskSalesforce.object_name,
+      identity.group.getOrElse(""),
+      identity.userID.toString,
+      identity.userID.toString,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    )
+    val formTransferTaskSalesforceId = formTransferTaskSalesforce.insert
+    formInsertFormRequestFormTransferTaskSalesforce.fields.map(f => {
+      insertFormTransferTaskSalesforceField(identity, f, formTransferTaskSalesforceId)
+    })
+    formTransferTaskSalesforceId
+  }
+
+  private def insertFormTransferTaskSalesforceField(identity: User, formInsertFormRequestFormTransferTaskSalesforceField: FormInsertFormRequestFormTransferTaskSalesforceField, formTransferTaskSalesforceId: Int): Int = {
+    val formTransferTaskSalesforceField = FormTransferTaskSalesforceField(
+      0,
+      formTransferTaskSalesforceId,
+      formInsertFormRequestFormTransferTaskSalesforceField.form_column_id,
+      formInsertFormRequestFormTransferTaskSalesforceField.field_name,
+      identity.group.getOrElse(""),
+      identity.userID.toString,
+      identity.userID.toString,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    )
+    formTransferTaskSalesforceField.insert
+  }
+
+
+  //-------------------------------------------------
+  //  更新リクエスト→作成リクエスト変換ロジック
+  //-------------------------------------------------
+  private def FormUpdateFormRequestFormColToFormInsertFormRequestFormCol(src: FormUpdateFormRequestFormCol): FormInsertFormRequestFormCol = {
+    FormInsertFormRequestFormCol(
+      src.name,
+      src.col_id,
+      src.col_index,
+      src.col_type,
+      src.default_value,
+      src.select_list.map(s => FormUpdateFormRequestFormColSelectToFormInsertFormRequestFormColSelect(s)),
+      src.validations.map(v => FormUpdateFormRequestFormColValidationToFormInsertFormRequestFormColValidation(v))
+    )
+  }
+
+  private def FormUpdateFormRequestFormColSelectToFormInsertFormRequestFormColSelect(src: FormUpdateFormRequestFormColSelect): FormInsertFormRequestFormColSelect = {
+    FormInsertFormRequestFormColSelect(
+      src.select_index,
+      src.select_name,
+      src.select_value,
+      src.is_default,
+      src.edit_style,
+      src.view_style
+    )
+  }
+
+  private def FormUpdateFormRequestFormColValidationToFormInsertFormRequestFormColValidation(src: FormUpdateFormRequestFormColValidation): FormInsertFormRequestFormColValidation = {
+    FormInsertFormRequestFormColValidation(
+      src.max_value,
+      src.min_value,
+      src.max_length,
+      src.min_length,
+      src.input_type,
+      src.required
+    )
+  }
+
+  private def FormUpdateFormRequestFormTransferTaskToFormInsertFormRequestFormTransferTask(src: FormUpdateFormRequestFormTransferTask): FormInsertFormRequestFormTransferTask = {
+    FormInsertFormRequestFormTransferTask(
+      src.transfer_config_id,
+      src.form_id,
+      src.task_index,
+      src.name,
+      src.form_transfer_task_conditions.map(c => FormUpdateFormRequestFormTransferTaskConditionToFormInsertFormRequestFormTransferTaskCondition(c)),
+      src.mail.map(m => FormUpdateFormRequestFormTransferTaskMailToFormInsertFormRequestFormTransferTaskMail(m)),
+      src.salesforce.map(s => FormUpdateFormRequestFormTransferTaskSalesforceToFormInsertFormRequestFormTransferTaskSalesforce(s))
+    )
+  }
+
+  private def FormUpdateFormRequestFormTransferTaskConditionToFormInsertFormRequestFormTransferTaskCondition(src: FormUpdateFormRequestFormTransferTaskCondition): FormInsertFormRequestFormTransferTaskCondition = {
+    FormInsertFormRequestFormTransferTaskCondition(
+      src.form_transfer_task_id,
+      src.form_id,
+      src.form_col_id,
+      src.operator,
+      src.cond_value
+    )
+  }
+
+  private def FormUpdateFormRequestFormTransferTaskMailToFormInsertFormRequestFormTransferTaskMail(src: FormUpdateFormRequestFormTransferTaskMail): FormInsertFormRequestFormTransferTaskMail = {
+    FormInsertFormRequestFormTransferTaskMail(
+      src.form_transfer_task_id.getOrElse(0),
+      src.from_address_id,
+      src.to_address,
+      src.cc_address,
+      src.bcc_address_id,
+      src.replyto_address_id,
+      src.subject,
+      src.body
+    )
+  }
+
+  private def FormUpdateFormRequestFormTransferTaskSalesforceToFormInsertFormRequestFormTransferTaskSalesforce(src: FormUpdateFormRequestFormTransferTaskSalesforce): FormInsertFormRequestFormTransferTaskSalesforce = {
+    FormInsertFormRequestFormTransferTaskSalesforce(
+      src.form_transfer_task_id.getOrElse(0),
+      src.object_name,
+      src.fields.map(f => FormUpdateFormRequestFormTransferTaskSalesforceFieldToFormInsertFormRequestFormTransferTaskSalesforceField(f))
+    )
+  }
+
+  private def FormUpdateFormRequestFormTransferTaskSalesforceFieldToFormInsertFormRequestFormTransferTaskSalesforceField(src: FormUpdateFormRequestFormTransferTaskSalesforceField): FormInsertFormRequestFormTransferTaskSalesforceField = {
+    FormInsertFormRequestFormTransferTaskSalesforceField(
+      src.form_transfer_task_salesforce_id,
+      src.form_column_id,
+      src.field_name
+    )
+  }
 }
+

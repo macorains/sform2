@@ -1,4 +1,6 @@
 package net.macolabo.sform2.services.Form
+import java.time.ZonedDateTime
+
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
@@ -13,6 +15,7 @@ import play.api.libs.functional.syntax._
   * @param max_length 最大長
   * @param min_length 最小長
   * @param input_type 入力種別
+  * @param required 入力必須
   */
 case class FormGetFormResponseFormColValidation(
                                                id: Int,
@@ -22,7 +25,8 @@ case class FormGetFormResponseFormColValidation(
                                                min_value: Int,
                                                max_length: Int,
                                                min_length: Int,
-                                               input_type: Int
+                                               input_type: Int,
+                                               required: Boolean
                                                )
 
 /**
@@ -48,6 +52,95 @@ case class FormGetFormResponseFormColSelect(
                                                edit_style: String,
                                                view_style: String
                                                )
+
+/**
+ * フォーム取得API・FormTransferTask
+ * @param id FormTransferTask ID
+ * @param transfer_config_id TransferConfig ID
+ * @param form_id フォームID
+ * @param task_index 順番
+ * @param form_transfer_task_conditions FormTransferTaskConditionのリスト
+ */
+case class FormGetFormResponseFormTransferTask(
+                                            id: Int,
+                                            transfer_config_id: Int,
+                                            form_id: Int,
+                                            task_index: Int,
+                                            name: String,
+                                            form_transfer_task_conditions: List[FormGetFormResponseFormTransferTaskCondition],
+                                            mail: Option[FormGetFormResponseFormTransferTaskMail],
+                                            salesforce: Option[FormGetFormResponseFormTransferTaskSalesforce]
+                                          )
+
+/**
+ * フォーム取得API・FormTransferTask・FormTransferTaskCondition
+ * @param id FormTransferTaskCondition ID
+ * @param form_transfer_task_id FormTransferTask ID
+ * @param form_id フォームID
+ * @param form_col_id フォーム項目ID
+ * @param operator 演算子
+ * @param cond_value 値　
+ */
+case class FormGetFormResponseFormTransferTaskCondition(
+                                                         id: Int,
+                                                         form_transfer_task_id: Int,
+                                                         form_id: Int,
+                                                         form_col_id: Int,
+                                                         operator: String,
+                                                         cond_value: String
+                                                       )
+
+/**
+ * フォーム取得API・FormTransferTask・FormTransferTaskMail
+ * @param id FormTransferTaskMail ID
+ * @param form_transfer_task_id FormTransferTask ID
+ * @param from_address_id FROMに使うメールアドレスのID
+ * @param to_address Toアドレス
+ * @param cc_address Ccアドレス
+ * @param bcc_address_id Bccに使うメールアドレスのID
+ * @param replyto_address_id replyToに使うメールアドレスのID
+ * @param subject 件名
+ * @param body 本文
+ */
+case class FormGetFormResponseFormTransferTaskMail(
+                                                    id: Int,
+                                                    form_transfer_task_id: Int,
+                                                    from_address_id: Int,
+                                                    to_address: String,
+                                                    cc_address: String,
+                                                    bcc_address_id: Int,
+                                                    replyto_address_id: Int,
+                                                    subject: String,
+                                                    body: String
+                                                  )
+
+/**
+ * フォーム取得API・FormTransferTask・FormTransferTaskSalesforce
+ * @param id FormTransferTaskSalesforce ID
+ * @param form_transfer_task_id FormTransferTask ID
+ * @param object_name Salesforceオブジェクト名
+ * @param fields フィールド割り当てリスト
+ */
+case class FormGetFormResponseFormTransferTaskSalesforce(
+                                                          id: Int,
+                                                          form_transfer_task_id: Int,
+                                                          object_name: String,
+                                                          fields: List[FormGetFormResponseFormTransferTaskSalesforceField]
+                                                        )
+
+/**
+ * フォーム取得API・FormTransferTask・FormTransferTaskSalesforceField
+ * @param id FormTransferTaskSalesforceField ID
+ * @param form_transfer_task_salesforce_id FormTransferTaskSalesforce ID
+ * @param form_column_id フォーム項目ID
+ * @param field_name Salesforceフィールド名
+ */
+case class FormGetFormResponseFormTransferTaskSalesforceField(
+                                                               id: Int,
+                                                               form_transfer_task_salesforce_id: Int,
+                                                               form_column_id: String,
+                                                               field_name: String
+                                                             )
 
 /**
   * フォーム取得API・フォーム項目
@@ -102,7 +195,8 @@ case class FormGetFormResponse(
                               input_header: String,
                               complete_text: String,
                               confirm_header: String,
-                              form_cols: List[FormGetFormResponseFormCol]
+                              form_cols: List[FormGetFormResponseFormCol],
+                              form_transfer_tasks: List[FormGetFormResponseFormTransferTask]
                               ) {
 
 }
@@ -116,7 +210,8 @@ trait FormGetFormResponseJson {
     "min_value" -> formGetFormResponseFormColValidation.min_value,
     "max_length" -> formGetFormResponseFormColValidation.max_length,
     "min_length" -> formGetFormResponseFormColValidation.min_length,
-    "input_type" -> formGetFormResponseFormColValidation.input_type
+    "input_type" -> formGetFormResponseFormColValidation.input_type,
+    "required" -> formGetFormResponseFormColValidation.required
   )
 
   implicit val FormGetFormResponseFormColValidationReads: Reads[FormGetFormResponseFormColValidation] = (
@@ -127,7 +222,8 @@ trait FormGetFormResponseJson {
       (JsPath \ "min_value").read[Int] ~
       (JsPath \ "max_length").read[Int] ~
       (JsPath \ "min_length").read[Int] ~
-      (JsPath \ "input_type").read[Int]
+      (JsPath \ "input_type").read[Int] ~
+      (JsPath \ "required").read[Boolean]
     )(FormGetFormResponseFormColValidation.apply _)
 
   implicit val FormGetFormResponseFormColSelectListWrites: Writes[FormGetFormResponseFormColSelect] = (formGetFormResponseFormColSelectList: FormGetFormResponseFormColSelect) => Json.obj(
@@ -153,6 +249,99 @@ trait FormGetFormResponseJson {
       (JsPath \ "edit_style").read[String] ~
       (JsPath \ "view_style").read[String]
   )(FormGetFormResponseFormColSelect.apply _)
+
+  implicit val formGetFormResponseFormTransferTaskWrites: Writes[FormGetFormResponseFormTransferTask] = (formGetFormResponseFormTransferTask: FormGetFormResponseFormTransferTask) => Json.obj(
+    "id" -> formGetFormResponseFormTransferTask.id,
+    "transfer_config_id" -> formGetFormResponseFormTransferTask.transfer_config_id,
+    "form_id" -> formGetFormResponseFormTransferTask.form_id,
+    "task_index" -> formGetFormResponseFormTransferTask.task_index,
+    "name" -> formGetFormResponseFormTransferTask.name,
+    "form_transfer_task_conditions" -> formGetFormResponseFormTransferTask.form_transfer_task_conditions,
+    "mail" -> formGetFormResponseFormTransferTask.mail,
+    "salesforce" -> formGetFormResponseFormTransferTask.salesforce
+  )
+
+  implicit val formGetFormResponseFormTransferTaskReads: Reads[FormGetFormResponseFormTransferTask] = (
+    (JsPath \ "id").read[Int] ~
+      (JsPath \ "transfer_config_id").read[Int] ~
+      (JsPath \ "form_id").read[Int] ~
+      (JsPath \ "task_index").read[Int] ~
+      (JsPath \ "name").read[String] ~
+      (JsPath \ "form_transfer_task_condition").read[List[FormGetFormResponseFormTransferTaskCondition]] ~
+      (JsPath \ "mail").readNullable[FormGetFormResponseFormTransferTaskMail] ~
+      (JsPath \ "salesforce").readNullable[FormGetFormResponseFormTransferTaskSalesforce]
+  )(FormGetFormResponseFormTransferTask.apply _)
+
+  implicit val formGetFormResponseFormTransferTaskConditionWrites: Writes[FormGetFormResponseFormTransferTaskCondition] = (formGetFormResponseFormTransferTaskCondition: FormGetFormResponseFormTransferTaskCondition) => Json.obj(
+    "id" -> formGetFormResponseFormTransferTaskCondition.id,
+    "form_transfer_task_id" -> formGetFormResponseFormTransferTaskCondition.form_transfer_task_id,
+    "form_id" -> formGetFormResponseFormTransferTaskCondition.form_id,
+    "form_col_id" -> formGetFormResponseFormTransferTaskCondition.form_col_id,
+    "operator" -> formGetFormResponseFormTransferTaskCondition.operator,
+    "cond_value" -> formGetFormResponseFormTransferTaskCondition.cond_value
+  )
+
+  implicit val formGetFormResponseFormTransferTaskConditionReads: Reads[FormGetFormResponseFormTransferTaskCondition] = (
+    (JsPath \ "id").read[Int] ~
+      (JsPath \ "form_transfer_task_id").read[Int] ~
+      (JsPath \ "form_id").read[Int] ~
+      (JsPath \ "form_col_id").read[Int] ~
+      (JsPath \ "operator").read[String] ~
+      (JsPath \ "cond_value").read[String]
+  )(FormGetFormResponseFormTransferTaskCondition.apply _)
+
+  implicit val FormGetFormResponseFormTransferTaskMailWrites: Writes[FormGetFormResponseFormTransferTaskMail] = (formGetFormResponseFormTransferTaskMail:FormGetFormResponseFormTransferTaskMail) => Json.obj(
+    "id" -> formGetFormResponseFormTransferTaskMail.id,
+    "form_transfer_task_id" -> formGetFormResponseFormTransferTaskMail.form_transfer_task_id,
+    "from_address_id" -> formGetFormResponseFormTransferTaskMail.from_address_id,
+    "to_address" -> formGetFormResponseFormTransferTaskMail.to_address,
+    "cc_address" -> formGetFormResponseFormTransferTaskMail.cc_address,
+    "bcc_address_id" -> formGetFormResponseFormTransferTaskMail.bcc_address_id,
+    "replyto_address_id" -> formGetFormResponseFormTransferTaskMail.replyto_address_id,
+    "subject" -> formGetFormResponseFormTransferTaskMail.subject,
+    "body" -> formGetFormResponseFormTransferTaskMail.body
+  )
+
+  implicit val FormGetFormResponseFormTransferTaskMailReads: Reads[FormGetFormResponseFormTransferTaskMail] = (
+    (JsPath \ "id").read[Int] ~
+      (JsPath \ "form_transfer_task_id").read[Int] ~
+      (JsPath \ "from_address_id").read[Int] ~
+      (JsPath \ "to_address").read[String] ~
+      (JsPath \ "cc_address").read[String] ~
+      (JsPath \ "bcc_address_id").read[Int] ~
+      (JsPath \ "replyto_address_id").read[Int] ~
+      (JsPath \ "subject").read[String] ~
+      (JsPath \ "body").read[String]
+  )(FormGetFormResponseFormTransferTaskMail.apply _)
+
+  implicit val FormGetFormResponseFormTransferTaskSalesforceFieldWrites: Writes[FormGetFormResponseFormTransferTaskSalesforceField]
+  = (formGetFormResponseFormTransferTaskSalesforceField:FormGetFormResponseFormTransferTaskSalesforceField) => Json.obj(
+    "id" -> formGetFormResponseFormTransferTaskSalesforceField.id,
+    "form_ransfer_task_salesforce_id" -> formGetFormResponseFormTransferTaskSalesforceField.form_transfer_task_salesforce_id,
+    "form_column_id" -> formGetFormResponseFormTransferTaskSalesforceField.form_column_id,
+    "field_name" -> formGetFormResponseFormTransferTaskSalesforceField.field_name
+  )
+
+  implicit val FormGetFormResponseFormTransferTaskSalesforceFieldReads: Reads[FormGetFormResponseFormTransferTaskSalesforceField] = (
+    (JsPath \ "id").read[Int] ~
+      (JsPath \ "transfer_task_salesforce_id").read[Int] ~
+      (JsPath \ "form_column_id").read[String] ~
+      (JsPath \ "field_name").read[String]
+  )(FormGetFormResponseFormTransferTaskSalesforceField.apply _)
+
+  implicit val FormGetFormResponseFormTransferTaskSalesforceWrites: Writes[FormGetFormResponseFormTransferTaskSalesforce] = (formGetFormResponseFormTransferTaskSalesforce:FormGetFormResponseFormTransferTaskSalesforce) => Json.obj(
+    "id" -> formGetFormResponseFormTransferTaskSalesforce.id,
+    "form_transfer_task_id" -> formGetFormResponseFormTransferTaskSalesforce.form_transfer_task_id,
+    "object_name" -> formGetFormResponseFormTransferTaskSalesforce.object_name,
+    "fields" -> formGetFormResponseFormTransferTaskSalesforce.fields
+  )
+
+  implicit val FormGetFormResponseFormTransferTaskSalesforceReads: Reads[FormGetFormResponseFormTransferTaskSalesforce] = (
+    (JsPath \ "id").read[Int] ~
+      (JsPath \ "form_transfer_task_id").read[Int] ~
+      (JsPath \ "object_name").read[String] ~
+      (JsPath \ "fields").read[List[FormGetFormResponseFormTransferTaskSalesforceField]]
+  )(FormGetFormResponseFormTransferTaskSalesforce.apply _)
 
   implicit val FormGetFormResponseFormColWrites: Writes[FormGetFormResponseFormCol] = (formGetFormResponseFormCol: FormGetFormResponseFormCol) => Json.obj(
     "id" -> formGetFormResponseFormCol.id,
@@ -191,7 +380,8 @@ trait FormGetFormResponseJson {
     "input_header" -> formGetFormResponse.input_header,
     "complete_text" -> formGetFormResponse.complete_text,
     "confirm_header" -> formGetFormResponse.confirm_header,
-    "form_cols" -> formGetFormResponse.form_cols
+    "form_cols" -> formGetFormResponse.form_cols,
+    "form_transfer_tasks" -> formGetFormResponse.form_transfer_tasks
   )
 
   implicit val FormGetFormResponseReads: Reads[FormGetFormResponse] = (
@@ -207,6 +397,7 @@ trait FormGetFormResponseJson {
       (JsPath \ "input_header").read[String] ~
       (JsPath \ "complete_text").read[String] ~
       (JsPath \ "confirm_header").read[String] ~
-      (JsPath \ "form_cols").read[List[FormGetFormResponseFormCol]]
+      (JsPath \ "form_cols").read[List[FormGetFormResponseFormCol]] ~
+      (JsPath \ "form_transfer_tasks").read[List[FormGetFormResponseFormTransferTask]]
   )(FormGetFormResponse.apply _)
 }

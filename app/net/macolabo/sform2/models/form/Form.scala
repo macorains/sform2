@@ -1,6 +1,7 @@
-package net.macolabo.sform2.models.entity
+package net.macolabo.sform2.models.form
 
 import java.time.ZonedDateTime
+
 import scalikejdbc._
 
 /**
@@ -181,21 +182,22 @@ object Form extends SQLSyntaxSupport[Form] {
    */
   def save(form: Form)(implicit session: DBSession = autoSession): Int = {
       withSQL{
+        val c = Form.column
         update(Form).set(
-          column.form_index -> form.form_index,
-          column.name -> form.name,
-          column.title -> form.title,
-          column.status -> form.status,
-          column.cancel_url -> form.cancel_url,
-          column.complete_url -> form.complete_url,
-          column.input_header -> form.input_header,
-          column.confirm_header -> form.confirm_header,
-          column.complete_text -> form.complete_text,
-          column.close_text -> form.close_text,
-          column.form_data -> form.form_data,
-          column.modified_user -> form.modified_user,
-          column.modified -> form.modified
-        ).where.eq(column.id, form.id)
+          c.form_index -> form.form_index,
+          c.name -> form.name,
+          c.title -> form.title,
+          c.status -> form.status,
+          c.cancel_url -> form.cancel_url,
+          c.complete_url -> form.complete_url,
+          c.input_header -> form.input_header,
+          c.confirm_header -> form.confirm_header,
+          c.complete_text -> form.complete_text,
+          c.close_text -> form.close_text,
+          c.form_data -> form.form_data,
+          c.modified_user -> form.modified_user,
+          c.modified -> form.modified
+        ).where.eq(c.id, form.id)
       }.update().apply()
   }
 

@@ -1,4 +1,4 @@
-package net.macolabo.sform2.models.json
+package net.macolabo.sform2.services.User
 
 import play.api.libs.json.{Json, Reads, Writes}
 

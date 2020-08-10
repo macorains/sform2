@@ -1,3 +1,4 @@
+/*
 package net.macolabo.sform2.controllers
 
 import com.mohiva.play.silhouette.api._
@@ -61,3 +62,5 @@ class TransferTaskController @Inject() (
     Future.successful(Ok(Json.toJson(res)))
   }
 }
+
+ */

@@ -10,13 +10,15 @@ import play.api.libs.functional.syntax._
  * @param max_length 最大長
  * @param min_length 最小長
  * @param input_type 入力種別
+ * @param required 必須項目
  */
 case class FormInsertFormRequestFormColValidation(
                                                    max_value: Int,
                                                    min_value: Int,
                                                    max_length: Int,
                                                    min_length: Int,
-                                                   input_type: Int
+                                                   input_type: Int,
+                                                   required: Boolean
                                                  )
 
 /**
@@ -58,6 +60,90 @@ case class FormInsertFormRequestFormCol(
                                        )
 
 /**
+ * フォーム作成API・FormTransferTask・Salesforce・Field
+ * @param form_transfer_task_salesforce_id FormTransferTaskSalesforce ID
+ * @param form_column_id フォーム項目ID
+ * @param field_name Salesforceフィールド名
+ */
+case class FormInsertFormRequestFormTransferTaskSalesforceField(
+                                                                 form_transfer_task_salesforce_id: Int,
+                                                                 form_column_id: String,
+                                                                 field_name: String
+                                                               )
+
+/**
+ * フォーム作成API・FormTransferTask・Condition
+ * @param form_transfer_task_id FormTransferTask ID
+ * @param form_id フォームID
+ * @param form_col_id フォーム項目ID
+ * @param operator 演算子
+ * @param cond_value 値　
+ */
+case class FormInsertFormRequestFormTransferTaskCondition(
+                                                           form_transfer_task_id: Int,
+                                                           form_id: Int,
+                                                           form_col_id: Int,
+                                                           operator: String,
+                                                           cond_value: String
+                                                         )
+
+/**
+ * フォーム作成API・FormTransferTask・Mail
+ * @param form_transfer_task_id FormTransferTask ID
+ * @param from_address_id FROMに使うメールアドレスのID
+ * @param to_address Toアドレス
+ * @param cc_address Ccアドレス
+ * @param bcc_address_id Bccに使うメールアドレスのID
+ * @param replyto_address_id replyToに使うメールアドレスのID
+ * @param subject 件名
+ * @param body 本文
+ */
+case class FormInsertFormRequestFormTransferTaskMail(
+                                                      form_transfer_task_id: Int,
+                                                      from_address_id: Int,
+                                                      to_address: String,
+                                                      cc_address: String,
+                                                      bcc_address_id: Int,
+                                                      replyto_address_id: Int,
+                                                      subject: String,
+                                                      body: String
+                                                    )
+
+/**
+ * フォーム作成API・FormTransferTask・Salesforce
+ * @param form_transfer_task_id FormTransferTask ID
+ * @param object_name Salesforceオブジェクト名
+ * @param fields フィールド割り当て情報
+ */
+case class FormInsertFormRequestFormTransferTaskSalesforce(
+                                                            form_transfer_task_id: Int,
+                                                            object_name: String,
+                                                            fields: List[FormInsertFormRequestFormTransferTaskSalesforceField]
+                                                          )
+
+
+/**
+ * フォーム作成API・FormTransferTask
+ * @param transfer_config_id TransferConfig ID
+ * @param form_id Form ID
+ * @param task_index 順番
+ * @param name 名前
+ * @param form_transfer_task_conditions 実行条件データ
+ * @param mail MailTransfer設定
+ * @param salesforce SalesforceTransfer設定
+ */
+case class FormInsertFormRequestFormTransferTask(
+                                                  transfer_config_id: Int,
+                                                  form_id: Int,
+                                                  task_index: Int,
+                                                  name: String,
+                                                  form_transfer_task_conditions: List[FormInsertFormRequestFormTransferTaskCondition],
+                                                  mail: Option[FormInsertFormRequestFormTransferTaskMail],
+                                                  salesforce: Option[FormInsertFormRequestFormTransferTaskSalesforce]
+                                                )
+
+
+/**
  * フォーム作成API・フォームデータ
  * @param name フォーム名
  * @param form_index 順番
@@ -93,7 +179,8 @@ trait FormInsertFormRequestJson {
     "min_value" -> formInsertFormRequestFormColValidation.min_value,
     "max_length" -> formInsertFormRequestFormColValidation.max_length,
     "min_length" -> formInsertFormRequestFormColValidation.min_length,
-    "input_type" -> formInsertFormRequestFormColValidation.input_type
+    "input_type" -> formInsertFormRequestFormColValidation.input_type,
+    "required" -> formInsertFormRequestFormColValidation.required
   )
 
   implicit val FormInsertFormRequestFormColValidationReads: Reads[FormInsertFormRequestFormColValidation] = (
@@ -101,7 +188,8 @@ trait FormInsertFormRequestJson {
       (JsPath \ "min_value").read[Int] ~
       (JsPath \ "max_length").read[Int] ~
       (JsPath \ "min_length").read[Int] ~
-      (JsPath \ "input_type").read[Int]
+      (JsPath \ "input_type").read[Int] ~
+      (JsPath \ "required").read[Boolean]
     )(FormInsertFormRequestFormColValidation.apply _)
 
   implicit val FormInsertFormRequestFormColSelectListWrites: Writes[FormInsertFormRequestFormColSelect] = (formInsertFormRequestFormColSelectList: FormInsertFormRequestFormColSelect) => Json.obj(

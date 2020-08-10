@@ -2,7 +2,7 @@ package net.macolabo.sform2.controllers
 
 import com.mohiva.play.silhouette.api.Silhouette
 import javax.inject.Inject
-import net.macolabo.sform2.models.daos.{FormsDAO, PostdataDAO}
+import net.macolabo.sform2.models.daos.PostdataDAO
 import org.webjars.play.WebJarsUtil
 import play.api.Environment
 import play.api.db.DBApi
@@ -30,15 +30,15 @@ class FormPostDataController @Inject() (
   }
 
   def getPostData(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
-    val formsDao = new FormsDAO()
-    val f = formsDao.getFormCols(hashed_form_id)
-    val postdataDao = new PostdataDAO()
-    val d = hashed_form_id match {
-      case s: String => postdataDao.getPostdata(s).map(t => addPostDataId(t.postdata_id, t.postdata))
-      case _ => List(Json.toJson(""))
-    }
-    val res = postDataResponse(d.length.toString, "1", "1", f, Json.toJson(d))
-    Future.successful(Ok(Json.toJson(res)).as("application/json; charset=UTF-8"))
+//    val formsDao = new FormsDAO()
+//    val f = formsDao.getFormCols(hashed_form_id)
+//    val postdataDao = new PostdataDAO()
+//    val d = hashed_form_id match {
+//      case s: String => postdataDao.getPostdata(s).map(t => addPostDataId(t.postdata_id, t.postdata))
+//      case _ => List(Json.toJson(""))
+//    }
+//    val res = postDataResponse(d.length.toString, "1", "1", f, Json.toJson(d))
+    Future.successful(Ok(Json.toJson("ok")).as("application/json; charset=UTF-8"))
   }
 
   def addPostDataId(id: Int, postdata: JsValue): JsValue = {
