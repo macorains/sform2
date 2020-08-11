@@ -1,0 +1,11 @@
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
+@(code: String)(implicit messages: Messages)
+
+<html>
+    <body>
+        <p>@messages("email.verification.hello")</p>
+        <p>@Html(messages("email.verification.html.text", code))</p>
+    </body>
+</html>

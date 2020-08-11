@@ -1,0 +1,6 @@
+@import play.api.i18n.Messages
+
+@(code: String)(implicit messages: Messages)
+@messages("email.verification.hello")
+
+@messages("email.verification.txt.text", code)

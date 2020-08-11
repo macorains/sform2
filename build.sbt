@@ -4,7 +4,7 @@ name := """sform2s"""
 
 version := "1.0-SNAPSHOT"
 
-scalaVersion := "2.12.11"
+scalaVersion := "2.13.3"
 resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/"
 resolvers += Resolver.jcenterRepo
 resolvers += "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
@@ -15,29 +15,30 @@ libraryDependencies ++= Seq(
   jdbc,
   ws,
   evolutions,
-  "org.scala-lang" % "scala-reflect" % "2.12.11",
-  "mysql" % "mysql-connector-java" % "5.1.48",
-  "org.scalikejdbc" %% "scalikejdbc" % "3.1.0",
-  "org.scalikejdbc" %% "scalikejdbc-config" % "3.1.0",
-  "org.scalikejdbc" %% "scalikejdbc-syntax-support-macro" % "3.1.0",
-  "org.scalikejdbc" %% "scalikejdbc-test" % "3.1.0"  % "test",
+  "org.scala-lang" % "scala-reflect" % "2.13.3",
+  "mysql" % "mysql-connector-java" % "8.0.20",
+  "org.scalikejdbc" %% "scalikejdbc" % "3.4.2",
+  "org.scalikejdbc" %% "scalikejdbc-config" % "3.4.2",
+  "org.scalikejdbc" %% "scalikejdbc-play-fixture" % "2.8.0-scalikejdbc-3.4",
+  "org.scalikejdbc" %% "scalikejdbc-syntax-support-macro" % "3.4.2",
+  "org.scalikejdbc" %% "scalikejdbc-joda-time" % "3.4.2",
+  "org.scalikejdbc" %% "scalikejdbc-test" % "3.4.2"  % "test",
+  "com.mohiva" %% "play-silhouette" % "7.0.0",
+  "com.mohiva" %% "play-silhouette-password-bcrypt" % "7.0.0",
+  "com.mohiva" %% "play-silhouette-persistence" % "7.0.0",
+  "com.mohiva" %% "play-silhouette-crypto-jca" % "7.0.0",
+  "com.mohiva" %% "play-silhouette-testkit" % "7.0.0" % "test",
+  "org.webjars" %% "webjars-play" % "2.8.0-1",
+  "com.typesafe.play" %% "play-mailer" % "8.0.1",
+  "com.typesafe.play" %% "play-mailer-guice" % "8.0.1",
+  "net.codingwell" %% "scala-guice" % "4.2.10",
+  "com.iheart" %% "ficus" % "1.4.7",
+  "com.enragedginger" %% "akka-quartz-scheduler" % "1.8.4-akka-2.6.x",
+  "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B4",
+  "com.digitaltangible" %% "play-guard" % "2.5.0",
 
-  "com.mohiva" %% "play-silhouette" % "5.0.0-RC2",
-  "com.mohiva" %% "play-silhouette-password-bcrypt" % "5.0.0-RC2",
-  "com.mohiva" %% "play-silhouette-persistence" % "5.0.0-RC2",
-  "com.mohiva" %% "play-silhouette-crypto-jca" % "5.0.0-RC2",
-  "org.webjars" %% "webjars-play" % "2.6.0",
-  "org.webjars" % "bootstrap" % "3.3.7-1" exclude("org.webjars", "jquery"),
-  "org.webjars" % "jquery" % "3.2.1",
-  "net.codingwell" %% "scala-guice" % "4.1.0",
-  "com.iheart" %% "ficus" % "1.4.1",
-  "com.typesafe.play" %% "play-mailer" % "6.0.0",
-  "com.typesafe.play" %% "play-mailer-guice" % "6.0.0",
-  "com.enragedginger" %% "akka-quartz-scheduler" % "1.6.1-akka-2.5.x",
-  "com.adrianhurt" %% "play-bootstrap" % "1.2-P26-B4",
-  "com.mohiva" %% "play-silhouette-testkit" % "5.0.0-RC2" % "test",
-  "org.apache.commons" % "commons-lang3" % "3.1",
-  "commons-io" % "commons-io" % "2.4" ,
+  "org.apache.commons" % "commons-lang3" % "3.10",
+  "commons-io" % "commons-io" % "2.7" ,
   specs2 % Test,
   ehcache,
   guice,
@@ -48,7 +49,7 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 routesGenerator := InjectedRoutesGenerator
 
-routesImport += "utils.route.Binders._"
+routesImport += "net.macolabo.sform2.utils.route.Binders._"
 
 // https://github.com/playframework/twirl/issues/105
 TwirlKeys.templateImports := Seq()
@@ -58,27 +59,7 @@ scalacOptions ++= Seq(
   "-feature", // Emit warning and location for usages of features that should be imported explicitly.
   "-unchecked", // Enable additional warnings where generated code depends on assumptions.
   "-Xfatal-warnings", // Fail the compilation if there are any warnings.
-  //"-Xlint", // Enable recommended additional warnings.
-  "-Ywarn-adapted-args", // Warn if an argument list is modified to match the receiver.
   "-Ywarn-dead-code", // Warn when dead code is identified.
-  "-Ywarn-inaccessible", // Warn about inaccessible types in method signatures.
-  "-Ywarn-nullary-override", // Warn when non-nullary overrides nullary, e.g. def foo() over def foo.
   "-Ywarn-numeric-widen", // Warn when numerics are widened.
-  // Play has a lot of issues with unused imports and unsued params
-  // https://github.com/playframework/playframework/issues/6690
-  // https://github.com/playframework/twirl/issues/105
   "-Xlint:-unused,_"
 )
-
-//********************************************************
-// Scalariform settings
-//********************************************************
-
-/*
-defaultScalariformSettings
-
-ScalariformKeys.preferences := ScalariformKeys.preferences.value
-  .setPreference(FormatXml, false)
-  .setPreference(DoubleIndentClassDeclaration, false)
-  .setPreference(DanglingCloseParenthesis, Preserve)
-*/

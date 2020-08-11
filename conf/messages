@@ -3,6 +3,9 @@ error.invalid.request = Invalid request
 error.not.activated = User Not Activated
 error.required = This field is required
 error.user.not.found = User Not Found
+error.failure.limit.exceed = Login failure limit exceeded
+error.verification.timeout = Verification Timeout
+error.verification.invalid = Invalid Verification Request
 invalid.credentials = Invalid credentials!
 access.denied = Access denied!
 could.not.authenticate = Could not authenticate with social provider! Please try again!
@@ -80,7 +83,7 @@ yahoo = Yahoo
 # Emails
 ##########
 
-email.from = Silhouette <noreply@mohiva.com>
+email.from = Sform <noreply@msform.net>
 
 # Sign Up
 email.sign.up.subject = Welcome
@@ -105,6 +108,12 @@ email.activate.account.subject = Activate account
 email.activate.account.hello = Hello {0},
 email.activate.account.html.text = Please follow <a href="{0}">this link</a> to confirm and activate your new account.
 email.activate.account.txt.text = Please follow the link to confirm and activate your new account: {0}
+
+# Login Verification
+email.verification.subject = Sform Login Verification
+email.verification.hello = Your Verification Code is:
+email.verification.html.text = [ {0} ]
+email.verification.txt.text = [ {0} ]
 
 ##########
 # Sform

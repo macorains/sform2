@@ -1,4 +1,5 @@
 silhouette {
+  virtualHostName = "https://adm_it.msform.net/"
 
   # Authenticator settings
   authenticator.fieldName = "X-Auth-Token"

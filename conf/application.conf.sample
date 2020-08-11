@@ -17,19 +17,22 @@ play.http.requestHandler = "play.api.http.DefaultHttpRequestHandler"
 
 # Registers the filters
 # ~~~~~
-play.http.filters = "utils.Filters"
+play.http.filters = "net.macolabo.sform2.utils.net.macolabo.sform2.Filters"
 
 play.http.parser.maxMemoryBuffer = 5MB
 play.http.parser.maxDiskBuffer = 100MB
 parsers.anyContent.maxLength = 100MB
 
+# Session Cookie
+play.http.session.maxAge = 1h
+
 # The application DI modules
 # ~~~~~
-play.modules.enabled += "modules.BaseModule"
-play.modules.enabled += "modules.JobModule"
-play.modules.enabled += "modules.SilhouetteModule"
+play.modules.enabled += "net.macolabo.sform2.modules.BaseModule"
+play.modules.enabled += "net.macolabo.sform2.modules.JobModule"
+play.modules.enabled += "net.macolabo.sform2.modules.SilhouetteModule"
 play.modules.enabled += "play.api.libs.mailer.MailerModule"
-play.modules.enabled += "modules.DBInitializerModule"
+play.modules.enabled += "net.macolabo.sform2.modules.DBInitializerModule"
 
 play.modules.disabled += "com.mohiva.play.silhouette.api.actions.SecuredErrorHandlerModule"
 play.modules.disabled += "com.mohiva.play.silhouette.api.actions.UnsecuredErrorHandlerModule"
@@ -78,8 +81,8 @@ play.filters {
     exposedHeaders = ["x-auth-token","X-Auth-Token"]
     pathPrefixes = ["/"]
     allowedOrigins = ["http://localhost:8080"]
-    allowedHttpMethods = ["GET", "POST", "OPTIONS"]
-    # allowedHttpHeaders = ["Accept"]
+    allowedHttpMethods = ["GET", "POST", "OPTIONS", "DELETE"]
+    allowedHttpHeaders = ["Accept", "Content-Type", "Access-Control-Allow-Origin", "Origin", "X-Requested-With", "X-Auth-Token", "Timeout"]
     preflightMaxAge = 3 days
   }
   csrf {
@@ -160,3 +163,4 @@ db {
 
 
 include "silhouette.conf"
+include "sform.conf"
