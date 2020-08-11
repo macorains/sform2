@@ -18,9 +18,9 @@ import scalikejdbc._
  * @param modified 更新日
  */
 case class FormTransferTask(
-                       id: Int,
-                       transfer_config_id: Int,
-                       form_id: Int,
+                       id: BigInt,
+                       transfer_config_id: BigInt,
+                       form_id: BigInt,
                        task_index: Int,
                        name: String,
                        user_group: String,
@@ -38,9 +38,9 @@ object FormTransferTask extends SQLSyntaxSupport[FormTransferTask] {
   override val tableName = "D_FORM_TRANSFER_TASK"
   def apply(rs:WrappedResultSet): FormTransferTask = {
     FormTransferTask(
-      rs.int("id"),
-      rs.int("transfer_config_id"),
-      rs.int("form_id"),
+      rs.bigInt("id"),
+      rs.bigInt("transfer_config_id"),
+      rs.bigInt("form_id"),
       rs.int("task_index"),
       rs.string("name"),
       rs.string("user_group"),

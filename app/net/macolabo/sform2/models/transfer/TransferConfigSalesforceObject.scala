@@ -5,8 +5,8 @@ import java.time.ZonedDateTime
 import scalikejdbc._
 
 case class TransferConfigSalesforceObject(
-                                         id: Int,
-                                         transfer_config_salesforce_id: Int,
+                                         id: BigInt,
+                                         transfer_config_salesforce_id: BigInt,
                                          name: String,
                                          label: String,
                                          active: Boolean,
@@ -25,8 +25,8 @@ object TransferConfigSalesforceObject extends SQLSyntaxSupport[TransferConfigSal
   override val tableName = "D_TRANSFER_CONFIG_SALESFORCE_OBJECT"
   def apply(rs:WrappedResultSet): TransferConfigSalesforceObject = {
     TransferConfigSalesforceObject(
-      rs.int("id"),
-      rs.int("transfer_config_salesforce_id"),
+      rs.bigInt("id"),
+      rs.bigInt("transfer_config_salesforce_id"),
       rs.string("name"),
       rs.string("label"),
       rs.boolean("active"),

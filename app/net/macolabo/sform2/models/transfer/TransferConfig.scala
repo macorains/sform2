@@ -18,7 +18,7 @@ import scalikejdbc._
  * @param modified 更新日
  */
 case class TransferConfig(
-                           id: Int,
+                           id: BigInt,
                            type_code: String,
                            config_index: Int,
                            name: String,
@@ -38,7 +38,7 @@ object TransferConfig extends SQLSyntaxSupport[TransferConfig] {
   override val tableName = "D_TRANSFER_CONFIG"
   def apply(rs: WrappedResultSet): TransferConfig = {
     TransferConfig(
-      rs.int("id"),
+      rs.bigInt("id"),
       rs.string("type_code"),
       rs.int("config_index"),
       rs.string("name"),

@@ -5,8 +5,8 @@ import java.time.ZonedDateTime
 import scalikejdbc._
 
 case class TransferConfigSalesforceObjectField(
-                                               id: Int,
-                                               transfer_config_salesforce_object_id: Int,
+                                               id: BigInt,
+                                               transfer_config_salesforce_object_id: BigInt,
                                                name: String,
                                                label: String,
                                                field_type: String,
@@ -27,8 +27,8 @@ object TransferConfigSalesforceObjectField extends SQLSyntaxSupport[TransferConf
 
   def apply(rs: WrappedResultSet): TransferConfigSalesforceObjectField = {
     TransferConfigSalesforceObjectField(
-      rs.int("id"),
-      rs.int("transfer_config_salesforce_object_id"),
+      rs.bigInt("id"),
+      rs.bigInt("transfer_config_salesforce_object_id"),
       rs.string("name"),
       rs.string("label"),
       rs.string("field_type"),

@@ -5,8 +5,8 @@ import java.time.ZonedDateTime
 import scalikejdbc._
 
 case class TransferConfigMailAddress(
-                                    id: Int,
-                                    transfer_config_mail_id: Int,
+                                    id: BigInt,
+                                    transfer_config_mail_id: BigInt,
                                     address_index: Int,
                                     name: String,
                                     address: String,
@@ -25,8 +25,8 @@ object TransferConfigMailAddress extends SQLSyntaxSupport[TransferConfigMailAddr
   override val tableName = "D_TRANSFER_CONFIG_MAIL_ADDRESS"
   def apply(rs: WrappedResultSet): TransferConfigMailAddress = {
     TransferConfigMailAddress(
-      rs.int("id"),
-      rs.int("transfer_config_mail_id"),
+      rs.bigInt("id"),
+      rs.bigInt("transfer_config_mail_id"),
       rs.int("address_index"),
       rs.string("name"),
       rs.string("address"),

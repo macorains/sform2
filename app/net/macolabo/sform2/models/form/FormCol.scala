@@ -21,8 +21,8 @@ import scalikejdbc._
  * @param modified 更新日
  */
 case class FormCol (
-                     id: Int,
-                     form_id: Int,
+                     id: BigInt,
+                     form_id: BigInt,
                      name: String,
                      col_id: String,
                      col_index: Int,
@@ -44,8 +44,8 @@ object FormCol extends SQLSyntaxSupport[FormCol] {
   override val tableName = "D_FORM_COL"
   def apply(rs: WrappedResultSet): FormCol = {
     FormCol(
-      rs.int("id"),
-      rs.int("form_id"),
+      rs.bigInt("id"),
+      rs.bigInt("form_id"),
       rs.string("name"),
       rs.string("col_id"),
       rs.int("col_index"),

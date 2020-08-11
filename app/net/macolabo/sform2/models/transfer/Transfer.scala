@@ -16,7 +16,7 @@ import scalikejdbc._
  * @param modified 更新日
  */
 case class Transfer(
-                     id: Int,
+                     id: BigInt,
                      type_code: String,
                      name: String,
                      status: Int,
@@ -30,7 +30,7 @@ object Transfer extends SQLSyntaxSupport[Transfer] {
   override val tableName = "M_TRANSFER"
   def apply(rs: WrappedResultSet):Transfer = {
     Transfer(
-      rs.int("id"),
+      rs.bigInt("id"),
       rs.string("type_code"),
       rs.string("name"),
       rs.int("status"),

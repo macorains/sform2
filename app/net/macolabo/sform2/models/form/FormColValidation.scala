@@ -5,9 +5,9 @@ import java.time.ZonedDateTime
 import scalikejdbc._
 
 case class FormColValidation(
-                              id: Int,
-                              form_col_id: Int,
-                              form_id: Int,
+                              id: BigInt,
+                              form_col_id: BigInt,
+                              form_id: BigInt,
                               max_value: Int,
                               min_value: Int,
                               max_length: Int,
@@ -30,9 +30,9 @@ object FormColValidation extends SQLSyntaxSupport[FormColValidation] {
   override val tableName = "D_FORM_COL_VALIDATION"
   def apply(rs: WrappedResultSet): FormColValidation = {
     FormColValidation(
-      rs.int("id"),
-      rs.int("form_col_id"),
-      rs.int("form_id"),
+      rs.bigInt("id"),
+      rs.bigInt("form_col_id"),
+      rs.bigInt("form_id"),
       rs.int("max_value"),
       rs.int("min_value"),
       rs.int("max_length"),

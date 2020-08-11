@@ -5,8 +5,8 @@ import java.time.ZonedDateTime
 import scalikejdbc._
 
 case class FormTransferTaskSalesforceField(
-                                            id: Int,
-                                            form_transfer_task_salesforce_id: Int,
+                                            id: BigInt,
+                                            form_transfer_task_salesforce_id: BigInt,
                                             form_column_id: String,
                                             field_name: String,
                                             user_group: String,
@@ -24,8 +24,8 @@ object FormTransferTaskSalesforceField extends SQLSyntaxSupport[FormTransferTask
   override val tableName = "D_FORM_TRANSFER_TASK_SALESFORCE_FIELD"
   def apply(rs:WrappedResultSet): FormTransferTaskSalesforceField = {
     FormTransferTaskSalesforceField(
-      rs.int("id"),
-      rs.int("form_transfer_task_salesforce_id"),
+      rs.bigInt("id"),
+      rs.bigInt("form_transfer_task_salesforce_id"),
       rs.string("form_column_id"),
       rs.string("field_name"),
       rs.string("user_group"),

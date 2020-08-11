@@ -22,9 +22,9 @@ import scalikejdbc._
  * @param modified 更新日
  */
 case class FormColSelect(
-                          id: Int,
-                          form_col_id: Int,
-                          form_id: Int,
+                          id: BigInt,
+                          form_col_id: BigInt,
+                          form_id: BigInt,
                           select_index: Int,
                           select_name: String,
                           select_value: String,
@@ -47,9 +47,9 @@ object FormColSelect extends SQLSyntaxSupport[FormColSelect] {
   override val tableName = "D_FORM_COL_SELECT"
   def apply(rs: WrappedResultSet) :FormColSelect = {
     FormColSelect(
-      rs.int("id"),
-      rs.int("form_col_id"),
-      rs.int("form_id"),
+      rs.bigInt("id"),
+      rs.bigInt("form_col_id"),
+      rs.bigInt("form_id"),
       rs.int("select_index"),
       rs.string("select_name"),
       rs.string("select_value"),

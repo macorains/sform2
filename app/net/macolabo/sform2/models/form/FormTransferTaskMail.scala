@@ -5,13 +5,13 @@ import java.time.ZonedDateTime
 import scalikejdbc._
 
 case class FormTransferTaskMail(
-                               id: Int,
-                               form_transfer_task_id: Int,
-                               from_address_id: Int,
+                               id: BigInt,
+                               form_transfer_task_id: BigInt,
+                               from_address_id: BigInt,
                                to_address: String,
                                cc_address: String,
-                               bcc_address_id: Int,
-                               replyto_address_id: Int,
+                               bcc_address_id: BigInt,
+                               replyto_address_id: BigInt,
                                subject: String,
                                body: String,
                                user_group: String,
@@ -29,13 +29,13 @@ object FormTransferTaskMail extends SQLSyntaxSupport[FormTransferTaskMail] {
   override val tableName = "D_FORM_TRANSFER_TASK_MAIL"
   def apply(rs:WrappedResultSet): FormTransferTaskMail = {
     FormTransferTaskMail(
-      rs.int("id"),
-      rs.int("form_transfer_task_id"),
-      rs.int("from_address_id"),
+      rs.bigInt("id"),
+      rs.bigInt("form_transfer_task_id"),
+      rs.bigInt("from_address_id"),
       rs.string("to_address"),
       rs.string("cc_address"),
-      rs.int("bcc_address_id"),
-      rs.int("replyto_address_id"),
+      rs.bigInt("bcc_address_id"),
+      rs.bigInt("replyto_address_id"),
       rs.string("subject"),
       rs.string("body"),
       rs.string("user_group"),

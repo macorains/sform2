@@ -27,7 +27,7 @@ import scalikejdbc._
  * @param modified 更新日
  */
 case class Form(
-                 id: Int,
+                 id: BigInt,
                  hashed_id: String,
                  form_index: Int,
                  name: String,
@@ -55,7 +55,7 @@ object Form extends SQLSyntaxSupport[Form] {
   override val tableName = "D_FORM"
   def apply(rs: WrappedResultSet): Form = {
     Form(
-      rs.int("id"),
+      rs.bigInt("id"),
       rs.string("hashed_id"),
       rs.int("form_index"),
       rs.string("name"),
