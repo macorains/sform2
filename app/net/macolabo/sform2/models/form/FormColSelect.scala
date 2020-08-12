@@ -38,8 +38,8 @@ case class FormColSelect(
                           modified: ZonedDateTime
                         ){
   import FormColSelect._
-  def insert: Int = create(this)
-  def update: Int = save(this)
+  def insert: BigInt = create(this)
+  def update: BigInt = save(this)
 
 }
 
@@ -72,7 +72,7 @@ object FormColSelect extends SQLSyntaxSupport[FormColSelect] {
    * @param session DB Session
    * @return フォーム項目選択項目のリスト
    */
-  def getList(userGroup: String, formId: Int, formColId: Int)(implicit session: DBSession = autoSession): List[FormColSelect] = {
+  def getList(userGroup: String, formId: BigInt, formColId: BigInt)(implicit session: DBSession = autoSession): List[FormColSelect] = {
     val f = FormColSelect.syntax("f")
     withSQL (
       select(
@@ -107,7 +107,7 @@ object FormColSelect extends SQLSyntaxSupport[FormColSelect] {
    * @param session DB Session
    * @return フォーム項目選択項目のID
    */
-  def create(formColSelect: FormColSelect)(implicit session: DBSession = autoSession): Int = {
+  def create(formColSelect: FormColSelect)(implicit session: DBSession = autoSession): BigInt = {
     withSQL {
       val c = FormColSelect.column
       insert.into(FormColSelect).namedValues(
@@ -134,7 +134,7 @@ object FormColSelect extends SQLSyntaxSupport[FormColSelect] {
    * @param session DB Session
    * @return
    */
-  def save(formColSelect: FormColSelect)(implicit session: DBSession = autoSession): Int = {
+  def save(formColSelect: FormColSelect)(implicit session: DBSession = autoSession): BigInt = {
     withSQL{
       val c = FormColSelect.column
       update(FormColSelect).set(
@@ -159,7 +159,7 @@ object FormColSelect extends SQLSyntaxSupport[FormColSelect] {
    * @param session DB Session
    * @return
    */
-  def erase(userGroup: String, formColSelectId: Int)(implicit session: DBSession = autoSession): Int = {
+  def erase(userGroup: String, formColSelectId: BigInt)(implicit session: DBSession = autoSession): BigInt = {
     withSQL {
       delete.from(FormColSelect).where.eq(Form.column.id, formColSelectId).and.eq(Form.column.user_group, userGroup)
     }.update().apply()

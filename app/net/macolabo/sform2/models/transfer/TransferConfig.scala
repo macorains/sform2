@@ -30,8 +30,8 @@ case class TransferConfig(
                            modified: ZonedDateTime
                          ){
   import TransferConfig._
-  def insert: Int = create(this)
-  def update: Int = save(this)
+  def insert: BigInt = create(this)
+  def update: BigInt = save(this)
 }
 
 object TransferConfig extends SQLSyntaxSupport[TransferConfig] {
@@ -58,7 +58,7 @@ object TransferConfig extends SQLSyntaxSupport[TransferConfig] {
    * @param session DB Session
    * @return TransferConfig
    */
-  def get(userGroup: String, transferConfigId: Int)(implicit session: DBSession = autoSession): Option[TransferConfig] = {
+  def get(userGroup: String, transferConfigId: BigInt)(implicit session: DBSession = autoSession): Option[TransferConfig] = {
     val f = TransferConfig.syntax("f")
     withSQL(
       select(
@@ -114,7 +114,7 @@ object TransferConfig extends SQLSyntaxSupport[TransferConfig] {
    * @param session DB Session
    * @return 作成したレコードのID
    */
-  def create(transferConfig: TransferConfig)(implicit session: DBSession = autoSession): Int = {
+  def create(transferConfig: TransferConfig)(implicit session: DBSession = autoSession): BigInt = {
     withSQL{
       val c = TransferConfig.column
       insert.into(TransferConfig).namedValues(
@@ -137,7 +137,7 @@ object TransferConfig extends SQLSyntaxSupport[TransferConfig] {
    * @param session DB Session
    * @return Result
    */
-  def save(transferConfig: TransferConfig)(implicit session: DBSession = autoSession): Int = {
+  def save(transferConfig: TransferConfig)(implicit session: DBSession = autoSession): BigInt = {
     withSQL{
       val c = TransferConfig.column
       update(TransferConfig).set(

@@ -21,8 +21,8 @@ case class FormTransferTaskMail(
                                modified: ZonedDateTime
                                ){
   import FormTransferTaskMail._
-  def insert: Int = create(this)
-  def update: Int = save(this)
+  def insert: BigInt = create(this)
+  def update: BigInt = save(this)
 }
 
 object FormTransferTaskMail extends SQLSyntaxSupport[FormTransferTaskMail] {
@@ -53,7 +53,7 @@ object FormTransferTaskMail extends SQLSyntaxSupport[FormTransferTaskMail] {
    * @param session DB Session
    * @return FormTransferTaskMail
    */
-  def get(userGroup: String, formTransferTaskId: Int)(implicit session: DBSession = autoSession): Option[FormTransferTaskMail] = {
+  def get(userGroup: String, formTransferTaskId: BigInt)(implicit session: DBSession = autoSession): Option[FormTransferTaskMail] = {
     val f = FormTransferTaskMail.syntax("f")
     withSQL(
     select(
@@ -86,7 +86,7 @@ object FormTransferTaskMail extends SQLSyntaxSupport[FormTransferTaskMail] {
    * @param session DB Session
    * @return 作成したレコードのID
    */
-  def create(formTransferTaskMail: FormTransferTaskMail)(implicit session: DBSession = autoSession): Int = {
+  def create(formTransferTaskMail: FormTransferTaskMail)(implicit session: DBSession = autoSession): BigInt = {
     withSQL{
       val c = FormTransferTaskMail.column
       insert.into(FormTransferTaskMail).namedValues(
@@ -113,7 +113,7 @@ object FormTransferTaskMail extends SQLSyntaxSupport[FormTransferTaskMail] {
    * @param session DB Session
    * @return result
    */
-  def save(formTransferTaskMail: FormTransferTaskMail)(implicit session: DBSession = autoSession): Int = {
+  def save(formTransferTaskMail: FormTransferTaskMail)(implicit session: DBSession = autoSession): BigInt = {
     withSQL{
       val c = FormTransferTaskMail.column
       update(FormTransferTaskMail).set(
@@ -141,7 +141,7 @@ object FormTransferTaskMail extends SQLSyntaxSupport[FormTransferTaskMail] {
    * @param session DB Session
    * @return Result
    */
-  def erase(userGroup: String, formTransferTaskMailId: Int)(implicit session: DBSession = autoSession): Int = {
+  def erase(userGroup: String, formTransferTaskMailId: BigInt)(implicit session: DBSession = autoSession): BigInt = {
     withSQL{
       val c = FormTransferTaskMail.column
       delete.from(FormTransferTaskMail).where.eq(c.id, formTransferTaskMailId).and.eq(c.user_group, userGroup)

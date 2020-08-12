@@ -47,8 +47,8 @@ case class Form(
                  modified: ZonedDateTime
                ){
   import Form._
-  def insert: Int = create(this)
-  def update: Int = save(this)
+  def insert: BigInt = create(this)
+  def update: BigInt = save(this)
 }
 
 object Form extends SQLSyntaxSupport[Form] {
@@ -149,7 +149,7 @@ object Form extends SQLSyntaxSupport[Form] {
    * @param form フォームデータ
    * @return 作成したフォームのID
    */
-  def create(form: Form)(implicit session: DBSession = autoSession): Int = {
+  def create(form: Form)(implicit session: DBSession = autoSession): BigInt = {
       withSQL {
         val c = Form.column
         insert.into(Form).namedValues(
@@ -180,7 +180,7 @@ object Form extends SQLSyntaxSupport[Form] {
    * @param session DBセッション
    * @return
    */
-  def save(form: Form)(implicit session: DBSession = autoSession): Int = {
+  def save(form: Form)(implicit session: DBSession = autoSession): BigInt = {
       withSQL{
         val c = Form.column
         update(Form).set(
@@ -208,7 +208,7 @@ object Form extends SQLSyntaxSupport[Form] {
    * @param session DB Session
    * @return
    */
-  def erase(userGroup:String, formId: Int)(implicit session: DBSession = autoSession): Int = {
+  def erase(userGroup:String, formId: BigInt)(implicit session: DBSession = autoSession): BigInt = {
     withSQL {
       delete.from(Form).where.eq(Form.column.id, formId).and.eq(Form.column.user_group, userGroup)
     }.update().apply()

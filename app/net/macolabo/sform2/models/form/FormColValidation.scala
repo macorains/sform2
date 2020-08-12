@@ -21,8 +21,8 @@ case class FormColValidation(
                               modified: ZonedDateTime
                             ){
   import FormColValidation._
-  def insert: Int = create(this)
-  def update: Int = save(this)
+  def insert: BigInt = create(this)
+  def update: BigInt = save(this)
 
 }
 
@@ -55,7 +55,7 @@ object FormColValidation extends SQLSyntaxSupport[FormColValidation] {
    * @param session DB Session
    * @return フォーム項目バリデーションのリスト
    */
-  def get(userGroup: String, formId: Int, formColId: Int)(implicit session: DBSession = autoSession): Option[FormColValidation] = {
+  def get(userGroup: String, formId: BigInt, formColId: BigInt)(implicit session: DBSession = autoSession): Option[FormColValidation] = {
     val f = FormColValidation.syntax("f")
     withSQL (
       select(
@@ -90,7 +90,7 @@ object FormColValidation extends SQLSyntaxSupport[FormColValidation] {
    * @param session DB Session
    * @return
    */
-  def create(formColValidation: FormColValidation)(implicit session: DBSession = autoSession): Int = {
+  def create(formColValidation: FormColValidation)(implicit session: DBSession = autoSession): BigInt = {
     withSQL{
       val c = FormColValidation.column
       insert.into(FormColValidation).namedValues(
@@ -108,7 +108,7 @@ object FormColValidation extends SQLSyntaxSupport[FormColValidation] {
         c.created -> formColValidation.created,
         c.modified -> formColValidation.modified
       )
-    }.updateAndReturnGeneratedKey().apply().toInt
+    }.updateAndReturnGeneratedKey().apply()
   }
 
   /**
@@ -116,7 +116,7 @@ object FormColValidation extends SQLSyntaxSupport[FormColValidation] {
    * @param formColValidation フォーム項目バリデーション
    * @param session DB Session
    */
-  def save(formColValidation: FormColValidation)(implicit session: DBSession = autoSession): Int = {
+  def save(formColValidation: FormColValidation)(implicit session: DBSession = autoSession): BigInt = {
     withSQL{
       val c = FormColValidation.column
       update(FormColValidation).set(
@@ -141,7 +141,7 @@ object FormColValidation extends SQLSyntaxSupport[FormColValidation] {
    * @param session DB Session
    * @return
    */
-  def erase(userGroup: String, formColValidationId: Int)(implicit session: DBSession = autoSession): Int = {
+  def erase(userGroup: String, formColValidationId: BigInt)(implicit session: DBSession = autoSession): BigInt = {
     withSQL {
       delete.from(FormColValidation).where.eq(Form.column.id, formColValidationId).and.eq(Form.column.user_group, userGroup)
     }.update().apply()

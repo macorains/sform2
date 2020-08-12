@@ -47,7 +47,7 @@ object Transfer extends SQLSyntaxSupport[Transfer] {
    * @param session DB Sessoin
    * @return Transfer
    */
-  def get(transferId: Int)(implicit session: DBSession = autoSession) :Option[Transfer] = {
+  def get(transferId: BigInt)(implicit session: DBSession = autoSession) :Option[Transfer] = {
     val f = Transfer.syntax("f")
     withSQL (
       select(

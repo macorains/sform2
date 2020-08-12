@@ -17,8 +17,8 @@ case class TransferConfigMail(
                              modified: ZonedDateTime
                              ){
   import TransferConfigMail._
-  def insert: Int = create(this)
-  def update: Int = save(this)
+  def insert: BigInt = create(this)
+  def update: BigInt = save(this)
 }
 
 object TransferConfigMail extends SQLSyntaxSupport[TransferConfigMail] {
@@ -45,7 +45,7 @@ object TransferConfigMail extends SQLSyntaxSupport[TransferConfigMail] {
    * @param session DB Session
    * @return TransferConfigMail
    */
-  def get(userGroup: String, transferConfigId: Int)(implicit session: DBSession = autoSession): Option[TransferConfigMail] = {
+  def get(userGroup: String, transferConfigId: BigInt)(implicit session: DBSession = autoSession): Option[TransferConfigMail] = {
     val f = TransferConfigMail.syntax("f")
     withSQL(
       select(
@@ -74,7 +74,7 @@ object TransferConfigMail extends SQLSyntaxSupport[TransferConfigMail] {
    * @param session DB Session
    * @return 作成したレコードのID
    */
-  def create(transferConfigMail:TransferConfigMail)(implicit session: DBSession = autoSession): Int = {
+  def create(transferConfigMail:TransferConfigMail)(implicit session: DBSession = autoSession): BigInt = {
     withSQL {
       val c = TransferConfigMail.column
       insert.into(TransferConfigMail).namedValues(
@@ -97,7 +97,7 @@ object TransferConfigMail extends SQLSyntaxSupport[TransferConfigMail] {
    * @param session DB Session
    * @return Result
    */
-  def save(transferConfigMail:TransferConfigMail)(implicit session: DBSession = autoSession): Int = {
+  def save(transferConfigMail:TransferConfigMail)(implicit session: DBSession = autoSession): BigInt = {
     withSQL {
       val c = TransferConfigMail.column
       update(TransferConfigMail).set(

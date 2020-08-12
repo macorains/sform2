@@ -35,8 +35,8 @@ case class FormCol (
                      modified: ZonedDateTime
                    ){
   import FormCol._
-  def insert: Int = create(this)
-  def update: Int = save(this)
+  def insert: BigInt = create(this)
+  def update: BigInt = save(this)
 
 }
 
@@ -65,7 +65,7 @@ object FormCol extends SQLSyntaxSupport[FormCol] {
    * @param session DB Session
    * @return フォーム項目のリスト
    */
-  def getList(userGroup: String, formId: Int)(implicit session: DBSession = autoSession): List[FormCol] = {
+  def getList(userGroup: String, formId: BigInt)(implicit session: DBSession = autoSession): List[FormCol] = {
     val f = FormCol.syntax("f")
     withSQL(
       select(
@@ -98,7 +98,7 @@ object FormCol extends SQLSyntaxSupport[FormCol] {
    * @param session DB Session
    * @return フォーム項目ID
    */
-  def create(formCol: FormCol)(implicit session: DBSession = autoSession): Int = {
+  def create(formCol: FormCol)(implicit session: DBSession = autoSession): BigInt = {
     withSQL{
       val c = FormCol.column
       insert.into(FormCol).namedValues(
@@ -114,7 +114,7 @@ object FormCol extends SQLSyntaxSupport[FormCol] {
         c.created -> formCol.created,
         c.modified -> formCol.modified
       )
-    }.updateAndReturnGeneratedKey().apply().toInt
+    }.updateAndReturnGeneratedKey().apply()
   }
 
   /**
@@ -123,7 +123,7 @@ object FormCol extends SQLSyntaxSupport[FormCol] {
    * @param session DB Session
    * @return
    */
-  def save(formCol: FormCol)(implicit session: DBSession = autoSession): Int = {
+  def save(formCol: FormCol)(implicit session: DBSession = autoSession): BigInt = {
     withSQL{
       val c = FormCol.column
       update(FormCol).set(
@@ -146,7 +146,7 @@ object FormCol extends SQLSyntaxSupport[FormCol] {
    * @param session DB Session
    * @return
    */
-  def erase(userGroup: String, formColId: Int)(implicit session: DBSession = autoSession): Int = {
+  def erase(userGroup: String, formColId: BigInt)(implicit session: DBSession = autoSession): BigInt = {
     withSQL {
       delete.from(FormCol).where.eq(Form.column.id, formColId).and.eq(Form.column.user_group, userGroup)
     }.update().apply()

@@ -17,8 +17,8 @@ case class TransferConfigSalesforce(
                                    modified: ZonedDateTime
                                    ){
   import TransferConfigSalesforce._
-  def insert: Int = create(this)
-  def update: Int = save(this)
+  def insert: BigInt = create(this)
+  def update: BigInt = save(this)
 }
 
 
@@ -46,7 +46,7 @@ object TransferConfigSalesforce extends SQLSyntaxSupport[TransferConfigSalesforc
    * @param session DB Session
    * @return TransferConfigSalesforce
    */
-  def get(userGroup: String, transferConfigId: Int)(implicit session: DBSession = autoSession): Option[TransferConfigSalesforce] = {
+  def get(userGroup: String, transferConfigId: BigInt)(implicit session: DBSession = autoSession): Option[TransferConfigSalesforce] = {
     val f = TransferConfigSalesforce.syntax("f")
     withSQL(
       select(
@@ -75,7 +75,7 @@ object TransferConfigSalesforce extends SQLSyntaxSupport[TransferConfigSalesforc
    * @param session DB Session
    * @return 作成したレコードのID
    */
-  def create(transferConfigSalesforce: TransferConfigSalesforce)(implicit session: DBSession = autoSession): Int = {
+  def create(transferConfigSalesforce: TransferConfigSalesforce)(implicit session: DBSession = autoSession): BigInt = {
     withSQL{
       val c = TransferConfigSalesforce.column
       insert.into(TransferConfigSalesforce).namedValues(
@@ -98,7 +98,7 @@ object TransferConfigSalesforce extends SQLSyntaxSupport[TransferConfigSalesforc
    * @param session DB Session
    * @return Result
    */
-  def save(transferConfigSalesforce: TransferConfigSalesforce)(implicit session: DBSession = autoSession): Int = {
+  def save(transferConfigSalesforce: TransferConfigSalesforce)(implicit session: DBSession = autoSession): BigInt = {
     withSQL{
       val c = TransferConfigSalesforce.column
       update(TransferConfigSalesforce).set(
