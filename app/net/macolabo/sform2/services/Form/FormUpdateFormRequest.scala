@@ -16,9 +16,9 @@ import play.api.libs.functional.syntax._
  * @param input_type 入力種別
  */
 case class FormUpdateFormRequestFormColValidation(
-                                                 id: Option[Int],
-                                                 form_col_id: Option[Int],
-                                                 form_id: Int,
+                                                 id: Option[BigInt],
+                                                 form_col_id: Option[BigInt],
+                                                 form_id: BigInt,
                                                  max_value: Int,
                                                  min_value: Int,
                                                  max_length: Int,
@@ -40,9 +40,9 @@ case class FormUpdateFormRequestFormColValidation(
  * @param view_style 参照時CSSスタイル
  */
 case class FormUpdateFormRequestFormColSelect(
-                                             id: Option[Int],
-                                             form_col_id: Option[Int],
-                                             form_id: Int,
+                                             id: Option[BigInt],
+                                             form_col_id: Option[BigInt],
+                                             form_id: BigInt,
                                              select_index: Int,
                                              select_name: String,
                                              select_value: String,
@@ -64,8 +64,8 @@ case class FormUpdateFormRequestFormColSelect(
  * @param validations バリデーション
  */
 case class FormUpdateFormRequestFormCol(
-                                       id: Option[Int],
-                                       form_id: Int,
+                                       id: Option[BigInt],
+                                       form_id: BigInt,
                                        name: String,
                                        col_id: String,
                                        col_index: Int,
@@ -83,7 +83,7 @@ case class FormUpdateFormRequestFormCol(
  * @param field_name Salesforceフィールド名
  */
 case class FormUpdateFormRequestFormTransferTaskSalesforceField(
-                                                            id: Option[Int],
+                                                            id: Option[BigInt],
                                                             form_transfer_task_salesforce_id: Int,
                                                             form_column_id: String,
                                                             field_name: String
@@ -99,10 +99,10 @@ case class FormUpdateFormRequestFormTransferTaskSalesforceField(
  * @param cond_value 値　
  */
 case class FormUpdateFormRequestFormTransferTaskCondition(
-                                                           id: Option[Int],
-                                                           form_transfer_task_id: Int,
-                                                           form_id: Int,
-                                                           form_col_id: Int,
+                                                           id: Option[BigInt],
+                                                           form_transfer_task_id: BigInt,
+                                                           form_id: BigInt,
+                                                           form_col_id: BigInt,
                                                            operator: String,
                                                            cond_value: String
                                                 )
@@ -120,13 +120,13 @@ case class FormUpdateFormRequestFormTransferTaskCondition(
  * @param body 本文
  */
 case class FormUpdateFormRequestFormTransferTaskMail(
-                                                      id: Option[Int],
-                                                      form_transfer_task_id: Option[Int],
-                                                      from_address_id: Int,
+                                                      id: Option[BigInt],
+                                                      form_transfer_task_id: Option[BigInt],
+                                                      from_address_id: BigInt,
                                                       to_address: String,
                                                       cc_address: String,
-                                                      bcc_address_id: Int,
-                                                      replyto_address_id: Int,
+                                                      bcc_address_id: BigInt,
+                                                      replyto_address_id: BigInt,
                                                       subject: String,
                                                       body: String
                                                     )
@@ -139,8 +139,8 @@ case class FormUpdateFormRequestFormTransferTaskMail(
  * @param fields フィールド割り当て情報
  */
 case class FormUpdateFormRequestFormTransferTaskSalesforce(
-                                                            id: Option[Int],
-                                                            form_transfer_task_id: Option[Int],
+                                                            id: Option[BigInt],
+                                                            form_transfer_task_id: Option[BigInt],
                                                             object_name: String,
                                                             fields: List[FormUpdateFormRequestFormTransferTaskSalesforceField]
                                                           )
@@ -158,9 +158,9 @@ case class FormUpdateFormRequestFormTransferTaskSalesforce(
  * @param salesforce SalesforceTransfer設定
  */
 case class FormUpdateFormRequestFormTransferTask(
-                                                  id: Option[Int],
-                                                  transfer_config_id: Int,
-                                                  form_id: Int,
+                                                  id: Option[BigInt],
+                                                  transfer_config_id: BigInt,
+                                                  form_id: BigInt,
                                                   task_index: Int,
                                                   name: String,
                                                   form_transfer_task_conditions: List[FormUpdateFormRequestFormTransferTaskCondition],
@@ -185,7 +185,7 @@ case class FormUpdateFormRequestFormTransferTask(
  * @param form_cols フォーム項目
  */
 case class FormUpdateFormRequest(
-                                id: Int,
+                                id: BigInt,
                                 name: String,
                                 form_index: Int,
                                 title: String,
@@ -212,7 +212,7 @@ trait FormUpdateFormRequestJson {
   )
 
   implicit val FormUpdateFormRequestFormTransferTaskSalesforceFieldReads: Reads[FormUpdateFormRequestFormTransferTaskSalesforceField] = (
-    (JsPath \ "id").readNullable[Int] ~
+    (JsPath \ "id").readNullable[BigInt] ~
       (JsPath \ "form_transfer_task_salesforce_id").read[Int] ~
       (JsPath \ "form_column_id").read[String] ~
       (JsPath \ "field_name").read[String]
@@ -228,10 +228,10 @@ trait FormUpdateFormRequestJson {
   )
 
   implicit val FormUpdateFormRequestFormTransferTaskConditionReads: Reads[FormUpdateFormRequestFormTransferTaskCondition] = (
-    (JsPath \ "id").readNullable[Int] ~
-      (JsPath \ "form_transfer_task_id").read[Int] ~
-      (JsPath \ "form_id").read[Int] ~
-      (JsPath \ "form_col_id").read[Int] ~
+    (JsPath \ "id").readNullable[BigInt] ~
+      (JsPath \ "form_transfer_task_id").read[BigInt] ~
+      (JsPath \ "form_id").read[BigInt] ~
+      (JsPath \ "form_col_id").read[BigInt] ~
       (JsPath \ "operator").read[String] ~
       (JsPath \ "cond_value").read[String]
   )(FormUpdateFormRequestFormTransferTaskCondition.apply _)
@@ -249,13 +249,13 @@ trait FormUpdateFormRequestJson {
   )
 
   implicit val FormUpdateFormRequestFormTransferTaskMailReads: Reads[FormUpdateFormRequestFormTransferTaskMail] = (
-    (JsPath \ "id").readNullable[Int] ~
-      (JsPath \ "form_transfer_task_id").readNullable[Int] ~
-      (JsPath \ "from_address_id").read[Int] ~
+    (JsPath \ "id").readNullable[BigInt] ~
+      (JsPath \ "form_transfer_task_id").readNullable[BigInt] ~
+      (JsPath \ "from_address_id").read[BigInt] ~
       (JsPath \ "to_address").read[String] ~
       (JsPath \ "cc_address").read[String] ~
-      (JsPath \ "bcc_address_id").read[Int] ~
-      (JsPath \ "replyto_address_id").read[Int] ~
+      (JsPath \ "bcc_address_id").read[BigInt] ~
+      (JsPath \ "replyto_address_id").read[BigInt] ~
       (JsPath \ "subject").read[String] ~
       (JsPath \ "body").read[String]
   )(FormUpdateFormRequestFormTransferTaskMail.apply _)
@@ -268,8 +268,8 @@ trait FormUpdateFormRequestJson {
   )
 
   implicit val FormUpdateFormRequestFormTransferTaskSalesforceReads: Reads[FormUpdateFormRequestFormTransferTaskSalesforce] = (
-    (JsPath \ "id").readNullable[Int] ~
-      (JsPath \ "form_transfer_task_id").readNullable[Int] ~
+    (JsPath \ "id").readNullable[BigInt] ~
+      (JsPath \ "form_transfer_task_id").readNullable[BigInt] ~
       (JsPath \ "object_name").read[String] ~
       (JsPath \ "fields").read[List[FormUpdateFormRequestFormTransferTaskSalesforceField]]
   )(FormUpdateFormRequestFormTransferTaskSalesforce.apply _)
@@ -286,9 +286,9 @@ trait FormUpdateFormRequestJson {
   )
 
   implicit val FormUpdateFormRequestFormTransferTaskReads: Reads[FormUpdateFormRequestFormTransferTask] = (
-    (JsPath \ "id").readNullable[Int] ~
-      (JsPath \ "transfer_config_id").read[Int] ~
-      (JsPath \ "form_id").read[Int] ~
+    (JsPath \ "id").readNullable[BigInt] ~
+      (JsPath \ "transfer_config_id").read[BigInt] ~
+      (JsPath \ "form_id").read[BigInt] ~
       (JsPath \ "task_index").read[Int] ~
       (JsPath \ "name").read[String] ~
       (JsPath \ "form_transfer_task_conditions").read[List[FormUpdateFormRequestFormTransferTaskCondition]] ~
@@ -308,9 +308,9 @@ trait FormUpdateFormRequestJson {
   )
 
   implicit val FormUpdateFormRequestFormColValidationReads: Reads[FormUpdateFormRequestFormColValidation] = (
-    (JsPath \ "id").readNullable[Int] ~
-      (JsPath \ "form_col_id").readNullable[Int] ~
-      (JsPath \ "form_id").read[Int] ~
+    (JsPath \ "id").readNullable[BigInt] ~
+      (JsPath \ "form_col_id").readNullable[BigInt] ~
+      (JsPath \ "form_id").read[BigInt] ~
       (JsPath \ "max_value").read[Int] ~
       (JsPath \ "min_value").read[Int] ~
       (JsPath \ "max_length").read[Int] ~
@@ -332,9 +332,9 @@ trait FormUpdateFormRequestJson {
   )
 
   implicit val FormUpdateFormRequestFormColSelectListReads: Reads[FormUpdateFormRequestFormColSelect] = (
-    (JsPath \ "id").readNullable[Int] ~
-      (JsPath \ "form_col_id").readNullable[Int] ~
-      (JsPath \ "form_id").read[Int] ~
+    (JsPath \ "id").readNullable[BigInt] ~
+      (JsPath \ "form_col_id").readNullable[BigInt] ~
+      (JsPath \ "form_id").read[BigInt] ~
       (JsPath \ "select_index").read[Int] ~
       (JsPath \ "select_name").read[String] ~
       (JsPath \ "select_value").read[String] ~
@@ -356,8 +356,8 @@ trait FormUpdateFormRequestJson {
   )
 
   implicit val FormUpdateFormRequestFormColReads: Reads[FormUpdateFormRequestFormCol] = (
-    (JsPath \ "id").readNullable[Int] ~
-      (JsPath \ "form_id").read[Int] ~
+    (JsPath \ "id").readNullable[BigInt] ~
+      (JsPath \ "form_id").read[BigInt] ~
       (JsPath \ "name").read[String] ~
       (JsPath \ "col_id").read[String] ~
       (JsPath \ "col_index").read[Int] ~
@@ -384,7 +384,7 @@ trait FormUpdateFormRequestJson {
   )
 
   implicit val FormUpdateFormRequestReads: Reads[FormUpdateFormRequest] = (
-    (JsPath \ "id").read[Int] ~
+    (JsPath \ "id").read[BigInt] ~
       (JsPath \ "name").read[String] ~
       (JsPath \ "form_index").read[Int] ~
       (JsPath \ "title").read[String] ~

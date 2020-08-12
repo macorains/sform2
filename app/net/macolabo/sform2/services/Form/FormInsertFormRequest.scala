@@ -66,7 +66,7 @@ case class FormInsertFormRequestFormCol(
  * @param field_name Salesforceフィールド名
  */
 case class FormInsertFormRequestFormTransferTaskSalesforceField(
-                                                                 form_transfer_task_salesforce_id: Int,
+                                                                 form_transfer_task_salesforce_id: BigInt,
                                                                  form_column_id: String,
                                                                  field_name: String
                                                                )
@@ -80,9 +80,9 @@ case class FormInsertFormRequestFormTransferTaskSalesforceField(
  * @param cond_value 値　
  */
 case class FormInsertFormRequestFormTransferTaskCondition(
-                                                           form_transfer_task_id: Int,
-                                                           form_id: Int,
-                                                           form_col_id: Int,
+                                                           form_transfer_task_id: BigInt,
+                                                           form_id: BigInt,
+                                                           form_col_id: BigInt,
                                                            operator: String,
                                                            cond_value: String
                                                          )
@@ -99,12 +99,12 @@ case class FormInsertFormRequestFormTransferTaskCondition(
  * @param body 本文
  */
 case class FormInsertFormRequestFormTransferTaskMail(
-                                                      form_transfer_task_id: Int,
-                                                      from_address_id: Int,
+                                                      form_transfer_task_id: BigInt,
+                                                      from_address_id: BigInt,
                                                       to_address: String,
                                                       cc_address: String,
-                                                      bcc_address_id: Int,
-                                                      replyto_address_id: Int,
+                                                      bcc_address_id: BigInt,
+                                                      replyto_address_id: BigInt,
                                                       subject: String,
                                                       body: String
                                                     )
@@ -116,7 +116,7 @@ case class FormInsertFormRequestFormTransferTaskMail(
  * @param fields フィールド割り当て情報
  */
 case class FormInsertFormRequestFormTransferTaskSalesforce(
-                                                            form_transfer_task_id: Int,
+                                                            form_transfer_task_id: BigInt,
                                                             object_name: String,
                                                             fields: List[FormInsertFormRequestFormTransferTaskSalesforceField]
                                                           )
@@ -133,8 +133,8 @@ case class FormInsertFormRequestFormTransferTaskSalesforce(
  * @param salesforce SalesforceTransfer設定
  */
 case class FormInsertFormRequestFormTransferTask(
-                                                  transfer_config_id: Int,
-                                                  form_id: Int,
+                                                  transfer_config_id: BigInt,
+                                                  form_id: BigInt,
                                                   task_index: Int,
                                                   name: String,
                                                   form_transfer_task_conditions: List[FormInsertFormRequestFormTransferTaskCondition],
