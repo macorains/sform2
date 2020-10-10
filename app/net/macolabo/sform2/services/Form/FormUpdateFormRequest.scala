@@ -19,10 +19,10 @@ case class FormUpdateFormRequestFormColValidation(
                                                  id: Option[BigInt],
                                                  form_col_id: Option[BigInt],
                                                  form_id: BigInt,
-                                                 max_value: Int,
-                                                 min_value: Int,
-                                                 max_length: Int,
-                                                 min_length: Int,
+                                                 max_value: Option[Int],
+                                                 min_value: Option[Int],
+                                                 max_length: Option[Int],
+                                                 min_length: Option[Int],
                                                  input_type: Int,
                                                  required: Boolean
                                                )
@@ -72,7 +72,7 @@ case class FormUpdateFormRequestFormCol(
                                        col_type: Int,
                                        default_value: String,
                                        select_list: List[FormUpdateFormRequestFormColSelect],
-                                       validations: Option[FormUpdateFormRequestFormColValidation]
+                                       validations: FormUpdateFormRequestFormColValidation
                                      )
 
 /**
@@ -311,10 +311,10 @@ trait FormUpdateFormRequestJson {
     (JsPath \ "id").readNullable[BigInt] ~
       (JsPath \ "form_col_id").readNullable[BigInt] ~
       (JsPath \ "form_id").read[BigInt] ~
-      (JsPath \ "max_value").read[Int] ~
-      (JsPath \ "min_value").read[Int] ~
-      (JsPath \ "max_length").read[Int] ~
-      (JsPath \ "min_length").read[Int] ~
+      (JsPath \ "max_value").readNullable[Int] ~
+      (JsPath \ "min_value").readNullable[Int] ~
+      (JsPath \ "max_length").readNullable[Int] ~
+      (JsPath \ "min_length").readNullable[Int] ~
       (JsPath \ "input_type").read[Int] ~
       (JsPath \ "required").read[Boolean]
     )(FormUpdateFormRequestFormColValidation.apply _)
@@ -364,7 +364,7 @@ trait FormUpdateFormRequestJson {
       (JsPath \ "col_type").read[Int] ~
       (JsPath \ "default_value").read[String] ~
       (JsPath \ "select_list").read[List[FormUpdateFormRequestFormColSelect]] ~
-      (JsPath \ "validations").readNullable[FormUpdateFormRequestFormColValidation]
+      (JsPath \ "validations").read[FormUpdateFormRequestFormColValidation]
     )(FormUpdateFormRequestFormCol.apply _)
 
   implicit val FormUpdateFormRequestWrites: Writes[FormUpdateFormRequest] = (formUpdateFormRequest: FormUpdateFormRequest) => Json.obj(

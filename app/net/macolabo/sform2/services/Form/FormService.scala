@@ -72,7 +72,7 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
       f.select_list.map(s => {
         insertFormColSelect(identity, s, response.id, formColId)
       })
-      f.validations.map(v => insertFormColValidation(identity, v, response.id, formColId))
+      insertFormColValidation(identity, f.validations, response.id, formColId)
     })
     response
   }
@@ -89,7 +89,14 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
     val updatedColIds = formUpdateFormRequest.form_cols.map(f => {
       f.id match {
         case Some(i: BigInt) if i > 0 => updateFormCol(identity, f)
-        case _ => insertFormCol(identity, FormUpdateFormRequestFormColToFormInsertFormRequestFormCol(f), formUpdateFormRequest.id)
+        case _ => {
+          val newColId = insertFormCol(identity, FormUpdateFormRequestFormColToFormInsertFormRequestFormCol(f), formUpdateFormRequest.id)
+          f.select_list.map(s => {
+            insertFormColSelect(identity, FormUpdateFormRequestFormColSelectToFormInsertFormRequestFormColSelect(s), formUpdateFormRequest.id, newColId)
+          })
+          insertFormColValidation(identity, FormUpdateFormRequestFormColValidationToFormInsertFormRequestFormColValidation(f.validations), formUpdateFormRequest.id, newColId)
+          newColId
+        }
       }
     })
 
@@ -316,12 +323,10 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
       .map(c => c.id)
       .foreach(c => FormColSelect.erase(userGroup, c))
 
-    formUpdateFormRequestFormCol.validations.map(v => {
-      v.id match {
-        case Some(i: BigInt) if i > 0 => updateFormColValidation(identity, v)
-        case _ => insertFormColValidation(identity, FormUpdateFormRequestFormColValidationToFormInsertFormRequestFormColValidation(v), formCol.form_id, formCol.id)
-      }
-    })
+    formUpdateFormRequestFormCol.validations.id match {
+      case Some(i: BigInt) if i > 0 => updateFormColValidation(identity, formUpdateFormRequestFormCol.validations)
+      case _ => insertFormColValidation(identity, FormUpdateFormRequestFormColValidationToFormInsertFormRequestFormColValidation(formUpdateFormRequestFormCol.validations), formCol.form_id, formCol.id)
+    }
     formCol.id
   }
 
@@ -697,7 +702,7 @@ class FormService @Inject() (implicit ex: ExecutionContext) {
       src.col_type,
       src.default_value,
       src.select_list.map(s => FormUpdateFormRequestFormColSelectToFormInsertFormRequestFormColSelect(s)),
-      src.validations.map(v => FormUpdateFormRequestFormColValidationToFormInsertFormRequestFormColValidation(v))
+      FormUpdateFormRequestFormColValidationToFormInsertFormRequestFormColValidation(src.validations)
     )
   }
 

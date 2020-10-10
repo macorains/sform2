@@ -21,10 +21,10 @@ case class FormGetFormResponseFormColValidation(
                                                id: BigInt,
                                                form_col_id: BigInt,
                                                form_id: BigInt,
-                                               max_value: Int,
-                                               min_value: Int,
-                                               max_length: Int,
-                                               min_length: Int,
+                                               max_value: Option[Int],
+                                               min_value: Option[Int],
+                                               max_length: Option[Int],
+                                               min_length: Option[Int],
                                                input_type: Int,
                                                required: Boolean
                                                )
@@ -218,10 +218,10 @@ trait FormGetFormResponseJson {
     (JsPath \ "id").read[BigInt] ~
       (JsPath \ "form_col_id").read[BigInt] ~
       (JsPath \ "form_id").read[BigInt] ~
-      (JsPath \ "max_value").read[Int] ~
-      (JsPath \ "min_value").read[Int] ~
-      (JsPath \ "max_length").read[Int] ~
-      (JsPath \ "min_length").read[Int] ~
+      (JsPath \ "max_value").readNullable[Int] ~
+      (JsPath \ "min_value").readNullable[Int] ~
+      (JsPath \ "max_length").readNullable[Int] ~
+      (JsPath \ "min_length").readNullable[Int] ~
       (JsPath \ "input_type").read[Int] ~
       (JsPath \ "required").read[Boolean]
     )(FormGetFormResponseFormColValidation.apply _)
