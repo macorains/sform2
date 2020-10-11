@@ -2,6 +2,7 @@ package net.macolabo.sform2.services.Form
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
+import net.macolabo.sform2.utils.StringUtils.StringImprovements
 
 /**
  * フォーム作成API・フォーム項目・バリデーション
@@ -184,10 +185,10 @@ trait FormInsertFormRequestJson {
   )
 
   implicit val FormInsertFormRequestFormColValidationReads: Reads[FormInsertFormRequestFormColValidation] = (
-      (JsPath \ "max_value").readNullable[Int] ~
-      (JsPath \ "min_value").readNullable[Int] ~
-      (JsPath \ "max_length").readNullable[Int] ~
-      (JsPath \ "min_length").readNullable[Int] ~
+      (JsPath \ "max_value").readNullable[String].map[Option[Int]](os => os.flatMap(s => s.toIntOpt)) ~
+      (JsPath \ "min_value").readNullable[String].map[Option[Int]](os => os.flatMap(s => s.toIntOpt)) ~
+      (JsPath \ "max_length").readNullable[String].map[Option[Int]](os => os.flatMap(s => s.toIntOpt)) ~
+      (JsPath \ "min_length").readNullable[String].map[Option[Int]](os => os.flatMap(s => s.toIntOpt)) ~
       (JsPath \ "input_type").read[Int] ~
       (JsPath \ "required").read[Boolean]
     )(FormInsertFormRequestFormColValidation.apply _)
