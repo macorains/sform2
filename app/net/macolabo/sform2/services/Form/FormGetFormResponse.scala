@@ -206,10 +206,10 @@ trait FormGetFormResponseJson {
     "id" -> formGetFormResponseFormColValidation.id,
     "form_col_id" -> formGetFormResponseFormColValidation.form_col_id,
     "form_id" -> formGetFormResponseFormColValidation.form_id,
-    "max_value" -> formGetFormResponseFormColValidation.max_value,
-    "min_value" -> formGetFormResponseFormColValidation.min_value,
-    "max_length" -> formGetFormResponseFormColValidation.max_length,
-    "min_length" -> formGetFormResponseFormColValidation.min_length,
+    "max_value" -> JsString(formGetFormResponseFormColValidation.max_value.map(v=>v.toString).getOrElse("")),
+    "min_value" -> JsString(formGetFormResponseFormColValidation.min_value.map(v=>v.toString).getOrElse("")),
+    "max_length" -> JsString(formGetFormResponseFormColValidation.max_length.map(v=>v.toString).getOrElse("")),
+    "min_length" -> JsString(formGetFormResponseFormColValidation.min_length.map(v=>v.toString).getOrElse("")),
     "input_type" -> formGetFormResponseFormColValidation.input_type,
     "required" -> formGetFormResponseFormColValidation.required
   )
