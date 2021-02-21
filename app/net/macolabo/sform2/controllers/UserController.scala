@@ -45,4 +45,11 @@ class UserController @Inject() (
     val res = RsResultSet("OK", "OK", Json.toJson(""))
     Future.successful(Ok(Json.toJson(res)))
   }
+
+  // ユーザーの保存
+  // POST /user
+  def save: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin"))).async { implicit request =>
+    val res = RsResultSet("OK", "OK", userDAO.getList(request.identity))
+    Future.successful(Ok(Json.toJson(res)))
+  }
 }
