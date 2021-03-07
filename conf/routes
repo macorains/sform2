@@ -49,6 +49,7 @@ GET /transfer/salesforce/field/:transfer_config_id/:object_name net.macolabo.sfo
 
 # user
 GET /user net.macolabo.sform2.controllers.UserController.getList()
+POST /user net.macolabo.sform2.controllers.UserController.save()
 GET /user/isadmin net.macolabo.sform2.controllers.UserController.isAdmin()
 
 # transferTask

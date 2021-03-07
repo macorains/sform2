@@ -12,8 +12,18 @@ import scala.collection.mutable
 import scala.concurrent.{Future, _}
 import scala.concurrent.duration.Duration
 
-case class UserJson(userId: String, userGroup: String, role: String, firstName: String, lastName: String, fullName: String,
-  email: String, avatarUrl: String, activated: Boolean, deletable: Boolean)
+case class UserJson(
+                     user_id: String,
+                     user_group: String,
+                     role: String,
+                     first_name: String,
+                     last_name: String,
+                     full_name: String,
+                     email: String,
+                     avatar_url: String,
+                     activated: Boolean,
+                     deletable: Boolean
+                   )
 object UserJson {
   implicit def jsonUserWrites: Writes[UserJson] = Json.writes[UserJson]
   implicit def jsonUserReads: Reads[UserJson] = Json.reads[UserJson]
@@ -114,7 +124,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
   def getList(identity: User): JsValue = {
     val userGroup = identity.group.getOrElse("")
     DB localTx { implicit l =>
-      val userList = sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE USER_GROUP=${userGroup}"
+      val userList = sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE USER_GROUP=$userGroup"
         .map(rs =>
           models.User(
             UUID.fromString(rs.string("USER_ID")),

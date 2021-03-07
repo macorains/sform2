@@ -5,7 +5,7 @@ import com.mohiva.play.silhouette.impl.providers._
 import javax.inject._
 import net.macolabo.sform2.models.RsResultSet
 import net.macolabo.sform2.models.daos.UserDAO
-import net.macolabo.sform2.services.User.UserService
+import net.macolabo.sform2.services.User.{UserSaveRequest, UserSaveRequestJson, UserService}
 import org.webjars.play.WebJarsUtil
 import play.api.{Environment, _}
 import play.api.db.DBApi
@@ -30,7 +30,7 @@ class UserController @Inject() (
   implicit
   webJarsUtil: WebJarsUtil,
   ex: ExecutionContext
-) extends AbstractController(components) with I18nSupport {
+) extends AbstractController(components) with I18nSupport with UserSaveRequestJson {
 
   // ToDo グループによる制御必要
   // GET /user
@@ -49,7 +49,13 @@ class UserController @Inject() (
   // ユーザーの保存
   // POST /user
   def save: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin"))).async { implicit request =>
-    val res = RsResultSet("OK", "OK", userDAO.getList(request.identity))
-    Future.successful(Ok(Json.toJson(res)))
+    request.body.asJson.flatMap(bodyJson => {
+      bodyJson.validate[UserSaveRequest].asOpt.map(userSaveRequest => {
+        userService.save(userSaveRequest, request.identity.group.getOrElse(""))
+        Future.successful(Ok)
+      })
+    }).getOrElse(Future.successful(BadRequest))
+    // val res = RsResultSet("OK", "OK", userDAO.getList(request.identity))
+    // Future.successful(Ok(Json.toJson(res)))
   }
 }
