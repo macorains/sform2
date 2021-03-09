@@ -105,7 +105,17 @@ class UserDAOImpl extends UserDAO with SFDBConf {
     }
   }
 
-  def update(user: User): Future[User] = {
+  /**
+   * Delete a user.
+   * @param userID The ID of the user to delete.
+   */
+  def delete(userID: String, group: String): Unit = {
+    DB localTx { implicit l =>
+      sql"DELETE FROM M_USERINFO WHERE USER_ID=$userID AND USER_GROUP=$group".update().apply()
+    }
+  }
+
+  private def update(user: User): Future[User] = {
     DB localTx { implicit l =>
       sql"UPDATE M_USERINFO SET FIRST_NAME=${user.firstName}, LAST_NAME=${user.lastName} ,EMAIL=${user.email}, AVATAR_URL=${user.avatarURL}, ACTIVATED=${user.activated}, DELETABLE=${user.deletable} WHERE USER_ID=${user.userID.toString}"
         .update().apply()
@@ -113,13 +123,14 @@ class UserDAOImpl extends UserDAO with SFDBConf {
     }
   }
 
-  def add(user: User): Future[User] = {
+  private def add(user: User): Future[User] = {
     DB localTx { implicit l =>
       sql"INSERT INTO M_USERINFO(USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE) VALUES(${user.userID.toString},${user.loginInfo.providerID},${user.loginInfo.providerKey},${user.group},${user.role},${user.firstName},${user.lastName},${user.email},'',0,1)"
         .update().apply()
       Future.successful(user)
     }
   }
+
 
   def getList(identity: User): JsValue = {
     val userGroup = identity.group.getOrElse("")

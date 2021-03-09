@@ -55,7 +55,13 @@ class UserController @Inject() (
         Future.successful(Ok)
       })
     }).getOrElse(Future.successful(BadRequest))
-    // val res = RsResultSet("OK", "OK", userDAO.getList(request.identity))
-    // Future.successful(Ok(Json.toJson(res)))
+  }
+
+  // ユーザーの削除
+  // DELETE /user
+  def delete(userId: String): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin"))).async { implicit request =>
+    userService.delete(userId, request.identity.group.getOrElse(""))
+    val res = RsResultSet("OK", "OK", Json.toJson(""))
+    Future.successful(Ok(Json.toJson(res)))
   }
 }

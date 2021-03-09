@@ -40,6 +40,8 @@ trait UserService extends IdentityService[User] {
    */
   def save(profile: CommonSocialProfile): Future[User]
 
+  def delete(userId: String, group: String): Unit
+
   /**
    * Adminグループのユーザー存在チェック
    * @return Adminグループのユーザー数が0の場合はfalse、1以上でtrue

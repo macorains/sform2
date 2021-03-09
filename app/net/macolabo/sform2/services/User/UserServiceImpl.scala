@@ -94,6 +94,10 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
     }
   }
 
+  def delete(userId: String, group: String): Unit = {
+    userDAO.delete(userId, group)
+  }
+
   /**
    * Adminグループのユーザー存在チェック
    * @return Adminグループのユーザー数が0の場合はfalse、1以上でtrue
