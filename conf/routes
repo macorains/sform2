@@ -40,7 +40,7 @@ DELETE /form/:hashed_form_id net.macolabo.sform2.controllers.FormController.dele
 
 # transfer
 GET /transfer/config/list net.macolabo.sform2.controllers.TransferController.getTransferConfigList()
-GET /transfer/config/selectlist net.macolabo.sform2.controllers.TransferController.getSelectList()
+GET /transfer/selectlist net.macolabo.sform2.controllers.TransferController.getSelectList()
 GET /transfer/config/:transfer_config_id net.macolabo.sform2.controllers.TransferController.getTransferConfig(transfer_config_id: Int)
 POST /transfer/config net.macolabo.sform2.controllers.TransferController.saveTransferConfig()
 POST /transfer/salesforce/check net.macolabo.sform2.controllers.TransferController.checkTransferSalesforce()
