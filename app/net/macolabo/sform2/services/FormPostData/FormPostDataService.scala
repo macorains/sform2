@@ -14,7 +14,7 @@ class FormPostDataService @Inject()(
     val formColMap = identity.group.map(group => {
       val form = Form.get(group, hashed_form_id)
       val colIdMap = form.map(f => {
-        FormCol.getList(group, f.id).sortBy(formCol => formCol.col_index).map(formCol => (formCol.col_id, formCol.name))
+        FormCol.getList(group, f.id).map(formCol => (formCol.col_id, formCol.name))
       })
       (form.map(f=>f.id), colIdMap)
     })
