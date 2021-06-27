@@ -3,7 +3,7 @@ package net.macolabo.sform2.models.daos
 import net.macolabo.sform2.models.entity.form.{Form, FormCol, FormColSelect, FormColValidation, FormTransferTask, FormTransferTaskCondition, FormTransferTaskMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField}
 import net.macolabo.sform2.models.{SFDBConf, User}
 import net.macolabo.sform2.services.Form.delete.FormDeleteResponse
-import net.macolabo.sform2.services.Form.get.{FormColGetReponse, FormGetResponse, FormTransferTaskGetReponse}
+import net.macolabo.sform2.services.Form.get.{FormColGetReponse, FormColSelectGetReponse, FormGetResponse, FormTransferTaskGetReponse}
 import net.macolabo.sform2.services.Form.insert.{FormInsertRequest, FormInsertResponse}
 import net.macolabo.sform2.services.Form.list.FormListResponse
 import net.macolabo.sform2.services.Form.update.{FormUpdateRequest, FormUpdateResponse}
@@ -76,7 +76,17 @@ class FormDAOImpl extends FormDAO with SFDBConf {
   }
 
   private def convertToFormCol(userGroup: String, formCol: FormCol): FormColGetReponse = {
-    ???
+    FormColGetReponse(
+      formCol.id,
+      formCol.form_id,
+      formCol.name,
+      formCol.col_id,
+      formCol.col_index,
+      formCol.col_type,
+      formCol.default_value.getOrElse(""),
+      selectFormColSelectList(userGroup, formCol.form_id, formCol.id).map(col => convertToFormColSelect(col)),
+      selectFormColValidation(userGroup, formCol.form_id, formCol.id).map(validation => convertToFormColValidation(userGroup, validation))
+    )
   }
 
   private def convertToFormTransferTaskSalesforceField() = {
@@ -99,11 +109,21 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     ???
   }
 
-  private def convertToFormColSelect() = {
-    ???
+  private def convertToFormColSelect(formColSelect: FormColSelect) = {
+    FormColSelectGetReponse (
+      formColSelect.id,
+      formColSelect.form_col_id,
+      formColSelect.form_id,
+      formColSelect.select_index,
+      formColSelect.select_name,
+      formColSelect.select_value,
+      formColSelect.is_default,
+      formColSelect.edit_style.getOrElse(""),
+      formColSelect.view_style.getOrElse("")
+    )
   }
 
-  private def convertToFormColValidation() = {
+  private def convertToFormColValidation(userGroup: String, formColValidation: FormColValidation) = {
     ???
   }
 
