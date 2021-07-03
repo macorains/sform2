@@ -100,8 +100,10 @@ class FormDAOImpl extends FormDAO with SFDBConf {
   }
 
   /** フォーム削除 */
+    // TODO Formに紐づく各テーブルにFK制約付ける前提
+    // ON DELETE CASCADEFormDeleteResponse ON UPDATE CASCADE
   def delete(identity: User, id: BigInt): FormDeleteResponse = {
-    ???
+      FormDeleteResponse(deleteForm(identity.group.getOrElse(""), id))
   }
 
   /** HashedIdによるフォーム削除 */
