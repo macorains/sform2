@@ -6,7 +6,7 @@ import net.macolabo.sform2.services.Form.delete.FormDeleteResponse
 import net.macolabo.sform2.services.Form.get.{FormColGetReponse, FormColSelectGetReponse, FormColValidationGetReponse, FormGetResponse, FormTransferTaskConditionGetReponse, FormTransferTaskGetResponse, FormTransferTaskMailGetReponse, FormTransferTaskSalesforceFieldGetReponse, FormTransferTaskSalesforceGetReponse}
 import net.macolabo.sform2.services.Form.list.{FormListResponse, FormResponse}
 import net.macolabo.sform2.services.Form.update.{FormColSelectUpdateRequest, FormColUpdateRequest, FormColValidationUpdateRequest, FormTransferTaskConditionRequest, FormTransferTaskMailRequest, FormTransferTaskRequest, FormTransferTaskSalesforceFieldRequest, FormTransferTaskSalesforceRequest, FormUpdateRequest, FormUpdateResponse}
-import scalikejdbc.{insert, update, _}
+import scalikejdbc._
 
 import java.time.ZonedDateTime
 
@@ -42,12 +42,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     )
   }
 
-//  /** フォーム作成 */
-//  def insert(identity: User, request: FormInsertRequest): FormInsertResponse = {
-//    ???
-//  }
-
-  /** フォーム更新 */
+  /** フォーム作成・更新 */
   def update(identity: User, request: FormUpdateRequest): FormUpdateResponse = {
       val userId = identity.userID.toString
       val group = identity.group.getOrElse("")
@@ -100,15 +95,13 @@ class FormDAOImpl extends FormDAO with SFDBConf {
   }
 
   /** フォーム削除 */
-    // TODO Formに紐づく各テーブルにFK制約付ける前提
-    // ON DELETE CASCADEFormDeleteResponse ON UPDATE CASCADE
   def delete(identity: User, id: BigInt): FormDeleteResponse = {
       FormDeleteResponse(deleteForm(identity.group.getOrElse(""), id))
   }
 
   /** HashedIdによるフォーム削除 */
   def deleteByHashedId(identity: User, hashed_id: String): FormDeleteResponse = {
-    ???
+    FormDeleteResponse(deleteFormByHashedId(identity.group.getOrElse(""), hashed_id))
   }
 
   // ----------------------------------------------
@@ -608,7 +601,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
   def insertFormColSelect(userGroup: String, user: String, formColSelect: FormColSelectUpdateRequest, formId: BigInt, formColId: BigInt): BigInt = {
     withSQL {
       val c = FormColSelect.column
-      insert.into(FormColSelect).namedValues(
+      insertInto(FormColSelect).namedValues(
         c.form_col_id -> formColId,
         c.form_id -> formId,
         c.select_index -> formColSelect.select_index,
@@ -666,7 +659,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
   def insertFormTransferTaskMail(userGroup: String, user: String, formTransferTaskMail: FormTransferTaskMailRequest, formTransferTaskId: BigInt): BigInt = {
     withSQL{
       val c = FormTransferTaskMail.column
-      insert.into(FormTransferTaskMail).namedValues(
+      insertInto(FormTransferTaskMail).namedValues(
         c.form_transfer_task_id -> formTransferTaskId,
         c.from_address_id -> formTransferTaskMail.from_address_id,
         c.to_address -> formTransferTaskMail.to_address,
@@ -687,7 +680,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
   def insertFormTransferTaskSalesforce(userGroup: String, user: String, formTransferTaskSalesforce: FormTransferTaskSalesforceRequest, formTransferTaskId: BigInt): BigInt = {
     withSQL{
       val c = FormTransferTaskSalesforce.column
-      insert.into(FormTransferTaskSalesforce).namedValues(
+      insertInto(FormTransferTaskSalesforce).namedValues(
         c.form_transfer_task_id -> formTransferTaskId,
         c.object_name -> formTransferTaskSalesforce.object_name,
         c.user_group -> userGroup,
@@ -702,7 +695,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
   def insertFormTransferTaskSalesforceField(userGroup: String, user: String, formTransferTaskSalesforceField: FormTransferTaskSalesforceFieldRequest, formTransferTaskSalesforceId: BigInt): BigInt = {
     withSQL {
       val c = FormTransferTaskSalesforceField.column
-      insert.into(FormTransferTaskSalesforceField).namedValues(
+      insertInto(FormTransferTaskSalesforceField).namedValues(
         c.form_transfer_task_salesforce_id -> formTransferTaskSalesforceId,
         c.form_column_id -> formTransferTaskSalesforceField.form_column_id,
         c.field_name -> formTransferTaskSalesforceField.field_name,
@@ -870,6 +863,13 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     withSQL {
       val c = Form.column
       QueryDSL.delete.from(Form).where.eq(c.id, formId).and.eq(c.user_group, userGroup)
+    }.update().apply()
+  }
+
+  def deleteFormByHashedId(userGroup:String, hashedFormId: String): Int = {
+    withSQL {
+      val c = Form.column
+      QueryDSL.delete.from(Form).where.eq(c.hashed_id, hashedFormId).and.eq(c.user_group, userGroup)
     }.update().apply()
   }
 

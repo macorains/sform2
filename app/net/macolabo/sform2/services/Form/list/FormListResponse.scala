@@ -33,7 +33,7 @@ trait FormListResponseJson {
       (JsPath \ "title").read[String] ~
       (JsPath \ "status").read[Int] ~
       (JsPath \ "hashed_id").read[String]
-    )(FormResponse.apply _)
+    ) (FormResponse.apply _)
   implicit val FormListResponseWrites: Writes[FormListResponse] = (formListResponse: FormListResponse) => Json.obj(
     "forms" -> formListResponse.forms,
     "data_count" -> formListResponse.data_count
@@ -41,4 +41,5 @@ trait FormListResponseJson {
   implicit val FormListResponseReads: Reads[FormListResponse] = (
     (JsPath \ "forms").read[List[FormResponse]] ~
       (JsPath \ "data_count").read[Int]
-    )(FormListResponse.apply _)
+    ) (FormListResponse.apply _)
+}
