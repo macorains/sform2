@@ -6,18 +6,18 @@ import scalikejdbc.{AutoSession, ConnectionPool}
 
 trait SformTestHelper {
   val config: Config = ConfigFactory.load()
-  Class.forName(config.getString("db.test.driver"))
-  ConnectionPool.singleton(config.getString("db.test.url"), config.getString("db.test.username"), config.getString("db.test.password"))
+  Class.forName(config.getString("db.default.driver"))
+  ConnectionPool.singleton(config.getString("db.default.url"), config.getString("db.default.username"), config.getString("db.default.password"))
   implicit val session: AutoSession.type = AutoSession
 
   def withSformDatabase[T](block: Database => T) = {
     Databases.withDatabase(
-      driver = config.getString("db.test.driver"),
-      url = config.getString("db.test.url"),
+      driver = config.getString("db.default.driver"),
+      url = config.getString("db.default.url"),
       name = "sformdb",
       config = Map(
-        "user" -> config.getString("db.test.username"),
-        "password" -> config.getString("db.test.password")
+        "user" -> config.getString("db.default.username"),
+        "password" -> config.getString("db.default.password")
       )
     )(block)
   }

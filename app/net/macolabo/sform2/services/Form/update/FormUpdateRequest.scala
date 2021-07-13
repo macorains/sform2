@@ -30,7 +30,7 @@ case class FormUpdateRequest(
                               complete_text: String,
                               confirm_header: String,
                               form_cols: List[FormColUpdateRequest],
-                              form_transfer_tasks: List[FormTransferTaskRequest]
+                              form_transfer_tasks: List[FormTransferTaskUpdateRequest]
                             )
 
 /**
@@ -47,7 +47,7 @@ case class FormUpdateRequest(
  */
 case class FormColUpdateRequest(
                                          id: Option[BigInt],
-                                         form_id: BigInt,
+                                         form_id: Option[BigInt],
                                          name: String,
                                          col_id: String,
                                          col_index: Int,
@@ -71,7 +71,7 @@ case class FormColUpdateRequest(
 case class FormColValidationUpdateRequest(
                                                    id: Option[BigInt],
                                                    form_col_id: Option[BigInt],
-                                                   form_id: BigInt,
+                                                   form_id: Option[BigInt],
                                                    max_value: Option[Int],
                                                    min_value: Option[Int],
                                                    max_length: Option[Int],
@@ -95,7 +95,7 @@ case class FormColValidationUpdateRequest(
 case class FormColSelectUpdateRequest(
                                                id: Option[BigInt],
                                                form_col_id: Option[BigInt],
-                                               form_id: BigInt,
+                                               form_id: Option[BigInt],
                                                select_index: Int,
                                                select_name: String,
                                                select_value: String,
@@ -115,15 +115,15 @@ case class FormColSelectUpdateRequest(
  * @param mail MailTransfer設定
  * @param salesforce SalesforceTransfer設定
  */
-case class FormTransferTaskRequest(
-                                                  id: Option[BigInt],
-                                                  transfer_config_id: BigInt,
-                                                  form_id: BigInt,
-                                                  task_index: Int,
-                                                  name: String,
-                                                  form_transfer_task_conditions: List[FormTransferTaskConditionRequest],
-                                                  mail: Option[FormTransferTaskMailRequest],
-                                                  salesforce: Option[FormTransferTaskSalesforceRequest]
+case class FormTransferTaskUpdateRequest(
+                                          id: Option[BigInt],
+                                          transfer_config_id: BigInt,
+                                          form_id: BigInt,
+                                          task_index: Int,
+                                          name: String,
+                                          form_transfer_task_conditions: List[FormTransferTaskConditionUpdateRequest],
+                                          mail: Option[FormTransferTaskMailUpdateRequest],
+                                          salesforce: Option[FormTransferTaskSalesforceUpdateRequest]
                                                 )
 
 /**
@@ -135,10 +135,10 @@ case class FormTransferTaskRequest(
  * @param operator 演算子
  * @param cond_value 値　
  */
-case class FormTransferTaskConditionRequest(
+case class FormTransferTaskConditionUpdateRequest(
                                                            id: Option[BigInt],
-                                                           form_transfer_task_id: BigInt,
-                                                           form_id: BigInt,
+                                                           form_transfer_task_id: Option[BigInt],
+                                                           form_id: Option[BigInt],
                                                            form_col_id: BigInt,
                                                            operator: String,
                                                            cond_value: String
@@ -156,14 +156,14 @@ case class FormTransferTaskConditionRequest(
  * @param subject 件名
  * @param body 本文
  */
-case class FormTransferTaskMailRequest(
+case class FormTransferTaskMailUpdateRequest(
                                                       id: Option[BigInt],
                                                       form_transfer_task_id: Option[BigInt],
                                                       from_address_id: BigInt,
                                                       to_address: String,
-                                                      cc_address: String,
-                                                      bcc_address_id: BigInt,
-                                                      replyto_address_id: BigInt,
+                                                      cc_address: Option[String],
+                                                      bcc_address_id: Option[BigInt],
+                                                      replyto_address_id: Option[BigInt],
                                                       subject: String,
                                                       body: String
                                                     )
@@ -175,11 +175,11 @@ case class FormTransferTaskMailRequest(
  * @param object_name Salesforceオブジェクト名
  * @param fields フィールド割り当て情報
  */
-case class FormTransferTaskSalesforceRequest(
+case class FormTransferTaskSalesforceUpdateRequest(
                                                             id: Option[BigInt],
                                                             form_transfer_task_id: Option[BigInt],
                                                             object_name: String,
-                                                            fields: List[FormTransferTaskSalesforceFieldRequest]
+                                                            fields: List[FormTransferTaskSalesforceFieldUpdateRequest]
                                                           )
 
 /**
@@ -189,9 +189,9 @@ case class FormTransferTaskSalesforceRequest(
  * @param form_column_id フォーム項目ID
  * @param field_name Salesforceフィールド名
  */
-case class FormTransferTaskSalesforceFieldRequest(
+case class FormTransferTaskSalesforceFieldUpdateRequest(
                                                                  id: Option[BigInt],
-                                                                 form_transfer_task_salesforce_id: Int,
+                                                                 form_transfer_task_salesforce_id: Option[BigInt],
                                                                  form_column_id: String,
                                                                  field_name: String
                                                                )

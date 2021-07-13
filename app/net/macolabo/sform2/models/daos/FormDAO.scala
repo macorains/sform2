@@ -5,26 +5,24 @@ import net.macolabo.sform2.services.Form.delete.FormDeleteResponse
 import net.macolabo.sform2.services.Form.get.FormGetResponse
 import net.macolabo.sform2.services.Form.list.FormListResponse
 import net.macolabo.sform2.services.Form.update.{FormUpdateRequest, FormUpdateResponse}
+import scalikejdbc.DBSession
 
 trait FormDAO {
   /** フォーム取得 */
-  def get(identity: User, id: BigInt): Option[FormGetResponse]
+  def get(identity: User, id: BigInt)(implicit session: DBSession): Option[FormGetResponse]
 
   /** HashedIdによるフォーム取得 */
-  def getByHashedId(identity: User, hashed_id: String): Option[FormGetResponse]
+  def getByHashedId(identity: User, hashed_id: String)(implicit session: DBSession): Option[FormGetResponse]
 
   /** フォーム一覧取得 */
-  def getList(identity: User): FormListResponse
+  def getList(identity: User)(implicit session: DBSession): FormListResponse
 
-//  /** フォーム作成 */
-//  def insert(identity: User, request: FormInsertRequest): FormInsertResponse
-
-  /** フォーム更新 */
-  def update(identity: User, request: FormUpdateRequest): FormUpdateResponse
+  /** フォーム作成更新 */
+  def update(identity: User, request: FormUpdateRequest)(implicit session: DBSession): FormUpdateResponse
 
   /** フォーム削除 */
-  def delete(identity: User, id: BigInt): FormDeleteResponse
+  def delete(identity: User, id: BigInt)(implicit session: DBSession): FormDeleteResponse
 
   /** HashedIdによるフォーム削除 */
-  def deleteByHashedId(identity: User, hashed_id: String): FormDeleteResponse
+  def deleteByHashedId(identity: User, hashed_id: String)(implicit session: DBSession): FormDeleteResponse
 }

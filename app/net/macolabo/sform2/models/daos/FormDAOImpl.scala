@@ -1,11 +1,11 @@
 package net.macolabo.sform2.models.daos
 
 import net.macolabo.sform2.models.entity.form.{Form, FormCol, FormColSelect, FormColValidation, FormTransferTask, FormTransferTaskCondition, FormTransferTaskMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField}
-import net.macolabo.sform2.models.{SFDBConf, User}
+import net.macolabo.sform2.models.User
 import net.macolabo.sform2.services.Form.delete.FormDeleteResponse
 import net.macolabo.sform2.services.Form.get.{FormColGetReponse, FormColSelectGetReponse, FormColValidationGetReponse, FormGetResponse, FormTransferTaskConditionGetReponse, FormTransferTaskGetResponse, FormTransferTaskMailGetReponse, FormTransferTaskSalesforceFieldGetReponse, FormTransferTaskSalesforceGetReponse}
 import net.macolabo.sform2.services.Form.list.{FormListResponse, FormResponse}
-import net.macolabo.sform2.services.Form.update.{FormColSelectUpdateRequest, FormColUpdateRequest, FormColValidationUpdateRequest, FormTransferTaskConditionRequest, FormTransferTaskMailRequest, FormTransferTaskRequest, FormTransferTaskSalesforceFieldRequest, FormTransferTaskSalesforceRequest, FormUpdateRequest, FormUpdateResponse}
+import net.macolabo.sform2.services.Form.update.{FormColSelectUpdateRequest, FormColUpdateRequest, FormColValidationUpdateRequest, FormTransferTaskConditionUpdateRequest, FormTransferTaskMailUpdateRequest, FormTransferTaskUpdateRequest, FormTransferTaskSalesforceFieldUpdateRequest, FormTransferTaskSalesforceUpdateRequest, FormUpdateRequest, FormUpdateResponse}
 import scalikejdbc._
 
 import java.time.ZonedDateTime
@@ -14,10 +14,10 @@ import java.time.ZonedDateTime
  * FormDAO
  *
  */
-class FormDAOImpl extends FormDAO with SFDBConf {
+class FormDAOImpl extends FormDAO {
 
   /** フォーム取得 */
-  def get(identity: User, id: BigInt): Option[FormGetResponse] = {
+  def get(identity: User, id: BigInt)(implicit session: DBSession): Option[FormGetResponse] = {
     val userGroup = identity.group.getOrElse("")
     selectForm(userGroup, id).map(form => {
       convertToFormGetResponse(userGroup, form)
@@ -25,7 +25,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
   }
 
   /** HashedIdによるフォーム取得 */
-  def getByHashedId(identity: User, hashed_id: String): Option[FormGetResponse] = {
+  def getByHashedId(identity: User, hashed_id: String)(implicit session: DBSession): Option[FormGetResponse] = {
     val userGroup = identity.group.getOrElse("")
     selectFormByHashedId(userGroup, hashed_id).map(form => {
       convertToFormGetResponse(userGroup, form)
@@ -33,81 +33,80 @@ class FormDAOImpl extends FormDAO with SFDBConf {
   }
 
   /** フォーム一覧取得 */
-  def getList(identity: User): FormListResponse = {
-    val userGroup = identity.group.getOrElse("")
-    val formList = selectFormList(userGroup).map(form => convertToFormResponse(form))
-    FormListResponse(
-      formList,
-      formList.length
-    )
+  def getList(identity: User)(implicit session: DBSession): FormListResponse = {
+      val userGroup = identity.group.getOrElse("")
+      val formList = selectFormList(userGroup).map(form => convertToFormResponse(form))
+      FormListResponse(
+        formList,
+        formList.length
+      )
   }
 
   /** フォーム作成・更新 */
-  def update(identity: User, request: FormUpdateRequest): FormUpdateResponse = {
-      val userId = identity.userID.toString
-      val group = identity.group.getOrElse("")
+  def update(identity: User, request: FormUpdateRequest)(implicit session: DBSession): FormUpdateResponse = {
+    val userId = identity.userID.toString
+    val group = identity.group.getOrElse("")
 
-      val formId = request.id
-        .map(_ => updateForm(userId, request))
-        .getOrElse(insertForm(group, userId, request))
+    val formId = request.id
+      .map(_ => updateForm(userId, request))
+      .getOrElse(insertForm(group, userId, request))
 
-      request.form_cols.foreach(formCol => {
-        val formColId = formCol.id
-          .map(_ => updateFormCol(userId, formCol))
-          .getOrElse(insertFormCol(group, userId, formCol, formId))
-        formCol.select_list.map(select => {
-          select.id
-            .map(_ => updateFormColSelect(userId, select))
-            .getOrElse(insertFormColSelect(group, userId, select, formId, formColId))
-        })
-        formCol.validations.id
-          .map(_ => updateFormColValidation(userId, formCol.validations))
-          .getOrElse(insertFormColValidation(group, userId, formCol.validations, formId, formColId))
+    request.form_cols.foreach(formCol => {
+      val formColId = formCol.id
+        .map(_ => updateFormCol(userId, formCol))
+        .getOrElse(insertFormCol(group, userId, formCol, formId))
+      formCol.select_list.map(select => {
+        select.id
+          .map(_ => updateFormColSelect(userId, select))
+          .getOrElse(insertFormColSelect(group, userId, select, formId, formColId))
       })
+      formCol.validations.id
+        .map(_ => updateFormColValidation(userId, formCol.validations))
+        .getOrElse(insertFormColValidation(group, userId, formCol.validations, formId, formColId))
+    })
 
-      request.form_transfer_tasks.foreach(formTransferTask => {
-        val formTransferTaskId = formTransferTask.id
-          .map(_ => updateFormTransferTask(userId, formTransferTask))
-          .getOrElse(insertFormTransferTask(group, userId, formTransferTask, formId))
-        formTransferTask.form_transfer_task_conditions.foreach(condition => {
-          condition.id
-            .map(_ => updateFormTransferTaskCondition(userId, condition))
-            .getOrElse(insertFormTransferTaskCondition(group, userId, condition, formId, formTransferTaskId))
-        })
-        formTransferTask.salesforce.map(sf => {
-          val sfId = sf.id
-            .map(_ => updateFormTransferTaskSalesforce(userId, sf))
-            .getOrElse(insertFormTransferTaskSalesforce(group, userId, sf, formTransferTaskId))
-          sf.fields.map(sff => {
-            sff.id
-              .map(_ => updateFormTransferTaskSalesforceField(userId, sff))
-              .getOrElse(insertFormTransferTaskSalesforceField(group, userId, sff, sfId))
-          })
-        })
-        formTransferTask.mail.map(mail => {
-          mail.id
-            .map(_ => updateFormTransferTaskMail(userId, mail))
-            .getOrElse(insertFormTransferTaskMail(group, userId, mail, formTransferTaskId))
+    request.form_transfer_tasks.foreach(formTransferTask => {
+      val formTransferTaskId = formTransferTask.id
+        .map(_ => updateFormTransferTask(userId, formTransferTask))
+        .getOrElse(insertFormTransferTask(group, userId, formTransferTask, formId))
+      formTransferTask.form_transfer_task_conditions.foreach(condition => {
+        condition.id
+          .map(_ => updateFormTransferTaskCondition(userId, condition))
+          .getOrElse(insertFormTransferTaskCondition(group, userId, condition, formId, formTransferTaskId))
+      })
+      formTransferTask.salesforce.map(sf => {
+        val sfId = sf.id
+          .map(_ => updateFormTransferTaskSalesforce(userId, sf))
+          .getOrElse(insertFormTransferTaskSalesforce(group, userId, sf, formTransferTaskId))
+        sf.fields.map(sff => {
+          sff.id
+            .map(_ => updateFormTransferTaskSalesforceField(userId, sff))
+            .getOrElse(insertFormTransferTaskSalesforceField(group, userId, sff, sfId))
         })
       })
-
-      FormUpdateResponse(formId)
+      formTransferTask.mail.map(mail => {
+        mail.id
+          .map(_ => updateFormTransferTaskMail(userId, mail))
+          .getOrElse(insertFormTransferTaskMail(group, userId, mail, formTransferTaskId))
+      })
+    })
+    FormUpdateResponse(formId)
   }
 
   /** フォーム削除 */
-  def delete(identity: User, id: BigInt): FormDeleteResponse = {
-      FormDeleteResponse(deleteForm(identity.group.getOrElse(""), id))
+  def delete(identity: User, id: BigInt)(implicit session: DBSession): FormDeleteResponse = {
+    FormDeleteResponse(deleteForm(identity.group.getOrElse(""), id))
   }
 
   /** HashedIdによるフォーム削除 */
-  def deleteByHashedId(identity: User, hashed_id: String): FormDeleteResponse = {
+  def deleteByHashedId(identity: User, hashed_id: String)(implicit session: DBSession): FormDeleteResponse = {
     FormDeleteResponse(deleteFormByHashedId(identity.group.getOrElse(""), hashed_id))
   }
 
   // ----------------------------------------------
   // レスポンス作成
   // ----------------------------------------------
-  private def convertToFormGetResponse(userGroup: String, form: Form): FormGetResponse = {
+  private def convertToFormGetResponse(userGroup: String, form: Form)(implicit session: DBSession): FormGetResponse = {
     FormGetResponse(
       form.id,
       form.name,
@@ -126,7 +125,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     )
   }
 
-  private def convertToFormCol(userGroup: String, formCol: FormCol): FormColGetReponse = {
+  private def convertToFormCol(userGroup: String, formCol: FormCol)(implicit session: DBSession): FormColGetReponse = {
     FormColGetReponse(
       formCol.id,
       formCol.form_id,
@@ -140,7 +139,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     )
   }
 
-  private def convertToFormTransferTaskSalesforceField(formTransferTaskSalesforceField: FormTransferTaskSalesforceField): FormTransferTaskSalesforceFieldGetReponse = {
+  private def convertToFormTransferTaskSalesforceField(formTransferTaskSalesforceField: FormTransferTaskSalesforceField)(implicit session: DBSession): FormTransferTaskSalesforceFieldGetReponse = {
     FormTransferTaskSalesforceFieldGetReponse(
       formTransferTaskSalesforceField.id,
       formTransferTaskSalesforceField.form_transfer_task_salesforce_id,
@@ -149,7 +148,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     )
   }
 
-  private def convertToFormTransferTaskSalesforce(userGroup: String, formTransferTaskSalesforce: FormTransferTaskSalesforce): FormTransferTaskSalesforceGetReponse = {
+  private def convertToFormTransferTaskSalesforce(userGroup: String, formTransferTaskSalesforce: FormTransferTaskSalesforce)(implicit session: DBSession): FormTransferTaskSalesforceGetReponse = {
     FormTransferTaskSalesforceGetReponse(
       formTransferTaskSalesforce.id,
       formTransferTaskSalesforce.form_transfer_task_id,
@@ -158,7 +157,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     )
   }
 
-  private def convertToFormTransferTaskMail(formTransferTaskMail: FormTransferTaskMail): FormTransferTaskMailGetReponse = {
+  private def convertToFormTransferTaskMail(formTransferTaskMail: FormTransferTaskMail)(implicit session: DBSession): FormTransferTaskMailGetReponse = {
     FormTransferTaskMailGetReponse(
       formTransferTaskMail.id,
       formTransferTaskMail.form_transfer_task_id,
@@ -172,7 +171,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     )
   }
 
-  private def convertToFormTransferTaskCondition(formTransferTaskCondition: FormTransferTaskCondition): FormTransferTaskConditionGetReponse = {
+  private def convertToFormTransferTaskCondition(formTransferTaskCondition: FormTransferTaskCondition)(implicit session: DBSession): FormTransferTaskConditionGetReponse = {
     FormTransferTaskConditionGetReponse(
       formTransferTaskCondition.id,
       formTransferTaskCondition.form_transfer_task_id,
@@ -183,7 +182,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     )
   }
 
-  private def convertToFormTransferTask(userGroup: String, formTransferTask: FormTransferTask): FormTransferTaskGetResponse = {
+  private def convertToFormTransferTask(userGroup: String, formTransferTask: FormTransferTask)(implicit session: DBSession): FormTransferTaskGetResponse = {
     FormTransferTaskGetResponse(
       formTransferTask.id,
       formTransferTask.transfer_config_id,
@@ -196,7 +195,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     )
   }
 
-  private def convertToFormColSelect(formColSelect: FormColSelect): FormColSelectGetReponse = {
+  private def convertToFormColSelect(formColSelect: FormColSelect)(implicit session: DBSession): FormColSelectGetReponse = {
     FormColSelectGetReponse (
       formColSelect.id,
       formColSelect.form_col_id,
@@ -210,7 +209,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     )
   }
 
-  private def convertToFormColValidation(formColValidation: FormColValidation): FormColValidationGetReponse = {
+  private def convertToFormColValidation(formColValidation: FormColValidation)(implicit session: DBSession): FormColValidationGetReponse = {
     FormColValidationGetReponse(
       formColValidation.id,
       formColValidation.form_col_id,
@@ -238,7 +237,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
   // ----------------------------------------------
   // selectクエリ実行
   // ----------------------------------------------
-  private def selectForm(uesrGroup: String, id: BigInt): Option[Form] = {
+  private def selectForm(uesrGroup: String, id: BigInt)(implicit session: DBSession): Option[Form] = {
     val f = Form.syntax("f")
     withSQL(
       select(
@@ -268,7 +267,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     ).map(rs => Form(rs)).single().apply()
   }
 
-  private def selectFormByHashedId(userGroup: String, hashedId: String): Option[Form] = {
+  private def selectFormByHashedId(userGroup: String, hashedId: String)(implicit session: DBSession): Option[Form] = {
     val f = Form.syntax("f")
     withSQL(
       select(
@@ -298,7 +297,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     ).map(rs => Form(rs)).single().apply()
   }
 
-  private def selectFormList(userGroup: String): List[Form] = {
+  private def selectFormList(userGroup: String)(implicit session: DBSession): List[Form] = {
     val f = Form.syntax("f")
     withSQL(
       select(
@@ -326,7 +325,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     ).map(rs => Form(rs)).list().apply()
   }
 
-  private def selectFormColList(userGroup: String, formId: BigInt): List[FormCol] = {
+  private def selectFormColList(userGroup: String, formId: BigInt)(implicit session: DBSession): List[FormCol] = {
     val f = FormCol.syntax("f")
     withSQL(
       select(
@@ -353,7 +352,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     ).map(rs => FormCol(rs)).list().apply()
   }
 
-  private def selectFormTransferTaskList(userGroup: String, formId: BigInt): List[FormTransferTask] = {
+  private def selectFormTransferTaskList(userGroup: String, formId: BigInt)(implicit session: DBSession): List[FormTransferTask] = {
     val f = FormTransferTask.syntax("f")
     withSQL(
       select(
@@ -376,7 +375,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     ).map(rs => FormTransferTask(rs)).list().apply()
   }
 
-  private def selectFormColSelectList(userGroup: String, formId: BigInt, formColId: BigInt): List[FormColSelect] = {
+  private def selectFormColSelectList(userGroup: String, formId: BigInt, formColId: BigInt)(implicit session: DBSession): List[FormColSelect] = {
     val f = FormColSelect.syntax("f")
     withSQL (
       select(
@@ -405,7 +404,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     ).map(rs => FormColSelect(rs)).list().apply()
   }
 
-  private def selectFormColValidation(userGroup: String, formId: BigInt, formColId: BigInt): Option[FormColValidation] = {
+  private def selectFormColValidation(userGroup: String, formId: BigInt, formColId: BigInt)(implicit session: DBSession): Option[FormColValidation] = {
     val f = FormColValidation.syntax("f")
     withSQL (
       select(
@@ -434,7 +433,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     ).map(rs => FormColValidation(rs)).single().apply()
   }
 
-  private def selectFormTransferTaskConditionList(userGroup: String, formId: BigInt, formTransferTaskId: BigInt): List[FormTransferTaskCondition] = {
+  private def selectFormTransferTaskConditionList(userGroup: String, formId: BigInt, formTransferTaskId: BigInt)(implicit session: DBSession): List[FormTransferTaskCondition] = {
     val f = FormTransferTaskCondition.syntax("f")
     withSQL(
       select(
@@ -460,7 +459,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     ).map(rs => FormTransferTaskCondition(rs)).list().apply()
   }
 
-  private def selectFormTransferTaskMail(userGroup: String, formTransferTaskId: BigInt): Option[FormTransferTaskMail] = {
+  private def selectFormTransferTaskMail(userGroup: String, formTransferTaskId: BigInt)(implicit session: DBSession): Option[FormTransferTaskMail] = {
     val f = FormTransferTaskMail.syntax("f")
     withSQL(
       select(
@@ -487,7 +486,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     ).map(rs=>FormTransferTaskMail(rs)).single().apply()
   }
 
-  private def selectFormTransferTaskSalesforce(userGroup: String, formTransferTaskId: BigInt): Option[FormTransferTaskSalesforce] = {
+  private def selectFormTransferTaskSalesforce(userGroup: String, formTransferTaskId: BigInt)(implicit session: DBSession): Option[FormTransferTaskSalesforce] = {
     val f = FormTransferTaskSalesforce.syntax("f")
     withSQL(
       select(
@@ -508,7 +507,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     ).map(rs=>FormTransferTaskSalesforce(rs)).single().apply()
   }
 
-  private def selectFormTransferTaskSalesforceFieldList(userGroup: String, formTransferTaskSalesforceId: BigInt): List[FormTransferTaskSalesforceField] = {
+  private def selectFormTransferTaskSalesforceFieldList(userGroup: String, formTransferTaskSalesforceId: BigInt)(implicit session: DBSession): List[FormTransferTaskSalesforceField] = {
     val f = FormTransferTaskSalesforceField.syntax("f")
     withSQL(
       select(
@@ -533,7 +532,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
   // ----------------------------------------------
   // insertクエリ実行
   // ----------------------------------------------
-  def insertForm(userGroup: String, user: String, form: FormUpdateRequest): BigInt = {
+  def insertForm(userGroup: String, user: String, form: FormUpdateRequest)(implicit session: DBSession): BigInt = {
     withSQL {
       val c = Form.column
       insertInto(Form).namedValues(
@@ -558,7 +557,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     }.updateAndReturnGeneratedKey().apply().toInt
   }
 
-  def insertFormCol(userGroup: String, user: String, formCol: FormColUpdateRequest, formId: BigInt): BigInt = {
+  def insertFormCol(userGroup: String, user: String, formCol: FormColUpdateRequest, formId: BigInt)(implicit session: DBSession): BigInt = {
     withSQL{
       val c = FormCol.column
       insertInto(FormCol).namedValues(
@@ -577,7 +576,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     }.updateAndReturnGeneratedKey().apply()
   }
 
-  def insertFormColValidation(userGroup: String, user: String, formColValidation: FormColValidationUpdateRequest, formId: BigInt, formColId: BigInt): BigInt = {
+  def insertFormColValidation(userGroup: String, user: String, formColValidation: FormColValidationUpdateRequest, formId: BigInt, formColId: BigInt)(implicit session: DBSession): BigInt = {
     withSQL{
       val c = FormColValidation.column
       insertInto(FormColValidation).namedValues(
@@ -598,7 +597,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     }.updateAndReturnGeneratedKey().apply()
   }
 
-  def insertFormColSelect(userGroup: String, user: String, formColSelect: FormColSelectUpdateRequest, formId: BigInt, formColId: BigInt): BigInt = {
+  def insertFormColSelect(userGroup: String, user: String, formColSelect: FormColSelectUpdateRequest, formId: BigInt, formColId: BigInt)(implicit session: DBSession): BigInt = {
     withSQL {
       val c = FormColSelect.column
       insertInto(FormColSelect).namedValues(
@@ -619,7 +618,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     }.updateAndReturnGeneratedKey().apply().toInt
   }
 
-  def insertFormTransferTask(userGroup: String, user: String, formTransferTask: FormTransferTaskRequest, formId: BigInt): BigInt = {
+  def insertFormTransferTask(userGroup: String, user: String, formTransferTask: FormTransferTaskUpdateRequest, formId: BigInt)(implicit session: DBSession): BigInt = {
     withSQL {
       val c = FormTransferTask.column
       insertInto(FormTransferTask)
@@ -637,7 +636,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     }.updateAndReturnGeneratedKey().apply()
   }
 
-  def insertFormTransferTaskCondition(userGroup: String, user: String, formTransferTaskCondition: FormTransferTaskConditionRequest, formId: BigInt, formTransferTaskId: BigInt): BigInt = {
+  def insertFormTransferTaskCondition(userGroup: String, user: String, formTransferTaskCondition: FormTransferTaskConditionUpdateRequest, formId: BigInt, formTransferTaskId: BigInt)(implicit session: DBSession): BigInt = {
     withSQL {
       val c = FormTransferTaskCondition.column
       insertInto(FormTransferTaskCondition)
@@ -656,7 +655,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     }.updateAndReturnGeneratedKey().apply().toInt
   }
 
-  def insertFormTransferTaskMail(userGroup: String, user: String, formTransferTaskMail: FormTransferTaskMailRequest, formTransferTaskId: BigInt): BigInt = {
+  def insertFormTransferTaskMail(userGroup: String, user: String, formTransferTaskMail: FormTransferTaskMailUpdateRequest, formTransferTaskId: BigInt)(implicit session: DBSession): BigInt = {
     withSQL{
       val c = FormTransferTaskMail.column
       insertInto(FormTransferTaskMail).namedValues(
@@ -677,7 +676,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     }.updateAndReturnGeneratedKey().apply().toInt
   }
 
-  def insertFormTransferTaskSalesforce(userGroup: String, user: String, formTransferTaskSalesforce: FormTransferTaskSalesforceRequest, formTransferTaskId: BigInt): BigInt = {
+  def insertFormTransferTaskSalesforce(userGroup: String, user: String, formTransferTaskSalesforce: FormTransferTaskSalesforceUpdateRequest, formTransferTaskId: BigInt)(implicit session: DBSession): BigInt = {
     withSQL{
       val c = FormTransferTaskSalesforce.column
       insertInto(FormTransferTaskSalesforce).namedValues(
@@ -692,7 +691,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     }.updateAndReturnGeneratedKey().apply().toInt
   }
 
-  def insertFormTransferTaskSalesforceField(userGroup: String, user: String, formTransferTaskSalesforceField: FormTransferTaskSalesforceFieldRequest, formTransferTaskSalesforceId: BigInt): BigInt = {
+  def insertFormTransferTaskSalesforceField(userGroup: String, user: String, formTransferTaskSalesforceField: FormTransferTaskSalesforceFieldUpdateRequest, formTransferTaskSalesforceId: BigInt)(implicit session: DBSession): BigInt = {
     withSQL {
       val c = FormTransferTaskSalesforceField.column
       insertInto(FormTransferTaskSalesforceField).namedValues(
@@ -711,7 +710,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
   // ----------------------------------------------
   // updateクエリ実行
   // ----------------------------------------------
-  def updateForm(user: String, form: FormUpdateRequest): BigInt = {
+  def updateForm(user: String, form: FormUpdateRequest)(implicit session: DBSession): BigInt = {
     withSQL{
       val c = Form.column
       QueryDSL.update(Form).set(
@@ -732,7 +731,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     }.update().apply()
   }
 
-  def updateFormCol(user: String, formCol: FormColUpdateRequest): BigInt = {
+  def updateFormCol(user: String, formCol: FormColUpdateRequest)(implicit session: DBSession): BigInt = {
     withSQL{
       val c = FormCol.column
       QueryDSL.update(FormCol).set(
@@ -748,7 +747,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     }.update().apply()
   }
 
-  def updateFormColValidation(user: String, formColValidation: FormColValidationUpdateRequest): BigInt = {
+  def updateFormColValidation(user: String, formColValidation: FormColValidationUpdateRequest)(implicit session: DBSession): BigInt = {
     withSQL{
       val c = FormColValidation.column
       QueryDSL.update(FormColValidation).set(
@@ -765,7 +764,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
       ).where.eq(c.id, formColValidation.id)
     }.update().apply()  }
 
-  def updateFormColSelect(user: String, formColSelect: FormColSelectUpdateRequest): BigInt = {
+  def updateFormColSelect(user: String, formColSelect: FormColSelectUpdateRequest)(implicit session: DBSession): BigInt = {
     withSQL{
       val c = FormColSelect.column
       QueryDSL.update(FormColSelect).set(
@@ -783,7 +782,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     }.update().apply()
   }
 
-  def updateFormTransferTask(user: String, formTransferTask: FormTransferTaskRequest): BigInt = {
+  def updateFormTransferTask(user: String, formTransferTask: FormTransferTaskUpdateRequest)(implicit session: DBSession): BigInt = {
     withSQL {
       val c = FormTransferTask.column
       QueryDSL.update(FormTransferTask)
@@ -798,7 +797,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     }.update().apply()
   }
 
-  def updateFormTransferTaskCondition(user: String, formTransferTaskCondition: FormTransferTaskConditionRequest): BigInt = {
+  def updateFormTransferTaskCondition(user: String, formTransferTaskCondition: FormTransferTaskConditionUpdateRequest)(implicit session: DBSession): BigInt = {
     withSQL {
       val c = FormTransferTaskCondition.column
       QueryDSL.update(FormTransferTaskCondition)
@@ -814,7 +813,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     }.update().apply()
   }
 
-  def updateFormTransferTaskMail(user: String, formTransferTaskMail: FormTransferTaskMailRequest): BigInt = {
+  def updateFormTransferTaskMail(user: String, formTransferTaskMail: FormTransferTaskMailUpdateRequest)(implicit session: DBSession): BigInt = {
     withSQL{
       val c = FormTransferTaskMail.column
       QueryDSL.update(FormTransferTaskMail).set(
@@ -831,7 +830,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
       ).where.eq(c.id, formTransferTaskMail.id)
     }.update().apply()  }
 
-  def updateFormTransferTaskSalesforce(user: String, formTransferTaskSalesforce: FormTransferTaskSalesforceRequest): BigInt = {
+  def updateFormTransferTaskSalesforce(user: String, formTransferTaskSalesforce: FormTransferTaskSalesforceUpdateRequest)(implicit session: DBSession): BigInt = {
     withSQL{
       val c = FormTransferTaskSalesforce.column
       QueryDSL.update(FormTransferTaskSalesforce).set(
@@ -843,7 +842,7 @@ class FormDAOImpl extends FormDAO with SFDBConf {
     }.update().apply()
   }
 
-  def updateFormTransferTaskSalesforceField(user: String, formTransferTaskSalesforceField: FormTransferTaskSalesforceFieldRequest): BigInt = {
+  def updateFormTransferTaskSalesforceField(user: String, formTransferTaskSalesforceField: FormTransferTaskSalesforceFieldUpdateRequest)(implicit session: DBSession): BigInt = {
     withSQL {
       val c = FormTransferTaskSalesforceField.column
       QueryDSL.update(FormTransferTaskSalesforceField).set(
@@ -859,69 +858,69 @@ class FormDAOImpl extends FormDAO with SFDBConf {
   // ----------------------------------------------
   // deleteクエリ実行
   // ----------------------------------------------
-  def deleteForm(userGroup:String, formId: BigInt): Int = {
+  def deleteForm(userGroup:String, formId: BigInt)(implicit session: DBSession): Int = {
     withSQL {
       val c = Form.column
       QueryDSL.delete.from(Form).where.eq(c.id, formId).and.eq(c.user_group, userGroup)
     }.update().apply()
   }
 
-  def deleteFormByHashedId(userGroup:String, hashedFormId: String): Int = {
+  def deleteFormByHashedId(userGroup:String, hashedFormId: String)(implicit session: DBSession): Int = {
     withSQL {
       val c = Form.column
       QueryDSL.delete.from(Form).where.eq(c.hashed_id, hashedFormId).and.eq(c.user_group, userGroup)
     }.update().apply()
   }
 
-  def deleteFormCol(userGroup: String, formColId: BigInt): Int = {
+  def deleteFormCol(userGroup: String, formColId: BigInt)(implicit session: DBSession): Int = {
     withSQL {
       val c = FormCol.column
       QueryDSL.delete.from(FormCol).where.eq(c.id, formColId).and.eq(c.user_group, userGroup)
     }.update().apply()
   }
 
-  def deleteFormColValidation(userGroup: String, formColValidationId: BigInt): Int = {
+  def deleteFormColValidation(userGroup: String, formColValidationId: BigInt)(implicit session: DBSession): Int = {
     withSQL {
       val c = FormColValidation.column
       QueryDSL.delete.from(FormColValidation).where.eq(c.id, formColValidationId).and.eq(c.user_group, userGroup)
     }.update().apply()
   }
 
-  def deleteFormColSelect(userGroup: String, formColSelectId: BigInt): Int = {
+  def deleteFormColSelect(userGroup: String, formColSelectId: BigInt)(implicit session: DBSession): Int = {
     withSQL {
       val c = FormColSelect.column
       QueryDSL.delete.from(FormColSelect).where.eq(c.id, formColSelectId).and.eq(c.user_group, userGroup)
     }.update().apply()
   }
 
-  def deleteFormTransferTask(userGroup: String, formTransferTaskId: BigInt): Int = {
+  def deleteFormTransferTask(userGroup: String, formTransferTaskId: BigInt)(implicit session: DBSession): Int = {
     withSQL{
       val c = FormTransferTask.column
       QueryDSL.delete.from(FormTransferTask).where.eq(c.id, formTransferTaskId).and.eq(c.user_group, userGroup)
     }.update().apply()
   }
-  def deleteFormTransferTaskCondition(userGroup: String, formTransferTaskConditionId: BigInt): Int = {
+  def deleteFormTransferTaskCondition(userGroup: String, formTransferTaskConditionId: BigInt)(implicit session: DBSession): Int = {
     withSQL{
       val c = FormTransferTaskCondition.column
       QueryDSL.delete.from(FormTransferTaskCondition).where.eq(c.id, formTransferTaskConditionId).and.eq(c.user_group, userGroup)
     }.update().apply()
   }
 
-  def deleteFormTransferTaskMail(userGroup: String, formTransferTaskMailId: BigInt): Int = {
+  def deleteFormTransferTaskMail(userGroup: String, formTransferTaskMailId: BigInt)(implicit session: DBSession): Int = {
     withSQL{
       val c = FormTransferTaskMail.column
       QueryDSL.delete.from(FormTransferTaskMail).where.eq(c.id, formTransferTaskMailId).and.eq(c.user_group, userGroup)
     }.update().apply()
   }
 
-  def deleteFormTransferTaskSalesforce(userGroup: String, formTransferTaskSalesforceId: BigInt): Int = {
+  def deleteFormTransferTaskSalesforce(userGroup: String, formTransferTaskSalesforceId: BigInt)(implicit session: DBSession): Int = {
     withSQL{
       val c = FormTransferTaskSalesforce.column
       QueryDSL.delete.from(FormTransferTaskSalesforce).where.eq(c.id, formTransferTaskSalesforceId).and.eq(c.user_group, userGroup)
     }.update().apply()
   }
 
-  def deleteFormTransferTaskSalesforceField(userGroup: String, formTransferTaskSalesforceFieldId: BigInt): Int = {
+  def deleteFormTransferTaskSalesforceField(userGroup: String, formTransferTaskSalesforceFieldId: BigInt)(implicit session: DBSession): Int = {
     withSQL{
       val c = FormTransferTaskSalesforceField.column
       QueryDSL.delete.from(FormTransferTaskSalesforceField).where.eq(c.id, formTransferTaskSalesforceFieldId).and.eq(c.user_group, userGroup)
