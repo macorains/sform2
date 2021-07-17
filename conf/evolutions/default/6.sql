@@ -11,4 +11,4 @@ CREATE TABLE `M_AUTHINFO` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 # --- !Downs
-  drop table dummy
+      drop table M_AUTHINFO
