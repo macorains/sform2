@@ -33,10 +33,9 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-mailer-guice" % "8.0.1",
   "net.codingwell" %% "scala-guice" % "4.2.10",
   "com.iheart" %% "ficus" % "1.4.7",
-  "com.enragedginger" %% "akka-quartz-scheduler" % "1.8.4-akka-2.6.x",
+  "com.enragedginger" %% "akka-quartz-scheduler" % "1.9.0-akka-2.6.x",
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B4",
   "com.digitaltangible" %% "play-guard" % "2.5.0",
-
   "org.apache.commons" % "commons-lang3" % "3.10",
   "commons-io" % "commons-io" % "2.7" ,
   "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0",

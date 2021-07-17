@@ -6,8 +6,8 @@ case class FormDeleteResponse(
                                result: Int
                              )
 
-trait FormDeleteFormResponseJson {
+trait FormDeleteResponseJson {
   implicit val FormDeleteResponseWrites: Writes[FormDeleteResponse] = (formDeleteResponse: FormDeleteResponse) => Json.obj(
-    "id" -> formDeleteResponse.result
+    "result" -> formDeleteResponse.result
   )
 }

@@ -1,12 +1,14 @@
 package net.macolabo.sform2.model.daos
 
-import com.mohiva.play.silhouette.api.LoginInfo
+import com.mohiva.play.silhouette.api.{LoginInfo, Silhouette, SilhouetteProvider}
+import com.mohiva.play.silhouette.test.FakeEnvironment
 import net.macolabo.sform2.helper.SformTestHelper
 import net.macolabo.sform2.models.User
 import net.macolabo.sform2.models.daos.FormDAOImpl
 import net.macolabo.sform2.models.entity.Transfer.TransferConfig
 import net.macolabo.sform2.models.entity.form.{Form, FormCol, FormColSelect, FormColValidation, FormTransferTask, FormTransferTaskCondition, FormTransferTaskMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField}
 import net.macolabo.sform2.services.Form.update.{FormColSelectUpdateRequest, FormColUpdateRequest, FormColValidationUpdateRequest, FormTransferTaskConditionUpdateRequest, FormTransferTaskMailUpdateRequest, FormTransferTaskSalesforceFieldUpdateRequest, FormTransferTaskSalesforceUpdateRequest, FormTransferTaskUpdateRequest, FormUpdateRequest}
+import net.macolabo.sform2.utils.auth.DefaultEnv
 import org.scalatest.flatspec.FixtureAnyFlatSpec
 import scalikejdbc._
 import scalikejdbc.scalatest.AutoRollback
@@ -15,7 +17,7 @@ import scalikejdbc.interpolation.SQLSyntax.count
 
 import java.time.ZonedDateTime
 import java.util.UUID
-
+import scala.collection.compat.Factory
 
 class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite with SformTestHelper with AutoRollback {
 
@@ -24,6 +26,8 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
   val user = User(userId, loginInfo, Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge@hoge.com"), None, activated = true, deletable = false)
   var formId = BigInt(100)
   var transferConfigId = BigInt(100)
+
+
 
   behavior of "Form"
 
@@ -138,58 +142,10 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
 
   it should "create form & update form" in { implicit session =>
 
-    val formColSelectUpdateRequest = FormColSelectUpdateRequest(
-      id = None,
-      form_col_id = None,
-      form_id = Some(0),
-      select_index = 1,
-      select_name = "hoge2",
-      select_value = "hoge2",
-      is_default = true,
-      edit_style = "",
-      view_style = ""
-    )
-
-    val formColValidationUpdateRequest = FormColValidationUpdateRequest(
-      id = None,
-      form_col_id = None,
-      form_id = Some(0),
-      max_value = Some(10),
-      min_value = Some(1),
-      max_length = Some(10),
-      min_length = Some(2),
-      input_type = 1,
-      required = true
-    )
-
-    val formColUpdateRequest = FormColUpdateRequest(
-      id = None,
-      form_id = Some(0),
-      name = "fuga2",
-      col_id = "fuga2",
-      col_index = 1,
-      col_type = 1,
-      default_value = "x",
-      select_list = List(formColSelectUpdateRequest),
-      validations = formColValidationUpdateRequest
-    )
-
-    val formUpdateRequest = FormUpdateRequest(
-      id = None,
-      name = "hoge2",
-      form_index = 2,
-      title = "hoge2",
-      status = 1,
-      cancel_url = "hoge2",
-      close_text = "hoge2",
-      hashed_id = "hoge2",
-      complete_url = "hoge2",
-      input_header = "hoge2",
-      complete_text = "hoge2",
-      confirm_header = "hoge2",
-      form_cols = List(formColUpdateRequest),
-      form_transfer_tasks = List.empty
-    )
+    val formColSelectUpdateRequest = createFormColSelectUpdateRequest()
+    val formColValidationUpdateRequest = createFormColValidationUpdateRequest()
+    val formColUpdateRequest = createFormColUpdateRequest(List(formColSelectUpdateRequest), formColValidationUpdateRequest)
+    val formUpdateRequest = createFormUpdateRequest(List(formColUpdateRequest))
 
     val formDAO = new FormDAOImpl()
 
@@ -426,6 +382,67 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
 
   }
 
+  // Form作成・更新リクエストの作成
+  def createFormColSelectUpdateRequest() = {
+    FormColSelectUpdateRequest(
+      id = None,
+      form_col_id = None,
+      form_id = Some(0),
+      select_index = 1,
+      select_name = "hoge2",
+      select_value = "hoge2",
+      is_default = true,
+      edit_style = "",
+      view_style = ""
+    )
+  }
+
+  def createFormColValidationUpdateRequest() = {
+    FormColValidationUpdateRequest(
+      id = None,
+      form_col_id = None,
+      form_id = Some(0),
+      max_value = Some(10),
+      min_value = Some(1),
+      max_length = Some(10),
+      min_length = Some(2),
+      input_type = 1,
+      required = true
+    )
+  }
+  def createFormColUpdateRequest(formColSelectUpdateRequestList: List[FormColSelectUpdateRequest], formColValidationUpdateRequest: FormColValidationUpdateRequest) = {
+    FormColUpdateRequest(
+      id = None,
+      form_id = Some(0),
+      name = "fuga2",
+      col_id = "fuga2",
+      col_index = 1,
+      col_type = 1,
+      default_value = "x",
+      select_list = formColSelectUpdateRequestList,
+      validations = formColValidationUpdateRequest
+    )
+  }
+
+  def createFormUpdateRequest(formColUpdateRequestList: List[FormColUpdateRequest]) = {
+    FormUpdateRequest(
+      id = None,
+      name = "hoge2",
+      form_index = 2,
+      title = "hoge2",
+      status = 1,
+      cancel_url = "hoge2",
+      close_text = "hoge2",
+      hashed_id = "hoge2",
+      complete_url = "hoge2",
+      input_header = "hoge2",
+      complete_text = "hoge2",
+      confirm_header = "hoge2",
+      form_cols = formColUpdateRequestList,
+      form_transfer_tasks = List.empty
+    )
+  }
+
   // Fixture
   override def fixture(implicit session: DBSession) = {
       withSQL {
@@ -468,22 +485,28 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
       )
     }.update().apply()
 
-    val formColId = withSQL {
+    val formColParams: Seq[Seq[Any]] = (1 to 5)
+      .map(i => Seq(BigInt(i + 1000), formId, s"foo$i", s"foo$i", i, 1, "x", "hoge", userId.toString, userId.toString, ZonedDateTime.now(), ZonedDateTime.now()))
+
+    withSQL {
       val c = FormCol.column
       insertInto(FormCol).namedValues(
-        c.form_id -> formId,
-        c.name -> "foo",
-        c.col_id -> "foo",
-        c.col_index -> 1,
-        c.col_type -> 1,
-        c.default_value -> "x",
-        c.user_group -> "hoge",
-        c.created_user -> userId.toString,
-        c.modified_user -> userId.toString,
-        c.created -> ZonedDateTime.now(),
-        c.modified -> ZonedDateTime.now()
+        c.id -> sqls.?,
+        c.form_id -> sqls.?,
+        c.name -> sqls.?,
+        c.col_id -> sqls.?,
+        c.col_index -> sqls.?,
+        c.col_type -> sqls.?,
+        c.default_value -> sqls.?,
+        c.user_group -> sqls.?,
+        c.created_user -> sqls.?,
+        c.modified_user -> sqls.?,
+        c.created -> sqls.?,
+        c.modified -> sqls.?
       )
-    }.updateAndReturnGeneratedKey().apply()
+    }.batch(formColParams: _*).apply()(session, implicitly[Factory[Int, Seq[Int]]])
+
+    val formColId = BigInt(1001)
 
     withSQL {
       val c = FormColSelect.column
