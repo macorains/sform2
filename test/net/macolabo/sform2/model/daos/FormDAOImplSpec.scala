@@ -528,7 +528,8 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
      - formTransferTaskなしのフォームを更新してformTransferTaskを追加
      - 複数のformCol, formColSelect, formTransferTask, formTransferTaskSalesforceFieldから一部だけ削除更新
    */
-  def fixTransferConfig(implicit session: DBSession) = {
+  override def fixture(implicit session: DBSession) = {
+
     // TransferConfig
     withSQL {
       val c = TransferConfig.column
@@ -545,53 +546,36 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
         c.modified -> ZonedDateTime.now()
       )
     }.update().apply()
-  }
-  override def fixture(implicit session: DBSession) = {
 
-      // TransferConfig
-    // fixTransferConfig(session)
-      withSQL {
-        val c = TransferConfig.column
-        insertInto(TransferConfig).namedValues(
-          c.id -> transferConfigId.longValue,
-          c.type_code -> "Salesforce",
-          c.config_index -> 1,
-          c.name -> "hoge",
-          c.status -> 1,
-          c.user_group -> "hoge",
-          c.created_user -> userId.toString,
-          c.modified_user -> userId.toString,
-          c.created -> ZonedDateTime.now(),
-          c.modified -> ZonedDateTime.now()
-        )
-      }.update().apply()
+    // Form
+    val formParams: Seq[Seq[Any]] = (1 to 2)
+      .map(i => Seq(BigInt(i),s"hoge$i", i, s"hoge$i", s"hoge$i", 1, "hoge", "hoge", "Header", "Header", "Complete", "Close", "{}", "hoge", userId.toString, userId.toString, ZonedDateTime.now(), ZonedDateTime.now()))
 
-
-    // フォーム1
     withSQL {
       val c = Form.column
       insertInto(Form).namedValues(
-        c.id -> formId,
-        c.hashed_id -> "hoge",
-        c.form_index -> 1,
-        c.name -> "hoge",
-        c.title -> "hoge",
-        c.status -> 1,
-        c.cancel_url -> "hoge",
-        c.complete_url -> "hoge",
-        c.input_header -> "Header",
-        c.confirm_header -> "Header",
-        c.complete_text -> "Complete",
-        c.close_text -> "Close",
-        c.form_data -> "{}",
-        c.user_group -> "hoge",
-        c.created_user -> userId.toString,
-        c.modified_user -> userId.toString,
-        c.created -> ZonedDateTime.now(),
-        c.modified -> ZonedDateTime.now()
+        c.id -> sqls.?,
+        c.hashed_id -> sqls.?,
+        c.form_index -> sqls.?,
+        c.name -> sqls.?,
+        c.title -> sqls.?,
+        c.status -> sqls.?,
+        c.cancel_url -> sqls.?,
+        c.complete_url -> sqls.?,
+        c.input_header -> sqls.?,
+        c.confirm_header -> sqls.?,
+        c.complete_text -> sqls.?,
+        c.close_text -> sqls.?,
+        c.form_data -> sqls.?,
+        c.user_group -> sqls.?,
+        c.created_user -> sqls.?,
+        c.modified_user -> sqls.?,
+        c.created -> sqls.?,
+        c.modified -> sqls.?
       )
-    }.update().apply()
+    }.batch(formParams: _*).apply()(session, implicitly[Factory[Int, Seq[Int]]])
 
+    // FormCol
     val formColParams: Seq[Seq[Any]] = (1 to 5)
       .map(i => Seq(BigInt(i + 1000), formId, s"foo$i", s"foo$i", i, 1, "x", "hoge", userId.toString, userId.toString, ZonedDateTime.now(), ZonedDateTime.now()))
 
