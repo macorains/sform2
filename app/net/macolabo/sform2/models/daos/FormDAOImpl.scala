@@ -51,11 +51,12 @@ class FormDAOImpl extends FormDAO {
       .map(_ => updateForm(userId, request))
       .getOrElse(insertForm(group, userId, request))
 
-    request.form_cols.foreach(formCol => {
+    // FormColの処理
+    val formColIds = request.form_cols.map(formCol => {
       val formColId = formCol.id
         .map(_ => updateFormCol(userId, formCol))
         .getOrElse(insertFormCol(group, userId, formCol, formId))
-      formCol.select_list.map(select => {
+      val formColSelectIds = formCol.select_list.map(select => {
         select.id
           .map(_ => updateFormColSelect(userId, select))
           .getOrElse(insertFormColSelect(group, userId, select, formId, formColId))
@@ -63,9 +64,13 @@ class FormDAOImpl extends FormDAO {
       formCol.validations.id
         .map(_ => updateFormColValidation(userId, formCol.validations))
         .getOrElse(insertFormColValidation(group, userId, formCol.validations, formId, formColId))
+      bulkDeleteFormColSelect(formId, formColId, formColSelectIds, group)
+      formColId
     })
+    bulkDeleteFormCol(formId, formColIds, group)
 
-    request.form_transfer_tasks.foreach(formTransferTask => {
+    // FormTransferTaskの処理
+    val formTransferTaskIds = request.form_transfer_tasks.map(formTransferTask => {
       val formTransferTaskId = formTransferTask.id
         .map(_ => updateFormTransferTask(userId, formTransferTask))
         .getOrElse(insertFormTransferTask(group, userId, formTransferTask, formId))
@@ -74,24 +79,27 @@ class FormDAOImpl extends FormDAO {
           .map(_ => updateFormTransferTaskCondition(userId, condition))
           .getOrElse(insertFormTransferTaskCondition(group, userId, condition, formId, formTransferTaskId))
       })
-      formTransferTask.salesforce.map(sf => {
+
+      formTransferTask.salesforce.foreach(sf => {
         val sfId = sf.id
           .map(_ => updateFormTransferTaskSalesforce(userId, sf))
           .getOrElse(insertFormTransferTaskSalesforce(group, userId, sf, formTransferTaskId))
-        sf.fields.map(sff => {
+        val sffIds = sf.fields.map(sff => {
           sff.id
             .map(_ => updateFormTransferTaskSalesforceField(userId, sff))
             .getOrElse(insertFormTransferTaskSalesforceField(group, userId, sff, sfId))
         })
+        bulkDeleteFormTransferTaskSalesforceField(sfId, sffIds, group)
       })
+
       formTransferTask.mail.map(mail => {
         mail.id
           .map(_ => updateFormTransferTaskMail(userId, mail))
           .getOrElse(insertFormTransferTaskMail(group, userId, mail, formTransferTaskId))
       })
+      formTransferTaskId
     })
-
-    // TODO フォームの子要素削除時の処理を追加する必要あり
+    bulkDeleteFormTransferTask(formId, formTransferTaskIds, group)
 
     FormUpdateResponse(formId)
   }
@@ -106,6 +114,29 @@ class FormDAOImpl extends FormDAO {
     FormDeleteResponse(deleteFormByHashedId(identity.group.getOrElse(""), hashed_id))
   }
 
+  /** 更新時のSalesforceTransferTaskSalesforceField削除 */
+  private def bulkDeleteFormTransferTaskSalesforceField(formTransferTaskSalesforceId: BigInt, fieldIds: List[BigInt], userGroup: String)(implicit session: DBSession): Unit = {
+    val targetIds = selectFormTransferTaskSalesforceFieldList(userGroup, formTransferTaskSalesforceId).map(field => field.id).filter(field => !fieldIds.contains(field))
+    targetIds.foreach(id => deleteFormTransferTaskSalesforceField(userGroup, id))
+  }
+
+  /** 更新時のTransferTask削除 */
+  private def bulkDeleteFormTransferTask(formId: BigInt, taskIds: List[BigInt], userGroup: String)(implicit session: DBSession): Unit = {
+    val targetIds = selectFormTransferTaskList(userGroup, formId).map(task => task.id).filter(task => !taskIds.contains(task))
+    targetIds.foreach(id => deleteFormTransferTask(userGroup, id))
+  }
+
+  /** 更新時のFormCol削除 */
+  private def bulkDeleteFormCol(formId: BigInt, colIds: List[BigInt], userGroup: String)(implicit session: DBSession): Unit = {
+    val targetIds = selectFormColList(userGroup, formId).map(col => col.id).filter(col => !colIds.contains(col))
+    targetIds.foreach(id => deleteFormCol(userGroup, id))
+  }
+
+  /** 更新時のFormColSelect削除 */
+  private def bulkDeleteFormColSelect(formId: BigInt, formColId: BigInt, colSelectIds: List[BigInt], userGroup: String)(implicit session: DBSession): Unit = {
+    val targetIds = selectFormColSelectList(userGroup, formId, formColId).map(colSelect => colSelect.id).filter(colSelect => !colSelectIds.contains(colSelect))
+    targetIds.foreach(id => deleteFormColSelect(userGroup, id))
+  }
   // ----------------------------------------------
   // レスポンス作成
   // ----------------------------------------------
@@ -156,7 +187,7 @@ class FormDAOImpl extends FormDAO {
       formTransferTaskSalesforce.id,
       formTransferTaskSalesforce.form_transfer_task_id,
       formTransferTaskSalesforce.object_name,
-      selectFormTransferTaskSalesforceFieldList(userGroup, formTransferTaskSalesforce.form_transfer_task_id).map(salesforceField => convertToFormTransferTaskSalesforceField(salesforceField))
+      selectFormTransferTaskSalesforceFieldList(userGroup, formTransferTaskSalesforce.id).map(salesforceField => convertToFormTransferTaskSalesforceField(salesforceField))
     )
   }
 
@@ -732,6 +763,7 @@ class FormDAOImpl extends FormDAO {
         c.modified -> ZonedDateTime.now()
       ).where.eq(c.id, form.id)
     }.update().apply()
+    form.id.get
   }
 
   def updateFormCol(user: String, formCol: FormColUpdateRequest)(implicit session: DBSession): BigInt = {
@@ -748,6 +780,7 @@ class FormDAOImpl extends FormDAO {
         c.modified -> ZonedDateTime.now()
       ).where.eq(c.id, formCol.id)
     }.update().apply()
+    formCol.id.get
   }
 
   def updateFormColValidation(user: String, formColValidation: FormColValidationUpdateRequest)(implicit session: DBSession): BigInt = {
@@ -765,7 +798,9 @@ class FormDAOImpl extends FormDAO {
         c.modified_user -> user,
         c.modified -> ZonedDateTime.now()
       ).where.eq(c.id, formColValidation.id)
-    }.update().apply()  }
+    }.update().apply()
+    formColValidation.id.get
+  }
 
   def updateFormColSelect(user: String, formColSelect: FormColSelectUpdateRequest)(implicit session: DBSession): BigInt = {
     withSQL{
@@ -783,6 +818,7 @@ class FormDAOImpl extends FormDAO {
         c.modified -> ZonedDateTime.now()
       ).where.eq(c.id, formColSelect.id)
     }.update().apply()
+    formColSelect.id.get
   }
 
   def updateFormTransferTask(user: String, formTransferTask: FormTransferTaskUpdateRequest)(implicit session: DBSession): BigInt = {
@@ -798,6 +834,7 @@ class FormDAOImpl extends FormDAO {
           c.modified -> ZonedDateTime.now()
         ).where.eq(c.id, formTransferTask.id)
     }.update().apply()
+    formTransferTask.id.get
   }
 
   def updateFormTransferTaskCondition(user: String, formTransferTaskCondition: FormTransferTaskConditionUpdateRequest)(implicit session: DBSession): BigInt = {
@@ -814,6 +851,7 @@ class FormDAOImpl extends FormDAO {
           c.modified -> ZonedDateTime.now()
         ).where.eq(c.id, formTransferTaskCondition.id)
     }.update().apply()
+    formTransferTaskCondition.id.get
   }
 
   def updateFormTransferTaskMail(user: String, formTransferTaskMail: FormTransferTaskMailUpdateRequest)(implicit session: DBSession): BigInt = {
@@ -831,7 +869,9 @@ class FormDAOImpl extends FormDAO {
         c.modified_user -> user,
         c.modified -> ZonedDateTime.now()
       ).where.eq(c.id, formTransferTaskMail.id)
-    }.update().apply()  }
+    }.update().apply()
+    formTransferTaskMail.id.get
+  }
 
   def updateFormTransferTaskSalesforce(user: String, formTransferTaskSalesforce: FormTransferTaskSalesforceUpdateRequest)(implicit session: DBSession): BigInt = {
     withSQL{
@@ -843,6 +883,7 @@ class FormDAOImpl extends FormDAO {
         c.modified -> ZonedDateTime.now()
       ).where.eq(c.id, formTransferTaskSalesforce.id)
     }.update().apply()
+    formTransferTaskSalesforce.id.get
   }
 
   def updateFormTransferTaskSalesforceField(user: String, formTransferTaskSalesforceField: FormTransferTaskSalesforceFieldUpdateRequest)(implicit session: DBSession): BigInt = {
@@ -856,6 +897,7 @@ class FormDAOImpl extends FormDAO {
         c.modified -> ZonedDateTime.now()
       ).where.eq(c.id, formTransferTaskSalesforceField.id)
     }.update().apply()
+    formTransferTaskSalesforceField.id.get
   }
 
   // ----------------------------------------------

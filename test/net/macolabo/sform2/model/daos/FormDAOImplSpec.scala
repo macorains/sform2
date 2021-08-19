@@ -7,7 +7,7 @@ import net.macolabo.sform2.models.User
 import net.macolabo.sform2.models.daos.FormDAOImpl
 import net.macolabo.sform2.models.entity.Transfer.TransferConfig
 import net.macolabo.sform2.models.entity.form.{Form, FormCol, FormColSelect, FormColValidation, FormTransferTask, FormTransferTaskCondition, FormTransferTaskMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField}
-import net.macolabo.sform2.services.Form.get.{FormColGetReponse, FormColSelectGetReponse, FormColValidationGetReponse, FormGetResponse}
+import net.macolabo.sform2.services.Form.get.{FormColGetReponse, FormColSelectGetReponse, FormColValidationGetReponse, FormGetResponse, FormTransferTaskConditionGetReponse, FormTransferTaskGetResponse, FormTransferTaskMailGetReponse, FormTransferTaskSalesforceFieldGetReponse, FormTransferTaskSalesforceGetReponse}
 import net.macolabo.sform2.services.Form.update.{FormColSelectUpdateRequest, FormColUpdateRequest, FormColValidationUpdateRequest, FormTransferTaskConditionUpdateRequest, FormTransferTaskMailUpdateRequest, FormTransferTaskSalesforceFieldUpdateRequest, FormTransferTaskSalesforceUpdateRequest, FormTransferTaskUpdateRequest, FormUpdateRequest}
 import net.macolabo.sform2.utils.auth.DefaultEnv
 import org.scalatest.flatspec.FixtureAnyFlatSpec
@@ -22,13 +22,11 @@ import scala.collection.compat.Factory
 
 class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite with SformTestHelper with AutoRollback {
 
-  val loginInfo = LoginInfo("hoge", "hoge")
-  val userId = UUID.randomUUID()
-  val user = User(userId, loginInfo, Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge@hoge.com"), None, activated = true, deletable = false)
+  private val loginInfo = LoginInfo("hoge", "hoge")
+  private val userId = UUID.randomUUID()
+  private val user = User(userId, loginInfo, Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge@hoge.com"), None, activated = true, deletable = false)
   var formId = BigInt(100)
   var transferConfigId = BigInt(100)
-
-
 
   behavior of "Form"
 
@@ -141,8 +139,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     assert(form.title.nonEmpty)
   }
 
-  it should "create form & update form" in { implicit session =>
-
+  it should "create form" in { implicit session =>
     val formColSelectUpdateRequest = createFormColSelectUpdateRequest()
     val formColValidationUpdateRequest = createFormColValidationUpdateRequest()
     val formColUpdateRequest = createFormColUpdateRequest(List(formColSelectUpdateRequest), formColValidationUpdateRequest)
@@ -157,8 +154,103 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
 
     // 作成したフォームを取得
     val newForm = formDAO.get(user, newFormId).get
+    assert(newForm.id.equals(newFormId))
+    assert(newForm.hashed_id.equals(formUpdateRequest.hashed_id))
+    assert(newForm.name.equals(formUpdateRequest.name))
+    assert(newForm.form_index.equals(formUpdateRequest.form_index))
+    assert(newForm.status.equals(formUpdateRequest.status))
+    assert(newForm.title.equals(formUpdateRequest.title))
+    assert(newForm.input_header.equals(formUpdateRequest.input_header))
+    assert(newForm.confirm_header.equals(formUpdateRequest.confirm_header))
+    assert(newForm.complete_text.equals(formUpdateRequest.complete_text))
+    assert(newForm.complete_url.equals(formUpdateRequest.complete_url))
+    assert(newForm.close_text.equals(formUpdateRequest.close_text))
+    assert(newForm.cancel_url.equals(formUpdateRequest.cancel_url))
+    assert(newForm.form_cols.nonEmpty)
+    assert(newForm.form_transfer_tasks.isEmpty)
 
+    val newFormCol = newForm.form_cols.head
+    assert(newFormCol.form_id.equals(newFormId))
+    assert(newFormCol.id.isValidLong)
+    assert(newFormCol.col_id.equals(formColUpdateRequest.col_id))
+    assert(newFormCol.name.equals(formColUpdateRequest.name))
+    assert(newFormCol.col_index.equals(formColUpdateRequest.col_index))
+    assert(newFormCol.default_value.equals(formColUpdateRequest.default_value))
+    assert(newFormCol.col_type.equals(formColUpdateRequest.col_type))
+    assert(newFormCol.validations.nonEmpty)
 
+    val newFormColValidation = newForm.form_cols.head.validations.get
+    assert(newFormColValidation.id.isValidLong)
+    assert(newFormColValidation.form_col_id.isValidLong)
+    assert(newFormColValidation.form_id.equals(newFormId))
+    assert(newFormColValidation.input_type.equals(formColValidationUpdateRequest.input_type))
+    assert(newFormColValidation.min_length.equals(formColValidationUpdateRequest.min_length))
+    assert(newFormColValidation.max_length.equals(formColValidationUpdateRequest.max_length))
+    assert(newFormColValidation.min_value.equals(formColValidationUpdateRequest.min_value))
+    assert(newFormColValidation.max_value.equals(formColValidationUpdateRequest.max_value))
+
+    val newFormColSelect = newForm.form_cols.head.select_list.head
+    assert(newFormColSelect.id.isValidLong)
+    assert(newFormColSelect.form_id.equals(newFormId))
+    assert(newFormColSelect.form_col_id.isValidLong)
+    assert(newFormColSelect.select_index.equals(formColSelectUpdateRequest.select_index))
+    assert(newFormColSelect.select_name.equals(formColSelectUpdateRequest.select_name))
+    assert(newFormColSelect.select_value.equals(formColSelectUpdateRequest.select_value))
+    assert(newFormColSelect.is_default.equals(formColSelectUpdateRequest.is_default))
+    assert(newFormColSelect.view_style.equals(formColSelectUpdateRequest.view_style))
+    assert(newFormColSelect.edit_style.equals(formColSelectUpdateRequest.edit_style))
+  }
+
+  it should "update form" in { implicit session =>
+    val formDAO = new FormDAOImpl()
+
+    // DBにあるフォームを取得
+    val form = formDAO.get(user, formId).get
+
+    // 5つあるFormColSelectのうち最後尾を削除
+    val formColSelectUpdateRequest = form.form_cols.head.select_list.dropRight(1).map(formColSelect => createFormColSelectUpdateRequest(formColSelect))
+
+    // 5つあるFormColのうち最後尾を削除
+    val headFormCol = form.form_cols.head
+    val formColUpdateRequest =
+      List(createFormColUpdateRequest(headFormCol, formColSelectUpdateRequest, createFormColValidationUpdateRequest(headFormCol.validations.get))) :::
+      form.form_cols.drop(1).dropRight(1).map(formCol => createFormColUpdateRequest(formCol, List.empty, createFormColValidationUpdateRequest(formCol.validations.get)))
+
+    // 5つあるFormTransferTaskSalesforceFieldのうち最後尾を削除
+    val formTransferTaskSalesforceFieldUpdateRequest =
+      form.form_transfer_tasks.head.salesforce.get.fields.dropRight(1).map(field => createFormTransferTaskSalesforceFieldUpdateRequest(field))
+
+    val formTransferTaskSalesforceUpdateRequest =
+      form.form_transfer_tasks.head.salesforce.map(sf => createFormTransferTaskSalesforceUpdateRequest(sf, formTransferTaskSalesforceFieldUpdateRequest))
+    val formTransferTaskMailUpdateRequest =
+      form.form_transfer_tasks.head.mail.map(mail => createFormTransferTaskMailUpdateRequest(mail))
+    val formTransferTaskConditionUpdateRequest =
+      form.form_transfer_tasks.head.form_transfer_task_conditions.map(condition => createFormTransferTaskConditionUpdateRequest(condition))
+
+    // 5つあるFormTransferTaskのうち最後尾を削除
+    val formTransferTaskUpdateRequest = form.form_transfer_tasks.dropRight(1)
+      .map(formTransfer => createFormTransferTaskUpdateRequest(formTransfer, formTransferTaskConditionUpdateRequest, formTransferTaskMailUpdateRequest, formTransferTaskSalesforceUpdateRequest))
+    val formUpdateRequest = createFormUpdateRequest(form, formColUpdateRequest, formTransferTaskUpdateRequest)
+
+    // フォームを更新する
+    val response = formDAO.update(user, formUpdateRequest)
+    val newFormId = response.id
+
+    assert(newFormId.equals(formId))
+
+    // 作成したフォームを取得
+    val newForm = formDAO.get(user, newFormId).get
+    val newFormCol = newForm.form_cols.head
+    val newFormTransferTask = newForm.form_transfer_tasks.head
+
+    // FormColを一つ削除したので4つになるはず
+    assert(newForm.form_cols.length.equals(4))
+    // FormColSelectを一つ削除したので4つになるはず
+    assert(newFormCol.select_list.length.equals(4))
+    // FormTransferTaskを一つ削除したので4つになるはず
+    assert(newForm.form_transfer_tasks.length.equals(4))
+    // FormTransferTaskSalesforceFieldを一つ削除したので4つになるはず
+    assert(newFormTransferTask.salesforce.get.fields.length.equals(4))
   }
 
   it should "delete form" in { implicit session =>
@@ -343,7 +435,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
   }
 
   // Form作成・更新リクエストの作成
-  def createFormColSelectUpdateRequest() = {
+  private def createFormColSelectUpdateRequest() = {
     FormColSelectUpdateRequest(
       id = None,
       form_col_id = None,
@@ -357,7 +449,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     )
   }
 
-  def createFormColSelectUpdateRequest(formColSelectGetResponse: FormColSelectGetReponse) = {
+  private def createFormColSelectUpdateRequest(formColSelectGetResponse: FormColSelectGetReponse) = {
     FormColSelectUpdateRequest(
       id = Some(formColSelectGetResponse.id),
       form_col_id = Some(formColSelectGetResponse.form_col_id),
@@ -371,7 +463,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     )
   }
 
-  def createFormColValidationUpdateRequest() = {
+  private def createFormColValidationUpdateRequest() = {
     FormColValidationUpdateRequest(
       id = None,
       form_col_id = None,
@@ -385,7 +477,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     )
   }
 
-  def createFormColValidationUpdateRequest(formColValidationGetResponse: FormColValidationGetReponse) = {
+  private def createFormColValidationUpdateRequest(formColValidationGetResponse: FormColValidationGetReponse) = {
     FormColValidationUpdateRequest(
       id = Some(formColValidationGetResponse.id),
       form_col_id = Some(formColValidationGetResponse.form_col_id),
@@ -399,7 +491,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     )
   }
 
-  def createFormColUpdateRequest(formColSelectUpdateRequestList: List[FormColSelectUpdateRequest], formColValidationUpdateRequest: FormColValidationUpdateRequest) = {
+  private def createFormColUpdateRequest(formColSelectUpdateRequestList: List[FormColSelectUpdateRequest], formColValidationUpdateRequest: FormColValidationUpdateRequest) = {
     FormColUpdateRequest(
       id = None,
       form_id = Some(0),
@@ -413,7 +505,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     )
   }
 
-  def createFormColUpdateRequest(formColGetResponse: FormColGetReponse, formColSelectUpdateRequestList: List[FormColSelectUpdateRequest], formColValidationUpdateRequest: FormColValidationUpdateRequest) = {
+  private def createFormColUpdateRequest(formColGetResponse: FormColGetReponse, formColSelectUpdateRequestList: List[FormColSelectUpdateRequest], formColValidationUpdateRequest: FormColValidationUpdateRequest) = {
     FormColUpdateRequest(
       id = Some(formColGetResponse.id),
       form_id = Some(formColGetResponse.form_id),
@@ -427,7 +519,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     )
   }
 
-  def createFormUpdateRequest(formColUpdateRequestList: List[FormColUpdateRequest], formTransferTaskList:  List[FormTransferTaskUpdateRequest]) = {
+  private def createFormUpdateRequest(formColUpdateRequestList: List[FormColUpdateRequest], formTransferTaskList:  List[FormTransferTaskUpdateRequest]) = {
     FormUpdateRequest(
       id = None,
       name = "hoge2",
@@ -446,7 +538,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     )
   }
 
-  def createFormUpdateRequest(formGetResponse: FormGetResponse, formColUpdateRequestList: List[FormColUpdateRequest], formTransferTaskList:  List[FormTransferTaskUpdateRequest]) = {
+  private def createFormUpdateRequest(formGetResponse: FormGetResponse, formColUpdateRequestList: List[FormColUpdateRequest], formTransferTaskList:  List[FormTransferTaskUpdateRequest]) = {
     FormUpdateRequest(
       id = Some(formGetResponse.id),
       name = formGetResponse.name,
@@ -465,7 +557,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     )
   }
 
-  def createFormTransferTaskConditionUpdateRequest(formId: BigInt) = {
+  private def createFormTransferTaskConditionUpdateRequest(formId: BigInt) = {
     FormTransferTaskConditionUpdateRequest(
       id = None,
       form_transfer_task_id = Some(0),
@@ -476,7 +568,18 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     )
   }
 
-  def createFormTransferTaskMailUpdateRequest() = {
+  private def createFormTransferTaskConditionUpdateRequest(condition: FormTransferTaskConditionGetReponse) = {
+    FormTransferTaskConditionUpdateRequest(
+      id = Some(condition.id),
+      form_transfer_task_id = Some(condition.form_transfer_task_id),
+      form_id = Some(condition.form_id),
+      form_col_id = condition.form_col_id,
+      operator = condition.operator,
+      cond_value = condition.cond_value
+    )
+  }
+
+  private def createFormTransferTaskMailUpdateRequest() = {
     FormTransferTaskMailUpdateRequest(
       id = None,
       form_transfer_task_id = None,
@@ -490,7 +593,21 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     )
   }
 
-  def createFormTransferTaskSalesforceFieldUpdateRequest() = {
+  private def createFormTransferTaskMailUpdateRequest(mail: FormTransferTaskMailGetReponse) = {
+    FormTransferTaskMailUpdateRequest(
+      id = Some(mail.id),
+      form_transfer_task_id = Some(mail.form_transfer_task_id),
+      from_address_id = mail.from_address_id,
+      to_address = mail.to_address,
+      cc_address = Some(mail.cc_address),
+      bcc_address_id = Some(mail.bcc_address_id),
+      replyto_address_id = Some(mail.replyto_address_id),
+      subject = mail.subject,
+      body = mail.body
+    )
+  }
+
+  private def createFormTransferTaskSalesforceFieldUpdateRequest() = {
     FormTransferTaskSalesforceFieldUpdateRequest(
       id = None,
       form_transfer_task_salesforce_id = Some(0),
@@ -499,7 +616,16 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     )
   }
 
-  def createFormTransferTaskSalesforceUpdateRequest(salesforceFieldUpdateRequestList: List[FormTransferTaskSalesforceFieldUpdateRequest]) = {
+  private def createFormTransferTaskSalesforceFieldUpdateRequest(field:  FormTransferTaskSalesforceFieldGetReponse) = {
+    FormTransferTaskSalesforceFieldUpdateRequest(
+      id = Some(field.id),
+      form_transfer_task_salesforce_id = Some(field.form_transfer_task_salesforce_id),
+      form_column_id = field.form_column_id,
+      field_name = field.field_name
+    )
+  }
+
+  private def createFormTransferTaskSalesforceUpdateRequest(salesforceFieldUpdateRequestList: List[FormTransferTaskSalesforceFieldUpdateRequest]) = {
     FormTransferTaskSalesforceUpdateRequest(
       id = None,
       form_transfer_task_id = None,
@@ -508,13 +634,35 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     )
   }
 
-  def createFormTransferTaskUpdateRequest(formId: BigInt, conditionUpdateRequestList: List[FormTransferTaskConditionUpdateRequest], mailUpdateRequest: Option[FormTransferTaskMailUpdateRequest], salesforceUpdateRequest: Option[FormTransferTaskSalesforceUpdateRequest]) = {
+  private def createFormTransferTaskSalesforceUpdateRequest(salesforce: FormTransferTaskSalesforceGetReponse,salesforceFieldUpdateRequestList: List[FormTransferTaskSalesforceFieldUpdateRequest]) = {
+    FormTransferTaskSalesforceUpdateRequest(
+      id = Some(salesforce.id),
+      form_transfer_task_id = Some(salesforce.form_transfer_task_id),
+      object_name = salesforce.object_name,
+      fields = salesforceFieldUpdateRequestList
+    )
+  }
+
+  private def createFormTransferTaskUpdateRequest(formId: BigInt, conditionUpdateRequestList: List[FormTransferTaskConditionUpdateRequest], mailUpdateRequest: Option[FormTransferTaskMailUpdateRequest], salesforceUpdateRequest: Option[FormTransferTaskSalesforceUpdateRequest]) = {
     FormTransferTaskUpdateRequest(
       id = None,
       transfer_config_id = 1,
       form_id = formId,
       task_index = 1,
       name = "hoge",
+      form_transfer_task_conditions = conditionUpdateRequestList,
+      mail = mailUpdateRequest,
+      salesforce = salesforceUpdateRequest
+    )
+  }
+
+  private def createFormTransferTaskUpdateRequest(formTransferTask: FormTransferTaskGetResponse, conditionUpdateRequestList: List[FormTransferTaskConditionUpdateRequest], mailUpdateRequest: Option[FormTransferTaskMailUpdateRequest], salesforceUpdateRequest: Option[FormTransferTaskSalesforceUpdateRequest]) = {
+    FormTransferTaskUpdateRequest(
+      id = Some(formTransferTask.id),
+      transfer_config_id = formTransferTask.transfer_config_id,
+      form_id = formTransferTask.form_id,
+      task_index = formTransferTask.task_index,
+      name = formTransferTask.name,
       form_transfer_task_conditions = conditionUpdateRequestList,
       mail = mailUpdateRequest,
       salesforce = salesforceUpdateRequest
@@ -528,7 +676,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
      - formTransferTaskなしのフォームを更新してformTransferTaskを追加
      - 複数のformCol, formColSelect, formTransferTask, formTransferTaskSalesforceFieldから一部だけ削除更新
    */
-  override def fixture(implicit session: DBSession) = {
+  override def fixture(implicit session: DBSession): Unit = {
 
     // TransferConfig
     withSQL {
@@ -548,8 +696,8 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     }.update().apply()
 
     // Form
-    val formParams: Seq[Seq[Any]] = (1 to 2)
-      .map(i => Seq(BigInt(i),s"hoge$i", i, s"hoge$i", s"hoge$i", 1, "hoge", "hoge", "Header", "Header", "Complete", "Close", "{}", "hoge", userId.toString, userId.toString, ZonedDateTime.now(), ZonedDateTime.now()))
+    val formParams: Seq[Seq[Any]] = (formId to formId + 1)
+      .map(i => Seq(i,s"hoge$i", i, s"hoge$i", s"hoge$i", 1, "hoge", "hoge", "Header", "Header", "Complete", "Close", "{}", "hoge", userId.toString, userId.toString, ZonedDateTime.now(), ZonedDateTime.now()))
 
     withSQL {
       val c = Form.column
@@ -599,60 +747,76 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
 
     val formColId = BigInt(1001)
 
+    // FormColSelect
+    val formColSelectParams: Seq[Seq[Any]] = (1 to 5)
+      .map(i => Seq(BigInt(i + 2000), formColId, formId, 1, "foo", "foo", true, "", "", "hoge", userId.toString, userId.toString, ZonedDateTime.now(), ZonedDateTime.now()))
+
     withSQL {
       val c = FormColSelect.column
       insertInto(FormColSelect).namedValues(
-        c.form_col_id -> formColId,
-        c.form_id -> formId,
-        c.select_index -> 1,
-        c.select_name -> "foo",
-        c.select_value -> "foo",
-        c.is_default -> true,
-        c.edit_style -> "",
-        c.view_style -> "",
-        c.user_group -> "hoge",
-        c.created_user -> userId.toString,
-        c.modified_user -> userId.toString,
-        c.created -> ZonedDateTime.now(),
-        c.modified -> ZonedDateTime.now()
+        c.id -> sqls.?,
+        c.form_col_id -> sqls.?,
+        c.form_id -> sqls.?,
+        c.select_index -> sqls.?,
+        c.select_name -> sqls.?,
+        c.select_value -> sqls.?,
+        c.is_default -> sqls.?,
+        c.edit_style -> sqls.?,
+        c.view_style -> sqls.?,
+        c.user_group -> sqls.?,
+        c.created_user -> sqls.?,
+        c.modified_user -> sqls.?,
+        c.created -> sqls.?,
+        c.modified -> sqls.?
       )
-    }.updateAndReturnGeneratedKey().apply()
+    }.batch(formColSelectParams: _*).apply()(session, implicitly[Factory[Int, Seq[Int]]])
+
+    // FormColValidation
+    val formColValidationParams: Seq[Seq[Any]] = (1 to 5)
+      .map(i => Seq(BigInt(i + 1000), BigInt(i + 1000), formId, 10, 1, 100, 1, 1, false, "hoge", userId.toString, userId.toString, ZonedDateTime.now(), ZonedDateTime.now()))
 
     withSQL {
       val c = FormColValidation.column
       insertInto(FormColValidation).namedValues(
-        c.form_col_id -> formColId,
-        c.form_id -> formId,
-        c.max_value -> 10,
-        c.min_value -> 1,
-        c.max_length -> 100,
-        c.min_length -> 1,
-        c.input_type -> 1,
-        c.required -> false,
-        c.user_group -> "hoge",
-        c.created_user -> userId.toString,
-        c.modified_user -> userId.toString,
-        c.created -> ZonedDateTime.now(),
-        c.modified -> ZonedDateTime.now()
+        c.id -> sqls.?,
+        c.form_col_id -> sqls.?,
+        c.form_id -> sqls.?,
+        c.max_value -> sqls.?,
+        c.min_value -> sqls.?,
+        c.max_length -> sqls.?,
+        c.min_length -> sqls.?,
+        c.input_type -> sqls.?,
+        c.required -> sqls.?,
+        c.user_group -> sqls.?,
+        c.created_user -> sqls.?,
+        c.modified_user -> sqls.?,
+        c.created -> sqls.?,
+        c.modified -> sqls.?
       )
-    }.updateAndReturnGeneratedKey().apply()
+    }.batch(formColValidationParams: _*).apply()(session, implicitly[Factory[Int, Seq[Int]]])
 
-    val formTransferTaskId = withSQL {
+    // FormTransferTask
+    val formTransferTaskParams: Seq[Seq[Any]] = (1 to 5)
+      .map(i => Seq(BigInt(i + 1000), transferConfigId, formId, 1, "task", "hoge", userId.toString, userId.toString, ZonedDateTime.now(), ZonedDateTime.now()))
+    val formTransferTaskId = 1001L
+    withSQL {
       val c = FormTransferTask.column
       insertInto(FormTransferTask)
         .namedValues(
-          c.transfer_config_id -> transferConfigId,
-          c.form_id -> formId,
-          c.task_index -> 1,
-          c.name -> "Task",
-          c.user_group -> "hoge",
-          c.created_user -> userId.toString,
-          c.modified_user -> userId.toString,
-          c.created -> ZonedDateTime.now(),
-          c.modified -> ZonedDateTime.now()
+          c.id -> sqls.?,
+          c.transfer_config_id -> sqls.?,
+          c.form_id -> sqls.?,
+          c.task_index -> sqls.?,
+          c.name -> sqls.?,
+          c.user_group -> sqls.?,
+          c.created_user -> sqls.?,
+          c.modified_user -> sqls.?,
+          c.created -> sqls.?,
+          c.modified -> sqls.?
         )
-    }.updateAndReturnGeneratedKey().apply()
+    }.batch(formTransferTaskParams: _*).apply()(session, implicitly[Factory[Int, Seq[Int]]])
 
+    // FormTransferTaskCondition
     withSQL {
       val c = FormTransferTaskCondition.column
       insertInto(FormTransferTaskCondition)
@@ -670,6 +834,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
         )
     }.updateAndReturnGeneratedKey().apply()
 
+    // FormTransferTaskMail
     withSQL {
       val c = FormTransferTaskMail.column
       insertInto(FormTransferTaskMail).namedValues(
@@ -689,6 +854,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
       )
     }.updateAndReturnGeneratedKey().apply()
 
+    // FormTransferTaskSalesforce
     val formTransferTaskSalesforceId = withSQL {
       val c = FormTransferTaskSalesforce.column
       insertInto(FormTransferTaskSalesforce).namedValues(
@@ -702,18 +868,22 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
       )
     }.updateAndReturnGeneratedKey().apply()
 
+    // FormTransferTaskSalesforceField
+    val formTransferTaskSalesforceFieldParams: Seq[Seq[Any]] = (1 to 5)
+      .map(i => Seq(BigInt(i + 1000), formTransferTaskSalesforceId, "foo", "hoge", "hoge", userId.toString, userId.toString, ZonedDateTime.now(), ZonedDateTime.now()))
     withSQL {
       val c = FormTransferTaskSalesforceField.column
       insertInto(FormTransferTaskSalesforceField).namedValues(
-        c.form_transfer_task_salesforce_id -> formTransferTaskSalesforceId,
-        c.form_column_id -> "foo",
-        c.field_name -> "foo",
-        c.user_group -> "hoge",
-        c.created_user -> userId.toString,
-        c.modified_user -> userId.toString,
-        c.created -> ZonedDateTime.now(),
-        c.modified -> ZonedDateTime.now()
+        c.id -> sqls.?,
+        c.form_transfer_task_salesforce_id -> sqls.?,
+        c.form_column_id -> sqls.?,
+        c.field_name -> sqls.?,
+        c.user_group -> sqls.?,
+        c.created_user -> sqls.?,
+        c.modified_user -> sqls.?,
+        c.created -> sqls.?,
+        c.modified -> sqls.?
       )
-    }.updateAndReturnGeneratedKey().apply()
+    }.batch(formTransferTaskSalesforceFieldParams: _*).apply()(session, implicitly[Factory[Int, Seq[Int]]])
   }
 }
