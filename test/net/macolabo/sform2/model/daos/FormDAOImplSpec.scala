@@ -285,7 +285,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
         .from(FormColSelect as colSelect)
         .where
         .eq(colSelect.form_col_id, colId)
-    }.map(_.long(1)).single().apply().get
+    }.map(_.long(1)).list().apply().head
 
     val transferTask = FormTransferTask.syntax("transferTask")
     val formTransferTaskId = withSQL {
@@ -295,7 +295,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
         .from(FormTransferTask as transferTask)
         .where
         .eq(transferTask.form_id, formId)
-    }.map(_.long(1)).single().apply().get
+    }.map(_.long(1)).list().apply().head
 
     val transferTaskCondition = FormTransferTaskCondition.syntax("transferTaskCondition")
     val formTransferTaskConditionId = withSQL {
@@ -335,7 +335,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
         .from(FormTransferTaskSalesforceField as transferTaskSalesforceField)
         .where
         .eq(transferTaskSalesforceField.form_transfer_task_salesforce_id, formTransferTaskSalesforceId)
-    }.map(_.long(1)).single().apply().get
+    }.map(_.long(1)).list().apply().head
 
     // 削除実行
     formDAO.deleteForm("hoge", formId)
@@ -671,10 +671,6 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
 
   /*
    Fixture
-   - フォーム1 select、フォーム削除検証用
-   - フォーム2 update検証用
-     - formTransferTaskなしのフォームを更新してformTransferTaskを追加
-     - 複数のformCol, formColSelect, formTransferTask, formTransferTaskSalesforceFieldから一部だけ削除更新
    */
   override def fixture(implicit session: DBSession): Unit = {
 
