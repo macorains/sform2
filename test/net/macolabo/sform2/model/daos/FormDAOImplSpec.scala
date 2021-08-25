@@ -143,7 +143,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     val formColSelectUpdateRequest = createFormColSelectUpdateRequest()
     val formColValidationUpdateRequest = createFormColValidationUpdateRequest()
     val formColUpdateRequest = createFormColUpdateRequest(List(formColSelectUpdateRequest), formColValidationUpdateRequest)
-    val formUpdateRequest = createFormUpdateRequest(List(formColUpdateRequest), List.empty)
+    val formUpdateRequest = createFormUpdateRequest(None, List(formColUpdateRequest), List.empty)
 
     val formDAO = new FormDAOImpl()
 
@@ -230,27 +230,93 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     // 5つあるFormTransferTaskのうち最後尾を削除
     val formTransferTaskUpdateRequest = form.form_transfer_tasks.dropRight(1)
       .map(formTransfer => createFormTransferTaskUpdateRequest(formTransfer, formTransferTaskConditionUpdateRequest, formTransferTaskMailUpdateRequest, formTransferTaskSalesforceUpdateRequest))
-    val formUpdateRequest = createFormUpdateRequest(form, formColUpdateRequest, formTransferTaskUpdateRequest)
+    val formUpdateRequest = createFormUpdateRequest(Some(form.id), formColUpdateRequest, formTransferTaskUpdateRequest)
 
     // フォームを更新する
     val response = formDAO.update(user, formUpdateRequest)
     val newFormId = response.id
-
     assert(newFormId.equals(formId))
 
     // 作成したフォームを取得
     val newForm = formDAO.get(user, newFormId).get
-    val newFormCol = newForm.form_cols.head
-    val newFormTransferTask = newForm.form_transfer_tasks.head
 
+    // Formのチェック
+    assert(newForm.name.equals("hoge2"))
+    assert(newForm.form_index.equals(2))
+    assert(newForm.title.equals("hoge2"))
+    assert(newForm.status.equals(1))
+    assert(newForm.cancel_url.equals("hoge2"))
+    assert(newForm.close_text.equals("hoge2"))
+    assert(newForm.complete_url.equals("hoge2"))
+    assert(newForm.input_header.equals("hoge2"))
+    assert(newForm.complete_text.equals("hoge2"))
+    assert(newForm.confirm_header.equals("hoge2"))
     // FormColを一つ削除したので4つになるはず
     assert(newForm.form_cols.length.equals(4))
-    // FormColSelectを一つ削除したので4つになるはず
-    assert(newFormCol.select_list.length.equals(4))
     // FormTransferTaskを一つ削除したので4つになるはず
     assert(newForm.form_transfer_tasks.length.equals(4))
+
+    // FormColのチェック
+    val newFormCol = newForm.form_cols.head
+    assert(newFormCol.name.equals("fuga2"))
+    assert(newFormCol.col_id.equals("fuga2"))
+    assert(newFormCol.col_index.equals(2))
+    assert(newFormCol.col_type.equals(2))
+    assert(newFormCol.default_value.equals("x"))
+    // FormColSelectを一つ削除したので4つになるはず
+    assert(newFormCol.select_list.length.equals(4))
+
+    // FormColSelectのチェック
+    val newFormColSelect = newFormCol.select_list.head
+    assert(newFormColSelect.select_index.equals(2))
+    assert(newFormColSelect.select_name.equals("hoge2"))
+    assert(newFormColSelect.select_value.equals("hoge2"))
+    assert(newFormColSelect.is_default.equals(true))
+    assert(newFormColSelect.edit_style.equals("hogehoge"))
+    assert(newFormColSelect.view_style.equals("hogehoge"))
+
+    // FormColValidationのチェック
+    val newFormColValidation = newFormCol.validations.get
+    assert(newFormColValidation.max_value.get.equals(11))
+    assert(newFormColValidation.min_value.get.equals(2))
+    assert(newFormColValidation.max_length.get.equals(11))
+    assert(newFormColValidation.min_length.get.equals(3))
+    assert(newFormColValidation.input_type.equals(2))
+    assert(newFormColValidation.required.equals(true))
+
+    // FormTransferTaskのチェック
+    val newFormTransferTask = newForm.form_transfer_tasks.head
+    assert(newFormTransferTask.task_index.equals(2))
+    assert(newFormTransferTask.name.equals("hoge2"))
+    assert(newFormTransferTask.form_transfer_task_conditions.nonEmpty)
+    assert(newFormTransferTask.mail.nonEmpty)
+    assert(newFormTransferTask.salesforce.nonEmpty)
+
+    // FormTransferTaskConditionのチェック
+    val newFormTransferTaskCondition = newFormTransferTask.form_transfer_task_conditions.head
+    assert(newFormTransferTaskCondition.operator.equals(("eq")))
+    assert(newFormTransferTaskCondition.cond_value.equals("x"))
+
+    // FormTransferTaskMailのチェック
+    val newFormTransferTaskMail = newFormTransferTask.mail.get
+    assert(newFormTransferTaskMail.from_address_id.equals(2))
+    assert(newFormTransferTaskMail.to_address.equals("hoge2@hoge.com"))
+    assert(newFormTransferTaskMail.cc_address.equals("hoge2@hoge.com"))
+    assert(newFormTransferTaskMail.bcc_address_id.equals(2))
+    assert(newFormTransferTaskMail.replyto_address_id.equals(2))
+    assert(newFormTransferTaskMail.subject.equals("hogehoge2"))
+    assert(newFormTransferTaskMail.body.equals("fugafuga2"))
+
+    // FormTransferTaskSalesforceのチェック
+    val newFormTransferTaskSalesforce = newFormTransferTask.salesforce.get
+    assert(newFormTransferTaskSalesforce.object_name.equals("fuga"))
     // FormTransferTaskSalesforceFieldを一つ削除したので4つになるはず
     assert(newFormTransferTask.salesforce.get.fields.length.equals(4))
+
+    // FormTransferTaskSalesforceFieldのチェック
+    val newFormTransferTaskSalesforceField = newFormTransferTaskSalesforce.fields.head
+    assert(newFormTransferTaskSalesforceField.form_column_id.equals("hoge2"))
+    assert(newFormTransferTaskSalesforceField.field_name.equals("fuga2"))
   }
 
   it should "delete form" in { implicit session =>
@@ -454,12 +520,12 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
       id = Some(formColSelectGetResponse.id),
       form_col_id = Some(formColSelectGetResponse.form_col_id),
       form_id = Some(formColSelectGetResponse.form_id),
-      select_index = formColSelectGetResponse.select_index,
-      select_name = formColSelectGetResponse.select_name,
-      select_value = formColSelectGetResponse.select_value,
-      is_default = formColSelectGetResponse.is_default,
-      edit_style = formColSelectGetResponse.edit_style,
-      view_style = formColSelectGetResponse.view_style
+      select_index = 2,
+      select_name = "hoge2",
+      select_value = "hoge2",
+      is_default = true,
+      edit_style = "hogehoge",
+      view_style = "hogehoge"
     )
   }
 
@@ -482,12 +548,12 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
       id = Some(formColValidationGetResponse.id),
       form_col_id = Some(formColValidationGetResponse.form_col_id),
       form_id = Some(formColValidationGetResponse.form_id),
-      max_value = formColValidationGetResponse.max_value,
-      min_value = formColValidationGetResponse.min_value,
-      max_length = formColValidationGetResponse.max_length,
-      min_length = formColValidationGetResponse.min_length,
-      input_type = formColValidationGetResponse.input_type,
-      required = formColValidationGetResponse.required
+      max_value = Some(11),
+      min_value = Some(2),
+      max_length = Some(11),
+      min_length = Some(3),
+      input_type = 2,
+      required = true
     )
   }
 
@@ -509,19 +575,19 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     FormColUpdateRequest(
       id = Some(formColGetResponse.id),
       form_id = Some(formColGetResponse.form_id),
-      name = formColGetResponse.name,
-      col_id = formColGetResponse.col_id,
-      col_index = formColGetResponse.col_index,
-      col_type = formColGetResponse.col_type,
-      default_value = formColGetResponse.default_value,
+      name = "fuga2",
+      col_id ="fuga2",
+      col_index = 2,
+      col_type = 2,
+      default_value = "x",
       select_list = formColSelectUpdateRequestList,
       validations = formColValidationUpdateRequest
     )
   }
 
-  private def createFormUpdateRequest(formColUpdateRequestList: List[FormColUpdateRequest], formTransferTaskList:  List[FormTransferTaskUpdateRequest]) = {
+  private def createFormUpdateRequest(id: Option[BigInt], formColUpdateRequestList: List[FormColUpdateRequest], formTransferTaskList:  List[FormTransferTaskUpdateRequest]) = {
     FormUpdateRequest(
-      id = None,
+      id = id,
       name = "hoge2",
       form_index = 2,
       title = "hoge2",
@@ -535,26 +601,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
       confirm_header = "hoge2",
       form_cols = formColUpdateRequestList,
       form_transfer_tasks = formTransferTaskList
-    )
-  }
-
-  private def createFormUpdateRequest(formGetResponse: FormGetResponse, formColUpdateRequestList: List[FormColUpdateRequest], formTransferTaskList:  List[FormTransferTaskUpdateRequest]) = {
-    FormUpdateRequest(
-      id = Some(formGetResponse.id),
-      name = formGetResponse.name,
-      form_index = formGetResponse.form_index,
-      title = formGetResponse.title,
-      status = formGetResponse.status,
-      cancel_url = formGetResponse.cancel_url,
-      close_text = formGetResponse.close_text,
-      hashed_id = formGetResponse.hashed_id,
-      complete_url = formGetResponse.complete_url,
-      input_header = formGetResponse.input_header,
-      complete_text = formGetResponse.complete_text,
-      confirm_header = formGetResponse.confirm_header,
-      form_cols = formColUpdateRequestList,
-      form_transfer_tasks = formTransferTaskList
-    )
+      )
   }
 
   private def createFormTransferTaskConditionUpdateRequest(formId: BigInt) = {
@@ -574,8 +621,8 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
       form_transfer_task_id = Some(condition.form_transfer_task_id),
       form_id = Some(condition.form_id),
       form_col_id = condition.form_col_id,
-      operator = condition.operator,
-      cond_value = condition.cond_value
+      operator = "eq",
+      cond_value = "x"
     )
   }
 
@@ -597,13 +644,13 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     FormTransferTaskMailUpdateRequest(
       id = Some(mail.id),
       form_transfer_task_id = Some(mail.form_transfer_task_id),
-      from_address_id = mail.from_address_id,
-      to_address = mail.to_address,
-      cc_address = Some(mail.cc_address),
-      bcc_address_id = Some(mail.bcc_address_id),
-      replyto_address_id = Some(mail.replyto_address_id),
-      subject = mail.subject,
-      body = mail.body
+      from_address_id = 2,
+      to_address = "hoge2@hoge.com",
+      cc_address = Some("hoge2@hoge.com"),
+      bcc_address_id = Some(2),
+      replyto_address_id = Some(2),
+      subject = "hogehoge2",
+      body = "fugafuga2"
     )
   }
 
@@ -620,8 +667,8 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     FormTransferTaskSalesforceFieldUpdateRequest(
       id = Some(field.id),
       form_transfer_task_salesforce_id = Some(field.form_transfer_task_salesforce_id),
-      form_column_id = field.form_column_id,
-      field_name = field.field_name
+      form_column_id = "hoge2",
+      field_name = "fuga2"
     )
   }
 
@@ -638,7 +685,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     FormTransferTaskSalesforceUpdateRequest(
       id = Some(salesforce.id),
       form_transfer_task_id = Some(salesforce.form_transfer_task_id),
-      object_name = salesforce.object_name,
+      object_name = "fuga",
       fields = salesforceFieldUpdateRequestList
     )
   }
@@ -661,8 +708,8 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
       id = Some(formTransferTask.id),
       transfer_config_id = formTransferTask.transfer_config_id,
       form_id = formTransferTask.form_id,
-      task_index = formTransferTask.task_index,
-      name = formTransferTask.name,
+      task_index = 2,
+      name = "hoge2",
       form_transfer_task_conditions = conditionUpdateRequestList,
       mail = mailUpdateRequest,
       salesforce = salesforceUpdateRequest
