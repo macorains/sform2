@@ -12,4 +12,4 @@ CREATE TABLE `D_FORM` (
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 
 # --- !Downs
-  drop table dummy
+  drop table D_FORM

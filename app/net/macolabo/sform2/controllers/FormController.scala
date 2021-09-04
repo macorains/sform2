@@ -2,6 +2,11 @@ package net.macolabo.sform2.controllers
 
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.impl.providers._
+import net.macolabo.sform2.services.Form.delete.FormDeleteResponseJson
+import net.macolabo.sform2.services.Form.get.FormGetResponseJson
+import net.macolabo.sform2.services.Form.list.FormListResponseJson
+import net.macolabo.sform2.services.Form.update.{FormUpdateRequest, FormUpdateRequestJson, FormUpdateResponse, FormUpdateResponseJson}
+
 import javax.inject._
 import net.macolabo.sform2.services.Form.{FormDeleteFormResponseJson, FormGetFormResponseJson, FormGetListResponseJson, FormInsertFormRequest, FormInsertFormRequestJson, FormInsertFormResponse, FormInsertFormResponseJson, FormService, FormUpdateFormRequest, FormUpdateFormRequestJson, FormUpdateFormResponse, FormUpdateFormResponseJson}
 import org.webjars.play.WebJarsUtil
@@ -22,13 +27,11 @@ class FormController @Inject() (
   ex: ExecutionContext
 ) extends AbstractController(components)
   with I18nSupport
-  with FormGetFormResponseJson
-  with FormGetListResponseJson
-  with FormUpdateFormRequestJson
-  with FormUpdateFormResponseJson
-  with FormInsertFormRequestJson
-  with FormInsertFormResponseJson
-  with FormDeleteFormResponseJson
+  with FormGetResponseJson
+  with FormListResponseJson
+  with FormUpdateRequestJson
+  with FormUpdateResponseJson
+  with FormDeleteResponseJson
 {
 
   /**
@@ -55,13 +58,13 @@ class FormController @Inject() (
    * @return
    */
   def save(): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
-    println(request.body.asJson.get.validate[FormUpdateFormRequest].toString)
+    println(request.body.asJson.get.validate[FormUpdateRequest].toString)
     val res = request.body.asJson.flatMap(r =>
-      r.validate[FormUpdateFormRequest].map(f => {
+      r.validate[FormUpdateRequest].map(f => {
         formService.update(request.identity, f)
       }).asOpt)
     res match {
-      case Some(s :FormUpdateFormResponse) => Future.successful(Ok(toJson(s)))
+      case Some(s :FormUpdateResponse) => Future.successful(Ok(toJson(s)))
       case None => Future.successful(BadRequest)
     }
   }
@@ -72,11 +75,11 @@ class FormController @Inject() (
    */
   def create(): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
     val res = request.body.asJson.flatMap(r =>
-      r.validate[FormInsertFormRequest].map(f => {
+      r.validate[FormUpdateRequest].map(f => {
         formService.insert(request.identity, f)
       }).asOpt)
     res match {
-      case Some(s :FormInsertFormResponse) => Future.successful(Ok(toJson(s)))
+      case Some(s :FormUpdateResponse) => Future.successful(Ok(toJson(s)))
       case None => Future.successful(BadRequest)
     }
   }
@@ -90,10 +93,11 @@ class FormController @Inject() (
    */
   def delete(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
     val res = formService.deleteForm(request.identity, hashed_form_id)
-    res.id match {
-      case Some(s: BigInt) => Future.successful(Ok(toJson(res)))
-      case None => Future.successful(BadRequest)
-    }
+//    res.result match {
+//      case Some(s: Int) => Future.successful(Ok(toJson(res)))
+//      case None => Future.successful(BadRequest)
+//    }
+    Future.successful(Ok(toJson(res)))
   }
 
 
