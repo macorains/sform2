@@ -1,4 +1,4 @@
-package net.macolabo.sform2.models.entity.Transfer
+package net.macolabo.sform2.models.entity.transfer
 
 import scalikejdbc._
 import java.time.ZonedDateTime
