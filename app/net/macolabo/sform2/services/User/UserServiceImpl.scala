@@ -1,13 +1,14 @@
 package net.macolabo.sform2.services.User
 
 import java.util.UUID
-
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
+
 import javax.inject.Inject
 import net.macolabo.sform2.models
-import net.macolabo.sform2.models.User
 import net.macolabo.sform2.models.daos.UserDAO
+import net.macolabo.sform2.models.entity.user
+import net.macolabo.sform2.models.entity.user.User
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -45,7 +46,7 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
 
   def save(userSaveRequest: UserSaveRequest, userGroup: String): Future[User] = {
     val userId = userSaveRequest.userId.map(UUID.fromString).getOrElse(UUID.randomUUID())
-    save(models.User(
+    save(user.User(
       userID = userId,
       loginInfo = LoginInfo(userId.toString, s"""${userSaveRequest.email}:${userSaveRequest.userGroup}"""),
       group = Option(userGroup),
@@ -78,7 +79,7 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
           avatarURL = profile.avatarURL
         ))
       case None => // Insert a new user
-        userDAO.save(models.User(
+        userDAO.save(user.User(
           userID = UUID.randomUUID(),
           loginInfo = profile.loginInfo,
           group = Option(""),

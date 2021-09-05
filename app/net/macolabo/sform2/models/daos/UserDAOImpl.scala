@@ -1,10 +1,11 @@
 package net.macolabo.sform2.models.daos
 
 import java.util.UUID
-
 import com.mohiva.play.silhouette.api.LoginInfo
 import net.macolabo.sform2.models
-import net.macolabo.sform2.models.{SFDBConf, User}
+import net.macolabo.sform2.models.entity.user
+import net.macolabo.sform2.models.entity.user.User
+import net.macolabo.sform2.models.SFDBConf
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import scalikejdbc._
 
@@ -45,7 +46,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
       DB localTx { implicit l =>
         sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE PROVIDER_ID=${loginInfo.providerID} AND PROVIDER_KEY=${loginInfo.providerKey}"
           .map(rs =>
-            models.User(
+            user.User(
               UUID.fromString(rs.string("USER_ID")),
               LoginInfo(rs.string("PROVIDER_ID"), rs.string("PROVIDER_KEY")),
               Option(rs.string("USER_GROUP")),
@@ -74,7 +75,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
       DB localTx { implicit l =>
         sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE USER_ID=${userID.toString}"
           .map(rs =>
-            models.User(
+            User(
               UUID.fromString(rs.string("USER_ID")),
               LoginInfo(rs.string("PROVIDER_ID"), rs.string("PROVIDER_KEY")),
               Option(rs.string("USER_GROUP")),
@@ -137,7 +138,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
     DB localTx { implicit l =>
       val userList = sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE USER_GROUP=$userGroup"
         .map(rs =>
-          models.User(
+          user.User(
             UUID.fromString(rs.string("USER_ID")),
             LoginInfo(rs.string("PROVIDER_ID"), rs.string("PROVIDER_KEY")),
             Option(rs.string("USER_GROUP")),

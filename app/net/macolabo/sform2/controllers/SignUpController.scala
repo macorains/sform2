@@ -1,15 +1,16 @@
 package net.macolabo.sform2.controllers
 
 import java.util.UUID
-
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services.AvatarService
 import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
 import com.mohiva.play.silhouette.impl.providers._
+
 import javax.inject.Inject
 import net.macolabo.sform2.forms.SignUpForm
 import net.macolabo.sform2.models
+import net.macolabo.sform2.models.entity.user.User
 import net.macolabo.sform2.models.user.{UserSignUpResult, UserSignUpResultJson}
 import net.macolabo.sform2.services.AuthToken.AuthTokenService
 import net.macolabo.sform2.services.User.UserService
@@ -91,7 +92,7 @@ class SignUpController @Inject() (
               Future.successful(result)
             case None =>
               val authInfo = passwordHasherRegistry.current.hash(data.password)
-              val user = models.User(
+              val user = User(
                 userID = UUID.randomUUID(),
                 loginInfo = loginInfo,
                 group = Some(data.group),

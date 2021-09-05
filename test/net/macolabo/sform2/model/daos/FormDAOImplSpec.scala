@@ -3,10 +3,11 @@ package net.macolabo.sform2.model.daos
 import com.mohiva.play.silhouette.api.{LoginInfo, Silhouette, SilhouetteProvider}
 import com.mohiva.play.silhouette.test.FakeEnvironment
 import net.macolabo.sform2.helper.SformTestHelper
-import net.macolabo.sform2.models.User
 import net.macolabo.sform2.models.daos.FormDAOImpl
-import net.macolabo.sform2.models.entity.Transfer.TransferConfig
+import net.macolabo.sform2.models.entity
+import net.macolabo.sform2.models.entity.transfer.TransferConfig
 import net.macolabo.sform2.models.entity.form.{Form, FormCol, FormColSelect, FormColValidation, FormTransferTask, FormTransferTaskCondition, FormTransferTaskMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField}
+import net.macolabo.sform2.models.entity.user.User
 import net.macolabo.sform2.services.Form.get.{FormColGetReponse, FormColSelectGetReponse, FormColValidationGetReponse, FormGetResponse, FormTransferTaskConditionGetReponse, FormTransferTaskGetResponse, FormTransferTaskMailGetReponse, FormTransferTaskSalesforceFieldGetReponse, FormTransferTaskSalesforceGetReponse}
 import net.macolabo.sform2.services.Form.update.{FormColSelectUpdateRequest, FormColUpdateRequest, FormColValidationUpdateRequest, FormTransferTaskConditionUpdateRequest, FormTransferTaskMailUpdateRequest, FormTransferTaskSalesforceFieldUpdateRequest, FormTransferTaskSalesforceUpdateRequest, FormTransferTaskUpdateRequest, FormUpdateRequest}
 import net.macolabo.sform2.utils.auth.DefaultEnv
@@ -24,7 +25,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
 
   private val loginInfo = LoginInfo("hoge", "hoge")
   private val userId = UUID.randomUUID()
-  private val user = User(userId, loginInfo, Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge@hoge.com"), None, activated = true, deletable = false)
+  private val user = entity.user.User(userId, loginInfo, Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge@hoge.com"), None, activated = true, deletable = false)
   var formId = BigInt(100)
   var transferConfigId = BigInt(100)
 
@@ -294,7 +295,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
 
     // FormTransferTaskConditionのチェック
     val newFormTransferTaskCondition = newFormTransferTask.form_transfer_task_conditions.head
-    assert(newFormTransferTaskCondition.operator.equals(("eq")))
+    assert(newFormTransferTaskCondition.operator.equals("eq"))
     assert(newFormTransferTaskCondition.cond_value.equals("x"))
 
     // FormTransferTaskMailのチェック
