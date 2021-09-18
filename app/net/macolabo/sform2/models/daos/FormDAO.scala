@@ -1,6 +1,6 @@
 package net.macolabo.sform2.models.daos
 
-import net.macolabo.sform2.models.User
+import net.macolabo.sform2.models.entity.user.User
 import net.macolabo.sform2.services.Form.delete.FormDeleteResponse
 import net.macolabo.sform2.services.Form.get.FormGetResponse
 import net.macolabo.sform2.services.Form.list.FormListResponse

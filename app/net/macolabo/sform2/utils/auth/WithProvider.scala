@@ -2,7 +2,7 @@ package net.macolabo.sform2.utils.auth
 
 import com.mohiva.play.silhouette.api.{Authenticator, Authorization}
 import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
-import net.macolabo.sform2.models.User
+import net.macolabo.sform2.models.entity.user.User
 import play.api.mvc.Request
 
 import scala.concurrent.Future

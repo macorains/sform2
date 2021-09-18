@@ -1,10 +1,9 @@
 package net.macolabo.sform2.services.User
 
 import java.util.UUID
-
 import com.mohiva.play.silhouette.api.services.IdentityService
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
-import net.macolabo.sform2.models.User
+import net.macolabo.sform2.models.entity.user.User
 
 import scala.concurrent.Future
 

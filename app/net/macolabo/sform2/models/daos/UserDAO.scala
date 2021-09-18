@@ -1,9 +1,8 @@
 package net.macolabo.sform2.models.daos
 
 import java.util.UUID
-
 import com.mohiva.play.silhouette.api.LoginInfo
-import net.macolabo.sform2.models.User
+import net.macolabo.sform2.models.entity.user.User
 import play.api.libs.json.JsValue
 
 import scala.concurrent.Future
