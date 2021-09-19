@@ -6,9 +6,9 @@ import scalikejdbc._
 trait PostdataDAO {
 
   /** HashedFormIdによるpostdata一覧取得 */
-  def getPostdataByFormHashedId(form_hashed_id: String, transfer_type_id: Int): List[Postdata]
+  def getPostdataByFormHashedId(form_hashed_id: String, transfer_type_id: Int)(implicit session: DBSession): List[Postdata]
 
   /** postdata一覧取得 */
-  def getPostdata(form_hashed_id: String): List[Postdata]
+  def getPostdata(form_hashed_id: String)(implicit session: DBSession): List[Postdata]
 
 }
