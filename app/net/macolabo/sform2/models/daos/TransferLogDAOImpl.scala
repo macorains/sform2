@@ -22,7 +22,7 @@ class TransferLogDAOImpl extends TransferLogDAO {
     }.updateAndReturnGeneratedKey().apply()
   }
 
-  def start(id: Long, transfer_id: Int, transfer_data: String)(implicit session: DBSession): Int = {
+  def start(id: BigInt, transfer_id: Int, transfer_data: String)(implicit session: DBSession): Int = {
     withSQL {
       val c = TransferLog.column
       QueryDSL.update(TransferLog).set(
@@ -43,7 +43,7 @@ class TransferLogDAOImpl extends TransferLogDAO {
   //          .updateAndReturnGeneratedKey().apply()
   //  }
 
-  def update(id: Long, status: Int)(implicit session: DBSession): Int = {
+  def update(id: BigInt, status: Int)(implicit session: DBSession): Int = {
     withSQL {
       val c = TransferLog.column
       QueryDSL.update(TransferLog).set(

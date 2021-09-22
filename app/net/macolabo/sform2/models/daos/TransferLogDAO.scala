@@ -5,7 +5,7 @@ import scalikejdbc.{ DB, WrappedResultSet }
 
 trait TransferLogDAO {
   def create(transfer_type_id: Int)(implicit session: DBSession): Long
-  def start(id: Long, transfer_id: Int, transfer_data: String)(implicit session: DBSession): Int
+  def start(id: BigInt, transfer_id: Int, transfer_data: String)(implicit session: DBSession): Int
   //  def save(transfer_id: Int, transfer_type_id: Int, status: Int, transfer_data: String, result_data: String)(implicit session: DBSession) :Long
-  def update(id: Long, status: Int)(implicit session: DBSession): Int
+  def update(id: BigInt, status: Int)(implicit session: DBSession): Int
 }
