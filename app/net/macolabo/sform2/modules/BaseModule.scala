@@ -1,7 +1,7 @@
 package net.macolabo.sform2.modules
 
 import com.google.inject.AbstractModule
-import net.macolabo.sform2.models.daos.{AuthTokenDAO, AuthTokenDAOImpl, FormDAO, FormDAOImpl, PostdataDAO, PostdataDAOImpl}
+import net.macolabo.sform2.models.daos.{AuthTokenDAO, AuthTokenDAOImpl, FormDAO, FormDAOImpl, PostdataDAO, PostdataDAOImpl,  TransferLogDAO, TransferLogDAOImpl}
 import net.codingwell.scalaguice.ScalaModule
 import net.macolabo.sform2.services.AuthToken.{AuthTokenService, AuthTokenServiceImpl}
 
@@ -17,6 +17,7 @@ class BaseModule extends AbstractModule with ScalaModule {
     bind[AuthTokenDAO].to[AuthTokenDAOImpl]
     bind[FormDAO].to[FormDAOImpl]
     bind[PostdataDAO].to[PostdataDAOImpl]
+    bind[TransferLogDAO].to[TransferLogDAOImpl]
     bind[AuthTokenService].to[AuthTokenServiceImpl]
   }
 }
