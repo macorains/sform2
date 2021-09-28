@@ -1,22 +1,42 @@
 package net.macolabo.sform2.models.daos
 
 import net.macolabo.sform2.models.entity.Postdata
+import net.macolabo.sform2.models.entity.transfer.TransferDetailLog
 import scalikejdbc._
 
 class PostdataDAOImpl extends PostdataDAO {
   def getPostdataByFormHashedId(form_hashed_id: String, transfer_type_id: Int)(implicit session: DBSession): List[Postdata] = {
-      sql"""SELECT pd.POSTDATA_ID, pd.FORM_HASHED_ID, pd.POSTDATA
-           FROM D_POSTDATA pd
-           LEFT JOIN D_TRANSFER_DETAIL_LOG tdl
-             ON pd.POSTDATA_ID = tdl.POSTDATA_ID AND tdl.TRANSFER_TYPE_ID=$transfer_type_id
-           WHERE pd.FORM_HASHED_ID=$form_hashed_id  AND tdl.ID IS NULL"""
-        .map(rs => Postdata(rs)).list().apply()
+    withSQL {
+      val pd = Postdata.syntax("pd")
+      val tdl = TransferDetailLog.syntax("tdl")
+      select(
+        pd.postdata_id,
+        pd.form_hashed_id,
+        pd.postdata
+      )
+        .from(Postdata as pd)
+        .leftJoin(TransferDetailLog as tdl)
+        .on(pd.postdata_id, tdl.postdata_id)
+        .where
+        .eq(pd.form_hashed_id, form_hashed_id)
+        .and
+        .eq(tdl.transfer_type_id, transfer_type_id)
+        .and
+        .isNull(tdl.id) // 何故必要なのか？
+    }.map(rs => Postdata(rs)).list().apply()
   }
 
   def getPostdata(form_hashed_id: String)(implicit session: DBSession): List[Postdata] = {
-      sql"""SELECT pd.POSTDATA_ID, pd.FORM_HASHED_ID, pd.POSTDATA
-           FROM D_POSTDATA pd
-           WHERE pd.FORM_HASHED_ID=$form_hashed_id  """
-        .map(rs => Postdata(rs)).list().apply()
+    withSQL {
+      val pd = Postdata.syntax("pd")
+      select(
+        pd.postdata_id,
+        pd.form_hashed_id,
+        pd.postdata
+      )
+        .from(Postdata as pd)
+        .where
+        .eq(pd.form_hashed_id, form_hashed_id)
+    }.map(rs => Postdata(rs)).list().apply()
   }
 }
