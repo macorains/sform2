@@ -7,17 +7,25 @@ import java.time.ZonedDateTime
 
 class TransferDetailLogDAOImpl extends TransferDetailLogDAO {
 
-  def save(postdata_id: Int, transfer_type_id: Int, status: Int, postdata: String, modified_postdata: String,
-           result: Int, message: String, created: String, updated: String)(implicit session: DBSession): Long = {
+  def save(postdataId: Int,
+           transferTypeId: Int,
+           status: Int,
+           postdata: String,
+           modifiedPostdata: String,
+           resultCode: Int,
+           message: String,
+           created: ZonedDateTime,
+           modified: ZonedDateTime
+          )(implicit session: DBSession): Long = {
     withSQL{
       val c = TransferDetailLog.column
       insertInto(TransferDetailLog).namedValues(
-        c.postdata_id -> postdata_id,
-        c.transfer_type_id -> transfer_type_id,
+        c.postdata_id -> postdataId,
+        c.transfer_type_id -> transferTypeId,
         c.status -> status,
         c.postdata -> postdata,
-        c.modified_postdata -> modified_postdata,
-        c.result -> result,
+        c.modified_postdata -> modifiedPostdata,
+        c.result_code -> resultCode,
         c.message -> message,
         c.created -> ZonedDateTime.now(),
         c.modified -> ZonedDateTime.now()

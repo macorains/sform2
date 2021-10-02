@@ -2,9 +2,20 @@ package net.macolabo.sform2.models.daos
 
 import scalikejdbc._
 
+import java.time.ZonedDateTime
+
 trait TransferDetailLogDAO {
 
-  def save(postdata_id: Int, transfer_type_id: Int, status: Int, postdata: String, modified_postdata: String,
-    result: Int, message: String, created: String, updated: String)(implicit session: DBSession): Long
+  def save(
+            postdataId: Int,
+            transferTypeId: Int,
+            status: Int,
+            postdata: String,
+            modifiedPostdata: String,
+            resultCode: Int,
+            message: String,
+            created: ZonedDateTime,
+            modified: ZonedDateTime
+          )(implicit session: DBSession): Long
 
 }
