@@ -12,7 +12,12 @@ class PostdataDAOImpl extends PostdataDAO {
       select(
         pd.postdata_id,
         pd.form_hashed_id,
-        pd.postdata
+        pd.postdata,
+        pd.user_group,
+        pd.created_user,
+        pd.created,
+        pd.modified_user,
+        pd.modified
       )
         .from(Postdata as pd)
         .leftJoin(TransferDetailLog as tdl)
@@ -21,8 +26,6 @@ class PostdataDAOImpl extends PostdataDAO {
         .eq(pd.form_hashed_id, form_hashed_id)
         .and
         .eq(tdl.transfer_type_id, transfer_type_id)
-        .and
-        .isNull(tdl.id) // 何故必要なのか？
     }.map(rs => Postdata(rs)).list().apply()
   }
 
@@ -32,7 +35,12 @@ class PostdataDAOImpl extends PostdataDAO {
       select(
         pd.postdata_id,
         pd.form_hashed_id,
-        pd.postdata
+        pd.postdata,
+        pd.user_group,
+        pd.created_user,
+        pd.created,
+        pd.modified_user,
+        pd.modified
       )
         .from(Postdata as pd)
         .where

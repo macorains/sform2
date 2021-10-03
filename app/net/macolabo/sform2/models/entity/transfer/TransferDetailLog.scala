@@ -13,7 +13,10 @@ case class TransferDetailLog(
                               modified_postdata: String,
                               result_code: Int,
                               message: String,
+                              user_group: String,
+                              created_user: String,
                               created: ZonedDateTime,
+                              modified_user: String,
                               modified: ZonedDateTime
                             )
 
@@ -29,7 +32,11 @@ object TransferDetailLog extends SQLSyntaxSupport[TransferDetailLog] {
       rs.string("modified_postdata"),
       rs.int("result_code"),
       rs.string("message"),
+      rs.string("user_group"),
+      rs.string("created_user"),
       rs.dateTime("created"),
-      rs.dateTime("modified"))
+      rs.string("modified_user"),
+      rs.dateTime("modified")
+    )
   }
 }
