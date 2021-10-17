@@ -81,7 +81,7 @@ class SignUpController @Inject() (
           userService.retrieve(loginInfo).flatMap {
             case Some(user) =>
 
-              val url = net.macolabo.sform2.controllers.routes.SignInController.view().absoluteURL().replaceFirst("https*://[^/]+/", virtualHostName)
+              val url = net.macolabo.sform2.controllers.routes.SignInController.view.absoluteURL().replaceFirst("https*://[^/]+/", virtualHostName)
               mailerClient.send(Email(
                 subject = Messages("email.already.signed.up.subject"),
                 from = Messages("email.from"),

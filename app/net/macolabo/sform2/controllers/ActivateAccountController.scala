@@ -49,7 +49,7 @@ class ActivateAccountController @Inject() (
   def send(email: String): Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     val decodedEmail = URLDecoder.decode(email, "UTF-8")
     val loginInfo = LoginInfo(CredentialsProvider.ID, decodedEmail)
-    val result = Redirect(routes.SignInController.view()).flashing("info" -> Messages("activation.email.sent", decodedEmail))
+    val result = Redirect(routes.SignInController.view).flashing("info" -> Messages("activation.email.sent", decodedEmail))
 
     userService.retrieve(loginInfo).flatMap {
       case Some(user) if !user.activated =>

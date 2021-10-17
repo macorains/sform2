@@ -1,13 +1,21 @@
-import sbt.Resolver
+import sbt.{ExclusionRule, Resolver}
 
 name := """sform2s"""
-
 version := "1.0-SNAPSHOT"
-
 scalaVersion := "2.13.3"
-resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/"
-resolvers += Resolver.jcenterRepo
-resolvers += "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
+
+val playPac4jVersion = "11.0.0-PLAY2.8"
+val pac4jVersion = "5.1.3"
+val playVersion = "2.8.8"
+
+resolvers ++= Seq(
+  Resolver.mavenLocal,
+  Resolver.jcenterRepo,
+  "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
+  "Sonatype snapshots repository" at "https://oss.sonatype.org/content/repositories/snapshots/",
+  "Shibboleth releases" at "https://build.shibboleth.net/nexus/content/repositories/releases/",
+  "Atlassian Releases" at "https://maven.atlassian.com/public/"
+)
 
 unmanagedBase := baseDirectory.value / "lib"
 
@@ -15,6 +23,9 @@ libraryDependencies ++= Seq(
   jdbc,
   ws,
   evolutions,
+  ehcache,
+  guice,
+  filters,
   "org.scala-lang" % "scala-reflect" % "2.13.3",
   "mysql" % "mysql-connector-java" % "8.0.20",
   "org.scalikejdbc" %% "scalikejdbc" % "3.5.0",
@@ -42,9 +53,24 @@ libraryDependencies ++= Seq(
   "org.mockito" %% "mockito-scala-scalatest" % "1.13.11",
   "com.typesafe.play" %% "play-test"% "2.8.1",
   "org.scalatest" %% "scalatest" % "3.1.2",
-  ehcache,
-  guice,
-  filters
+
+  "org.pac4j" %% "play-pac4j" % playPac4jVersion,
+  "org.pac4j" % "pac4j-http" % pac4jVersion excludeAll(ExclusionRule(organization = "com.fasterxml.jackson.core")),
+  "org.pac4j" % "pac4j-cas" % pac4jVersion exclude("com.fasterxml.jackson.core", "jackson-databind"),
+  "org.pac4j" % "pac4j-oauth" % pac4jVersion excludeAll(ExclusionRule(organization = "com.fasterxml.jackson.core")),
+  "org.pac4j" % "pac4j-saml" % pac4jVersion excludeAll(ExclusionRule(organization = "com.fasterxml.jackson.core")),
+  "org.pac4j" % "pac4j-oidc" % pac4jVersion  excludeAll(ExclusionRule("commons-io" , "commons-io"), ExclusionRule(organization = "com.fasterxml.jackson.core")),
+  "org.pac4j" % "pac4j-gae" % pac4jVersion,
+  "org.pac4j" % "pac4j-jwt" % pac4jVersion exclude("commons-io" , "commons-io"),
+  "org.pac4j" % "pac4j-ldap" % pac4jVersion excludeAll(ExclusionRule(organization = "com.fasterxml.jackson.core")),
+  "org.pac4j" % "pac4j-sql" % pac4jVersion exclude("com.fasterxml.jackson.core", "jackson-databind"),
+  "org.pac4j" % "pac4j-mongo" % pac4jVersion excludeAll(ExclusionRule(organization = "com.fasterxml.jackson.core")),
+  "org.pac4j" % "pac4j-kerberos" % pac4jVersion exclude("org.springframework", "spring-core"),
+  "org.pac4j" % "pac4j-couch" % pac4jVersion excludeAll(ExclusionRule(organization = "com.fasterxml.jackson.core")),
+  "org.apache.shiro" % "shiro-core" % "1.7.1",
+  "com.typesafe.play" % "play-cache_2.13" % playVersion,
+  "commons-io" % "commons-io" % "2.11.0"
+
 )
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
