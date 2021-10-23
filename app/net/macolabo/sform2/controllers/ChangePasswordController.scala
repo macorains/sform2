@@ -16,7 +16,6 @@ import scala.concurrent.ExecutionContext
  * The `Change Password` controller.
  *
  * @param components             The Play controller components.
- * @param silhouette             The Silhouette stack.
  * @param credentialsProvider    The credentials provider.
  * @param authInfoRepository     The auth info repository.
  * @param passwordHasherRegistry The password hasher registry.
@@ -25,7 +24,6 @@ import scala.concurrent.ExecutionContext
  */
 class ChangePasswordController @Inject() (
   components: ControllerComponents,
-  silhouette: Silhouette[DefaultEnv],
   credentialsProvider: CredentialsProvider,
   authInfoRepository: AuthInfoRepository,
   passwordHasherRegistry: PasswordHasherRegistry

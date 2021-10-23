@@ -30,12 +30,9 @@ play.http.session.maxAge = 1h
 # ~~~~~
 play.modules.enabled += "net.macolabo.sform2.modules.BaseModule"
 play.modules.enabled += "net.macolabo.sform2.modules.JobModule"
-play.modules.enabled += "net.macolabo.sform2.modules.SilhouetteModule"
+play.modules.enabled += "net.macolabo.sform2.modules.SecurityModule"
 play.modules.enabled += "play.api.libs.mailer.MailerModule"
 play.modules.enabled += "net.macolabo.sform2.modules.DBInitializerModule"
-
-play.modules.disabled += "com.mohiva.play.silhouette.api.actions.SecuredErrorHandlerModule"
-play.modules.disabled += "com.mohiva.play.silhouette.api.actions.UnsecuredErrorHandlerModule"
 
 # Akka config
 akka {
@@ -160,7 +157,4 @@ db {
   #default.logSql=true
 }
 
-
-
-include "silhouette.conf"
 include "sform.conf"

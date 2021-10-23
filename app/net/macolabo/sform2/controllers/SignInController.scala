@@ -1,7 +1,6 @@
 package net.macolabo.sform2.controllers
 
 import java.util.UUID
-
 import com.digitaltangible.playguard._
 import com.mohiva.play.silhouette.api.Authenticator.Implicits._
 import com.mohiva.play.silhouette.api._
@@ -10,6 +9,7 @@ import com.mohiva.play.silhouette.api.util.{Clock, Credentials}
 import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
 import com.mohiva.play.silhouette.impl.exceptions.IdentityNotFoundException
 import com.mohiva.play.silhouette.impl.providers._
+
 import javax.inject.Inject
 import net.ceedubs.ficus.Ficus._
 import net.macolabo.sform2.forms.SignInForm
@@ -23,6 +23,8 @@ import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc._
 import play.cache.SyncCacheApi
 import net.macolabo.sform2.utils.auth.DefaultEnv
+import org.pac4j.core.profile.UserProfile
+import org.pac4j.play.scala.{Security, SecurityComponents}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,7 +33,6 @@ import scala.concurrent.{ExecutionContext, Future}
  * The `Sign In` controller.
  *
  * @param components             The Play controller components.
- * @param silhouette             The Silhouette stack.
  * @param userService            The user service implementation.
  * @param credentialsProvider    The credentials provider.
  * @param configuration          The Play configuration.
@@ -39,8 +40,7 @@ import scala.concurrent.{ExecutionContext, Future}
  * @param webJarsUtil            The webjar util.
  */
 class SignInController @Inject() (
-  components: ControllerComponents,
-  silhouette: Silhouette[DefaultEnv],
+  val controllerComponents: SecurityComponents,
   userService: UserService,
   credentialsProvider: CredentialsProvider,
   configuration: Configuration,
@@ -51,7 +51,7 @@ class SignInController @Inject() (
   implicit
   webJarsUtil: WebJarsUtil,
   ex: ExecutionContext
-) extends AbstractController(components) with I18nSupport with VerificationRequestJson {
+) extends Security[UserProfile] with I18nSupport with VerificationRequestJson {
 
   val verificationCodePrefix = "VC_"
   val authenticatorPrefix = "AU_"
@@ -65,7 +65,7 @@ class SignInController @Inject() (
    * Views the `Sign In` page.
    * @return The result to display.
    */
-  def view: Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
+  def view: Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
     Future.successful(Ok(""))
   }
 
@@ -73,7 +73,7 @@ class SignInController @Inject() (
    * Handles the submitted form.
    * @return The result to display.
    */
-  def submit: Action[AnyContent] = (silhouette.UnsecuredAction andThen httpErrorRateLimitFunction).async { implicit request =>
+  def submit: Action[AnyContent] = Action.async { implicit request =>
     SignInForm.form.bindFromRequest().fold(
       form => Future.successful(BadRequest(Json.parse(s"""{"message":"${Messages("error.invalid.request")}"}"""))),
       data => {
@@ -124,7 +124,7 @@ class SignInController @Inject() (
    * 認証コードのチェック
    * @return
    */
-  def verification: Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request =>
+  def verification: Action[AnyContent] = Action.async { implicit request =>
     request.body.asJson.getOrElse(JsNull).validate[VerificationRequestEntry].asOpt match {
       case Some(verificationRequest) =>
         val formToken = verificationRequest.formToken

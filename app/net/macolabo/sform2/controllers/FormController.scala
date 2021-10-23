@@ -14,18 +14,19 @@ import play.api.i18n.I18nSupport
 import play.api.libs.json.Json._
 import play.api.mvc._
 import net.macolabo.sform2.utils.auth.{DefaultEnv, WithProvider}
+import org.pac4j.core.profile.UserProfile
+import org.pac4j.play.scala.{Security, SecurityComponents}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class FormController @Inject() (
-  components: ControllerComponents,
-  silhouette: Silhouette[DefaultEnv],
+  val controllerComponents: SecurityComponents,
   formService: FormService
 )(
   implicit
   webJarsUtil: WebJarsUtil,
   ex: ExecutionContext
-) extends AbstractController(components)
+) extends Security[UserProfile]
   with I18nSupport
   with FormGetResponseJson
   with FormListResponseJson
@@ -38,7 +39,7 @@ class FormController @Inject() (
    * フォームデータ取得
    * @return フォームデータ
    */
-  def get(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
+  def get(hashed_form_id: String): Action[AnyContent] = Action.async { implicit request =>
     val res = formService.getForm(request.identity, hashed_form_id)
     Future.successful(Ok(toJson(res)))
   }
@@ -48,7 +49,7 @@ class FormController @Inject() (
    * GET /form/list
    * @return フォームデータのリスト
    */
-  def getList: Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
+  def getList: Action[AnyContent] = Action.async { implicit request =>
     val res = formService.getList(request.identity)
     Future.successful(Ok(toJson(res)))
   }
@@ -57,7 +58,7 @@ class FormController @Inject() (
    * フォーム更新
    * @return
    */
-  def save(): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
+  def save(): Action[AnyContent] = Action.async { implicit request =>
     println(request.body.asJson.get.validate[FormUpdateRequest].toString)
     val res = request.body.asJson.flatMap(r =>
       r.validate[FormUpdateRequest].map(f => {
@@ -73,7 +74,7 @@ class FormController @Inject() (
    * フォーム作成
    * @return
    */
-  def create(): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
+  def create(): Action[AnyContent] = Action.async { implicit request =>
     val res = request.body.asJson.flatMap(r =>
       r.validate[FormUpdateRequest].map(f => {
         formService.insert(request.identity, f)
@@ -91,7 +92,7 @@ class FormController @Inject() (
    * @param hashed_form_id フォームハッシュID
    * @return
    */
-  def delete(hashed_form_id: String): Action[AnyContent] = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin", "operator"))).async { implicit request =>
+  def delete(hashed_form_id: String): Action[AnyContent] = Action.async { implicit request =>
     val res = formService.deleteForm(request.identity, hashed_form_id)
 //    res.result match {
 //      case Some(s: Int) => Future.successful(Ok(toJson(res)))

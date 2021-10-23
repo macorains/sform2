@@ -21,14 +21,15 @@ import play.api.libs.json.Json
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc._
 import net.macolabo.sform2.utils.auth.DefaultEnv
+import org.pac4j.core.profile.UserProfile
+import org.pac4j.play.scala.{Security, SecurityComponents}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * The `Sign Up` controller.
  *
- * @param components             The Play controller components.
- * @param silhouette             The Silhouette stack.
+ * @param controllerComponents   The Play controller components.
  * @param userService            The user service implementation.
  * @param authInfoRepository     The auth info repository implementation.
  * @param authTokenService       The auth token service implementation.
@@ -40,8 +41,7 @@ import scala.concurrent.{ExecutionContext, Future}
  */
 class SignUpController @Inject() (
   config: Configuration,
-  components: ControllerComponents,
-  silhouette: Silhouette[DefaultEnv],
+  val controllerComponents: SecurityComponents,
   userService: UserService,
   authInfoRepository: AuthInfoRepository,
   authTokenService: AuthTokenService,
@@ -52,14 +52,14 @@ class SignUpController @Inject() (
   implicit
   webJarsUtil: WebJarsUtil,
   ex: ExecutionContext
-) extends AbstractController(components) with I18nSupport with UserSignUpResultJson {
+) extends Security[UserProfile] with I18nSupport with UserSignUpResultJson {
 
   /**
    * Views the `Sign Up` page.
    *
    * @return The result to display.
    */
-  def view: Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
+  def view: Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
     // Future.successful(Ok(views.html.signUp(SignUpForm.form)))
     Future.successful(Ok(""))
   }
@@ -69,7 +69,7 @@ class SignUpController @Inject() (
    * （初期管理ユーザー登録後は使わない）
    * @return The result to display.
    */
-  def submit: Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
+  def submit: Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
     if(!userService.checkAdminExists) {
       val virtualHostName = config.get[String]("silhouette.virtualHostName")
       SignUpForm.form.bindFromRequest().fold(

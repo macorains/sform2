@@ -1,6 +1,7 @@
 package net.macolabo.sform2.controllers
 
 import com.mohiva.play.silhouette.api._
+
 import javax.inject.Inject
 import net.macolabo.sform2.services.AuthToken.AuthTokenService
 import net.macolabo.sform2.services.User.UserService
@@ -9,6 +10,8 @@ import play.api.i18n.I18nSupport
 import play.api.libs.mailer.MailerClient
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents, Request}
 import net.macolabo.sform2.utils.auth.DefaultEnv
+import org.pac4j.core.profile.UserProfile
+import org.pac4j.play.scala.{Security, SecurityComponents}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -16,7 +19,6 @@ import scala.concurrent.{ExecutionContext, Future}
  * The `Forgot Password` controller.
  *
  * @param components       The Play controller components.
- * @param silhouette       The Silhouette stack.
  * @param userService      The user service implementation.
  * @param authTokenService The auth token service implementation.
  * @param mailerClient     The mailer client.
@@ -24,8 +26,7 @@ import scala.concurrent.{ExecutionContext, Future}
  * @param ex               The execution context.
  */
 class ForgotPasswordController @Inject() (
-  components: ControllerComponents,
-  silhouette: Silhouette[DefaultEnv],
+  val controllerComponents: SecurityComponents,
   userService: UserService,
   authTokenService: AuthTokenService,
   mailerClient: MailerClient
@@ -33,14 +34,14 @@ class ForgotPasswordController @Inject() (
   implicit
   webJarsUtil: WebJarsUtil,
   ex: ExecutionContext
-) extends AbstractController(components) with I18nSupport {
+) extends Security[UserProfile] with I18nSupport {
 
   /**
    * Views the `Forgot Password` page.
    *
    * @return The result to display.
    */
-  def view: Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
+  def view: Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
     // Future.successful(Ok(views.html.forgotPassword(ForgotPasswordForm.form)))
     Future.successful(Ok(""))
   }
