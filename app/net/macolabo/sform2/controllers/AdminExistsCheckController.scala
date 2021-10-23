@@ -13,7 +13,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AdminExistsCheckController @Inject() (
   components: ControllerComponents,
-  silhouette: Silhouette[DefaultEnv],
   userService: UserService
 )(
   implicit
@@ -21,7 +20,7 @@ class AdminExistsCheckController @Inject() (
   ex: ExecutionContext
 ) extends AbstractController(components) with I18nSupport with AdminExistsCheckResultJson {
 
-  def check: Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
-    Future.successful(Ok(Json.toJson(AdminExistsCheckResult(userService.checkAdminExists))))
+  def check: Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
+    Ok(Json.toJson(AdminExistsCheckResult(userService.checkAdminExists)))
   }
 }
