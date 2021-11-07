@@ -31,10 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
  *
  * @param controllerComponents   The Play controller components.
  * @param userService            The user service implementation.
- * @param authInfoRepository     The auth info repository implementation.
  * @param authTokenService       The auth token service implementation.
- * @param avatarService          The avatar service implementation.
- * @param passwordHasherRegistry The password hasher registry.
  * @param mailerClient           The mailer client.
  * @param webJarsUtil            The webjar util.
  * @param ex                     The execution context.
@@ -43,10 +40,7 @@ class SignUpController @Inject() (
   config: Configuration,
   val controllerComponents: SecurityComponents,
   userService: UserService,
-  authInfoRepository: AuthInfoRepository,
   authTokenService: AuthTokenService,
-  avatarService: AvatarService,
-  passwordHasherRegistry: PasswordHasherRegistry,
   mailerClient: MailerClient
 )(
   implicit
@@ -70,6 +64,8 @@ class SignUpController @Inject() (
    * @return The result to display.
    */
   def submit: Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
+    ???
+    /*
     if(!userService.checkAdminExists) {
       val virtualHostName = config.get[String]("silhouette.virtualHostName")
       SignUpForm.form.bindFromRequest().fold(
@@ -119,7 +115,7 @@ class SignUpController @Inject() (
                   bodyText = Some(net.macolabo.sform2.views.txt.emails.signUp(user, url).body),
                   bodyHtml = Some(net.macolabo.sform2.views.html.emails.signUp(user, url).body)
                 ))
-                silhouette.env.eventBus.publish(SignUpEvent(user, request))
+                //silhouette.env.eventBus.publish(SignUpEvent(user, request))
                 result
               }
           }
@@ -128,5 +124,6 @@ class SignUpController @Inject() (
     } else {
       Future.successful(BadRequest(s"${Messages("error.invalid.request")}"))
     }
+     */
   }
 }

@@ -1,6 +1,7 @@
 package net.macolabo.sform2.controllers
 
 import java.util.UUID
+import collection.JavaConverters
 import com.digitaltangible.playguard._
 import com.mohiva.play.silhouette.api.Authenticator.Implicits._
 import com.mohiva.play.silhouette.api._
@@ -23,18 +24,23 @@ import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc._
 import play.cache.SyncCacheApi
 import net.macolabo.sform2.utils.auth.DefaultEnv
-import org.pac4j.core.profile.UserProfile
+import org.pac4j.core.profile.{ProfileManager, UserProfile}
+import org.pac4j.core.util.CommonHelper
+import org.pac4j.jwt.config.signature.SecretSignatureConfiguration
+import org.pac4j.jwt.profile.JwtGenerator
+import org.pac4j.play.PlayWebContext
 import org.pac4j.play.scala.{Security, SecurityComponents}
 
+import scala.collection.JavaConverters.asJavaIterableConverter
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
+import scala.jdk.javaapi.CollectionConverters.asScala
 
 /**
  * The `Sign In` controller.
  *
  * @param components             The Play controller components.
  * @param userService            The user service implementation.
- * @param credentialsProvider    The credentials provider.
  * @param configuration          The Play configuration.
  * @param clock                  The clock instance.
  * @param webJarsUtil            The webjar util.
@@ -42,9 +48,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class SignInController @Inject() (
   val controllerComponents: SecurityComponents,
   userService: UserService,
-  credentialsProvider: CredentialsProvider,
   configuration: Configuration,
-  clock: Clock,
   cache: SyncCacheApi,
   mailerClient: MailerClient
 )(
@@ -73,7 +77,17 @@ class SignInController @Inject() (
    * Handles the submitted form.
    * @return The result to display.
    */
-  def submit: Action[AnyContent] = Action.async { implicit request =>
+  def submit: Action[AnyContent] = Secure("DirectFormClient") { implicit request =>
+    val profiles = getProfiles(request)
+    val generator = new JwtGenerator(new SecretSignatureConfiguration("12345678901234567890123456789012"))
+    var token: String = ""
+    if (CommonHelper.isNotEmpty(profiles)) {
+      token = generator.generate(profiles.get(0))
+    }
+
+    val json = Json.parse(s"""{"token":"${token}"}""")
+    Ok(json).as("application/json")
+    /*
     SignInForm.form.bindFromRequest().fold(
       form => Future.successful(BadRequest(Json.parse(s"""{"message":"${Messages("error.invalid.request")}"}"""))),
       data => {
@@ -118,6 +132,8 @@ class SignInController @Inject() (
         }
       }
     )
+    */
+
   }
 
   /**
@@ -125,6 +141,8 @@ class SignInController @Inject() (
    * @return
    */
   def verification: Action[AnyContent] = Action.async { implicit request =>
+    Future.successful(Ok("Hoge"))
+    /*
     request.body.asJson.getOrElse(JsNull).validate[VerificationRequestEntry].asOpt match {
       case Some(verificationRequest) =>
         val formToken = verificationRequest.formToken
@@ -143,9 +161,18 @@ class SignInController @Inject() (
 
       case None => Future.successful(BadRequest(Json.parse(s"""{"message":"${Messages("error.verification.invalid")}"}"}""")))
     }
+     */
   }
 
   private val httpErrorRateLimitFunction =
     HttpErrorRateLimitFunction[Request](new RateLimiter(1, 1/7f, "test failure rate limit"), _ => Future.successful(BadRequest(Json.parse(s"""{"message":"LoginFailureLimitExceeded"}"""))))
+
+  private def getProfiles(implicit request: RequestHeader)  = {
+    val webContext = new PlayWebContext(request)
+    val profileManager = new ProfileManager(webContext, controllerComponents.sessionStore)
+    profileManager.getProfiles()
+    //val profiles = profileManager.getProfiles()
+    //asScala(profiles).toList
+  }
 
 }

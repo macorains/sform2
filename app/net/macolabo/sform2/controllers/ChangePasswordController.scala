@@ -24,7 +24,6 @@ import scala.concurrent.ExecutionContext
  */
 class ChangePasswordController @Inject() (
   components: ControllerComponents,
-  credentialsProvider: CredentialsProvider,
   authInfoRepository: AuthInfoRepository,
   passwordHasherRegistry: PasswordHasherRegistry
 )(

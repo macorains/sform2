@@ -33,7 +33,9 @@ class FormPostDataController @Inject() (
   }
 
   def getPostData(hashed_form_id: String): Action[AnyContent] = Action.async { implicit request =>
-    Future.successful(Ok(formPostDataService.getData(hashed_form_id, request.identity)).as("application/json; charset=UTF-8"))
+    ???
+
+    //Future.successful(Ok(formPostDataService.getData(hashed_form_id, request.identity)).as("application/json; charset=UTF-8"))
   }
 
   def addPostDataId(id: Int, postdata: JsValue): JsValue = {

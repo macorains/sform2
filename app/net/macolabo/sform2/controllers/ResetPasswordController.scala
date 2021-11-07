@@ -31,7 +31,6 @@ import scala.concurrent.ExecutionContext
 class ResetPasswordController @Inject() (
   val controllerComponents: SecurityComponents,
   userService: UserService,
-  authInfoRepository: AuthInfoRepository,
   passwordHasherRegistry: PasswordHasherRegistry,
   authTokenService: AuthTokenService
 )(

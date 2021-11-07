@@ -43,8 +43,11 @@ class TransferController @Inject() (
    * @return TransferConfigのid,nameのリスト
    */
   def getSelectList: Action[AnyContent] = Action.async { implicit request =>
+    ???
+    /*
     val res = transferService.getTransferConfigSelectList(request.identity)
     Future.successful(Ok(toJson(res)))
+   */
   }
 
   /**
@@ -53,8 +56,11 @@ class TransferController @Inject() (
    * @return TransferConfigのリスト
    */
   def getTransferConfigList: Action[AnyContent] = Action.async { implicit request =>
+  ???
+    /*
     val res = transferService.getTransferConfigList(request.identity)
     Future.successful(Ok(toJson(res)))
+*/
   }
 
   /**
@@ -63,8 +69,12 @@ class TransferController @Inject() (
    * @return TransferConfig
    */
   def getTransferConfig(transferConfigId: Int): Action[AnyContent] = Action.async { implicit request =>
+    ???
+    /*
     val res = transferService.getTransferConfig(request.identity, transferConfigId)
     Future.successful(Ok(toJson(res)))
+    /
+     */
   }
 
   /**
@@ -72,6 +82,8 @@ class TransferController @Inject() (
    * @return Result
    */
   def saveTransferConfig: Action[AnyContent] = Action.async { implicit request =>
+    ???
+    /*
     println(request.body.asJson.get.validate[TransferUpdateTransferConfigRequest])
     val res = request.body.asJson.flatMap(r =>
       r.validate[TransferUpdateTransferConfigRequest].map(f => {
@@ -81,6 +93,8 @@ class TransferController @Inject() (
       case Some(s: TransferUpdateTransferConfigResponse) => Future.successful(Ok(toJson(s)))
       case None => Future.successful(BadRequest)
     }
+
+     */
   }
 
   /**
@@ -104,6 +118,8 @@ class TransferController @Inject() (
    * @return SalesforceのObject情報リスト
    */
   def getTransferSalesforceObject(transferConfigId: Int): Action[AnyContent] = Action.async { implicit request =>
+    ???
+    /*
     val res = transferService.getTransferConfig(request.identity,transferConfigId).flatMap(c => {
       c.detail.salesforce.flatMap(s => {
         salesforceConnectionService.getObject(s)
@@ -113,6 +129,8 @@ class TransferController @Inject() (
       case Some(s: List[SalesforceGetObjectResponse]) => Future.successful(Ok(toJson(s)))
       case None => Future.successful(BadRequest)
     }
+
+     */
   }
 
   /**
@@ -122,6 +140,8 @@ class TransferController @Inject() (
    * @return SalesforceのField情報リスト
    */
   def getTransferSalesforceField(transferConfigId: Int, objectName: String): Action[AnyContent] = Action.async { implicit request =>
+    ???
+    /*
     val res = transferService.getTransferConfig(request.identity,transferConfigId).flatMap(c => {
       c.detail.salesforce.flatMap(s => {
         salesforceConnectionService.getField(s, objectName)
@@ -131,5 +151,6 @@ class TransferController @Inject() (
       case Some(s: List[SalesforceGetFieldResponse]) => Future.successful(Ok(toJson(s)))
       case None => Future.successful(BadRequest)
     }
+    */
   }
 }

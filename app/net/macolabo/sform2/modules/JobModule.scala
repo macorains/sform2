@@ -1,7 +1,7 @@
 package net.macolabo.sform2.modules
 
 import net.codingwell.scalaguice.ScalaModule
-import net.macolabo.sform2.jobs.{AuthTokenCleaner, Scheduler}
+import net.macolabo.sform2.jobs.Scheduler
 import play.api.libs.concurrent.AkkaGuiceSupport
 
 /**

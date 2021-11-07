@@ -40,8 +40,12 @@ class FormController @Inject() (
    * @return フォームデータ
    */
   def get(hashed_form_id: String): Action[AnyContent] = Action.async { implicit request =>
+    ???
+    /*
     val res = formService.getForm(request.identity, hashed_form_id)
     Future.successful(Ok(toJson(res)))
+
+     */
   }
 
   /**
@@ -50,8 +54,12 @@ class FormController @Inject() (
    * @return フォームデータのリスト
    */
   def getList: Action[AnyContent] = Action.async { implicit request =>
+    ???
+    /*
     val res = formService.getList(request.identity)
     Future.successful(Ok(toJson(res)))
+
+     */
   }
 
   /**
@@ -59,6 +67,8 @@ class FormController @Inject() (
    * @return
    */
   def save(): Action[AnyContent] = Action.async { implicit request =>
+    ???
+    /*
     println(request.body.asJson.get.validate[FormUpdateRequest].toString)
     val res = request.body.asJson.flatMap(r =>
       r.validate[FormUpdateRequest].map(f => {
@@ -68,6 +78,8 @@ class FormController @Inject() (
       case Some(s :FormUpdateResponse) => Future.successful(Ok(toJson(s)))
       case None => Future.successful(BadRequest)
     }
+
+     */
   }
 
   /**
@@ -75,6 +87,8 @@ class FormController @Inject() (
    * @return
    */
   def create(): Action[AnyContent] = Action.async { implicit request =>
+    ???
+    /*
     val res = request.body.asJson.flatMap(r =>
       r.validate[FormUpdateRequest].map(f => {
         formService.insert(request.identity, f)
@@ -83,6 +97,7 @@ class FormController @Inject() (
       case Some(s :FormUpdateResponse) => Future.successful(Ok(toJson(s)))
       case None => Future.successful(BadRequest)
     }
+     */
   }
 
 
@@ -93,12 +108,13 @@ class FormController @Inject() (
    * @return
    */
   def delete(hashed_form_id: String): Action[AnyContent] = Action.async { implicit request =>
-    val res = formService.deleteForm(request.identity, hashed_form_id)
+    ???
+    //val res = formService.deleteForm(request.identity, hashed_form_id)
 //    res.result match {
 //      case Some(s: Int) => Future.successful(Ok(toJson(res)))
 //      case None => Future.successful(BadRequest)
 //    }
-    Future.successful(Ok(toJson(res)))
+  //  Future.successful(Ok(toJson(res)))
   }
 
 

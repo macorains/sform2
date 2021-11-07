@@ -22,8 +22,7 @@ import scala.language.postfixOps
  * @param ex           The execution context.
  */
 class AuthTokenServiceImpl @Inject() (
-  authTokenDAO: AuthTokenDAO,
-  clock: Clock
+  authTokenDAO: AuthTokenDAO
 )(
   implicit
   ex: ExecutionContext
@@ -36,12 +35,13 @@ class AuthTokenServiceImpl @Inject() (
    * @param expiry The duration a token expires.
    * @return The saved auth token.
    */
-  def create(userID: UUID, expiry: FiniteDuration = 5 minutes): Future[AuthToken] = {
-    DB.localTx(implicit session => {
-      val token = models.AuthToken(UUID.randomUUID(), userID, clock.now.withZone(DateTimeZone.UTC).plusSeconds(expiry.toSeconds.toInt))
-      authTokenDAO.save(token)
-    })
-  }
+  def create(userID: UUID, expiry: FiniteDuration = 5 minutes): Future[AuthToken] = ???
+  //  def create(userID: UUID, expiry: FiniteDuration = 5 minutes): Future[AuthToken] = {
+//    DB.localTx(implicit session => {
+//      val token = models.AuthToken(UUID.randomUUID(), userID, clock.now.withZone(DateTimeZone.UTC).plusSeconds(expiry.toSeconds.toInt))
+//      authTokenDAO.save(token)
+//    })
+//  }
 
   /**
    * Validates a token ID.
@@ -60,11 +60,12 @@ class AuthTokenServiceImpl @Inject() (
    *
    * @return The list of deleted tokens.
    */
-  def clean: Future[Seq[AuthToken]] = authTokenDAO.findExpired(clock.now.withZone(DateTimeZone.UTC)).flatMap { tokens =>
-    DB.localTx(implicit session => {
-      Future.sequence(tokens.map { token =>
-        authTokenDAO.remove(token.id).map(_ => token)
-      })
-    })
-  }
+  def clean: Future[Seq[AuthToken]] = ???
+//  def clean: Future[Seq[AuthToken]] = authTokenDAO.findExpired(clock.now.withZone(DateTimeZone.UTC)).flatMap { tokens =>
+//    DB.localTx(implicit session => {
+//      Future.sequence(tokens.map { token =>
+//        authTokenDAO.remove(token.id).map(_ => token)
+//      })
+//    })
+//  }
 }

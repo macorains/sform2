@@ -24,8 +24,6 @@ class UserController @Inject() (
   dbapi: DBApi,
   val controllerComponents: SecurityComponents,
   userService: UserService,
-  credentialsProvider: CredentialsProvider,
-  socialProviderRegistry: SocialProviderRegistry,
   configuration: Configuration,
   userDAO: UserDAO
 )(
@@ -37,8 +35,12 @@ class UserController @Inject() (
   // ToDo グループによる制御必要
   // GET /user
   def getList: Action[AnyContent] = Action.async { implicit request =>
+    ???
+    /*
     val res = RsResultSet("OK", "OK", userDAO.getList(request.identity))
     Future.successful(Ok(Json.toJson(res)))
+
+     */
   }
 
   // adminロールの有無チェック用
@@ -51,19 +53,26 @@ class UserController @Inject() (
   // ユーザーの保存
   // POST /user
   def save: Action[AnyContent] = Action.async { implicit request =>
+    ???
+    /*
     request.body.asJson.flatMap(bodyJson => {
       bodyJson.validate[UserSaveRequest].asOpt.map(userSaveRequest => {
         userService.save(userSaveRequest, request.identity.group.getOrElse(""))
         Future.successful(Ok)
       })
     }).getOrElse(Future.successful(BadRequest))
+
+     */
   }
 
   // ユーザーの削除
   // DELETE /user
   def delete(userId: String): Action[AnyContent] = Action.async { implicit request =>
+    ???
+    /*
     userService.delete(userId, request.identity.group.getOrElse(""))
     val res = RsResultSet("OK", "OK", Json.toJson(""))
     Future.successful(Ok(Json.toJson(res)))
+    */
   }
 }
