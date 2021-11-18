@@ -4,6 +4,7 @@ import java.util.UUID
 import com.mohiva.play.silhouette.api.LoginInfo
 import net.macolabo.sform2.models.entity.user.User
 import play.api.libs.json.JsValue
+import scalikejdbc.DBSession
 
 import scala.concurrent.Future
 
@@ -29,6 +30,23 @@ trait UserDAO {
   def find(userID: UUID): Future[Option[User]]
 
   /**
+   * ユーザー検索(pac4j)
+   * @param fields DBフィールド
+   * @param key 検索キー
+   * @param value 検索値
+   * @param session DBSession
+   * @return
+   */
+  def find(fields: String, key: String, value: String)(implicit session: DBSession): List[Map[String, Any]]
+
+  /**
+   * ユーザー作成(pac4j)
+   * @param attributes 属性リスト
+   * @param session DBSession
+   */
+  def insert(attributes: Seq[(String,AnyRef)])(implicit session: DBSession): Unit
+
+  /**
    * Saves a user.
    *
    * @param user The user to save.
@@ -41,6 +59,7 @@ trait UserDAO {
    * @param userID The ID of the user to delete.
    */
   def delete(userID: String, group: String): Unit
+  def delete(userID: String): Unit
 
   def getList(identity: User): JsValue
   def countAdminUsers() :Int

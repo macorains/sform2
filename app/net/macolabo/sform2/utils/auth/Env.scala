@@ -8,6 +8,6 @@ import net.macolabo.sform2.models.entity.user.User
  * The default env.
  */
 trait DefaultEnv extends Env {
-  type I = User
-  type A = JWTAuthenticator
+//  type I = User
+//  type A = JWTAuthenticator
 }

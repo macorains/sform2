@@ -46,20 +46,23 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
   def save(user: User): Future[User] = userDAO.save(user)
 
   def save(userSaveRequest: UserSaveRequest, userGroup: String): Future[User] = {
-    val userId = userSaveRequest.userId.map(UUID.fromString).getOrElse(UUID.randomUUID())
-    save(user.User(
-      userID = userId,
-      loginInfo = LoginInfo(userId.toString, s"""${userSaveRequest.email}:${userSaveRequest.userGroup}"""),
-      group = Option(userGroup),
-      role = Option("operator"),
-      firstName = Option(userSaveRequest.firstName),
-      lastName = Option(userSaveRequest.lastName),
-      fullName = Option(userSaveRequest.fullName),
-      email = Option(userSaveRequest.email),
-      avatarURL = userSaveRequest.avatarUrl,
-      activated = userSaveRequest.userId.isDefined,
-      deletable = true
-    ))
+    // TODO silhouette関係ない形に直す
+    ???
+    // とりあえず蓋 2021/11/14
+//    val userId = userSaveRequest.userId.map(UUID.fromString).getOrElse(UUID.randomUUID())
+//    save(user.User(
+//      userID = userId,
+//      loginInfo = LoginInfo(userId.toString, s"""${userSaveRequest.email}:${userSaveRequest.userGroup}"""),
+//      group = Option(userGroup),
+//      role = Option("operator"),
+//      firstName = Option(userSaveRequest.firstName),
+//      lastName = Option(userSaveRequest.lastName),
+//      fullName = Option(userSaveRequest.fullName),
+//      email = Option(userSaveRequest.email),
+//      avatarURL = userSaveRequest.avatarUrl,
+//      activated = userSaveRequest.userId.isDefined,
+//      deletable = true
+//    ))
   }
   /**
    * Saves the social profile for a user.
@@ -70,30 +73,33 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
    * @return The user for whom the profile was saved.
    */
   def save(profile: CommonSocialProfile): Future[User] = {
-    userDAO.find(profile.loginInfo).flatMap {
-      case Some(user) => // Update user with profile
-        userDAO.save(user.copy(
-          firstName = profile.firstName,
-          lastName = profile.lastName,
-          fullName = profile.fullName,
-          email = profile.email,
-          avatarURL = profile.avatarURL
-        ))
-      case None => // Insert a new user
-        userDAO.save(user.User(
-          userID = UUID.randomUUID(),
-          loginInfo = profile.loginInfo,
-          group = Option(""),
-          role = Option("operator"),
-          firstName = profile.firstName,
-          lastName = profile.lastName,
-          fullName = profile.fullName,
-          email = profile.email,
-          avatarURL = profile.avatarURL,
-          activated = true,
-          deletable = true
-        ))
-    }
+    // TODO silhouette関係ない形に直す
+???
+    // とりあえず蓋 2021/11/14
+//    userDAO.find(profile.loginInfo).flatMap {
+//      case Some(user) => // Update user with profile
+//        userDAO.save(user.copy(
+//          firstName = profile.firstName,
+//          lastName = profile.lastName,
+//          fullName = profile.fullName,
+//          email = profile.email,
+//          avatarURL = profile.avatarURL
+//        ))
+//      case None => // Insert a new user
+//        userDAO.save(user.User(
+//          userID = UUID.randomUUID(),
+//          loginInfo = profile.loginInfo,
+//          group = Option(""),
+//          role = Option("operator"),
+//          firstName = profile.firstName,
+//          lastName = profile.lastName,
+//          fullName = profile.fullName,
+//          email = profile.email,
+//          avatarURL = profile.avatarURL,
+//          activated = true,
+//          deletable = true
+//        ))
+//    }
   }
 
   def delete(userId: String, group: String): Unit = {

@@ -49,6 +49,9 @@ class ActivateAccountController @Inject() (
    */
   // TODO HTTPレスポンスのみ返すように変更すること (2019/03/20)
   def send(email: String): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
+
+    // Silhouetteを抜くために一旦蓋をする (2021/11/14)
+    /*
     val decodedEmail = URLDecoder.decode(email, "UTF-8")
     val loginInfo = LoginInfo(CredentialsProvider.ID, decodedEmail)
     val result = Redirect(routes.SignInController.view).flashing("info" -> Messages("activation.email.sent", decodedEmail))
@@ -70,6 +73,8 @@ class ActivateAccountController @Inject() (
         }
       case None => Future.successful(result)
     }
+    */
+    Future.successful(Ok)
   }
 
   /**
@@ -79,6 +84,7 @@ class ActivateAccountController @Inject() (
    * @return The result to display.
    */
   def activate(token: UUID): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
+    /*
     authTokenService.validate(token).flatMap {
       case Some(authToken) => userService.retrieve(authToken.userID).flatMap {
         case Some(user) if user.loginInfo.providerID == CredentialsProvider.ID =>
@@ -91,5 +97,7 @@ class ActivateAccountController @Inject() (
       case None =>
         Future.successful(BadRequest)
     }
+    */
+    Future.successful(Ok)
   }
 }

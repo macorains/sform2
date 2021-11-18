@@ -15,14 +15,16 @@ class TransferService @Inject() (implicit ex: ExecutionContext) extends Transfer
    * @return TransferConfigのID,Nameのリスト
    */
   def getTransferConfigSelectList(identity: User): List[TransferGetTransferConfigSelectList] = {
-    val userGroup = identity.group.getOrElse("")
-    TransferConfig.getList(userGroup).map(f => {
-      TransferGetTransferConfigSelectList(
-        f.id,
-        f.name,
-        f.type_code
-      )
-    })
+  ???
+    // とりあえず蓋 2021/11/14
+//    val userGroup = identity.group.getOrElse("")
+//    TransferConfig.getList(userGroup).map(f => {
+//      TransferGetTransferConfigSelectList(
+//        f.id,
+//        f.name,
+//        f.type_code
+//      )
+//    })
   }
 
   /**
@@ -31,16 +33,18 @@ class TransferService @Inject() (implicit ex: ExecutionContext) extends Transfer
    * @return TransferConfigのリスト
    */
   def getTransferConfigList(identity: User): List[TransferGetTransferConfigListResponse] = {
-    val userGroup = identity.group.getOrElse("")
-    TransferConfig.getList(userGroup).map(f => {
-      TransferGetTransferConfigListResponse(
-        f.id,
-        f.type_code,
-        f.config_index,
-        f.name,
-        f.status
-      )
-    })
+    ???
+    // とりあえず蓋 2021/11/14
+//    val userGroup = identity.group.getOrElse("")
+//    TransferConfig.getList(userGroup).map(f => {
+//      TransferGetTransferConfigListResponse(
+//        f.id,
+//        f.type_code,
+//        f.config_index,
+//        f.name,
+//        f.status
+//      )
+//    })
   }
 
   /**
@@ -50,20 +54,22 @@ class TransferService @Inject() (implicit ex: ExecutionContext) extends Transfer
    * @return 詳細付きTransferConfig
    */
   def getTransferConfig(identity:User, transferConfigId: Int): Option[TransferGetTransferConfigResponse] = {
-    val userGroup = identity.group.getOrElse("")
-    TransferConfig.get(userGroup, transferConfigId).map(f => {
-      TransferGetTransferConfigResponse(
-        f.id,
-        f.type_code,
-        f.config_index,
-        f.name,
-        f.status,
-        TransferGetTransferResponseConfigDetail(
-          getTransferConfigMail(userGroup, transferConfigId),
-          getTransferConfigSalesforce(userGroup, transferConfigId)
-        )
-      )
-    })
+    ???
+    // とりあえず蓋 2021/11/14
+//    val userGroup = identity.group.getOrElse("")
+//    TransferConfig.get(userGroup, transferConfigId).map(f => {
+//      TransferGetTransferConfigResponse(
+//        f.id,
+//        f.type_code,
+//        f.config_index,
+//        f.name,
+//        f.status,
+//        TransferGetTransferResponseConfigDetail(
+//          getTransferConfigMail(userGroup, transferConfigId),
+//          getTransferConfigSalesforce(userGroup, transferConfigId)
+//        )
+//      )
+//    })
   }
 
   /**
@@ -73,28 +79,30 @@ class TransferService @Inject() (implicit ex: ExecutionContext) extends Transfer
    * @return Result
    */
   def updateTransferConfig(identity: User, transferUpdateTransferConfigRequest: TransferUpdateTransferConfigRequest): TransferUpdateTransferConfigResponse = {
-    val userId = identity.userID.toString
-    val userGroup = identity.group.getOrElse("")
-    TransferConfig(
-      transferUpdateTransferConfigRequest.id,
-      transferUpdateTransferConfigRequest.type_code,
-      transferUpdateTransferConfigRequest.config_index,
-      transferUpdateTransferConfigRequest.name,
-      transferUpdateTransferConfigRequest.status,
-      userGroup,
-      userId,
-      userId,
-      ZonedDateTime.now(),
-      ZonedDateTime.now()
-    ).update
-
-    transferUpdateTransferConfigRequest.detail.mail.map(d => {
-      updateTransferConfigMail(userGroup, userId, d)
-    })
-    transferUpdateTransferConfigRequest.detail.salesforce.map(d => {
-      updateTransferConfigSalesforce(userGroup, userId, d)
-    })
-    TransferUpdateTransferConfigResponse(transferUpdateTransferConfigRequest.id)
+    ???
+    // とりあえず蓋 2021/11/14
+//    val userId = identity.userID.toString
+//    val userGroup = identity.group.getOrElse("")
+//    TransferConfig(
+//      transferUpdateTransferConfigRequest.id,
+//      transferUpdateTransferConfigRequest.type_code,
+//      transferUpdateTransferConfigRequest.config_index,
+//      transferUpdateTransferConfigRequest.name,
+//      transferUpdateTransferConfigRequest.status,
+//      userGroup,
+//      userId,
+//      userId,
+//      ZonedDateTime.now(),
+//      ZonedDateTime.now()
+//    ).update
+//
+//    transferUpdateTransferConfigRequest.detail.mail.map(d => {
+//      updateTransferConfigMail(userGroup, userId, d)
+//    })
+//    transferUpdateTransferConfigRequest.detail.salesforce.map(d => {
+//      updateTransferConfigSalesforce(userGroup, userId, d)
+//    })
+//    TransferUpdateTransferConfigResponse(transferUpdateTransferConfigRequest.id)
   }
 
   /**

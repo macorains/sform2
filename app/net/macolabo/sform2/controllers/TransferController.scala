@@ -10,7 +10,7 @@ import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json._
 import play.api.mvc._
-import net.macolabo.sform2.utils.auth.{DefaultEnv, WithProvider}
+import net.macolabo.sform2.utils.auth.DefaultEnv
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
 

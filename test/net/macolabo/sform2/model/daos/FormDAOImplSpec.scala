@@ -25,7 +25,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
 
   private val loginInfo = LoginInfo("hoge", "hoge")
   private val userId = UUID.randomUUID()
-  private val user = entity.user.User(userId, loginInfo, Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge@hoge.com"), None, activated = true, deletable = false)
+  private val user = entity.user.User(userId, "hoge", "hoge", Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge@hoge.com"), None, activated = true, deletable = false)
   var formId = BigInt(100)
   var transferConfigId = BigInt(100)
 
