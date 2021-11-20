@@ -25,11 +25,11 @@ class UserDAOImplSpec extends FixtureAnyFlatSpec  with GuiceOneServerPerSuite wi
     // 結果見る
     val user = result.head
     println(user)
-    assert(user.get("USER_ID").nonEmpty)
-    assert(user.get("USERNAME").nonEmpty)
-    assert(user.get("PASSWORD").nonEmpty)
-    assert(user.get("USER_GROUP").nonEmpty)
-    assert(user.get("ROLE").nonEmpty)
+    assert(user("USER_ID").asInstanceOf[String].size > 0)
+    assert(user("USERNAME").equals("hoge"))
+    assert(user("PASSWORD").equals("fuga"))
+    assert(user("USER_GROUP").equals("gg"))
+    assert(user("ROLE").equals("admin"))
   }
 
   // save
@@ -60,7 +60,17 @@ class UserDAOImplSpec extends FixtureAnyFlatSpec  with GuiceOneServerPerSuite wi
         .where
         .eq(u.user_id, userId)
     ).map(rs => rs.toMap()).list().apply()
+
+    val datamap = data.toMap
+    val newuser = result.head
+    println(newuser)
     assert(result.nonEmpty)
+    assert(newuser("user_id").equals(datamap("user_id")))
+    assert(newuser("username").equals(datamap("username")))
+    assert(newuser("password").equals(datamap("password")))
+    assert(newuser("user_group").equals(datamap("user_group")))
+    assert((newuser("activated") == 1).equals(datamap("activated").asInstanceOf[Boolean]))
+    assert((newuser("deletable") == 1).equals(datamap("deletable").asInstanceOf[Boolean]))
   }
 
   // delete
