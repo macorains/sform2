@@ -9,20 +9,20 @@ import scalikejdbc.DBSession
 
 trait FormDAO {
   /** フォーム取得 */
-  def get(identity: User, id: BigInt)(implicit session: DBSession): Option[FormGetResponse]
+  def get(userGroup: String, id: BigInt)(implicit session: DBSession): Option[FormGetResponse]
 
   /** HashedIdによるフォーム取得 */
-  def getByHashedId(identity: User, hashed_id: String)(implicit session: DBSession): Option[FormGetResponse]
+  def getByHashedId(userGroup: String, hashed_id: String)(implicit session: DBSession): Option[FormGetResponse]
 
   /** フォーム一覧取得 */
   def getList(userGroup: String)(implicit session: DBSession): FormListResponse
 
   /** フォーム作成更新 */
-  def update(identity: User, request: FormUpdateRequest)(implicit session: DBSession): FormUpdateResponse
+  def update(userId: String, userGroup: String, request: FormUpdateRequest)(implicit session: DBSession): FormUpdateResponse
 
   /** フォーム削除 */
-  def delete(identity: User, id: BigInt)(implicit session: DBSession): FormDeleteResponse
+  def delete(userGroup: String, id: BigInt)(implicit session: DBSession): FormDeleteResponse
 
   /** HashedIdによるフォーム削除 */
-  def deleteByHashedId(identity: User, hashed_id: String)(implicit session: DBSession): FormDeleteResponse
+  def deleteByHashedId(userGroup: String, hashed_id: String)(implicit session: DBSession): FormDeleteResponse
 }

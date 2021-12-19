@@ -17,21 +17,14 @@ import java.time.ZonedDateTime
 class FormDAOImpl extends FormDAO {
 
   /** フォーム取得 */
-  def get(identity: User, id: BigInt)(implicit session: DBSession): Option[FormGetResponse] = {
-    // TODO silhouette関係ない形に直す
-    // 一旦仮の値を入れる 2021/11/14
-    //val userGroup = identity.group.getOrElse("")
-    val userGroup = "hoge"
+  def get(userGroup: String, id: BigInt)(implicit session: DBSession): Option[FormGetResponse] = {
     selectForm(userGroup, id).map(form => {
       convertToFormGetResponse(userGroup, form)
     })
   }
 
   /** HashedIdによるフォーム取得 */
-  def getByHashedId(identity: User, hashed_id: String)(implicit session: DBSession): Option[FormGetResponse] = {
-    // TODO silhouette関係ない形に直す
-    //val userGroup = identity.group.getOrElse("")
-    val userGroup = "hoge"
+  def getByHashedId(userGroup: String, hashed_id: String)(implicit session: DBSession): Option[FormGetResponse] = {
     selectFormByHashedId(userGroup, hashed_id).map(form => {
       convertToFormGetResponse(userGroup, form)
     })
@@ -47,10 +40,7 @@ class FormDAOImpl extends FormDAO {
   }
 
   /** フォーム作成・更新 */
-  def update(identity: User, request: FormUpdateRequest)(implicit session: DBSession): FormUpdateResponse = {
-    // TODO silhouette関係ない形に直す
-    //val userId = identity.userID.toString
-    //val group = identity.group.getOrElse("")
+  def update(userId: String, userGroup: String, request: FormUpdateRequest)(implicit session: DBSession): FormUpdateResponse = {
     val userId = "hoge"
     val group = "hoge"
 
@@ -112,17 +102,13 @@ class FormDAOImpl extends FormDAO {
   }
 
   /** フォーム削除 */
-  def delete(identity: User, id: BigInt)(implicit session: DBSession): FormDeleteResponse = {
-    // TODO silhouette関係ない形に直す
-    //FormDeleteResponse(deleteForm(identity.group.getOrElse(""), id))
-    FormDeleteResponse(deleteForm("hoge", id))
+  def delete(userGroup: String, id: BigInt)(implicit session: DBSession): FormDeleteResponse = {
+    FormDeleteResponse(deleteForm(userGroup, id))
   }
 
   /** HashedIdによるフォーム削除 */
-  def deleteByHashedId(identity: User, hashed_id: String)(implicit session: DBSession): FormDeleteResponse = {
-    // TODO silhouette関係ない形に直す
-    //FormDeleteResponse(deleteFormByHashedId(identity.group.getOrElse(""), hashed_id))
-    FormDeleteResponse(deleteFormByHashedId("hoge", hashed_id))
+  def deleteByHashedId(userGroup: String, hashed_id: String)(implicit session: DBSession): FormDeleteResponse = {
+    FormDeleteResponse(deleteFormByHashedId(userGroup, hashed_id))
   }
 
   /** 更新時のSalesforceTransferTaskSalesforceField削除 */

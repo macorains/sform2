@@ -1,16 +1,12 @@
 package net.macolabo.sform2.model.daos
 
-import com.mohiva.play.silhouette.api.{LoginInfo, Silhouette, SilhouetteProvider}
-import com.mohiva.play.silhouette.test.FakeEnvironment
 import net.macolabo.sform2.helper.SformTestHelper
 import net.macolabo.sform2.models.daos.FormDAOImpl
 import net.macolabo.sform2.models.entity
 import net.macolabo.sform2.models.entity.transfer.TransferConfig
 import net.macolabo.sform2.models.entity.form.{Form, FormCol, FormColSelect, FormColValidation, FormTransferTask, FormTransferTaskCondition, FormTransferTaskMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField}
-import net.macolabo.sform2.models.entity.user.User
-import net.macolabo.sform2.services.Form.get.{FormColGetReponse, FormColSelectGetReponse, FormColValidationGetReponse, FormGetResponse, FormTransferTaskConditionGetReponse, FormTransferTaskGetResponse, FormTransferTaskMailGetReponse, FormTransferTaskSalesforceFieldGetReponse, FormTransferTaskSalesforceGetReponse}
+import net.macolabo.sform2.services.Form.get.{FormColGetReponse, FormColSelectGetReponse, FormColValidationGetReponse, FormTransferTaskConditionGetReponse, FormTransferTaskGetResponse, FormTransferTaskMailGetReponse, FormTransferTaskSalesforceFieldGetReponse, FormTransferTaskSalesforceGetReponse}
 import net.macolabo.sform2.services.Form.update.{FormColSelectUpdateRequest, FormColUpdateRequest, FormColValidationUpdateRequest, FormTransferTaskConditionUpdateRequest, FormTransferTaskMailUpdateRequest, FormTransferTaskSalesforceFieldUpdateRequest, FormTransferTaskSalesforceUpdateRequest, FormTransferTaskUpdateRequest, FormUpdateRequest}
-import net.macolabo.sform2.utils.auth.DefaultEnv
 import org.scalatest.flatspec.FixtureAnyFlatSpec
 import scalikejdbc._
 import scalikejdbc.scalatest.AutoRollback
@@ -23,7 +19,6 @@ import scala.collection.compat.Factory
 
 class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite with SformTestHelper with AutoRollback {
 
-  private val loginInfo = LoginInfo("hoge", "hoge")
   private val userId = UUID.randomUUID()
   private val user = entity.user.User(userId, "hoge", "hoge", Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge@hoge.com"), None, activated = true, deletable = false)
   var formId = BigInt(100)
@@ -34,7 +29,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
   it should "select form detail" in { implicit session =>
 
     val formDAO = new FormDAOImpl()
-    val form = formDAO.get(user, formId)
+    val form = formDAO.get(user.user_group.get, formId)
 
     assert(form.nonEmpty)
     form.map(f => {
@@ -129,7 +124,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
 
   it should "select form list" in { implicit session =>
     val formDAO = new FormDAOImpl()
-    val formList = formDAO.getList(user)
+    val formList = formDAO.getList(user.user_group.get)
     assert(formList.forms.nonEmpty)
     val form = formList.forms.head
     assert(form.id.isValidLong)
@@ -149,12 +144,12 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     val formDAO = new FormDAOImpl()
 
     // フォームを作成する（作成時にはFormTransferTaskは存在しない）
-    val response = formDAO.update(user, formUpdateRequest)
+    val response = formDAO.update(user.user_id.toString, user.user_group.get, formUpdateRequest)
     val newFormId = response.id
     assert(newFormId.isValidLong)
 
     // 作成したフォームを取得
-    val newForm = formDAO.get(user, newFormId).get
+    val newForm = formDAO.get(user.user_group.get, newFormId).get
     assert(newForm.id.equals(newFormId))
     assert(newForm.hashed_id.equals(formUpdateRequest.hashed_id))
     assert(newForm.name.equals(formUpdateRequest.name))
@@ -206,7 +201,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     val formDAO = new FormDAOImpl()
 
     // DBにあるフォームを取得
-    val form = formDAO.get(user, formId).get
+    val form = formDAO.get(user.user_group.get, formId).get
 
     // 5つあるFormColSelectのうち最後尾を削除
     val formColSelectUpdateRequest = form.form_cols.head.select_list.dropRight(1).map(formColSelect => createFormColSelectUpdateRequest(formColSelect))
@@ -234,12 +229,12 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     val formUpdateRequest = createFormUpdateRequest(Some(form.id), formColUpdateRequest, formTransferTaskUpdateRequest)
 
     // フォームを更新する
-    val response = formDAO.update(user, formUpdateRequest)
+    val response = formDAO.update(user.user_id.toString, user.user_group.get, formUpdateRequest)
     val newFormId = response.id
     assert(newFormId.equals(formId))
 
     // 作成したフォームを取得
-    val newForm = formDAO.get(user, newFormId).get
+    val newForm = formDAO.get(user.user_group.get, newFormId).get
 
     // Formのチェック
     assert(newForm.name.equals("hoge2"))
