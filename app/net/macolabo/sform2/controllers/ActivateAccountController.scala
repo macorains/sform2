@@ -2,8 +2,6 @@ package net.macolabo.sform2.controllers
 
 import java.net.URLDecoder
 import java.util.UUID
-import com.mohiva.play.silhouette.api._
-import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 
 import javax.inject.Inject
 import net.macolabo.sform2.services.AuthToken.AuthTokenService

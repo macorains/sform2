@@ -1,26 +1,16 @@
 package net.macolabo.sform2.controllers
 
 import java.util.UUID
-import com.mohiva.play.silhouette.api._
-import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
-import com.mohiva.play.silhouette.api.services.AvatarService
-import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
-import com.mohiva.play.silhouette.impl.providers._
 
 import javax.inject.Inject
-import net.macolabo.sform2.forms.SignUpForm
-import net.macolabo.sform2.models
-import net.macolabo.sform2.models.entity.user.User
 import net.macolabo.sform2.models.user.{UserSignUpResult, UserSignUpResultJson}
 import net.macolabo.sform2.services.AuthToken.AuthTokenService
 import net.macolabo.sform2.services.User.UserService
 import org.webjars.play.{WebJarsUtil, routes}
 import play.api.Configuration
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.libs.json.Json
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc._
-import net.macolabo.sform2.utils.auth.DefaultEnv
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
 

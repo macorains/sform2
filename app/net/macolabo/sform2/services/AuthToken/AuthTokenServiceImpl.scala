@@ -1,13 +1,10 @@
 package net.macolabo.sform2.services.AuthToken
 
 import java.util.UUID
-import com.mohiva.play.silhouette.api.util.Clock
 
 import javax.inject.Inject
-import net.macolabo.sform2.models
 import net.macolabo.sform2.models.AuthToken
 import net.macolabo.sform2.models.daos.AuthTokenDAO
-import org.joda.time.DateTimeZone
 import scalikejdbc.DB
 
 import scala.concurrent.duration._

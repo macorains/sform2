@@ -1,21 +1,21 @@
 package net.macolabo.sform2.models.entity.user
 
-import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
 import scalikejdbc._
 import java.util.UUID
 
 /**
  * The user object.
  *
- * @param userID    The unique ID of the user.
- * @param loginInfo The linked login info.
- * @param group     Group name of user.
+ * @param user_id    The unique ID of the user.
+ * @param username UserName
+ * @param password Password
+ * @param user_group     Group name of user.
  * @param role      Role of user.
- * @param firstName Maybe the first name of the authenticated user.
- * @param lastName  Maybe the last name of the authenticated user.
- * @param fullName  Maybe the full name of the authenticated user.
+ * @param first_name Maybe the first name of the authenticated user.
+ * @param last_name  Maybe the last name of the authenticated user.
+ * @param full_name  Maybe the full name of the authenticated user.
  * @param email     Maybe the email of the authenticated provider.
- * @param avatarURL Maybe the avatar URL of the authenticated provider.
+ * @param avatar_url Maybe the avatar URL of the authenticated provider.
  * @param activated Indicates that the user has activated its registration.
  * @param deletable User is deletable or not.
  */

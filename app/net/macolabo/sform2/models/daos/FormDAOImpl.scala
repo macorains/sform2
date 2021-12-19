@@ -38,10 +38,7 @@ class FormDAOImpl extends FormDAO {
   }
 
   /** フォーム一覧取得 */
-  def getList(identity: User)(implicit session: DBSession): FormListResponse = {
-    // TODO silhouette関係ない形に直す
-      //val userGroup = identity.group.getOrElse("")
-      val userGroup = "hoge"
+  def getList(userGroup: String)(implicit session: DBSession): FormListResponse = {
       val formList = selectFormList(userGroup).map(form => convertToFormResponse(form))
       FormListResponse(
         formList,

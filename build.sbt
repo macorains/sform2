@@ -34,11 +34,6 @@ libraryDependencies ++= Seq(
   "org.scalikejdbc" %% "scalikejdbc-syntax-support-macro" % "3.5.0",
   "org.scalikejdbc" %% "scalikejdbc-joda-time" % "3.5.0",
   "org.scalikejdbc" %% "scalikejdbc-test" % "3.5.0"  % "test",
-  "com.mohiva" %% "play-silhouette" % "7.0.0",
-  "com.mohiva" %% "play-silhouette-password-bcrypt" % "7.0.0",
-  "com.mohiva" %% "play-silhouette-persistence" % "7.0.0",
-  "com.mohiva" %% "play-silhouette-crypto-jca" % "7.0.0",
-  "com.mohiva" %% "play-silhouette-testkit" % "7.0.0" % "test",
   "org.webjars" %% "webjars-play" % "2.8.0-1",
   "com.typesafe.play" %% "play-mailer" % "8.0.1",
   "com.typesafe.play" %% "play-mailer-guice" % "8.0.1",
@@ -70,7 +65,11 @@ libraryDependencies ++= Seq(
   "org.apache.shiro" % "shiro-core" % "1.7.1",
   "com.typesafe.play" % "play-cache_2.13" % playVersion,
   "commons-io" % "commons-io" % "2.11.0"
+)
 
+excludeDependencies ++= Seq(
+  ExclusionRule("com.google.appengine", "appengine-api-1.0-sdk"),
+  ExclusionRule("com.google.appengine", "appengine-jsr107cache")
 )
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)

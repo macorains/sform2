@@ -1,14 +1,9 @@
 package net.macolabo.sform2.controllers
 
-import com.mohiva.play.silhouette.api._
-import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
-import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
-import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import javax.inject.Inject
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.mvc.{AbstractController, ControllerComponents}
-import net.macolabo.sform2.utils.auth.DefaultEnv
 
 import scala.concurrent.ExecutionContext
 
@@ -16,16 +11,11 @@ import scala.concurrent.ExecutionContext
  * The `Change Password` controller.
  *
  * @param components             The Play controller components.
- * @param credentialsProvider    The credentials provider.
- * @param authInfoRepository     The auth info repository.
- * @param passwordHasherRegistry The password hasher registry.
  * @param webJarsUtil            The webjar util.
  * @param ex                     The execution context.
  */
 class ChangePasswordController @Inject() (
-  components: ControllerComponents,
-  authInfoRepository: AuthInfoRepository,
-  passwordHasherRegistry: PasswordHasherRegistry
+  components: ControllerComponents
 )(
   implicit
   webJarsUtil: WebJarsUtil,

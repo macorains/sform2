@@ -1,21 +1,15 @@
 package net.macolabo.sform2.controllers
 
-import com.mohiva.play.silhouette.api.Silhouette
-
 import javax.inject.Inject
-import net.macolabo.sform2.models.daos.PostdataDAO
 import net.macolabo.sform2.services.FormPostData.FormPostDataService
 import org.webjars.play.WebJarsUtil
-import play.api.Environment
-import play.api.db.DBApi
 import play.api.i18n.I18nSupport
 import play.api.libs.json._
-import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
-import net.macolabo.sform2.utils.auth.DefaultEnv
+import play.api.mvc.{Action, AnyContent}
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class FormPostDataController @Inject() (
   val controllerComponents: SecurityComponents

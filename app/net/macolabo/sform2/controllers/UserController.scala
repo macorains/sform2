@@ -1,8 +1,5 @@
 package net.macolabo.sform2.controllers
 
-import com.mohiva.play.silhouette.api._
-import com.mohiva.play.silhouette.impl.providers._
-
 import javax.inject._
 import net.macolabo.sform2.models.RsResultSet
 import net.macolabo.sform2.models.daos.UserDAO
@@ -13,7 +10,6 @@ import play.api.db.DBApi
 import play.api.i18n.I18nSupport
 import play.api.libs.json._
 import play.api.mvc._
-import net.macolabo.sform2.utils.auth.DefaultEnv
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
 

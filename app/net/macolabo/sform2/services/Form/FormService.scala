@@ -34,9 +34,9 @@ class FormService @Inject()(
    * @param identity 認証情報
    * @return フォームリスト
    */
-  def getList(identity: User): FormListResponse = {
+  def getList(userGroup: String): FormListResponse = {
     DB.localTx(implicit session => {
-      formDAO.getList(identity)
+      formDAO.getList(userGroup)
     })
   }
 

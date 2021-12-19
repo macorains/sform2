@@ -10,31 +10,21 @@ import org.pac4j.core.credentials.Credentials
 import org.pac4j.core.credentials.authenticator.Authenticator
 import org.pac4j.core.credentials.password.ShiroPasswordEncoder
 import org.pac4j.core.exception.CredentialsException
-import org.pac4j.sql.profile.service.DbProfileService
-import play.api.cache.SyncCacheApi
-import play.api.db._
-import play.api.libs.mailer.MailerClient
 
-class SqlAuthencator @Inject() (
+class CacheAuthenticator @Inject() (
   userDAO: UserDAO
-)(implicit ec: DatabaseExecutionContext)  extends Authenticator {
-
-  val db = Databases.apply("com.mysql.jdbc.Driver", "jdbc:mysql://localhost:3306/pac4jtest?allowPublicKeyRetrieval=true&useSSL=false&characterEncoding=UTF8", "default",Map("user"->"pac4j","password"->"Pac4j43210"))
+)(implicit ec: DatabaseExecutionContext)extends Authenticator {
 
   @Override
   def validate(cred: Credentials, context: WebContext, sessionStore: SessionStore)  = {
     if (cred == null) throw new CredentialsException("No credential")
 
     // 標準のprofile項目以外にDBから読みたいものあれば、カンマ区切りでフィールド名入れる
-    val profile_fields = "user_group"
+    val profile_fields = ""
     val userProfileService = new UserProfileService(userDAO)(profile_fields, new ShiroPasswordEncoder(new DefaultPasswordService))
-
-    // DBテーブル名はsetUsersTableで変更可能
-
-    //dbProfileService.validate(cred, context, sessionStore)
-    // userProfileService.validate(cred, context, sessionStore)
 
     userProfileService.validate(cred, context, sessionStore)
 
   }
+
 }

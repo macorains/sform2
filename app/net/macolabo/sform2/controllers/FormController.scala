@@ -1,7 +1,5 @@
 package net.macolabo.sform2.controllers
 
-import com.mohiva.play.silhouette.api._
-import com.mohiva.play.silhouette.impl.providers._
 import net.macolabo.sform2.services.Form.delete.FormDeleteResponseJson
 import net.macolabo.sform2.services.Form.get.FormGetResponseJson
 import net.macolabo.sform2.services.Form.list.FormListResponseJson
@@ -13,8 +11,8 @@ import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json._
 import play.api.mvc._
-import net.macolabo.sform2.utils.auth.DefaultEnv
-import org.pac4j.core.profile.UserProfile
+import org.pac4j.core.profile.{ProfileManager, UserProfile}
+import org.pac4j.play.PlayWebContext
 import org.pac4j.play.scala.{Security, SecurityComponents}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,6 +31,7 @@ class FormController @Inject() (
   with FormUpdateRequestJson
   with FormUpdateResponseJson
   with FormDeleteResponseJson
+  with Pac4jUtil
 {
 
   /**
@@ -53,13 +52,11 @@ class FormController @Inject() (
    * GET /form/list
    * @return フォームデータのリスト
    */
-  def getList: Action[AnyContent] = Action.async { implicit request =>
-    ???
-    /*
-    val res = formService.getList(request.identity)
-    Future.successful(Ok(toJson(res)))
-
-     */
+  def getList(): Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+    val profiles = getProfiles(controllerComponents)(request)
+    val userGroup = profiles.get(0).getAttribute("user_group").asInstanceOf[String]
+    val res = formService.getList(userGroup)
+    Ok(toJson(res))
   }
 
   /**
@@ -116,6 +113,7 @@ class FormController @Inject() (
 //    }
   //  Future.successful(Ok(toJson(res)))
   }
+
 
 
 }

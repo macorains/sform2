@@ -1,8 +1,12 @@
 package net.macolabo.sform2.modules
 
 import akka.actor.ActorSystem
-import com.google.inject.{AbstractModule, Provides}
-//import controllers.{CustomAuthorizer, DemoHttpActionAdapter, RoleAdminAuthGenerator}
+import com.google.inject.{AbstractModule, Inject, Provides}
+import net.codingwell.scalaguice.ScalaModule
+import net.macolabo.sform2.models.daos.{UserDAO, UserDAOImpl}
+import org.pac4j.http.client.direct.HeaderClient
+import org.pac4j.jwt.config.signature.SecretSignatureConfiguration
+import org.pac4j.jwt.credentials.authenticator.JwtAuthenticator
 import net.macolabo.sform2.models.security.{DatabaseExecutionContext, DemoHttpActionAdapter, SqlAuthencator}
 import org.pac4j.core.client.Clients
 import org.pac4j.http.client.indirect.FormClient
@@ -12,14 +16,13 @@ import play.api.{Configuration, Environment}
 
 import java.nio.charset.StandardCharsets
 import org.pac4j.play.store.{PlayCookieSessionStore, ShiroAesDataEncrypter}
-import org.pac4j.core.authorization.authorizer.RequireAnyRoleAuthorizer
 import org.pac4j.core.client.direct.AnonymousClient
 import org.pac4j.core.config.Config
 import org.pac4j.core.context.session.SessionStore
-import org.pac4j.core.matching.matcher.PathMatcher
 import org.pac4j.core.profile.CommonProfile
 import org.pac4j.http.client.direct.DirectFormClient
 import org.pac4j.play.scala.{DefaultSecurityComponents, Pac4jScalaTemplateHelper, SecurityComponents}
+import play.api.libs.mailer.MailerClient
 
 /**
  * Guice DI module to be included in application.conf
@@ -28,22 +31,28 @@ import org.pac4j.play.scala.{DefaultSecurityComponents, Pac4jScalaTemplateHelper
  * (2)一通り動くようになったらopenidなどを追加
  * (3)jwt使えないか？
  */
-class SecurityModule(environment: Environment, configuration: Configuration) extends AbstractModule {
+class SecurityModule(environment: Environment, configuration: Configuration) extends AbstractModule with ScalaModule {
 
   val baseUrl = configuration.get[String]("baseUrl")
   val system = ActorSystem("security")
   implicit val databaseExecutionContext = new DatabaseExecutionContext(system)
+  //val userDAO = new UserDAOImpl()
 
   override def configure(): Unit = {
 
     val sKey = configuration.get[String]("play.http.secret.key").substring(0, 16)
     val dataEncrypter = new ShiroAesDataEncrypter(sKey.getBytes(StandardCharsets.UTF_8))
+
     val playSessionStore = new PlayCookieSessionStore(dataEncrypter)
     bind(classOf[SessionStore]).toInstance(playSessionStore)
+
+
+    // bind[UserDAO].toInstance(new UserDAOImpl)
 
     bind(classOf[SecurityComponents]).to(classOf[DefaultSecurityComponents])
 
     bind(classOf[Pac4jScalaTemplateHelper[CommonProfile]])
+
 
     // callback
     val callbackController = new CallbackController()
@@ -54,17 +63,29 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
     val logoutController = new LogoutController()
     logoutController.setDefaultUrl("/")
     bind(classOf[LogoutController]).toInstance(logoutController)
+
   }
 
   @Provides
   def provideFormClient: FormClient = new FormClient(baseUrl + "/loginForm", new SimpleTestUsernamePasswordAuthenticator())
 
   @Provides
-  def provideDirectFormClient: DirectFormClient = new DirectFormClient(new SqlAuthencator)
+  def provideDirectFormClient: DirectFormClient = {
+    val userDAO = new UserDAOImpl()
+    new DirectFormClient(new SqlAuthencator(userDAO))
+  }
 
   @Provides
-  def provideConfig(formClient: FormClient, directFormClient: DirectFormClient): Config = {
-    val clients = new Clients(baseUrl + "/callback", formClient, directFormClient, new AnonymousClient())
+  def provideHeaderClient: HeaderClient = {
+    val jwtAuthenticator = new JwtAuthenticator()
+    jwtAuthenticator.addSignatureConfiguration(new SecretSignatureConfiguration("12345678901234567890123456789012"))
+    val headerClient = new HeaderClient("X-Auth-Token", jwtAuthenticator)
+    headerClient
+  }
+
+  @Provides
+  def provideConfig(formClient: FormClient, directFormClient: DirectFormClient, headerClient: HeaderClient): Config = {
+    val clients = new Clients(baseUrl + "/callback", formClient, directFormClient, headerClient, new AnonymousClient())
 
     val config = new Config(clients)
 //    config.addAuthorizer("admin", new RequireAnyRoleAuthorizer("ROLE_ADMIN"))

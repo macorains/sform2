@@ -1,17 +1,12 @@
 package net.macolabo.sform2.controllers
 
 import java.util.UUID
-import com.mohiva.play.silhouette.api._
-import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
-import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
 
 import javax.inject.Inject
 import net.macolabo.sform2.services.AuthToken.AuthTokenService
 import net.macolabo.sform2.services.User.UserService
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
-import play.api.mvc._
-import net.macolabo.sform2.utils.auth.DefaultEnv
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
 
@@ -22,8 +17,6 @@ import scala.concurrent.ExecutionContext
  *
  * @param components             The Play controller components.
  * @param userService            The user service implementation.
- * @param authInfoRepository     The auth info repository.
- * @param passwordHasherRegistry The password hasher registry.
  * @param authTokenService       The auth token service implementation.
  * @param webJarsUtil            The webjar util.
  * @param ex                     The execution context.
@@ -31,7 +24,6 @@ import scala.concurrent.ExecutionContext
 class ResetPasswordController @Inject() (
   val controllerComponents: SecurityComponents,
   userService: UserService,
-  passwordHasherRegistry: PasswordHasherRegistry,
   authTokenService: AuthTokenService
 )(
   implicit

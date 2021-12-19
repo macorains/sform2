@@ -15,6 +15,7 @@ class UserDAOImplSpec extends FixtureAnyFlatSpec  with GuiceOneServerPerSuite wi
   behavior of "User"
 
   val username = "hoge"
+  val userId = UUID.randomUUID().toString
 
   // def find(fields: String, key: String, value: String): List[Map[String, Any]]
   it should "find by keyvalue" in { implicit session =>
@@ -34,9 +35,9 @@ class UserDAOImplSpec extends FixtureAnyFlatSpec  with GuiceOneServerPerSuite wi
 
   // save
   it should "insert user" in { implicit session =>
-    val userId = UUID.randomUUID().toString
+    val newUserId = UUID.randomUUID().toString
     val data :Seq[(String, AnyRef)]= Seq(
-      ("user_id",userId),
+      ("user_id",newUserId),
       ("username","hoge2"),
       ("password","fuga2"),
       ("user_group","test2"),
@@ -58,7 +59,7 @@ class UserDAOImplSpec extends FixtureAnyFlatSpec  with GuiceOneServerPerSuite wi
       )
         .from(User as u)
         .where
-        .eq(u.user_id, userId)
+        .eq(u.user_id, newUserId)
     ).map(rs => rs.toMap()).list().apply()
 
     val datamap = data.toMap
@@ -73,8 +74,47 @@ class UserDAOImplSpec extends FixtureAnyFlatSpec  with GuiceOneServerPerSuite wi
     assert((newuser("deletable") == 1).equals(datamap("deletable").asInstanceOf[Boolean]))
   }
 
-  // delete
   // update
+  it should "update user" in { implicit session =>
+    val data :Seq[(String, AnyRef)]= Seq(
+      ("user_id",userId),
+      ("username","hoge3"),
+      ("user_group","test3"),
+      ("activated",false.asInstanceOf[AnyRef]),
+      ("deletable",false.asInstanceOf[AnyRef])
+    )
+    val userDAO = new UserDAOImpl()
+    userDAO.update(data)
+
+    val u = User.syntax("u")
+    val result = withSQL (
+      select(
+        u.user_id,
+        u.username,
+        u.password,
+        u.user_group,
+        u.activated,
+        u.deletable
+      )
+        .from(User as u)
+        .where
+        .eq(u.user_id, userId)
+    ).map(rs => rs.toMap()).list().apply()
+
+    val datamap = data.toMap
+    val newuser = result.head
+    assert(result.nonEmpty)
+    assert(newuser("user_id").equals(datamap("user_id")))
+    assert(newuser("username").equals(datamap("username")))
+    assert(newuser("password").equals("fuga")) // 変更対象ではない項目が変更されていないことを確認
+    assert(newuser("user_group").equals(datamap("user_group")))
+    assert((newuser("activated") == 1).equals(datamap("activated").asInstanceOf[Boolean]))
+    assert((newuser("deletable") == 1).equals(datamap("deletable").asInstanceOf[Boolean]))
+  }
+
+
+
+  // delete
 
   /*
   Fixture

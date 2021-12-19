@@ -15,7 +15,7 @@ trait FormDAO {
   def getByHashedId(identity: User, hashed_id: String)(implicit session: DBSession): Option[FormGetResponse]
 
   /** フォーム一覧取得 */
-  def getList(identity: User)(implicit session: DBSession): FormListResponse
+  def getList(userGroup: String)(implicit session: DBSession): FormListResponse
 
   /** フォーム作成更新 */
   def update(identity: User, request: FormUpdateRequest)(implicit session: DBSession): FormUpdateResponse

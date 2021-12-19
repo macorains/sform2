@@ -1,13 +1,11 @@
 package net.macolabo.sform2.controllers
 
 import com.google.inject.Inject
-import com.mohiva.play.silhouette.api.Silhouette
 import net.macolabo.sform2.services.User.{AdminExistsCheckResultJson, UserService}
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
 import play.api.mvc._
-import net.macolabo.sform2.utils.auth.DefaultEnv
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
 

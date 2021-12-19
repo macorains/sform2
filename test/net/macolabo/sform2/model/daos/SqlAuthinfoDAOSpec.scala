@@ -3,7 +3,6 @@ package net.macolabo.sform2.model.daos
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.api.util.PasswordInfo
 import net.macolabo.sform2.helper.SformTestHelper
-import net.macolabo.sform2.models.daos.SqlAuthInfoDAO
 import net.macolabo.sform2.models.entity.user.AuthInfo
 import org.scalatest.flatspec.FixtureAnyFlatSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
