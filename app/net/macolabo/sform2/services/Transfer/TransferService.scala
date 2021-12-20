@@ -2,107 +2,98 @@ package net.macolabo.sform2.services.Transfer
 
 import java.time.ZonedDateTime
 import com.google.inject.Inject
-import net.macolabo.sform2.models.entity.user.User
 import net.macolabo.sform2.models.transfer.{TransferConfig, TransferConfigMail, TransferConfigMailAddress, TransferConfigSalesforce, TransferConfigSalesforceObject, TransferConfigSalesforceObjectField}
 
 import scala.concurrent.ExecutionContext
 
-class TransferService @Inject() (implicit ex: ExecutionContext) extends TransferGetTransferConfigSelectListJson with TransferGetTransferConfigListJson with TransferGetTransferConfigResponseJson {
+class TransferService @Inject() (implicit ex: ExecutionContext)
+  extends TransferGetTransferConfigSelectListJson
+    with TransferGetTransferConfigListJson
+    with TransferGetTransferConfigResponseJson
+{
 
   /**
    * フォーム編集画面のTransferConfig選択リスト用データ取得
-   * @param identity 認証情報
+   * @param userGroup ユーザーグループ
    * @return TransferConfigのID,Nameのリスト
    */
-  def getTransferConfigSelectList(identity: User): List[TransferGetTransferConfigSelectList] = {
-  ???
-    // とりあえず蓋 2021/11/14
-//    val userGroup = identity.group.getOrElse("")
-//    TransferConfig.getList(userGroup).map(f => {
-//      TransferGetTransferConfigSelectList(
-//        f.id,
-//        f.name,
-//        f.type_code
-//      )
-//    })
+  def getTransferConfigSelectList(userGroup: String): List[TransferGetTransferConfigSelectList] = {
+    TransferConfig.getList(userGroup).map(f => {
+      TransferGetTransferConfigSelectList(
+        f.id,
+        f.name,
+        f.type_code
+      )
+    })
   }
 
   /**
    * TransferConfigのリスト取得
-   * @param identity 認証情報
+   * @param userGroup ユーザーグループ
    * @return TransferConfigのリスト
    */
-  def getTransferConfigList(identity: User): List[TransferGetTransferConfigListResponse] = {
-    ???
-    // とりあえず蓋 2021/11/14
-//    val userGroup = identity.group.getOrElse("")
-//    TransferConfig.getList(userGroup).map(f => {
-//      TransferGetTransferConfigListResponse(
-//        f.id,
-//        f.type_code,
-//        f.config_index,
-//        f.name,
-//        f.status
-//      )
-//    })
+  def getTransferConfigList(userGroup: String): List[TransferGetTransferConfigListResponse] = {
+    TransferConfig.getList(userGroup).map(f => {
+      TransferGetTransferConfigListResponse(
+        f.id,
+        f.type_code,
+        f.config_index,
+        f.name,
+        f.status
+      )
+    })
   }
 
   /**
    * TransferConfigの詳細付きデータ取得
-   * @param identity 認証情報
+   * @param userGroup ユーザーグループ
    * @param transferConfigId TransferConfig ID
    * @return 詳細付きTransferConfig
    */
-  def getTransferConfig(identity:User, transferConfigId: Int): Option[TransferGetTransferConfigResponse] = {
-    ???
-    // とりあえず蓋 2021/11/14
-//    val userGroup = identity.group.getOrElse("")
-//    TransferConfig.get(userGroup, transferConfigId).map(f => {
-//      TransferGetTransferConfigResponse(
-//        f.id,
-//        f.type_code,
-//        f.config_index,
-//        f.name,
-//        f.status,
-//        TransferGetTransferResponseConfigDetail(
-//          getTransferConfigMail(userGroup, transferConfigId),
-//          getTransferConfigSalesforce(userGroup, transferConfigId)
-//        )
-//      )
-//    })
+  def getTransferConfig(userGroup: String, transferConfigId: Int): Option[TransferGetTransferConfigResponse] = {
+    TransferConfig.get(userGroup, transferConfigId).map(f => {
+      TransferGetTransferConfigResponse(
+        f.id,
+        f.type_code,
+        f.config_index,
+        f.name,
+        f.status,
+        TransferGetTransferResponseConfigDetail(
+          getTransferConfigMail(userGroup, transferConfigId),
+          getTransferConfigSalesforce(userGroup, transferConfigId)
+        )
+      )
+    })
   }
 
   /**
    * TransferConfigの更新
-   * @param identity 認証情報
+   * @param userId ユーザーID
+   * @param userGroup ユーザーグループ
    * @param transferUpdateTransferConfigRequest TransferConfig更新リクエスト
    * @return Result
    */
-  def updateTransferConfig(identity: User, transferUpdateTransferConfigRequest: TransferUpdateTransferConfigRequest): TransferUpdateTransferConfigResponse = {
-    ???
-    // とりあえず蓋 2021/11/14
-//    val userId = identity.userID.toString
-//    val userGroup = identity.group.getOrElse("")
-//    TransferConfig(
-//      transferUpdateTransferConfigRequest.id,
-//      transferUpdateTransferConfigRequest.type_code,
-//      transferUpdateTransferConfigRequest.config_index,
-//      transferUpdateTransferConfigRequest.name,
-//      transferUpdateTransferConfigRequest.status,
-//      userGroup,
-//      userId,
-//      userId,
-//      ZonedDateTime.now(),
-//      ZonedDateTime.now()
-//    ).update
-//
-//    transferUpdateTransferConfigRequest.detail.mail.map(d => {
-//      updateTransferConfigMail(userGroup, userId, d)
-//    })
-//    transferUpdateTransferConfigRequest.detail.salesforce.map(d => {
-//      updateTransferConfigSalesforce(userGroup, userId, d)
-//    })
-//    TransferUpdateTransferConfigResponse(transferUpdateTransferConfigRequest.id)
+  def updateTransferConfig(userId: String, userGroup: String, transferUpdateTransferConfigRequest: TransferUpdateTransferConfigRequest): TransferUpdateTransferConfigResponse = {
+    TransferConfig(
+      transferUpdateTransferConfigRequest.id,
+      transferUpdateTransferConfigRequest.type_code,
+      transferUpdateTransferConfigRequest.config_index,
+      transferUpdateTransferConfigRequest.name,
+      transferUpdateTransferConfigRequest.status,
+      userGroup,
+      userId,
+      userId,
+      ZonedDateTime.now(),
+      ZonedDateTime.now()
+    ).update
+
+    transferUpdateTransferConfigRequest.detail.mail.map(d => {
+      updateTransferConfigMail(userGroup, userId, d)
+    })
+    transferUpdateTransferConfigRequest.detail.salesforce.map(d => {
+      updateTransferConfigSalesforce(userGroup, userId, d)
+    })
+    TransferUpdateTransferConfigResponse(transferUpdateTransferConfigRequest.id)
   }
 
   /**
