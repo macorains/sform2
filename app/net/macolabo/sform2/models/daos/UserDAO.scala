@@ -64,6 +64,6 @@ trait UserDAO {
    */
   def delete(userID: String): Unit
 
-  def getList(identity: User): JsValue
+  def getList(userGroup: String): JsValue
   def countAdminUsers() :Int
 }

@@ -26,49 +26,48 @@ class UserController @Inject() (
   implicit
   webJarsUtil: WebJarsUtil,
   ex: ExecutionContext
-) extends Security[UserProfile] with I18nSupport with UserSaveRequestJson {
+) extends Security[UserProfile]
+  with I18nSupport
+  with UserSaveRequestJson
+  with Pac4jUtil
+{
 
-  // ToDo グループによる制御必要
   // GET /user
-  def getList: Action[AnyContent] = Action.async { implicit request =>
-    ???
-    /*
-    val res = RsResultSet("OK", "OK", userDAO.getList(request.identity))
-    Future.successful(Ok(Json.toJson(res)))
-
-     */
+  def getList: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+    val profiles = getProfiles(controllerComponents)(request)
+    val userGroup = getAttributeValue(profiles, "user_group")
+    val res = RsResultSet("OK", "OK", userDAO.getList(userGroup))
+    Ok(Json.toJson(res))
   }
 
   // adminロールの有無チェック用
   // GET /user/isadmin
-  def isAdmin: Action[AnyContent] = Action.async { implicit request =>
+  // TODO ロールチェックを考慮する
+  def isAdmin: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
     val res = RsResultSet("OK", "OK", Json.toJson(""))
-    Future.successful(Ok(Json.toJson(res)))
+    Ok(Json.toJson(res))
   }
 
   // ユーザーの保存
   // POST /user
-  def save: Action[AnyContent] = Action.async { implicit request =>
-    ???
-    /*
+  def save: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+    val profiles = getProfiles(controllerComponents)(request)
+    val userGroup = getAttributeValue(profiles, "user_group")
     request.body.asJson.flatMap(bodyJson => {
       bodyJson.validate[UserSaveRequest].asOpt.map(userSaveRequest => {
-        userService.save(userSaveRequest, request.identity.group.getOrElse(""))
-        Future.successful(Ok)
+        userService.save(userSaveRequest, userGroup)
+        Ok
       })
-    }).getOrElse(Future.successful(BadRequest))
-
-     */
+    }).getOrElse(BadRequest)
   }
 
   // ユーザーの削除
   // DELETE /user
-  def delete(userId: String): Action[AnyContent] = Action.async { implicit request =>
-    ???
-    /*
-    userService.delete(userId, request.identity.group.getOrElse(""))
+  def delete(userId: String): Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+    val profiles = getProfiles(controllerComponents)(request)
+    val userGroup = getAttributeValue(profiles, "user_group")
+    userService.delete(userId, userGroup)
     val res = RsResultSet("OK", "OK", Json.toJson(""))
-    Future.successful(Ok(Json.toJson(res)))
-    */
+    Ok(Json.toJson(res))
   }
 }

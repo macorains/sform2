@@ -12,6 +12,8 @@ import scala.concurrent.duration.Duration
 
 case class UserJson(
                      user_id: String,
+                     username: String,
+                     password: String,
                      user_group: String,
                      role: String,
                      first_name: String,
@@ -39,29 +41,28 @@ class UserDAOImpl extends UserDAO with SFDBConf {
    * @return The found user or None if no user for the given ID could be found.
    */
   def find(userID: UUID): Future[Option[User]] =
-  // とりあえず蓋 2021/11/14
-  ???
-//    Future.successful(
-//      DB localTx { implicit l =>
-//        sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE USER_ID=${userID.toString}"
-//          .map(rs =>
-//            User(
-//              UUID.fromString(rs.string("USER_ID")),
-//              LoginInfo(rs.string("PROVIDER_ID"), rs.string("PROVIDER_KEY")),
-//              Option(rs.string("USER_GROUP")),
-//              Option(rs.string("ROLE")),
-//              Option(rs.string("FIRST_NAME")),
-//              Option(rs.string("LAST_NAME")),
-//              Option(rs.string("FULL_NAME")),
-//              Option(rs.string("EMAIL")),
-//              Option(rs.string("AVATAR_URL")),
-//              rs.boolean("ACTIVATED"),
-//              rs.boolean("DELETABLE")
-//            )
-//          )
-//          .single().apply()
-//      }
-//    )
+    Future.successful(
+      DB localTx { implicit l =>
+        sql"SELECT USER_ID,USERNAME,PASSWORD,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE USER_ID=${userID.toString}"
+          .map(rs =>
+            User(
+              UUID.fromString(rs.string("USER_ID")),
+              rs.string("USERNAME"),
+              rs.string("PASSWORD"),
+              Option(rs.string("USER_GROUP")),
+              Option(rs.string("ROLE")),
+              Option(rs.string("FIRST_NAME")),
+              Option(rs.string("LAST_NAME")),
+              Option(rs.string("FULL_NAME")),
+              Option(rs.string("EMAIL")),
+              Option(rs.string("AVATAR_URL")),
+              rs.boolean("ACTIVATED"),
+              rs.boolean("DELETABLE")
+            )
+          )
+          .single().apply()
+      }
+    )
 
   /**
    * ユーザー検索(pac4j)
@@ -113,12 +114,10 @@ class UserDAOImpl extends UserDAO with SFDBConf {
    * @return The saved user.
    */
   def save(user: User): Future[User] = {
-    ???
-    // とりあえず蓋 2021/11/14
-//    Await.result(find(user.userID), Duration.Inf) match {
-//      case Some(u: User) => update(user)
-//      case _ => add(user)
-//    }
+    Await.result(find(user.user_id), Duration.Inf) match {
+      case Some(u: User) => update(user)
+      case _ => add(user)
+    }
   }
 
   /**
@@ -145,55 +144,62 @@ class UserDAOImpl extends UserDAO with SFDBConf {
   }
 
   private def update(user: User): Future[User] = {
-    ???
-    // とりあえず蓋 2021/11/14
-//    DB localTx { implicit l =>
-//      sql"UPDATE M_USERINFO SET FIRST_NAME=${user.firstName}, LAST_NAME=${user.lastName} ,EMAIL=${user.email}, AVATAR_URL=${user.avatarURL}, ACTIVATED=${user.activated}, DELETABLE=${user.deletable} WHERE USER_ID=${user.userID.toString}"
-//        .update().apply()
-//      Future.successful(user)
-//    }
+    DB localTx { implicit l =>
+      sql"UPDATE M_USERINFO SET USERNAME=${user.username}, PASSWORD=${user.password}, FIRST_NAME=${user.first_name}, LAST_NAME=${user.last_name} ,EMAIL=${user.email}, AVATAR_URL=${user.avatar_url}, ACTIVATED=${user.activated}, DELETABLE=${user.deletable} WHERE USER_ID=${user.user_id.toString}"
+        .update().apply()
+      Future.successful(user)
+    }
   }
 
   private def add(user: User): Future[User] = {
-    // とりあえず蓋 2021/11/14
-//    DB localTx { implicit l =>
-//      sql"INSERT INTO M_USERINFO(USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE) VALUES(${user.userID.toString},${user.loginInfo.providerID},${user.loginInfo.providerKey},${user.group},${user.role},${user.firstName},${user.lastName},${user.email},'',0,1)"
-//        .update().apply()
-//      Future.successful(user)
-//    }
-    Future.successful(user)
+    DB localTx { implicit l =>
+      sql"INSERT INTO M_USERINFO(USER_ID,USERNAME,PASSWORD,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE) VALUES(${user.user_id.toString},${user.username},${user.password},${user.user_group},${user.role},${user.first_name},${user.last_name},${user.email},'',0,1)"
+        .update().apply()
+      Future.successful(user)
+    }
   }
 
 
-  def getList(identity: User): JsValue = {
-    // とりあえず蓋 2021/11/14
-//    val userGroup = identity.group.getOrElse("")
-//    DB localTx { implicit l =>
-//      val userList = sql"SELECT USER_ID,PROVIDER_ID,PROVIDER_KEY,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE USER_GROUP=$userGroup"
-//        .map(rs =>
-//          user.User(
-//            UUID.fromString(rs.string("USER_ID")),
-//            LoginInfo(rs.string("PROVIDER_ID"), rs.string("PROVIDER_KEY")),
-//            Option(rs.string("USER_GROUP")),
-//            Option(rs.string("ROLE")),
-//            Option(rs.string("FIRST_NAME")),
-//            Option(rs.string("LAST_NAME")),
-//            Option(rs.string("FULL_NAME")),
-//            Option(rs.string("EMAIL")),
-//            Option(rs.string("AVATAR_URL")),
-//            rs.boolean("ACTIVATED"),
-//            rs.boolean("DELETABLE")
-//          )
-//        )
-//        .list().apply()
-//      val userListJson = userList.map(
-//        u => {
-//          UserJson(u.userID.toString, u.group.getOrElse(""), u.role.getOrElse(""), u.firstName.getOrElse(""), u.lastName.getOrElse(""),
-//            u.fullName.getOrElse(""), u.email.getOrElse(""), u.avatarURL.getOrElse(""), u.activated, u.deletable)
-//        }
-//      )
-//      Json.toJson(userListJson)
-      Json.parse("{}")
+  def getList(userGroup: String): JsValue = {
+    DB localTx { implicit l =>
+      val userList = sql"SELECT USER_ID,USERNAME,PASSWORD,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE USER_GROUP=$userGroup"
+        .map(rs =>
+          User(
+            UUID.fromString(rs.string("USER_ID")),
+            rs.string("USERNAME"),
+            rs.string("PASSWORD"),
+            Option(rs.string("USER_GROUP")),
+            Option(rs.string("ROLE")),
+            Option(rs.string("FIRST_NAME")),
+            Option(rs.string("LAST_NAME")),
+            Option(rs.string("FULL_NAME")),
+            Option(rs.string("EMAIL")),
+            Option(rs.string("AVATAR_URL")),
+            rs.boolean("ACTIVATED"),
+            rs.boolean("DELETABLE")
+          )
+        )
+        .list().apply()
+      val userListJson = userList.map(
+        u => {
+          UserJson(
+            u.user_id.toString,
+            u.username,
+            u.password,
+            u.user_group.getOrElse(""),
+            u.role.getOrElse(""),
+            u.first_name.getOrElse(""),
+            u.last_name.getOrElse(""),
+            u.full_name.getOrElse(""),
+            u.email.getOrElse(""),
+            u.avatar_url.getOrElse(""),
+            u.activated,
+            u.deletable
+          )
+        }
+      )
+      Json.toJson(userListJson)
+    }
   }
 
   // Adminグループのユーザーアカウント数を取得
