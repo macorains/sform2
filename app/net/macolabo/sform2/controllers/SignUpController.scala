@@ -38,17 +38,7 @@ class SignUpController @Inject() (
   ex: ExecutionContext
 ) extends Security[UserProfile] with I18nSupport with UserSignUpResultJson {
 
-  /**
-   * Views the `Sign Up` page.
-   *
-   * @return The result to display.
-   */
-  def view: Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
-    // Future.successful(Ok(views.html.signUp(SignUpForm.form)))
-    Future.successful(Ok(""))
-  }
-
-  /**
+   /**
    * 初期管理ユーザーの登録
    * （初期管理ユーザー登録後は使わない）
    * @return The result to display.

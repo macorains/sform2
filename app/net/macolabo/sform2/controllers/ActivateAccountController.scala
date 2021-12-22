@@ -47,6 +47,12 @@ class ActivateAccountController @Inject() (
    */
   // TODO HTTPレスポンスのみ返すように変更すること (2019/03/20)
   def send(email: String): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
+    // emailからユーザー検索
+
+    // 対象が未アクティベートならアクティベートコードを生成してキャッシュに入れる
+
+    // アクティベートメールを送る
+
 
     // Silhouetteを抜くために一旦蓋をする (2021/11/14)
     /*

@@ -23,18 +23,6 @@ class ChangePasswordController @Inject() (
 ) extends AbstractController(components) with I18nSupport {
 
   /**
-   * Views the `Change Password` page.
-   *
-   * @return The result to display.
-   */
-//  def view = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID, List("admin"))) {
-//    implicit request: SecuredRequest[DefaultEnv, AnyContent] =>
-//      // Ok(views.html.changePassword(ChangePasswordForm.form, request.identity))
-//      Ok("")
-//  }
-  def view = ???
-
-  /**
    * Changes the password.
    *
    * @return The result to display.

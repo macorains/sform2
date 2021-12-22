@@ -34,16 +34,6 @@ class ForgotPasswordController @Inject() (
 ) extends Security[UserProfile] with I18nSupport {
 
   /**
-   * Views the `Forgot Password` page.
-   *
-   * @return The result to display.
-   */
-  def view: Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
-    // Future.successful(Ok(views.html.forgotPassword(ForgotPasswordForm.form)))
-    Future.successful(Ok(""))
-  }
-
-  /**
    * Sends an email with password reset instructions.
    *
    * It sends an email to the given address if it exists in the database. Otherwise we do not show the user
