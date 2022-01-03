@@ -1,5 +1,7 @@
-# This is the maiｃn configuration file for the application.
+# This is the main configuration file for the application.
 # ~~~~~
+
+baseUrl="http://localhost:9001"
 
 # Secret key
 # ~~~~~
