@@ -159,4 +159,29 @@ db {
   #default.logSql=true
 }
 
+pac4j.security {
+  rules = [
+    {"/facebook.*" = {
+      clients = "FacebookClient",
+      matchers = "excludedPath"
+    }}
+    {"/rest-jwt.*" = {
+      clients = "ParameterClient"
+    }}
+  ]
+}
+
+# Number of database connections
+# See https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing
+fixedConnectionPool = 9
+
+# Job queue sized to HikariCP connection pool
+database.dispatcher {
+  executor = "thread-pool-executor"
+  throughput = 1
+  thread-pool-executor {
+    fixed-pool-size = ${fixedConnectionPool}
+  }
+}
+
 include "sform.conf"
