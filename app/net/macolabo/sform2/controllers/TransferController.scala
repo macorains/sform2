@@ -9,6 +9,7 @@ import play.api.libs.json.Json._
 import play.api.mvc._
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
+
 import scala.jdk.CollectionConverters._
 import scala.concurrent.ExecutionContext
 
