@@ -7,7 +7,7 @@ baseUrl="http://localhost:9001"
 # ~~~~~
 # The secret key is used to secure cryptographics functions.
 # If you deploy your application to several instances be sure to use the same key!
-play.http.secret.key="changeme"
+play.http.secret.key="changemechangemechangemechangemechangemechangemechangemechangemechangemechangeme"
 
 # The application languages
 # ~~~~~
@@ -16,11 +16,6 @@ play.i18n.langs=["en"]
 # Registers the request handler
 # ~~~~~
 play.http.requestHandler = "play.api.http.DefaultHttpRequestHandler"
-
-# Registers the filters
-# ~~~~~
-play.http.filters = "net.macolabo.sform2.utils.net.macolabo.sform2.Filters"
-
 play.http.parser.maxMemoryBuffer = 5MB
 play.http.parser.maxDiskBuffer = 100MB
 parsers.anyContent.maxLength = 100MB
@@ -67,6 +62,12 @@ play.mailer {
 }
 
 # Security Filter Configuration - Content Security Policy
+# Registers the filters
+# ~~~~~
+# TODO pac4jのfilterを使ってCORSを動かしたい
+# とりあえず上手くいかないので、play標準のCORSフィルターとの折衷型にしておく
+# play.filters.enabled += "net.macolabo.sform2.filters.Filters"
+play.filters.enabled += "play.filters.cors.CORSFilter"
 play.filters {
   headers {
     contentSecurityPolicy = "default-src 'self';"
@@ -77,9 +78,10 @@ play.filters {
     contentSecurityPolicy = ${play.filters.headers.contentSecurityPolicy}" connect-src 'self' twitter.com *.xing.com;"
  }
   cors {
-    exposedHeaders = ["x-auth-token","X-Auth-Token"]
+    exposedHeaders = ["x-auth-token","X-Auth-Token","Access-Control-Allow-Origin"]
     pathPrefixes = ["/"]
-    allowedOrigins = ["http://localhost:8080"]
+    # Chrome拡張のAPI Testerの類を使う場合はallowedOriginsに追加が必要
+    allowedOrigins = ["http://localhost:8080","http://localhost:8081", "chrome-extension://aejoelaoggembcahagimdiliamlcdmfm"]
     allowedHttpMethods = ["GET", "POST", "OPTIONS", "DELETE"]
     allowedHttpHeaders = ["Accept", "Content-Type", "Access-Control-Allow-Origin", "Origin", "X-Requested-With", "X-Auth-Token", "Timeout"]
     preflightMaxAge = 3 days
@@ -184,4 +186,6 @@ database.dispatcher {
   }
 }
 
+# sform.confもgitリポジトリに含まれていないので、sform.conf.sampleを環境に合わせて調整して設置すること
 include "sform.conf"
+
