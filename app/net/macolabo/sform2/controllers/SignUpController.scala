@@ -1,7 +1,8 @@
 package net.macolabo.sform2.controllers
 
-import java.util.UUID
+import net.macolabo.sform2.forms.SignUpForm
 
+import java.util.UUID
 import javax.inject.Inject
 import net.macolabo.sform2.models.user.{UserSignUpResult, UserSignUpResultJson}
 import net.macolabo.sform2.services.AuthToken.AuthTokenService
@@ -43,8 +44,18 @@ class SignUpController @Inject() (
    * （初期管理ユーザー登録後は使わない）
    * @return The result to display.
    */
-  def submit: Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
-    ???
+  def submit: Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
+    if(!userService.checkAdminExists) {
+      SignUpForm.form.bindFromRequest().fold(
+        form => BadRequest(s"${Messages("error.invalid.request")}"),
+        data => {
+
+        }
+      )
+      Ok("")
+    } else {
+      BadRequest(s"${Messages("error.invalid.request")}")
+    }
     /*
     if(!userService.checkAdminExists) {
       val virtualHostName = config.get[String]("silhouette.virtualHostName")
