@@ -24,6 +24,10 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
    */
   def retrieve(id: UUID): Future[Option[User]] = userDAO.find(id)
 
+  def retrieve(username: String): Future[Option[User]] = {
+    userDAO.find(username)
+  }
+
   /**
    * Saves a user.
    *

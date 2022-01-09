@@ -18,6 +18,7 @@ trait UserService {
    * @return The retrieved user or None if no user could be retrieved for the given ID.
    */
   def retrieve(id: UUID): Future[Option[User]]
+  def retrieve(username: String): Future[Option[User]]
 
   /**
    * Saves a user.

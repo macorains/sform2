@@ -19,6 +19,7 @@ trait UserDAO {
    * @return The found user or None if no user for the given ID could be found.
    */
   def find(userID: UUID): Future[Option[User]]
+  def find(username: String): Future[Option[User]]
 
   /**
    * ユーザー検索(pac4j)

@@ -40,13 +40,47 @@ class UserDAOImpl extends UserDAO with SFDBConf {
    * @param userID The ID of the user to find.
    * @return The found user or None if no user for the given ID could be found.
    */
-  def find(userID: UUID): Future[Option[User]] =
+  def find(userID: UUID): Future[Option[User]] = {
+    // TODO QueryDSLに変更する
     Future.successful(
       DB localTx { implicit l =>
-        sql"SELECT USER_ID,USERNAME,PASSWORD,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE USER_ID=${userID.toString}"
+        sql"SELECT ID,USERNAME,PASSWORD,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE ID=${userID.toString}"
           .map(rs =>
             User(
-              UUID.fromString(rs.string("USER_ID")),
+              UUID.fromString(rs.string("ID")),
+              rs.string("USERNAME"),
+              rs.string("PASSWORD"),
+              Option(rs.string("USER_GROUP")),
+              Option(rs.string("ROLE")),
+              Option(rs.string("FIRST_NAME")),
+              Option(rs.string("LAST_NAME")),
+              Option(rs.string("FULL_NAME")),
+              Option(rs.string("EMAIL")),
+              Option(rs.string("AVATAR_URL")),
+              rs.boolean("ACTIVATED"),
+              rs.boolean("DELETABLE")
+            )
+          )
+          .single().apply()
+      }
+    )
+  }
+
+  /**
+   * Finds a user by its user ID.
+   *
+   * @param userID The ID of the user to find.
+   * @return The found user or None if no user for the given ID could be found.
+   */
+  def find(username: String): Future[Option[User]] =
+  // TODO QueryDSLに変更する
+  // TODO usergroupも加えて検索するように
+    Future.successful(
+      DB localTx { implicit l =>
+        sql"SELECT ID,USERNAME,PASSWORD,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE USERNAME=$username"
+          .map(rs =>
+            User(
+              UUID.fromString(rs.string("ID")),
               rs.string("USERNAME"),
               rs.string("PASSWORD"),
               Option(rs.string("USER_GROUP")),
@@ -126,7 +160,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
    */
   def delete(userID: String, group: String): Unit = {
     DB localTx { implicit l =>
-      sql"DELETE FROM M_USERINFO WHERE USER_ID=$userID AND USER_GROUP=$group".update().apply()
+      sql"DELETE FROM M_USERINFO WHERE ID=$userID AND USER_GROUP=$group".update().apply()
     }
   }
 
@@ -145,7 +179,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
 
   private def update(user: User): Future[User] = {
     DB localTx { implicit l =>
-      sql"UPDATE M_USERINFO SET USERNAME=${user.username}, PASSWORD=${user.password}, FIRST_NAME=${user.first_name}, LAST_NAME=${user.last_name} ,EMAIL=${user.email}, AVATAR_URL=${user.avatar_url}, ACTIVATED=${user.activated}, DELETABLE=${user.deletable} WHERE USER_ID=${user.user_id.toString}"
+      sql"UPDATE M_USERINFO SET USERNAME=${user.username}, PASSWORD=${user.password}, FIRST_NAME=${user.first_name}, LAST_NAME=${user.last_name} ,EMAIL=${user.email}, AVATAR_URL=${user.avatar_url}, ACTIVATED=${user.activated}, DELETABLE=${user.deletable} WHERE ID=${user.user_id.toString}"
         .update().apply()
       Future.successful(user)
     }
@@ -153,7 +187,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
 
   private def add(user: User): Future[User] = {
     DB localTx { implicit l =>
-      sql"INSERT INTO M_USERINFO(USER_ID,USERNAME,PASSWORD,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE) VALUES(${user.user_id.toString},${user.username},${user.password},${user.user_group},${user.role},${user.first_name},${user.last_name},${user.email},'',0,1)"
+      sql"INSERT INTO M_USERINFO(ID,USERNAME,PASSWORD,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE) VALUES(${user.user_id.toString},${user.username},${user.password},${user.user_group},${user.role},${user.first_name},${user.last_name},${user.email},'',0,1)"
         .update().apply()
       Future.successful(user)
     }
