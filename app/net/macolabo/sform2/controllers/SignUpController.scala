@@ -142,6 +142,22 @@ class SignUpController @Inject() (
     ))
   }
 
+  private def sendActivationMail(user: User)(implicit requestHeader: RequestHeader) = {
+    // val url = net.macolabo.sform2.controllers.routes.ActivateAccountController.activate(user.user_id).absoluteURL().replaceFirst("https*://[^/]+/", virtualHostName)
+    // アクティベートコードを生成してDBに記録
+    // アクティベートコードを入れたURLを生成
+    val url = net.macolabo.sform2.controllers.routes.ActivateAccountController.activate(user.user_id).absoluteURL()
+    user.email.map(email => {
+      mailerClient.send(Email(
+        subject = Messages("email.sign.up.subject"),
+        from = Messages("email.from"),
+        to = Seq(email),
+        bodyText = Some(net.macolabo.sform2.views.txt.emails.signUp(user, url).body),
+        bodyHtml = Some(net.macolabo.sform2.views.html.emails.signUp(user, url).body)
+      ))
+    })
+  }
+
   private def createAdminUser(data: SignUpForm.Data)(implicit provider: MessagesProvider) = {
     //val authInfo = passwordHasherRegistry.current.hash(data.password)
     val service = new DefaultPasswordService
@@ -160,14 +176,16 @@ class SignUpController @Inject() (
       activated = false,
       deletable = false
     )
+    userService.save(user)
+    /*
     for {
       // avatar <- avatarService.retrieveURL(data.email)
       user <- userService.save(user.copy())
       // _ <- authInfoRepository.add(loginInfo, authInfo)
       //authToken <- authTokenService.create(user.userID)
     } yield {
-      // val url = net.macolabo.sform2.controllers.routes.ActivateAccountController.activate(authToken.id).absoluteURL().replaceFirst("https*://[^/]+/", virtualHostName)
-      val url = "hogehoge"
+      val url = net.macolabo.sform2.controllers.routes.ActivateAccountController.activate(user.user_id).absoluteURL().replaceFirst("https*://[^/]+/", virtualHostName)
+      //val url = "hogehoge"
       mailerClient.send(Email(
         subject = Messages("email.sign.up.subject"),
         from = Messages("email.from"),
@@ -176,5 +194,7 @@ class SignUpController @Inject() (
         bodyHtml = Some(net.macolabo.sform2.views.html.emails.signUp(user, url).body)
       ))
     }
+     */
   }
+
 }

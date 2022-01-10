@@ -1,17 +1,14 @@
 package net.macolabo.sform2.models.daos
 
 import java.util.UUID
-
-import net.macolabo.sform2.models
-import net.macolabo.sform2.models.{AuthToken, SFDBConf}
-import org.joda.time.DateTime
+import net.macolabo.sform2.models.entity.user.AuthToken
+import net.macolabo.sform2.models.SFDBConf
 
 import scala.collection.mutable
 import scala.concurrent.Future
-
 import scalikejdbc._
-import scalikejdbc.jodatime.JodaParameterBinderFactory._
-import scalikejdbc.jodatime.JodaTypeBinder._
+
+import java.time.LocalDateTime
 /**
  * Give access to the [[AuthToken]] object.
  */
@@ -23,31 +20,37 @@ class AuthTokenDAOImpl extends AuthTokenDAO with SFDBConf {
    * @param id The unique token ID.
    * @return The found token or None if no token for the given ID could be found.
    */
-  //def find(id: UUID) = Future.successful(tokens.get(id))
-  def find(id: UUID): Future[Option[AuthToken]] = Future.successful(
-    DB localTx { implicit session =>
-      sql"SELECT ID,USER_ID,EXPIRY FROM D_AUTHTOKEN WHERE ID=${id.toString}"
-        .map(rs => models.AuthToken(UUID.fromString(rs.string("ID")), UUID.fromString(rs.string("USER_ID")), rs.get("EXPIRY"))).single().apply()
-    }
-  )
+  def find(id: UUID)(implicit session: DBSession): Future[Option[AuthToken]] = Future.successful {
+    val f = AuthToken.syntax("f")
+    withSQL(
+      select(
+        f.id,
+        f.user_id,
+        f.expiry
+      )
+        .from(AuthToken as f)
+        .where
+        .eq(f.id, id.toString)
+    ).map(rs => AuthToken(rs)).single().apply()
+  }
 
   /**
    * Finds expired tokens.
    *
    * @param dateTime The current date time.
    */
-  def findExpired(dateTime: DateTime): Future[Seq[AuthToken]] = Future.successful {
-    /*
-    tokens.filter {
-      case (_, token) =>
-        token.expiry.isBefore(dateTime)
-    }.values.toSeq
-    */
-    DB localTx { implicit session =>
-      println(dateTime)
-      sql"SELECT ID,USER_ID,EXPIRY FROM D_AUTHTOKEN WHERE EXPIRY<=$dateTime"
-        .map(rs => models.AuthToken(UUID.fromString(rs.string("ID")), UUID.fromString(rs.string("USER_ID")), rs.get("EXPIRY"))).list().apply()
-    }
+  def findExpired(dateTime: LocalDateTime)(implicit session: DBSession): Future[Seq[AuthToken]] = Future.successful {
+    val f = AuthToken.syntax("f")
+    withSQL(
+      select(
+        f.id,
+        f.user_id,
+        f.expiry
+      )
+        .from(AuthToken as f)
+        .where
+        .le(f.expiry, dateTime)
+    ).map(rs => AuthToken(rs)).list().apply()
   }
 
   /**
@@ -56,14 +59,17 @@ class AuthTokenDAOImpl extends AuthTokenDAO with SFDBConf {
    * @param token The token to save.
    * @return The saved token.
    */
-  def save(token: AuthToken): Future[AuthToken] = {
-    //tokens += (token.id -> token)
-    //println(token.toString)
-    DB localTx { implicit session =>
-      sql"INSERT INTO D_AUTHTOKEN(ID,USER_ID,EXPIRY) VALUES(${token.id.toString},${token.userID.toString},${token.expiry})"
-        .update().apply()
-      Future.successful(token)
-    }
+  def save(token: AuthToken)(implicit session: DBSession): Future[AuthToken] = Future.successful {
+    withSQL {
+      val c = AuthToken.column
+      insertInto(AuthToken)
+        .namedValues(
+          c.id -> token.id.toString,
+          c.user_id -> token.userID.toString,
+          c.expiry -> token.expiry
+        )
+    }.update().apply()
+    token
   }
 
   /**
@@ -72,12 +78,15 @@ class AuthTokenDAOImpl extends AuthTokenDAO with SFDBConf {
    * @param id The ID for which the token should be removed.
    * @return A future to wait for the process to be completed.
    */
-  def remove(id: UUID): Future[Unit] = {
-    //tokens -= id
-    DB localTx { implicit session =>
-      sql"DELETE FROM D_AUTHTOKEN WHERE ID=$id".update().apply()
-      Future.successful(())
-    }
+  def remove(id: UUID)(implicit session: DBSession): Future[Int] = Future.successful {
+    withSQL {
+      val c = AuthToken.column
+      QueryDSL
+        .delete
+        .from(AuthToken)
+        .where
+        .eq(c.id, id.toString)
+    }.update().apply()
   }
 }
 

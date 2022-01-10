@@ -1,10 +1,10 @@
 package net.macolabo.sform2.models.daos
 
 import java.util.UUID
+import net.macolabo.sform2.models.entity.user.AuthToken
+import scalikejdbc.DBSession
 
-import net.macolabo.sform2.models.AuthToken
-import org.joda.time.DateTime
-
+import java.time.LocalDateTime
 import scala.concurrent.Future
 
 /**
@@ -18,14 +18,14 @@ trait AuthTokenDAO {
    * @param id The unique token ID.
    * @return The found token or None if no token for the given ID could be found.
    */
-  def find(id: UUID): Future[Option[AuthToken]]
+  def find(id: UUID)(implicit session: DBSession): Future[Option[AuthToken]]
 
   /**
    * Finds expired tokens.
    *
    * @param dateTime The current date time.
    */
-  def findExpired(dateTime: DateTime): Future[Seq[AuthToken]]
+  def findExpired(dateTime: LocalDateTime)(implicit session: DBSession): Future[Seq[AuthToken]]
 
   /**
    * Saves a token.
@@ -33,7 +33,7 @@ trait AuthTokenDAO {
    * @param token The token to save.
    * @return The saved token.
    */
-  def save(token: AuthToken): Future[AuthToken]
+  def save(token: AuthToken)(implicit session: DBSession): Future[AuthToken]
 
   /**
    * Removes the token for the given ID.
@@ -41,5 +41,5 @@ trait AuthTokenDAO {
    * @param id The ID for which the token should be removed.
    * @return A future to wait for the process to be completed.
    */
-  def remove(id: UUID): Future[Unit]
+  def remove(id: UUID)(implicit session: DBSession): Future[Int]
 }
