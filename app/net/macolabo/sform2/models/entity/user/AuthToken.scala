@@ -7,7 +7,7 @@ import java.util.UUID
 
 case class AuthToken(
   id: UUID,
-  userID: UUID,
+  user_id: UUID,
   expiry: LocalDateTime
 )
 

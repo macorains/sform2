@@ -43,8 +43,7 @@ class SignUpController @Inject() (
 ) extends Security[UserProfile] with I18nSupport with UserSignUpResultJson {
 
    /**
-   * 初期管理ユーザーの登録
-   * （初期管理ユーザー登録後は使わない）
+   * ユーザーの登録
    * @return The result to display.
    */
   def submit: Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
@@ -52,86 +51,27 @@ class SignUpController @Inject() (
       SignUpForm.form.bindFromRequest().fold(
         form => Future.successful(BadRequest(s"${Messages("error.invalid.request")}")),
         data => {
-          val message = s"""${Messages("activate.account.text1")} ${data.email} ${Messages("activate.account.text2")}"""
-          val result = Ok(Json.toJson(UserSignUpResult(Ok.header.status, Option(message))))
+          //val message = s"""${Messages("activate.account.text1")} ${data.email} ${Messages("activate.account.text2")}"""
+          //val result = Ok(Json.toJson(UserSignUpResult(Ok.header.status, Option(message))))
 
-          userService.retrieve(data.email).map {
+          userService.retrieve(data.email).flatMap {
             case Some(user) => // 該当するユーザーが存在する場合
               sendAlreadySignedUpMail(user, data)
-              Conflict("")
-            case None => // 該当するユーザーが存在しない場合
-              createAdminUser(data)
-              Ok("")
+              Future.successful(Conflict(""))
+            case _=> // 該当するユーザーが存在しない場合
+              createAdminUser(data).map(user => {
+                sendActivationMail(user)
+                Ok("")
+              })
           }
         }
       )
     } else {
       Future.successful(BadRequest(s"${Messages("error.invalid.request")}"))
     }
-    /*
-    if(!userService.checkAdminExists) {
-      val virtualHostName = config.get[String]("silhouette.virtualHostName")
-      SignUpForm.form.bindFromRequest().fold(
-        form => Future.successful(BadRequest(s"${Messages("error.invalid.request")}")),
-        data => {
-          val message = s"""${Messages("activate.account.text1")} ${data.email} ${Messages("activate.account.text2")}"""
-          val result = Ok(Json.toJson(UserSignUpResult(Ok.header.status, Option(message))))
-          val loginInfo = LoginInfo(CredentialsProvider.ID, s"""${data.email}:${data.group}""")
-          userService.retrieve(loginInfo).flatMap {
-            case Some(user) =>
-
-              val url = net.macolabo.sform2.controllers.routes.SignInController.view.absoluteURL().replaceFirst("https*://[^/]+/", virtualHostName)
-              mailerClient.send(Email(
-                subject = Messages("email.already.signed.up.subject"),
-                from = Messages("email.from"),
-                to = Seq(data.email),
-                bodyText = Some(net.macolabo.sform2.views.txt.emails.alreadySignedUp(user, url).body),
-                bodyHtml = Some(net.macolabo.sform2.views.html.emails.alreadySignedUp(user, url).body)
-              ))
-              Future.successful(result)
-            case None =>
-              val authInfo = passwordHasherRegistry.current.hash(data.password)
-              val user = User(
-                userID = UUID.randomUUID(),
-                loginInfo = loginInfo,
-                group = Some(data.group),
-                role = Some("operator"),
-                firstName = Some(data.firstName),
-                lastName = Some(data.lastName),
-                fullName = Some(data.firstName + " " + data.lastName),
-                email = Some(data.email),
-                avatarURL = None,
-                activated = false,
-                deletable = false
-              )
-              for {
-                avatar <- avatarService.retrieveURL(data.email)
-                user <- userService.save(user.copy(avatarURL = avatar))
-                _ <- authInfoRepository.add(loginInfo, authInfo)
-                authToken <- authTokenService.create(user.userID)
-              } yield {
-                val url = net.macolabo.sform2.controllers.routes.ActivateAccountController.activate(authToken.id).absoluteURL().replaceFirst("https*://[^/]+/", virtualHostName)
-                mailerClient.send(Email(
-                  subject = Messages("email.sign.up.subject"),
-                  from = Messages("email.from"),
-                  to = Seq(data.email),
-                  bodyText = Some(net.macolabo.sform2.views.txt.emails.signUp(user, url).body),
-                  bodyHtml = Some(net.macolabo.sform2.views.html.emails.signUp(user, url).body)
-                ))
-                //silhouette.env.eventBus.publish(SignUpEvent(user, request))
-                result
-              }
-          }
-        }
-      )
-    } else {
-      Future.successful(BadRequest(s"${Messages("error.invalid.request")}"))
-    }
-     */
   }
 
   private def sendAlreadySignedUpMail(user: User, data: SignUpForm.Data)(implicit provider: MessagesProvider) = {
-    //val url = net.macolabo.sform2.controllers.routes.SignInController.view.absoluteURL().replaceFirst("https*://[^/]+/", virtualHostName)
     val url = ""
     mailerClient.send(Email(
       subject = Messages("email.already.signed.up.subject"),
@@ -143,23 +83,21 @@ class SignUpController @Inject() (
   }
 
   private def sendActivationMail(user: User)(implicit requestHeader: RequestHeader) = {
-    // val url = net.macolabo.sform2.controllers.routes.ActivateAccountController.activate(user.user_id).absoluteURL().replaceFirst("https*://[^/]+/", virtualHostName)
-    // アクティベートコードを生成してDBに記録
-    // アクティベートコードを入れたURLを生成
-    val url = net.macolabo.sform2.controllers.routes.ActivateAccountController.activate(user.user_id).absoluteURL()
-    user.email.map(email => {
-      mailerClient.send(Email(
-        subject = Messages("email.sign.up.subject"),
-        from = Messages("email.from"),
-        to = Seq(email),
-        bodyText = Some(net.macolabo.sform2.views.txt.emails.signUp(user, url).body),
-        bodyHtml = Some(net.macolabo.sform2.views.html.emails.signUp(user, url).body)
-      ))
+    authTokenService.create(user.user_id).map(authToken => {
+      val url = net.macolabo.sform2.controllers.routes.ActivateAccountController.activate(authToken.id).absoluteURL()
+      user.email.map(email => {
+        mailerClient.send(Email(
+          subject = Messages("email.sign.up.subject"),
+          from = Messages("email.from"),
+          to = Seq(email),
+          bodyText = Some(net.macolabo.sform2.views.txt.emails.signUp(user, url).body),
+          bodyHtml = Some(net.macolabo.sform2.views.html.emails.signUp(user, url).body)
+        ))
+      })
     })
   }
 
   private def createAdminUser(data: SignUpForm.Data)(implicit provider: MessagesProvider) = {
-    //val authInfo = passwordHasherRegistry.current.hash(data.password)
     val service = new DefaultPasswordService
     val password = service.encryptPassword(data.password)
     val user = User(
@@ -177,24 +115,6 @@ class SignUpController @Inject() (
       deletable = false
     )
     userService.save(user)
-    /*
-    for {
-      // avatar <- avatarService.retrieveURL(data.email)
-      user <- userService.save(user.copy())
-      // _ <- authInfoRepository.add(loginInfo, authInfo)
-      //authToken <- authTokenService.create(user.userID)
-    } yield {
-      val url = net.macolabo.sform2.controllers.routes.ActivateAccountController.activate(user.user_id).absoluteURL().replaceFirst("https*://[^/]+/", virtualHostName)
-      //val url = "hogehoge"
-      mailerClient.send(Email(
-        subject = Messages("email.sign.up.subject"),
-        from = Messages("email.from"),
-        to = Seq(data.email),
-        bodyText = Some(net.macolabo.sform2.views.txt.emails.signUp(user, url).body),
-        bodyHtml = Some(net.macolabo.sform2.views.html.emails.signUp(user, url).body)
-      ))
-    }
-     */
   }
 
 }

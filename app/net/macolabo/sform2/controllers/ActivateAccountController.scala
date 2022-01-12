@@ -88,20 +88,17 @@ class ActivateAccountController @Inject() (
    * @return The result to display.
    */
   def activate(token: UUID): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
-    /*
     authTokenService.validate(token).flatMap {
-      case Some(authToken) => userService.retrieve(authToken.userID).flatMap {
-        case Some(user) if user.loginInfo.providerID == CredentialsProvider.ID =>
+      case Some(authToken) => userService.retrieve(authToken.user_id).flatMap {
+        case Some(user) =>
           userService.save(user.copy(activated = true)).map { _ =>
             Ok
           }
         case _ =>
-          Future.successful(BadRequest)
+          Future.successful(NotFound)
       }
       case None =>
         Future.successful(BadRequest)
     }
-    */
-    Future.successful(Ok)
   }
 }

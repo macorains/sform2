@@ -3,8 +3,6 @@ package net.macolabo.sform2.models.daos
 import java.util.UUID
 import net.macolabo.sform2.models.entity.user.AuthToken
 import net.macolabo.sform2.models.SFDBConf
-
-import scala.collection.mutable
 import scala.concurrent.Future
 import scalikejdbc._
 
@@ -65,7 +63,7 @@ class AuthTokenDAOImpl extends AuthTokenDAO with SFDBConf {
       insertInto(AuthToken)
         .namedValues(
           c.id -> token.id.toString,
-          c.user_id -> token.userID.toString,
+          c.user_id -> token.user_id.toString,
           c.expiry -> token.expiry
         )
     }.update().apply()
@@ -90,13 +88,3 @@ class AuthTokenDAOImpl extends AuthTokenDAO with SFDBConf {
   }
 }
 
-/**
- * The companion object.
- */
-object AuthTokenDAOImpl {
-
-  /**
-   * The list of tokens.
-   */
-  val tokens: mutable.HashMap[UUID, AuthToken] = mutable.HashMap()
-}
