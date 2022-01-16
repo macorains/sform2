@@ -8,7 +8,7 @@ import net.macolabo.sform2.services.User.UserService
 import org.webjars.play.WebJarsUtil
 import play.api.{Configuration, Logger}
 import play.api.i18n.I18nSupport
-import play.api.libs.json.Json
+import play.api.libs.json.{JsString, JsSuccess, Json}
 import play.api.libs.mailer._
 import play.api.mvc._
 import play.api.cache.SyncCacheApi
@@ -44,6 +44,7 @@ class SignInController @Inject() (
   with I18nSupport
   with VerificationRequestJson
   with Pac4jUtil
+  with SignInVerificationRequestConverter
 {
 
   val profilePrefix = "PR_"
@@ -62,8 +63,10 @@ class SignInController @Inject() (
    */
   def submit: Action[AnyContent] = Secure("DirectFormClient") { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
-    val authKey = if(profiles.asScala.nonEmpty) profiles.get(0).getAttribute("AuthKey") else ""
+    val authKey = if(profiles.asScala.nonEmpty) profiles.get(0).getAttribute("AuthKey").asInstanceOf[String] else ""
+    val verificationCode = if(profiles.asScala.nonEmpty) profiles.get(0).getAttribute("VerificationCode").asInstanceOf[String] else ""
     cache.set(profilePrefix + authKey, profiles)
+    //cache.set(verificationCodePrefix + authKey, verificationCode)
 
     mailerClient.send(Email(
 //      subject = Messages("email.verification.subject"),
@@ -71,10 +74,10 @@ class SignInController @Inject() (
       subject = "hogehoge",
       from = "mac.rainshrine@gmail.com",
       to = Seq("mac.rainshrine@gmail.com"),
-      bodyText = Some("hogehoge"),
+      bodyText = Some(verificationCode),
       bodyHtml = Some("<html><body>hogehoge</body></html>>")
     ))
-    Ok(s"""{"auth_key" : "$authKey"}""")
+    Ok(s"""{"authkey" : "$authKey"}""")
   }
 
   /**
@@ -82,21 +85,29 @@ class SignInController @Inject() (
    * @return
    */
   def verification: Action[AnyContent] = Action { implicit request =>
-    getCachedProfiles(request).map(profiles => {
-      val generator = new JwtGenerator(new SecretSignatureConfiguration("12345678901234567890123456789012"))
-      val token = generator.generate(profiles.get(0))
-      Ok(token)
-    }).getOrElse(NotFound(""))
+    request.body.asJson.flatMap(bodyJson => {
+      bodyJson.validate[SignInVerificationRequest].map(verificationRequest => {
+        val authKey = verificationRequest.authkey
+        val verificationCode = verificationRequest.verification_code
+
+        getCachedProfiles(authKey).map(profiles => {
+          val profile = profiles.get(0)
+          val vc = profile.getAttribute("VerificationCode").asInstanceOf[String]
+
+          if(vc.nonEmpty && vc.equals(verificationCode)) {
+            val generator = new JwtGenerator(new SecretSignatureConfiguration("12345678901234567890123456789012"))
+            val token = generator.generate(profile)
+            Ok(token).withHeaders("X-Auth-Token" -> token)
+          } else NotFound("")
+        }).getOrElse(NotFound(""))
+      }).asOpt
+    }).getOrElse(BadRequest(""))
   }
 
   private val httpErrorRateLimitFunction =
     HttpErrorRateLimitFunction[Request](new RateLimiter(1, 1/7f, "test failure rate limit"), _ => Future.successful(BadRequest(Json.parse(s"""{"message":"LoginFailureLimitExceeded"}"""))))
 
-  private def getCachedProfiles(implicit request: RequestHeader)  = {
-    val webContext = new PlayWebContext(request)
-    val authKey = webContext.getRequestParameter("authkey").orElse("")
-    val verificationCode = webContext.getRequestParameter("verificationcode").orElse("")
-
+  private def getCachedProfiles(authKey: String)  = {
     cache.get[java.util.List[UserProfile]](profilePrefix + authKey)
 
     // この辺りにauthkeyとverificationcodeの照合ロジック入れればOK
