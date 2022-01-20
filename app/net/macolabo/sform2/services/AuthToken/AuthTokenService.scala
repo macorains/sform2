@@ -2,7 +2,7 @@ package net.macolabo.sform2.services.AuthToken
 
 import java.util.UUID
 
-import net.macolabo.sform2.models.AuthToken
+import net.macolabo.sform2.models.entity.user.AuthToken
 
 import scala.concurrent.Future
 import scala.concurrent.duration._

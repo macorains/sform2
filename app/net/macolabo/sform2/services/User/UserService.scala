@@ -1,16 +1,15 @@
 package net.macolabo.sform2.services.User
 
 import java.util.UUID
-import com.mohiva.play.silhouette.api.services.IdentityService
-import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import net.macolabo.sform2.models.entity.user.User
 
 import scala.concurrent.Future
 
+// TODO silhouette関係ない形に直す
 /**
  * Handles actions to users.
  */
-trait UserService extends IdentityService[User] {
+trait UserService {
 
   /**
    * Retrieves a user that matches the specified ID.
@@ -19,6 +18,7 @@ trait UserService extends IdentityService[User] {
    * @return The retrieved user or None if no user could be retrieved for the given ID.
    */
   def retrieve(id: UUID): Future[Option[User]]
+  def retrieve(username: String): Future[Option[User]]
 
   /**
    * Saves a user.
@@ -37,7 +37,7 @@ trait UserService extends IdentityService[User] {
    * @param profile The social profile to save.
    * @return The user for whom the profile was saved.
    */
-  def save(profile: CommonSocialProfile): Future[User]
+  //def save(profile: CommonSocialProfile): Future[User]
 
   def delete(userId: String, group: String): Unit
 

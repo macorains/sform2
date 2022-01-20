@@ -1,7 +1,6 @@
 package net.macolabo.sform2.models.daos
 
 import net.macolabo.sform2.models.entity.form.{Form, FormCol, FormColSelect, FormColValidation, FormTransferTask, FormTransferTaskCondition, FormTransferTaskMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField}
-import net.macolabo.sform2.models.entity.user.User
 import net.macolabo.sform2.services.Form.delete.FormDeleteResponse
 import net.macolabo.sform2.services.Form.get.{FormColGetReponse, FormColSelectGetReponse, FormColValidationGetReponse, FormGetResponse, FormTransferTaskConditionGetReponse, FormTransferTaskGetResponse, FormTransferTaskMailGetReponse, FormTransferTaskSalesforceFieldGetReponse, FormTransferTaskSalesforceGetReponse}
 import net.macolabo.sform2.services.Form.list.{FormListResponse, FormResponse}
@@ -17,24 +16,21 @@ import java.time.ZonedDateTime
 class FormDAOImpl extends FormDAO {
 
   /** フォーム取得 */
-  def get(identity: User, id: BigInt)(implicit session: DBSession): Option[FormGetResponse] = {
-    val userGroup = identity.group.getOrElse("")
+  def get(userGroup: String, id: BigInt)(implicit session: DBSession): Option[FormGetResponse] = {
     selectForm(userGroup, id).map(form => {
       convertToFormGetResponse(userGroup, form)
     })
   }
 
   /** HashedIdによるフォーム取得 */
-  def getByHashedId(identity: User, hashed_id: String)(implicit session: DBSession): Option[FormGetResponse] = {
-    val userGroup = identity.group.getOrElse("")
+  def getByHashedId(userGroup: String, hashed_id: String)(implicit session: DBSession): Option[FormGetResponse] = {
     selectFormByHashedId(userGroup, hashed_id).map(form => {
       convertToFormGetResponse(userGroup, form)
     })
   }
 
   /** フォーム一覧取得 */
-  def getList(identity: User)(implicit session: DBSession): FormListResponse = {
-      val userGroup = identity.group.getOrElse("")
+  def getList(userGroup: String)(implicit session: DBSession): FormListResponse = {
       val formList = selectFormList(userGroup).map(form => convertToFormResponse(form))
       FormListResponse(
         formList,
@@ -43,9 +39,9 @@ class FormDAOImpl extends FormDAO {
   }
 
   /** フォーム作成・更新 */
-  def update(identity: User, request: FormUpdateRequest)(implicit session: DBSession): FormUpdateResponse = {
-    val userId = identity.userID.toString
-    val group = identity.group.getOrElse("")
+  def update(userId: String, userGroup: String, request: FormUpdateRequest)(implicit session: DBSession): FormUpdateResponse = {
+    val userId = "hoge"
+    val group = "hoge"
 
     val formId = request.id
       .map(_ => updateForm(userId, request))
@@ -105,13 +101,13 @@ class FormDAOImpl extends FormDAO {
   }
 
   /** フォーム削除 */
-  def delete(identity: User, id: BigInt)(implicit session: DBSession): FormDeleteResponse = {
-    FormDeleteResponse(deleteForm(identity.group.getOrElse(""), id))
+  def delete(userGroup: String, id: BigInt)(implicit session: DBSession): FormDeleteResponse = {
+    FormDeleteResponse(deleteForm(userGroup, id))
   }
 
   /** HashedIdによるフォーム削除 */
-  def deleteByHashedId(identity: User, hashed_id: String)(implicit session: DBSession): FormDeleteResponse = {
-    FormDeleteResponse(deleteFormByHashedId(identity.group.getOrElse(""), hashed_id))
+  def deleteByHashedId(userGroup: String, hashed_id: String)(implicit session: DBSession): FormDeleteResponse = {
+    FormDeleteResponse(deleteFormByHashedId(userGroup, hashed_id))
   }
 
   /** 更新時のSalesforceTransferTaskSalesforceField削除 */

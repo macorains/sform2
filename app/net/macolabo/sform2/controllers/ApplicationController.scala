@@ -1,38 +1,35 @@
 package net.macolabo.sform2.controllers
 
-import com.mohiva.play.silhouette.api.actions.SecuredRequest
-import com.mohiva.play.silhouette.api.{LogoutEvent, Silhouette}
 import javax.inject.Inject
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
-import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
-import net.macolabo.sform2.utils.auth.DefaultEnv
+import play.api.mvc.{Action, AnyContent, Request}
+import org.pac4j.core.profile.UserProfile
+import org.pac4j.play.scala.{Security, SecurityComponents}
 
 import scala.concurrent.Future
 
 /**
  * The basic application controller.
  *
- * @param components             The Play controller components.
- * @param silhouette             The Silhouette stack.
+ * @param controllerComponents   The Play controller components.
  * @param webJarsUtil            The webjar util.
  */
 class ApplicationController @Inject() (
-  components: ControllerComponents,
-  silhouette: Silhouette[DefaultEnv]
+                                        val controllerComponents: SecurityComponents
 )(
   implicit
   webJarsUtil: WebJarsUtil
-) extends AbstractController(components) with I18nSupport {
+) extends Security[UserProfile] with I18nSupport {
 
   /**
    * Handles the index action.
    *
    * @return The result to display.
    */
-  def index: Action[AnyContent] = silhouette.SecuredAction.async { implicit request: SecuredRequest[DefaultEnv, AnyContent] =>
+  def index: Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
     //Future.successful(Ok(views.html.home(request.identity)))
-    println(request.identity)
+    //println(request.identity)
     // Future.successful(Ok(views.html.index(request.identity)))
     Future.successful(Ok(""))
   }
@@ -42,9 +39,9 @@ class ApplicationController @Inject() (
    *
    * @return The result to display.
    */
-  def signOut: Action[AnyContent] = silhouette.SecuredAction.async { implicit request: SecuredRequest[DefaultEnv, AnyContent] =>
-    val result = Redirect(routes.ApplicationController.index())
-    silhouette.env.eventBus.publish(LogoutEvent(request.identity, request))
-    silhouette.env.authenticatorService.discard(request.authenticator, result)
+  def signOut: Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
+    Redirect(routes.ApplicationController.index)
+    //silhouette.env.eventBus.publish(LogoutEvent(request.identity, request))
+    //silhouette.env.authenticatorService.discard(request.authenticator, result)
   }
 }

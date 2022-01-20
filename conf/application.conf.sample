@@ -1,11 +1,13 @@
-# This is the maiｃn configuration file for the application.
+# This is the main configuration file for the application.
 # ~~~~~
+
+baseUrl="http://localhost:9001"
 
 # Secret key
 # ~~~~~
 # The secret key is used to secure cryptographics functions.
 # If you deploy your application to several instances be sure to use the same key!
-play.http.secret.key="changeme"
+play.http.secret.key="changemechangemechangemechangemechangemechangemechangemechangemechangemechangeme"
 
 # The application languages
 # ~~~~~
@@ -14,11 +16,6 @@ play.i18n.langs=["en"]
 # Registers the request handler
 # ~~~~~
 play.http.requestHandler = "play.api.http.DefaultHttpRequestHandler"
-
-# Registers the filters
-# ~~~~~
-play.http.filters = "net.macolabo.sform2.utils.net.macolabo.sform2.Filters"
-
 play.http.parser.maxMemoryBuffer = 5MB
 play.http.parser.maxDiskBuffer = 100MB
 parsers.anyContent.maxLength = 100MB
@@ -30,12 +27,9 @@ play.http.session.maxAge = 1h
 # ~~~~~
 play.modules.enabled += "net.macolabo.sform2.modules.BaseModule"
 play.modules.enabled += "net.macolabo.sform2.modules.JobModule"
-play.modules.enabled += "net.macolabo.sform2.modules.SilhouetteModule"
+play.modules.enabled += "net.macolabo.sform2.modules.SecurityModule"
 play.modules.enabled += "play.api.libs.mailer.MailerModule"
 play.modules.enabled += "net.macolabo.sform2.modules.DBInitializerModule"
-
-play.modules.disabled += "com.mohiva.play.silhouette.api.actions.SecuredErrorHandlerModule"
-play.modules.disabled += "com.mohiva.play.silhouette.api.actions.UnsecuredErrorHandlerModule"
 
 # Akka config
 akka {
@@ -68,6 +62,12 @@ play.mailer {
 }
 
 # Security Filter Configuration - Content Security Policy
+# Registers the filters
+# ~~~~~
+# TODO pac4jのfilterを使ってCORSを動かしたい
+# とりあえず上手くいかないので、play標準のCORSフィルターとの折衷型にしておく
+# play.filters.enabled += "net.macolabo.sform2.filters.Filters"
+play.filters.enabled += "play.filters.cors.CORSFilter"
 play.filters {
   headers {
     contentSecurityPolicy = "default-src 'self';"
@@ -78,9 +78,10 @@ play.filters {
     contentSecurityPolicy = ${play.filters.headers.contentSecurityPolicy}" connect-src 'self' twitter.com *.xing.com;"
  }
   cors {
-    exposedHeaders = ["x-auth-token","X-Auth-Token"]
+    exposedHeaders = ["x-auth-token","X-Auth-Token","Access-Control-Allow-Origin"]
     pathPrefixes = ["/"]
-    allowedOrigins = ["http://localhost:8080"]
+    # Chrome拡張のAPI Testerの類を使う場合はallowedOriginsに追加が必要
+    allowedOrigins = ["http://localhost:8080","http://localhost:8081", "chrome-extension://aejoelaoggembcahagimdiliamlcdmfm"]
     allowedHttpMethods = ["GET", "POST", "OPTIONS", "DELETE"]
     allowedHttpHeaders = ["Accept", "Content-Type", "Access-Control-Allow-Origin", "Origin", "X-Requested-With", "X-Auth-Token", "Timeout"]
     preflightMaxAge = 3 days
@@ -160,7 +161,31 @@ db {
   #default.logSql=true
 }
 
+pac4j.security {
+  rules = [
+    {"/facebook.*" = {
+      clients = "FacebookClient",
+      matchers = "excludedPath"
+    }}
+    {"/rest-jwt.*" = {
+      clients = "ParameterClient"
+    }}
+  ]
+}
 
+# Number of database connections
+# See https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing
+fixedConnectionPool = 9
 
-include "silhouette.conf"
+# Job queue sized to HikariCP connection pool
+database.dispatcher {
+  executor = "thread-pool-executor"
+  throughput = 1
+  thread-pool-executor {
+    fixed-pool-size = ${fixedConnectionPool}
+  }
+}
+
+# sform.confもgitリポジトリに含まれていないので、sform.conf.sampleを環境に合わせて調整して設置すること
 include "sform.conf"
+

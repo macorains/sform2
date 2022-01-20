@@ -2,20 +2,22 @@ package net.macolabo.sform2.services.Transfer
 
 import java.time.ZonedDateTime
 import com.google.inject.Inject
-import net.macolabo.sform2.models.entity.user.User
 import net.macolabo.sform2.models.transfer.{TransferConfig, TransferConfigMail, TransferConfigMailAddress, TransferConfigSalesforce, TransferConfigSalesforceObject, TransferConfigSalesforceObjectField}
 
 import scala.concurrent.ExecutionContext
 
-class TransferService @Inject() (implicit ex: ExecutionContext) extends TransferGetTransferConfigSelectListJson with TransferGetTransferConfigListJson with TransferGetTransferConfigResponseJson {
+class TransferService @Inject() (implicit ex: ExecutionContext)
+  extends TransferGetTransferConfigSelectListJson
+    with TransferGetTransferConfigListJson
+    with TransferGetTransferConfigResponseJson
+{
 
   /**
    * フォーム編集画面のTransferConfig選択リスト用データ取得
-   * @param identity 認証情報
+   * @param userGroup ユーザーグループ
    * @return TransferConfigのID,Nameのリスト
    */
-  def getTransferConfigSelectList(identity: User): List[TransferGetTransferConfigSelectList] = {
-    val userGroup = identity.group.getOrElse("")
+  def getTransferConfigSelectList(userGroup: String): List[TransferGetTransferConfigSelectList] = {
     TransferConfig.getList(userGroup).map(f => {
       TransferGetTransferConfigSelectList(
         f.id,
@@ -27,11 +29,10 @@ class TransferService @Inject() (implicit ex: ExecutionContext) extends Transfer
 
   /**
    * TransferConfigのリスト取得
-   * @param identity 認証情報
+   * @param userGroup ユーザーグループ
    * @return TransferConfigのリスト
    */
-  def getTransferConfigList(identity: User): List[TransferGetTransferConfigListResponse] = {
-    val userGroup = identity.group.getOrElse("")
+  def getTransferConfigList(userGroup: String): List[TransferGetTransferConfigListResponse] = {
     TransferConfig.getList(userGroup).map(f => {
       TransferGetTransferConfigListResponse(
         f.id,
@@ -45,12 +46,11 @@ class TransferService @Inject() (implicit ex: ExecutionContext) extends Transfer
 
   /**
    * TransferConfigの詳細付きデータ取得
-   * @param identity 認証情報
+   * @param userGroup ユーザーグループ
    * @param transferConfigId TransferConfig ID
    * @return 詳細付きTransferConfig
    */
-  def getTransferConfig(identity:User, transferConfigId: Int): Option[TransferGetTransferConfigResponse] = {
-    val userGroup = identity.group.getOrElse("")
+  def getTransferConfig(userGroup: String, transferConfigId: Int): Option[TransferGetTransferConfigResponse] = {
     TransferConfig.get(userGroup, transferConfigId).map(f => {
       TransferGetTransferConfigResponse(
         f.id,
@@ -68,13 +68,12 @@ class TransferService @Inject() (implicit ex: ExecutionContext) extends Transfer
 
   /**
    * TransferConfigの更新
-   * @param identity 認証情報
+   * @param userId ユーザーID
+   * @param userGroup ユーザーグループ
    * @param transferUpdateTransferConfigRequest TransferConfig更新リクエスト
    * @return Result
    */
-  def updateTransferConfig(identity: User, transferUpdateTransferConfigRequest: TransferUpdateTransferConfigRequest): TransferUpdateTransferConfigResponse = {
-    val userId = identity.userID.toString
-    val userGroup = identity.group.getOrElse("")
+  def updateTransferConfig(userId: String, userGroup: String, transferUpdateTransferConfigRequest: TransferUpdateTransferConfigRequest): TransferUpdateTransferConfigResponse = {
     TransferConfig(
       transferUpdateTransferConfigRequest.id,
       transferUpdateTransferConfigRequest.type_code,

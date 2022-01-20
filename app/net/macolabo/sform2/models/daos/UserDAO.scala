@@ -1,9 +1,9 @@
 package net.macolabo.sform2.models.daos
 
 import java.util.UUID
-import com.mohiva.play.silhouette.api.LoginInfo
 import net.macolabo.sform2.models.entity.user.User
 import play.api.libs.json.JsValue
+import scalikejdbc.DBSession
 
 import scala.concurrent.Future
 
@@ -13,20 +13,37 @@ import scala.concurrent.Future
 trait UserDAO {
 
   /**
-   * Finds a user by its login info.
-   *
-   * @param loginInfo The login info of the user to find.
-   * @return The found user or None if no user for the given login info could be found.
-   */
-  def find(loginInfo: LoginInfo): Future[Option[User]]
-
-  /**
    * Finds a user by its user ID.
    *
    * @param userID The ID of the user to find.
    * @return The found user or None if no user for the given ID could be found.
    */
   def find(userID: UUID): Future[Option[User]]
+  def find(username: String): Future[Option[User]]
+
+  /**
+   * ユーザー検索(pac4j)
+   * @param fields DBフィールド
+   * @param key 検索キー
+   * @param value 検索値
+   * @param session DBSession
+   * @return
+   */
+  def find(fields: String, key: String, value: String)(implicit session: DBSession): List[Map[String, Any]]
+
+  /**
+   * ユーザー作成(pac4j)
+   * @param attributes 属性リスト
+   * @param session DBSession
+   */
+  def insert(attributes: Seq[(String,AnyRef)])(implicit session: DBSession): Unit
+
+  /**
+   * ユーザー更新(pac4j)
+   * @param attributes 属性リスト
+   * @param session DBSession
+   */
+  def update(attributes: Seq[(String,AnyRef)])(implicit session: DBSession): Unit
 
   /**
    * Saves a user.
@@ -42,6 +59,12 @@ trait UserDAO {
    */
   def delete(userID: String, group: String): Unit
 
-  def getList(identity: User): JsValue
+  /**
+   * ユーザー削除(pac4j)
+   * @param userID ユーザーID
+   */
+  def delete(userID: String): Unit
+
+  def getList(userGroup: String): JsValue
   def countAdminUsers() :Int
 }

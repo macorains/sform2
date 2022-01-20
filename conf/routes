@@ -6,20 +6,14 @@
 
 GET         /                                net.macolabo.sform2.controllers.ApplicationController.index
 GET         /signOut                         net.macolabo.sform2.controllers.ApplicationController.signOut
-# GET         /authenticate/:provider          controllers.SocialAuthController.authenticate(provider)
 
-GET         /signUp                          net.macolabo.sform2.controllers.SignUpController.view
 POST        /signUp                          net.macolabo.sform2.controllers.SignUpController.submit
 
-GET         /signIn                          net.macolabo.sform2.controllers.SignInController.view
 POST        /signIn                          net.macolabo.sform2.controllers.SignInController.submit
 POST        /verification                    net.macolabo.sform2.controllers.SignInController.verification
 
-# GET         /password/forgot                 net.macolabo.sform2.controllers.ForgotPasswordController.view
 # POST        /password/forgot                 net.macolabo.sform2.controllers.ForgotPasswordController.submit
-# GET         /password/reset/:token           net.macolabo.sform2.controllers.ResetPasswordController.view(token: java.util.UUID)
 # POST        /password/reset/:token           net.macolabo.sform2.controllers.ResetPasswordController.submit(token: java.util.UUID)
-# GET         /password/change                 net.macolabo.sform2.controllers.ChangePasswordController.view
 # POST        /password/change                 net.macolabo.sform2.controllers.ChangePasswordController.submit
 
 # GET         /account/email/:email            net.macolabo.sform2.controllers.ActivateAccountController.send(email: String)
@@ -52,11 +46,6 @@ GET /user net.macolabo.sform2.controllers.UserController.getList()
 POST /user net.macolabo.sform2.controllers.UserController.save()
 DELETE /user/:user_id net.macolabo.sform2.controllers.UserController.delete(user_id: String)
 GET /user/isadmin net.macolabo.sform2.controllers.UserController.isAdmin()
-
-
-# transferTask
-# GET /transfertask/list/:form_id net.macolabo.sform2.controllers.TransferTaskController.getTransferTaskListByFormId(form_id: String)
-# GET /transfertask/:id net.macolabo.sform2.controllers.TransferTaskController.getTransferTask(id: Int)
 
 # adminExistsCheck
 GET /adminExistsCheck net.macolabo.sform2.controllers.AdminExistsCheckController.check()

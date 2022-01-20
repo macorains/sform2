@@ -18,51 +18,51 @@ class FormService @Inject()(
   /**
    * フォーム詳細データ取得
    *
-   * @param identity       認証情報
+   * @param userGroup ユーザーグループ
    * @param hashed_form_id フォームhashed ID
    * @return フォームデータ
    */
-  def getForm(identity: User, hashed_form_id: String): Option[FormGetResponse] = {
+  def getForm(userGroup: String, hashed_form_id: String): Option[FormGetResponse] = {
     DB.localTx(implicit session => {
-      formDAO.getByHashedId(identity, hashed_form_id)
+      formDAO.getByHashedId(userGroup, hashed_form_id)
     })
   }
 
   /**
    * フォームリスト取得
    *
-   * @param identity 認証情報
+   * @param userGroup ユーザーグループ
    * @return フォームリスト
    */
-  def getList(identity: User): FormListResponse = {
+  def getList(userGroup: String): FormListResponse = {
     DB.localTx(implicit session => {
-      formDAO.getList(identity)
+      formDAO.getList(userGroup)
     })
   }
 
   /**
    * フォーム作成
    *
-   * @param identity          認証情報
+   * @param userGroup ユーザーグループ
    * @param formUpdateRequest フォーム作成リクエストデータ
    * @return フォーム作成結果レスポンス
    */
-  def insert(identity: User, formUpdateRequest: FormUpdateRequest): FormUpdateResponse = {
+  def insert(userId: String, userGroup: String, formUpdateRequest: FormUpdateRequest): FormUpdateResponse = {
     DB.localTx(implicit session => {
-      formDAO.update(identity, formUpdateRequest)
+      formDAO.update(userId, userGroup, formUpdateRequest)
     })
   }
 
   /**
    * フォーム更新
    *
-   * @param identity          認証情報
+   * @param userGroup ユーザーグループ
    * @param formUpdateRequest フォーム更新リクエストデータ
    * @return フォーム更新結果レスポンス
    */
-  def update(identity: User, formUpdateRequest: FormUpdateRequest): FormUpdateResponse = {
+  def update(userId: String, userGroup: String, formUpdateRequest: FormUpdateRequest): FormUpdateResponse = {
     DB.localTx(implicit session => {
-      formDAO.update(identity, formUpdateRequest)
+      formDAO.update(userId, userGroup, formUpdateRequest)
     })
 
   }
@@ -70,13 +70,13 @@ class FormService @Inject()(
   /**
    * フォーム削除
    *
-   * @param identity       認証情報
+   * @param userGroup ユーザーグループ
    * @param hashed_form_id ハッシュ化フォームID
    * @return フォーム削除結果レスポンス
    */
-  def deleteForm(identity: User, hashed_form_id: String): FormDeleteResponse = {
+  def deleteForm(userGroup: String, hashed_form_id: String): FormDeleteResponse = {
     DB.localTx(implicit session => {
-      formDAO.deleteByHashedId(identity, hashed_form_id)
+      formDAO.deleteByHashedId(userGroup, hashed_form_id)
     })
   }
 }
