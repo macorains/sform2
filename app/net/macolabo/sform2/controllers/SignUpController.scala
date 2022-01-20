@@ -5,18 +5,16 @@ import net.macolabo.sform2.models.entity.user.User
 
 import java.util.UUID
 import javax.inject.Inject
-import net.macolabo.sform2.models.user.{UserSignUpResult, UserSignUpResultJson}
+import net.macolabo.sform2.models.user.UserSignUpResultJson
 import net.macolabo.sform2.services.AuthToken.AuthTokenService
 import net.macolabo.sform2.services.User.UserService
 import org.apache.shiro.authc.credential.DefaultPasswordService
-import org.webjars.play.{WebJarsUtil, routes}
-import play.api.Configuration
+import org.webjars.play.WebJarsUtil
 import play.api.i18n.{I18nSupport, Messages, MessagesProvider}
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc._
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
-import play.api.libs.json.Json
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -31,7 +29,6 @@ import scala.concurrent.{ExecutionContext, Future}
  * @param ex                     The execution context.
  */
 class SignUpController @Inject() (
-  config: Configuration,
   val controllerComponents: SecurityComponents,
   userService: UserService,
   authTokenService: AuthTokenService,

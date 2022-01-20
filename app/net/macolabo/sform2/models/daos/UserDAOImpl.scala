@@ -67,9 +67,9 @@ class UserDAOImpl extends UserDAO with SFDBConf {
   }
 
   /**
-   * Finds a user by its user ID.
+   * Finds a user by its username.
    *
-   * @param userID The ID of the user to find.
+   * @param username ユーザー名
    * @return The found user or None if no user for the given ID could be found.
    */
   def find(username: String): Future[Option[User]] =
@@ -107,8 +107,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
    * @return
    */
   def find(fields: String, key: String, value: String)(implicit session: DBSession): List[Map[String, Any]] = {
-    val result = StringSQLRunner(s"""SELECT ${fields} FROM M_USERINFO as c WHERE ${key} = '${value}'""").run()
-    result
+    StringSQLRunner(s"""SELECT $fields FROM M_USERINFO as c WHERE $key = '$value'""").run()
   }
 
   /**
@@ -149,7 +148,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
    */
   def save(user: User): Future[User] = {
     Await.result(find(user.user_id), Duration.Inf) match {
-      case Some(u: User) => update(user)
+      case Some(_: User) => update(user)
       case _ => add(user)
     }
   }
@@ -166,7 +165,7 @@ class UserDAOImpl extends UserDAO with SFDBConf {
 
   /**
    * ユーザー削除(pac4j)
-   * @param userID
+   * @param userID ユーザーID
    */
   def delete(userID: String): Unit = {
     DB localTx { implicit l =>

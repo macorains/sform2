@@ -13,7 +13,7 @@ trait Pac4jUtil {
   def getProfiles(components: SecurityComponents)(implicit request: RequestHeader): util.List[UserProfile] = {
     val webContext = new PlayWebContext(request)
     val profileManager = new ProfileManager(webContext, components.sessionStore)
-    profileManager.getProfiles()
+    profileManager.getProfiles
   }
 
   def getAttributeValue(profiles: java.util.List[UserProfile], key: String): String = {

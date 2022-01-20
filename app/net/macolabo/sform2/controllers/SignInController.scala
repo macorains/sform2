@@ -3,19 +3,17 @@ package net.macolabo.sform2.controllers
 import com.digitaltangible.playguard._
 
 import javax.inject.Inject
-import net.macolabo.sform2.models.user.VerificationRequestJson
 import net.macolabo.sform2.services.User.UserService
 import org.webjars.play.WebJarsUtil
 import play.api.{Configuration, Logger}
 import play.api.i18n.I18nSupport
-import play.api.libs.json.{JsString, JsSuccess, Json}
+import play.api.libs.json.Json
 import play.api.libs.mailer._
 import play.api.mvc._
 import play.api.cache.SyncCacheApi
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.jwt.config.signature.SecretSignatureConfiguration
 import org.pac4j.jwt.profile.JwtGenerator
-import org.pac4j.play.PlayWebContext
 import org.pac4j.play.scala.{Security, SecurityComponents}
 
 import scala.jdk.CollectionConverters._
@@ -24,10 +22,11 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
  * The `Sign In` controller.
  *
- * @param components             The Play controller components.
+ * @param controllerComponents   The Play controller components.
  * @param userService            The user service implementation.
  * @param configuration          The Play configuration.
- * @param clock                  The clock instance.
+ * @param cache                  The cache instance.
+ * @param mailerClient The Mailer instance.
  * @param webJarsUtil            The webjar util.
  */
 class SignInController @Inject() (
@@ -42,7 +41,6 @@ class SignInController @Inject() (
   ex: ExecutionContext
 ) extends Security[UserProfile]
   with I18nSupport
-  with VerificationRequestJson
   with Pac4jUtil
   with SignInVerificationRequestConverter
 {
@@ -55,7 +53,7 @@ class SignInController @Inject() (
   val failureCheckPrefix = "FC_"
   val cacheExpireTime = 60
 
-  val logger: Logger = Logger(this.getClass())
+  val logger: Logger = Logger(this.getClass)
 
   /**
    * Handles the submitted form.
@@ -63,10 +61,15 @@ class SignInController @Inject() (
    */
   def submit: Action[AnyContent] = Secure("DirectFormClient") { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
-    val authKey = if(profiles.asScala.nonEmpty) profiles.get(0).getAttribute("AuthKey").asInstanceOf[String] else ""
-    val verificationCode = if(profiles.asScala.nonEmpty) profiles.get(0).getAttribute("VerificationCode").asInstanceOf[String] else ""
+    val(authKey,verificationCode) =
+      if(profiles.asScala.nonEmpty)
+        (
+          profiles.get(0).getAttribute("AuthKey").asInstanceOf[String],
+          profiles.get(0).getAttribute("VerificationCode").asInstanceOf[String]
+        )
+      else ("","")
     cache.set(profilePrefix + authKey, profiles)
-    //cache.set(verificationCodePrefix + authKey, verificationCode)
+
 
     mailerClient.send(Email(
 //      subject = Messages("email.verification.subject"),

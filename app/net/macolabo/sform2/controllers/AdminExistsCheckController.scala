@@ -9,7 +9,7 @@ import play.api.mvc._
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class AdminExistsCheckController @Inject() (
   val controllerComponents: SecurityComponents,

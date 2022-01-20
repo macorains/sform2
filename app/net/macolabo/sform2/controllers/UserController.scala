@@ -16,11 +16,8 @@ import org.pac4j.play.scala.{Security, SecurityComponents}
 import scala.concurrent.{ExecutionContext, Future}
 
 class UserController @Inject() (
-  env: Environment,
-  dbapi: DBApi,
   val controllerComponents: SecurityComponents,
   userService: UserService,
-  configuration: Configuration,
   userDAO: UserDAO
 )(
   implicit

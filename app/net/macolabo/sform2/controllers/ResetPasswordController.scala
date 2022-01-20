@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext
 /**
  * The `Reset Password` controller.
  *
- * @param components             The Play controller components.
+ * @param controllerComponents   The Play controller components.
  * @param userService            The user service implementation.
  * @param authTokenService       The auth token service implementation.
  * @param webJarsUtil            The webjar util.

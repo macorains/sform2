@@ -1,19 +1,17 @@
 package net.macolabo.sform2.controllers
 
-import java.net.URLDecoder
 import java.util.UUID
 
 import javax.inject.Inject
 import net.macolabo.sform2.services.AuthToken.AuthTokenService
 import net.macolabo.sform2.services.User.UserService
 import play.api.Configuration
-import play.api.i18n.{I18nSupport, Messages}
-import play.api.libs.mailer.{Email, MailerClient}
+import play.api.i18n.I18nSupport
+import play.api.libs.mailer.MailerClient
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Request}
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Pac4jScalaTemplateHelper, Security, SecurityComponents}
 
-import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future}
 
 /**

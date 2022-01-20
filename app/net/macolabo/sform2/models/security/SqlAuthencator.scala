@@ -19,7 +19,7 @@ class SqlAuthencator @Inject() (
   userDAO: UserDAO
 )(implicit ec: DatabaseExecutionContext)  extends Authenticator {
 
-  val db = Databases.apply("com.mysql.jdbc.Driver", "jdbc:mysql://localhost:3306/pac4jtest?allowPublicKeyRetrieval=true&useSSL=false&characterEncoding=UTF8", "default",Map("user"->"pac4j","password"->"Pac4j43210"))
+  //val db = Databases.apply("com.mysql.jdbc.Driver", "jdbc:mysql://localhost:3306/pac4jtest?allowPublicKeyRetrieval=true&useSSL=false&characterEncoding=UTF8", "default",Map("user"->"pac4j","password"->"Pac4j43210"))
 
   @Override
   def validate(cred: Credentials, context: WebContext, sessionStore: SessionStore)  = {

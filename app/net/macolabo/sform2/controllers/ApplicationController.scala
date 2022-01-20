@@ -3,7 +3,7 @@ package net.macolabo.sform2.controllers
 import javax.inject.Inject
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
-import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents, Request}
+import play.api.mvc.{Action, AnyContent, Request}
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
 
@@ -12,7 +12,7 @@ import scala.concurrent.Future
 /**
  * The basic application controller.
  *
- * @param components             The Play controller components.
+ * @param controllerComponents   The Play controller components.
  * @param webJarsUtil            The webjar util.
  */
 class ApplicationController @Inject() (

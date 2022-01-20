@@ -1,7 +1,6 @@
 package net.macolabo.sform2.models.daos
 
 import scalikejdbc._
-import scalikejdbc.{ DB, WrappedResultSet }
 
 trait TransferLogDAO {
   def create(transfer_type_id: Int)(implicit session: DBSession): Long

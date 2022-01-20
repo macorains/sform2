@@ -79,6 +79,7 @@ class UserProfileService @Inject()(
   }
 
   override def validate(cred: Credentials, context: WebContext, sessionStore: SessionStore) = {
+    println("init()")
     init()
     assertNotNull("credentials", cred)
     val credentials = cred.asInstanceOf[UsernamePasswordCredentials]
@@ -93,12 +94,15 @@ class UserProfileService @Inject()(
     try {
       val listAttributes = read(attributesToRead, getUsernameAttribute(), username)
       if(listAttributes == null || listAttributes.isEmpty()) {
+        println("No account found for: " + username)
         throw new AccountNotFoundException("No account found for: " + username)
       } else if (listAttributes.size() > 1) {
+        println("Too many accounts found for: " + username)
         throw new MultipleAccountsFoundException("Too many accounts found for: " + username)
       } else {
         val retrievedPassword = listAttributes.get(0).get(getPasswordAttribute()).asInstanceOf[String]
         if (!passwordEncoder.matches(password, retrievedPassword)) {
+          println("Bad credentials for: " + username)
           throw new BadCredentialsException("Bad credentials for: " + username)
         } else {
           val profile = convertAttributesToProfile(listAttributes, null)

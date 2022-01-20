@@ -61,7 +61,7 @@ trait UserDAO {
 
   /**
    * ユーザー削除(pac4j)
-   * @param userID
+   * @param userID ユーザーID
    */
   def delete(userID: String): Unit
 
