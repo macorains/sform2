@@ -8,6 +8,7 @@ import net.macolabo.sform2.services.Form.update.{FormColSelectUpdateRequest, For
 import scalikejdbc._
 
 import java.time.ZonedDateTime
+import java.util.UUID
 
 /**
  * FormDAO
@@ -560,10 +561,11 @@ class FormDAOImpl extends FormDAO {
   // insertクエリ実行
   // ----------------------------------------------
   def insertForm(userGroup: String, user: String, form: FormUpdateRequest)(implicit session: DBSession): BigInt = {
+    val formHashedId = UUID.randomUUID().toString
     withSQL {
       val c = Form.column
       insertInto(Form).namedValues(
-        c.hashed_id -> form.hashed_id,
+        c.hashed_id -> formHashedId,
         c.form_index -> form.form_index,
         c.name -> form.name,
         c.title -> form.title,
