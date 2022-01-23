@@ -8,6 +8,7 @@ import net.macolabo.sform2.services.Form.update.{FormColSelectUpdateRequest, For
 import scalikejdbc._
 
 import java.time.ZonedDateTime
+import java.util.UUID
 
 /**
  * FormDAO
@@ -40,62 +41,59 @@ class FormDAOImpl extends FormDAO {
 
   /** フォーム作成・更新 */
   def update(userId: String, userGroup: String, request: FormUpdateRequest)(implicit session: DBSession): FormUpdateResponse = {
-    val userId = "hoge"
-    val group = "hoge"
-
     val formId = request.id
       .map(_ => updateForm(userId, request))
-      .getOrElse(insertForm(group, userId, request))
+      .getOrElse(insertForm(userGroup, userId, request))
 
     // FormColの処理
     val formColIds = request.form_cols.map(formCol => {
       val formColId = formCol.id
         .map(_ => updateFormCol(userId, formCol))
-        .getOrElse(insertFormCol(group, userId, formCol, formId))
+        .getOrElse(insertFormCol(userGroup, userId, formCol, formId))
       val formColSelectIds = formCol.select_list.map(select => {
         select.id
           .map(_ => updateFormColSelect(userId, select))
-          .getOrElse(insertFormColSelect(group, userId, select, formId, formColId))
+          .getOrElse(insertFormColSelect(userGroup, userId, select, formId, formColId))
       })
       formCol.validations.id
         .map(_ => updateFormColValidation(userId, formCol.validations))
-        .getOrElse(insertFormColValidation(group, userId, formCol.validations, formId, formColId))
-      bulkDeleteFormColSelect(formId, formColId, formColSelectIds, group)
+        .getOrElse(insertFormColValidation(userGroup, userId, formCol.validations, formId, formColId))
+      bulkDeleteFormColSelect(formId, formColId, formColSelectIds, userGroup)
       formColId
     })
-    bulkDeleteFormCol(formId, formColIds, group)
+    bulkDeleteFormCol(formId, formColIds, userGroup)
 
     // FormTransferTaskの処理
     val formTransferTaskIds = request.form_transfer_tasks.map(formTransferTask => {
       val formTransferTaskId = formTransferTask.id
         .map(_ => updateFormTransferTask(userId, formTransferTask))
-        .getOrElse(insertFormTransferTask(group, userId, formTransferTask, formId))
+        .getOrElse(insertFormTransferTask(userGroup, userId, formTransferTask, formId))
       formTransferTask.form_transfer_task_conditions.foreach(condition => {
         condition.id
           .map(_ => updateFormTransferTaskCondition(userId, condition))
-          .getOrElse(insertFormTransferTaskCondition(group, userId, condition, formId, formTransferTaskId))
+          .getOrElse(insertFormTransferTaskCondition(userGroup, userId, condition, formId, formTransferTaskId))
       })
 
       formTransferTask.salesforce.foreach(sf => {
         val sfId = sf.id
           .map(_ => updateFormTransferTaskSalesforce(userId, sf))
-          .getOrElse(insertFormTransferTaskSalesforce(group, userId, sf, formTransferTaskId))
+          .getOrElse(insertFormTransferTaskSalesforce(userGroup, userId, sf, formTransferTaskId))
         val sffIds = sf.fields.map(sff => {
           sff.id
             .map(_ => updateFormTransferTaskSalesforceField(userId, sff))
-            .getOrElse(insertFormTransferTaskSalesforceField(group, userId, sff, sfId))
+            .getOrElse(insertFormTransferTaskSalesforceField(userGroup, userId, sff, sfId))
         })
-        bulkDeleteFormTransferTaskSalesforceField(sfId, sffIds, group)
+        bulkDeleteFormTransferTaskSalesforceField(sfId, sffIds, userGroup)
       })
 
       formTransferTask.mail.map(mail => {
         mail.id
           .map(_ => updateFormTransferTaskMail(userId, mail))
-          .getOrElse(insertFormTransferTaskMail(group, userId, mail, formTransferTaskId))
+          .getOrElse(insertFormTransferTaskMail(userGroup, userId, mail, formTransferTaskId))
       })
       formTransferTaskId
     })
-    bulkDeleteFormTransferTask(formId, formTransferTaskIds, group)
+    bulkDeleteFormTransferTask(formId, formTransferTaskIds, userGroup)
 
     FormUpdateResponse(formId)
   }
@@ -563,10 +561,11 @@ class FormDAOImpl extends FormDAO {
   // insertクエリ実行
   // ----------------------------------------------
   def insertForm(userGroup: String, user: String, form: FormUpdateRequest)(implicit session: DBSession): BigInt = {
+    val formHashedId = UUID.randomUUID().toString
     withSQL {
       val c = Form.column
       insertInto(Form).namedValues(
-        c.hashed_id -> form.hashed_id,
+        c.hashed_id -> formHashedId,
         c.form_index -> form.form_index,
         c.name -> form.name,
         c.title -> form.title,
