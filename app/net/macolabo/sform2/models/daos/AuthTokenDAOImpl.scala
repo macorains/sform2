@@ -2,7 +2,6 @@ package net.macolabo.sform2.models.daos
 
 import java.util.UUID
 import net.macolabo.sform2.models.entity.user.AuthToken
-import net.macolabo.sform2.models.SFDBConf
 import scala.concurrent.Future
 import scalikejdbc._
 
@@ -10,7 +9,7 @@ import java.time.LocalDateTime
 /**
  * Give access to the [[AuthToken]] object.
  */
-class AuthTokenDAOImpl extends AuthTokenDAO with SFDBConf {
+class AuthTokenDAOImpl extends AuthTokenDAO {
 
   /**
    * Finds a token by its ID.
