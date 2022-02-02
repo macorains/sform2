@@ -2,7 +2,6 @@ package net.macolabo.sform2.models.daos
 
 import java.util.UUID
 import net.macolabo.sform2.models.entity.user.User
-import net.macolabo.sform2.models.SFDBConf
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import scalikejdbc._
 
@@ -32,7 +31,7 @@ object UserJson {
 /**
  * Give access to the user object.
  */
-class UserDAOImpl extends UserDAO with SFDBConf {
+class UserDAOImpl extends UserDAO {
 
   /**
    * Finds a user by its user ID.
