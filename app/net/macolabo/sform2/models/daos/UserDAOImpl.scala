@@ -40,27 +40,28 @@ class UserDAOImpl extends UserDAO {
    * @return The found user or None if no user for the given ID could be found.
    */
   def find(userID: UUID): Future[Option[User]] = {
-    // TODO QueryDSLに変更する
     Future.successful(
       DB localTx { implicit l =>
-        sql"SELECT ID,USERNAME,PASSWORD,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE ID=${userID.toString}"
-          .map(rs =>
-            User(
-              UUID.fromString(rs.string("ID")),
-              rs.string("USERNAME"),
-              rs.string("PASSWORD"),
-              Option(rs.string("USER_GROUP")),
-              Option(rs.string("ROLE")),
-              Option(rs.string("FIRST_NAME")),
-              Option(rs.string("LAST_NAME")),
-              Option(rs.string("FULL_NAME")),
-              Option(rs.string("EMAIL")),
-              Option(rs.string("AVATAR_URL")),
-              rs.boolean("ACTIVATED"),
-              rs.boolean("DELETABLE")
-            )
+        val u = User.syntax("u")
+        withSQL(
+          select(
+            u.id,
+            u.username,
+            u.password,
+            u.user_group,
+            u.role,
+            u.first_name,
+            u.last_name,
+            u.full_name,
+            u.email,
+            u.avatar_url,
+            u.activated,
+            u.deletable
           )
-          .single().apply()
+            .from(User as u)
+            .where
+            .eq(u.id, userID.toString)
+        ).map(rs => User(rs)).single().apply()
       }
     )
   }
@@ -72,28 +73,29 @@ class UserDAOImpl extends UserDAO {
    * @return The found user or None if no user for the given ID could be found.
    */
   def find(username: String): Future[Option[User]] =
-  // TODO QueryDSLに変更する
   // TODO usergroupも加えて検索するように
     Future.successful(
       DB localTx { implicit l =>
-        sql"SELECT ID,USERNAME,PASSWORD,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE USERNAME=$username"
-          .map(rs =>
-            User(
-              UUID.fromString(rs.string("ID")),
-              rs.string("USERNAME"),
-              rs.string("PASSWORD"),
-              Option(rs.string("USER_GROUP")),
-              Option(rs.string("ROLE")),
-              Option(rs.string("FIRST_NAME")),
-              Option(rs.string("LAST_NAME")),
-              Option(rs.string("FULL_NAME")),
-              Option(rs.string("EMAIL")),
-              Option(rs.string("AVATAR_URL")),
-              rs.boolean("ACTIVATED"),
-              rs.boolean("DELETABLE")
-            )
+        val u = User.syntax("u")
+        withSQL(
+          select(
+            u.id,
+            u.username,
+            u.password,
+            u.user_group,
+            u.role,
+            u.first_name,
+            u.last_name,
+            u.full_name,
+            u.email,
+            u.avatar_url,
+            u.activated,
+            u.deletable
           )
-          .single().apply()
+            .from(User as u)
+            .where
+            .eq(u.username, username)
+        ).map(rs => User(rs)).single().apply()
       }
     )
 
@@ -131,7 +133,9 @@ class UserDAOImpl extends UserDAO {
     val c = User.column
     val nv = attributes.map(attr => c.column(attr._1)->attr._2).toMap
     withSQL {
-      QueryDSL.update(User).set(nv)
+      QueryDSL
+        .update(User)
+        .set(nv)
     }.update().apply()
   }
 
@@ -158,7 +162,16 @@ class UserDAOImpl extends UserDAO {
    */
   def delete(userID: String, group: String): Unit = {
     DB localTx { implicit l =>
-      sql"DELETE FROM M_USERINFO WHERE ID=$userID AND USER_GROUP=$group".update().apply()
+      withSQL{
+        val u = User.column
+        QueryDSL
+          .delete
+          .from(User)
+          .where
+          .eq(u.id, userID)
+          .and
+          .eq(u.user_group, group)
+      }.update().apply()
     }
   }
 
@@ -169,8 +182,12 @@ class UserDAOImpl extends UserDAO {
   def delete(userID: String): Unit = {
     DB localTx { implicit l =>
       withSQL{
-        val c = User.column
-        QueryDSL.delete.from(User).where.eq(c.user_id, userID)
+        val u = User.column
+        QueryDSL
+          .delete
+          .from(User)
+          .where
+          .eq(u.user_id, userID)
       }.update().apply()
     }
   }
@@ -194,10 +211,10 @@ class UserDAOImpl extends UserDAO {
 
   def getList(userGroup: String): JsValue = {
     DB localTx { implicit l =>
-      val userList = sql"SELECT USER_ID,USERNAME,PASSWORD,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE USER_GROUP=$userGroup"
+      val userList = sql"SELECT ID,USERNAME,PASSWORD,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE USER_GROUP=$userGroup"
         .map(rs =>
           User(
-            UUID.fromString(rs.string("USER_ID")),
+            UUID.fromString(rs.string("ID")),
             rs.string("USERNAME"),
             rs.string("PASSWORD"),
             Option(rs.string("USER_GROUP")),
