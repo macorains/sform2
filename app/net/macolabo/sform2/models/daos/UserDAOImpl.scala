@@ -4,6 +4,7 @@ import java.util.UUID
 import net.macolabo.sform2.models.entity.user.User
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import scalikejdbc._
+import scalikejdbc.interpolation.SQLSyntax.count
 
 import scala.collection.mutable
 import scala.concurrent.{Future, _}
@@ -131,11 +132,14 @@ class UserDAOImpl extends UserDAO {
    */
   def update(attributes: Seq[(String,AnyRef)])(implicit session: DBSession): Unit = {
     val c = User.column
-    val nv = attributes.map(attr => c.column(attr._1)->attr._2).toMap
+    val userId = attributes.filter(attr => attr._1.eq("id")).map(attr => attr._2).head
+    val nv = attributes.filter(attr => attr._1.ne("id")).map(attr => c.column(attr._1)->attr._2).toMap
     withSQL {
       QueryDSL
         .update(User)
         .set(nv)
+        .where
+        .eq(c.id, userId)
     }.update().apply()
   }
 
@@ -150,7 +154,7 @@ class UserDAOImpl extends UserDAO {
    * @return The saved user.
    */
   def save(user: User): Future[User] = {
-    Await.result(find(user.user_id), Duration.Inf) match {
+    Await.result(find(user.id), Duration.Inf) match {
       case Some(_: User) => update(user)
       case _ => add(user)
     }
@@ -187,52 +191,81 @@ class UserDAOImpl extends UserDAO {
           .delete
           .from(User)
           .where
-          .eq(u.user_id, userID)
+          .eq(u.id, userID)
       }.update().apply()
     }
   }
 
   private def update(user: User): Future[User] = {
     DB localTx { implicit l =>
-      sql"UPDATE M_USERINFO SET USERNAME=${user.username}, PASSWORD=${user.password}, FIRST_NAME=${user.first_name}, LAST_NAME=${user.last_name} ,EMAIL=${user.email}, AVATAR_URL=${user.avatar_url}, ACTIVATED=${user.activated}, DELETABLE=${user.deletable} WHERE ID=${user.user_id.toString}"
-        .update().apply()
+      withSQL {
+        val u = User.column
+        QueryDSL.update(User).set(
+          u.username -> user.username,
+          u.password -> user.password,
+          u.first_name -> user.first_name,
+          u.last_name -> user.last_name,
+          u.email -> user.email,
+          u.avatar_url -> user.avatar_url,
+          u.activated -> user.activated,
+          u.deletable -> user.deletable
+        )
+          .where
+          .eq(u.id, user.id.toString)
+      }.update().apply()
       Future.successful(user)
     }
   }
 
   private def add(user: User): Future[User] = {
     DB localTx { implicit l =>
-      sql"INSERT INTO M_USERINFO(ID,USERNAME,PASSWORD,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE) VALUES(${user.user_id.toString},${user.username},${user.password},${user.user_group},${user.role},${user.first_name},${user.last_name},${user.email},'',0,1)"
-        .update().apply()
+      withSQL {
+        val u = User.column
+        insertInto(User).namedValues(
+          u.id -> user.id.toString,
+          u.username -> user.username,
+          u.password -> user.password,
+          u.user_group -> user.user_group,
+          u.role -> user.role,
+          u.first_name -> user.first_name,
+          u.last_name -> user.last_name,
+          u.email -> user.email,
+          u.avatar_url -> user.avatar_url,
+          u.activated -> 0,
+          u.deletable -> 1
+        )
+      }.update().apply()
       Future.successful(user)
     }
   }
 
-
   def getList(userGroup: String): JsValue = {
     DB localTx { implicit l =>
-      val userList = sql"SELECT ID,USERNAME,PASSWORD,USER_GROUP,ROLE,FIRST_NAME,LAST_NAME,FULL_NAME,EMAIL,AVATAR_URL,ACTIVATED,DELETABLE FROM M_USERINFO WHERE USER_GROUP=$userGroup"
-        .map(rs =>
-          User(
-            UUID.fromString(rs.string("ID")),
-            rs.string("USERNAME"),
-            rs.string("PASSWORD"),
-            Option(rs.string("USER_GROUP")),
-            Option(rs.string("ROLE")),
-            Option(rs.string("FIRST_NAME")),
-            Option(rs.string("LAST_NAME")),
-            Option(rs.string("FULL_NAME")),
-            Option(rs.string("EMAIL")),
-            Option(rs.string("AVATAR_URL")),
-            rs.boolean("ACTIVATED"),
-            rs.boolean("DELETABLE")
-          )
+      val u = User.syntax("u")
+      val userList = withSQL(
+        select(
+          u.id,
+          u.username,
+          u.password,
+          u.user_group,
+          u.role,
+          u.first_name,
+          u.last_name,
+          u.full_name,
+          u.email,
+          u.avatar_url,
+          u.activated,
+          u.deletable
         )
-        .list().apply()
+          .from(User as u)
+          .where
+          .eq(u.user_group, userGroup)
+      ).map(rs => User(rs)).list().apply()
+
       val userListJson = userList.map(
         u => {
           UserJson(
-            u.user_id.toString,
+            u.id.toString,
             u.username,
             u.password,
             u.user_group.getOrElse(""),
@@ -254,7 +287,13 @@ class UserDAOImpl extends UserDAO {
   // Adminグループのユーザーアカウント数を取得
   def countAdminUsers() :Int = {
     DB localTx { implicit l =>
-      sql"SELECT count(*) FROM M_USERINFO WHERE USER_GROUP='admin'".map(_.int(1)).first().apply().getOrElse(0)
+      withSQL {
+        val u = User.syntax("u")
+        select(count)
+          .from(User as u)
+          .where
+          .eq(u.user_group, "admin")
+      }.map(rs => rs.int(1)).single().apply().getOrElse(0)
     }
   }
 }

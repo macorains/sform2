@@ -6,7 +6,7 @@ import java.util.UUID
 /**
  * The user object.
  *
- * @param user_id    The unique ID of the user.
+ * @param id    The unique ID of the user.
  * @param username UserName
  * @param password Password
  * @param user_group     Group name of user.
@@ -20,7 +20,7 @@ import java.util.UUID
  * @param deletable User is deletable or not.
  */
 case class User(
-  user_id: UUID,
+  id: UUID,
   username: String,
   password: String,
   user_group: Option[String],

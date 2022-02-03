@@ -14,19 +14,19 @@ import java.util.UUID
 class UserDAOImplSpec extends FixtureAnyFlatSpec  with GuiceOneServerPerSuite with SformTestHelper with AutoRollback {
   behavior of "User"
 
-  val username = "hoge"
-  val userId = UUID.randomUUID().toString
+  val username: String = "hoge"
+  val userId: String = UUID.randomUUID().toString
 
   // def find(fields: String, key: String, value: String): List[Map[String, Any]]
   it should "find by keyvalue" in { implicit session =>
     val userDAO = new UserDAOImpl()
     // 実行
-    val result = userDAO.find("USER_ID,USERNAME,PASSWORD,USER_GROUP,ROLE","USERNAME",username)
+    val result = userDAO.find("ID,USERNAME,PASSWORD,USER_GROUP,ROLE","USERNAME",username)
 
     // 結果見る
     val user = result.head
     println(user)
-    assert(user("USER_ID").asInstanceOf[String].size > 0)
+    assert(user("ID").asInstanceOf[String].nonEmpty)
     assert(user("USERNAME").equals("hoge"))
     assert(user("PASSWORD").equals("fuga"))
     assert(user("USER_GROUP").equals("gg"))
@@ -37,7 +37,7 @@ class UserDAOImplSpec extends FixtureAnyFlatSpec  with GuiceOneServerPerSuite wi
   it should "insert user" in { implicit session =>
     val newUserId = UUID.randomUUID().toString
     val data :Seq[(String, AnyRef)]= Seq(
-      ("user_id",newUserId),
+      ("id",newUserId),
       ("username","hoge2"),
       ("password","fuga2"),
       ("user_group","test2"),
@@ -50,7 +50,7 @@ class UserDAOImplSpec extends FixtureAnyFlatSpec  with GuiceOneServerPerSuite wi
     val u = User.syntax("u")
     val result = withSQL (
       select(
-        u.user_id,
+        u.id,
         u.username,
         u.password,
         u.user_group,
@@ -59,14 +59,14 @@ class UserDAOImplSpec extends FixtureAnyFlatSpec  with GuiceOneServerPerSuite wi
       )
         .from(User as u)
         .where
-        .eq(u.user_id, newUserId)
+        .eq(u.id, newUserId)
     ).map(rs => rs.toMap()).list().apply()
 
     val datamap = data.toMap
     val newuser = result.head
     println(newuser)
     assert(result.nonEmpty)
-    assert(newuser("user_id").equals(datamap("user_id")))
+    assert(newuser("id").equals(datamap("id")))
     assert(newuser("username").equals(datamap("username")))
     assert(newuser("password").equals(datamap("password")))
     assert(newuser("user_group").equals(datamap("user_group")))
@@ -77,7 +77,7 @@ class UserDAOImplSpec extends FixtureAnyFlatSpec  with GuiceOneServerPerSuite wi
   // update
   it should "update user" in { implicit session =>
     val data :Seq[(String, AnyRef)]= Seq(
-      ("user_id",userId),
+      ("id",userId),
       ("username","hoge3"),
       ("user_group","test3"),
       ("activated",false.asInstanceOf[AnyRef]),
@@ -89,7 +89,7 @@ class UserDAOImplSpec extends FixtureAnyFlatSpec  with GuiceOneServerPerSuite wi
     val u = User.syntax("u")
     val result = withSQL (
       select(
-        u.user_id,
+        u.id,
         u.username,
         u.password,
         u.user_group,
@@ -98,13 +98,13 @@ class UserDAOImplSpec extends FixtureAnyFlatSpec  with GuiceOneServerPerSuite wi
       )
         .from(User as u)
         .where
-        .eq(u.user_id, userId)
+        .eq(u.id, userId)
     ).map(rs => rs.toMap()).list().apply()
 
     val datamap = data.toMap
     val newuser = result.head
     assert(result.nonEmpty)
-    assert(newuser("user_id").equals(datamap("user_id")))
+    assert(newuser("id").equals(datamap("id")))
     assert(newuser("username").equals(datamap("username")))
     assert(newuser("password").equals("fuga")) // 変更対象ではない項目が変更されていないことを確認
     assert(newuser("user_group").equals(datamap("user_group")))
@@ -123,7 +123,7 @@ class UserDAOImplSpec extends FixtureAnyFlatSpec  with GuiceOneServerPerSuite wi
     withSQL {
       val c = User.column
       insertInto(User).namedValues(
-        c.user_id -> UUID.randomUUID().toString,
+        c.id -> userId,
         c.username -> "hoge",
         c.password -> "fuga",
         c.user_group -> "gg",
