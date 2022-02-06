@@ -7,7 +7,7 @@ import scalikejdbc._
 
 import java.time.LocalDateTime
 /**
- * Give access to the [[AuthToken]] object.
+ * Give access to the AuthToken object.
  */
 class AuthTokenDAOImpl extends AuthTokenDAO {
 
