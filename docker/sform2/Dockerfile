@@ -28,5 +28,5 @@ RUN apt -y update && \
     git clone https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/macorains/sform2-config.git && \
     cp sform2-config/application.it.conf sform2/conf
 EXPOSE 9001
-CMD ["nohup", "sform2/bin/sform2s", "-Dport=9001"]
+CMD ["nohup", "sform2/bin/sform2s", "-Dport=9001", "-Dconfig.file=sform2/conf/application.it.conf"]
 
