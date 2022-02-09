@@ -10,6 +10,7 @@ env:
   WORKLOAD_IDENTITY_POOL_ID: ${{ secrets.WORKLOAD_IDENTITY_POOL_ID }}
   PROVIDER_ID: ${{ secrets.PROVIDER_ID }}
   SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
+  SERVICE_ACCOUNT_JSON_KEY: ${{ secrets.SERVICE_ACCOUNT_JSON_KEY }}
   SFORM_GITHUB_USER: ${{ secrets.SFORM_GITHUB_USER }}
   SFORM_GITHUB_TOKEN: ${{ secrets.SFORM_GITHUB_TOKEN }}
   DEPLOYMENT_NAME: gke-test
@@ -18,6 +19,9 @@ env:
 jobs:
   hello:
     runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     steps:
       - name: 'Checkout'
         uses: 'actions/checkout@v2'
@@ -33,7 +37,7 @@ jobs:
 
       - name: 'Configure Docker'
         run: |-
-          gcloud auth configure-docker
+          gcloud auth configure-docker --quiet
 
       - name: Build
         run: |-
@@ -49,5 +53,5 @@ jobs:
 
       - name: Publish
         run: |-
+          echo $SERVICE_ACCOUNT_JSON_KEY | docker login -u _json_key --password-stdin https://gcr.io
           docker push "gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA"
-
