@@ -25,7 +25,7 @@ RUN apt -y update && \
     apt -y install git unzip && \
     unzip sform2s-${SFORM_VERSION}.zip && \
     mv sform2s-${SFORM_VERSION} sform2 && \
-    git clone https://${GITHUB_TOKEN}@github.com/macorains/sform2-config.git && \
+    git clone https://${GITHUB_TOKEN}:x-oauth-basic@github.com/macorains/sform2-config.git && \
     cp sform2-config/application.it.conf sform2/conf
 EXPOSE 9001
 CMD ["nohup", "sform2/bin/sform2s", "-Dport=9001", "-Dconfig.file=sform2/conf/application.it.conf"]
