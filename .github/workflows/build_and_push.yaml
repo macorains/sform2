@@ -59,7 +59,7 @@ jobs:
           docker push "gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA"
 
       - name: Deploy
-          uses: 'google-github-actions/deploy-cloudrun@v0'
-          with:
-            service: 'sform2'
-            image: 'gcr.io/sform-296512/sform2'
+        uses: 'google-github-actions/deploy-cloudrun@v0'
+        with:
+          service: 'sform2'
+          image: 'gcr.io/sform-296512/sform2'
