@@ -72,6 +72,7 @@ jobs:
         with:
           workload_identity_provider: projects/$PROJECT_ID/locations/global/workloadIdentityPools/$WORKLOAD_IDENTITY_POOL_ID/providers/$PROVIDER_ID
           service_account: $SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com
+          create_credentials_file: false
 
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v0'
