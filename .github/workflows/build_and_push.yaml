@@ -17,7 +17,7 @@ env:
   IMAGE: sform2
 
 jobs:
-  sform2-release:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
@@ -58,7 +58,13 @@ jobs:
           echo $SERVICE_ACCOUNT_JSON_KEY | docker login -u _json_key --password-stdin https://gcr.io
           docker push "gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA"
 
-      - name: 'auth2'
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    steps:
+      - name: Auth
         uses: 'google-github-actions/auth@v0'
         with:
           workload_identity_provider: projects/$PROJECT_ID/locations/global/workloadIdentityPools/$WORKLOAD_IDENTITY_POOL_ID/providers/$PROVIDER_ID
