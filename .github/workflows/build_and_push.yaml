@@ -28,7 +28,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: 'auth'
+      - name: 'Auth'
         uses: 'google-github-actions/auth@v0.3.1'
         with:
           workload_identity_provider: projects/$PROJECT_ID/locations/global/workloadIdentityPools/$WORKLOAD_IDENTITY_POOL_ID/providers/$PROVIDER_ID
@@ -41,7 +41,7 @@ jobs:
         run: |-
           gcloud auth configure-docker --quiet
 
-      - name: Build
+      - name: 'Build'
         run: |-
           cd docker/sform2/
           docker build \
@@ -64,13 +64,18 @@ jobs:
       contents: 'read'
       id-token: 'write'
     steps:
-      - name: Auth
+      - name: 'Checkout'
+        uses: 'actions/checkout@v2'
+        with:
+          persist-credentials: false
+
+      - name: 'Auth'
         uses: 'google-github-actions/auth@v0'
         with:
           workload_identity_provider: projects/$PROJECT_ID/locations/global/workloadIdentityPools/$WORKLOAD_IDENTITY_POOL_ID/providers/$PROVIDER_ID
           service_account: $SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com
 
-      - name: Deploy
+      - name: 'Deploy'
         uses: 'google-github-actions/deploy-cloudrun@v0'
         with:
           service: 'sform2'
