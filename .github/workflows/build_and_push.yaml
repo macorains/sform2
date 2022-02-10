@@ -63,3 +63,4 @@ jobs:
         with:
           service: 'sform2'
           image: 'gcr.io/sform-296512/sform2'
+          region: 'asia-northeast1'
