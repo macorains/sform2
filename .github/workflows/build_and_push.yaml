@@ -69,7 +69,7 @@ jobs:
       - name: 'Checkout'
         uses: 'actions/checkout@v2'
         with:
-          persist-credentials: true
+          persist-credentials: false
 
       - name: 'Auth'
         uses: 'google-github-actions/auth@v0.4.4'
