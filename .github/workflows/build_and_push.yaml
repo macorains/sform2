@@ -81,3 +81,4 @@ jobs:
           service: 'sform2'
           image: ${{ env.IMAGE }}
           region: 'asia-northeast1'
+          add-cloudsql-instances: ${{ env.PROJECT_ID }}:asia-northeast1:sform
