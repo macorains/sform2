@@ -75,6 +75,8 @@ jobs:
 
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v0'
+        with:
+          export_default_credentials: true
 
       - name: 'Deploy'
         uses: 'google-github-actions/deploy-cloudrun@v0.4.0'
