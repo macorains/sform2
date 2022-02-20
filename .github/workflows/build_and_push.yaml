@@ -85,4 +85,4 @@ jobs:
 
       - name: 'Deploy'
         run : |-
-          gcloud run deploy sform2 --image ${IMAGE} --region asia-northeast1 --platform managed --add-cloudsql-instances ${PROJECT_ID}:asia-northeast1:sform --port=9001
+          gcloud run deploy sform2 --service-account ${SERVICE_ACCOUNT} --image ${IMAGE} --region asia-northeast1 --platform managed --add-cloudsql-instances ${PROJECT_ID}:asia-northeast1:sform --port=9001--ingress internal-and-cloud-load-balancing
