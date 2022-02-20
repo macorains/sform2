@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 import scala.concurrent.Future
 
 /**
- * Give access to the [[AuthToken]] object.
+ * Give access to the AuthToken object.
  */
 trait AuthTokenDAO {
 
