@@ -49,3 +49,4 @@ GET /user/isadmin net.macolabo.sform2.controllers.UserController.isAdmin()
 
 # adminExistsCheck
 GET /adminExistsCheck net.macolabo.sform2.controllers.AdminExistsCheckController.check()
+OPTIONS /adminExistsCheck net.macolabo.sform2.controllers.ApplicationController.index()
