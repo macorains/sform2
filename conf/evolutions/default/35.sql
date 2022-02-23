@@ -1,7 +1,7 @@
 # --- !Ups
-ALTER TABLE D_TRANSFER_CONFIG_SALESFORCE_OBJECT_FIELD 
-CHANGE COLUMN TRANSFER_CONFIG_SALESFORCE_FIELD_ID TRANSFER_CONFIG_SALESFORCE_OBJECT_ID INT NOT NULL ;
+ALTER TABLE d_transfer_config_salesforce_object_field
+CHANGE COLUMN transfer_config_salesforce_field_id transfer_config_salesforce_object_id INT NOT NULL ;
 
 # --- !Downs
-ALTER TABLE D_TRANSFER_CONFIG_SALESFORCE_OBJECT_FIELD
-CHANGE COLUMN TRANSFER_CONFIG_SALESFORCE_OBJECT_ID TRANSFER_CONFIG_SALESFORCE_FIELD_ID INT NOT NULL ;
+ALTER TABLE d_transfer_config_salesforce_object_field
+CHANGE COLUMN transfer_config_salesforce_object_id transfer_config_salesforce_field_id INT NOT NULL ;
