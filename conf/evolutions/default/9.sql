@@ -1,17 +1,17 @@
 # --- !Ups
-CREATE TABLE `D_TRANSFER_LOG` (
-  `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `TRANSFER_ID` int(11),
-  `TRANSFER_TYPE_ID` int(11),
-  `STATUS` int(11),
-  `TRANSFER_DATA` json,
-  `RESULT_DATA` json,
-  `CREATED` datetime DEFAULT NULL,
-  `MODIFIED` datetime DEFAULT NULL,
-  PRIMARY KEY (`ID`)
+CREATE TABLE `d_transfer_log` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `transfer_id` INT(11),
+  `transfer_type_id` INT(11),
+  `status` INT(11),
+  `transfer_data` JSON,
+  `result_data` JSON,
+  `created` DATETIME DEFAULT NULL,
+  `modified` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 # --- !Downs
-drop table D_TRANSFER_LOG
+drop table d_transfer_log
 
 

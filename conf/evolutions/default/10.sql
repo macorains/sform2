@@ -1,15 +1,15 @@
 # --- !Ups
-CREATE TABLE `D_SALESFORCE_TRANSFER_LOG` (
-  `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `POSTDATA_ID` int(11),
-  `POSTDATA` json,
-  `MODIFIED_POSTDATA` json,
-  `RESULT` int(11),
-  `MESSAGE` json,
-  `CREATED` datetime DEFAULT NULL,
-  `MODIFIED` datetime DEFAULT NULL,
-  PRIMARY KEY (`ID`)
+CREATE TABLE `d_salesforce_transfer_log` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `postdata_id` INT(11),
+  `postdata` JSON,
+  `modified_postdata` JSON,
+  `result` INT(11),
+  `message` JSON,
+  `created` DATETIME DEFAULT NULL,
+  `modified` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 # --- !Downs
-drop table D_SALESFORCE_TRANSFER_LOG
+drop table d_salesforce_transfer_log

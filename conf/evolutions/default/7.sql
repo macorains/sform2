@@ -1,14 +1,14 @@
 # --- !Ups
 
-CREATE TABLE `D_POSTDATA` (
-  `POSTDATA_ID` int(11) NOT NULL AUTO_INCREMENT,
-  `FORM_HASHED_ID` varchar(45) NOT NULL,
-  `POSTDATA` json,
-  `CREATED` datetime DEFAULT NULL,
-  `MODIFIED` datetime DEFAULT NULL,
+CREATE TABLE `d_postdata` (
+  `postdata_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `form_hashed_id` VARCHAR(45) NOT NULL,
+  `postdata` JSON,
+  `created` DATETIME DEFAULT NULL,
+  `modified` DATETIME DEFAULT NULL,
 
-  PRIMARY KEY (`POSTDATA_ID`)
+  PRIMARY KEY (`postdata_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 # --- !Downs
-  drop table D_POSTDATA
+  drop table d_postdata
