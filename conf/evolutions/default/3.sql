@@ -1,22 +1,22 @@
 # --- !Ups
 
-ALTER TABLE `M_USER` ADD `UUID` varchar(50);
-ALTER TABLE `M_USER` ADD `PROVIDER_ID` varchar(255);
-ALTER TABLE `M_USER` ADD `PROVIDER_KEY` varchar(255);
-ALTER TABLE `M_USER` ADD `FIRST_NAME` varchar(30);
-ALTER TABLE `M_USER` ADD `LAST_NAME` varchar(30);
-ALTER TABLE `M_USER` ADD `FULL_NAME` varchar(50);
-ALTER TABLE `M_USER` ADD `AVATAR_URL` varchar(255);
-ALTER TABLE `M_USER` ADD `ACTIVATED` tinyint;
+ALTER TABLE `m_user` ADD `uuid` VARCHAR(50);
+ALTER TABLE `m_user` ADD `provider_id` VARCHAR(255);
+ALTER TABLE `m_user` ADD `provider_key` VARCHAR(255);
+ALTER TABLE `m_user` ADD `first_name` VARCHAR(30);
+ALTER TABLE `m_user` ADD `last_name` VARCHAR(30);
+ALTER TABLE `m_user` ADD `full_name` VARCHAR(50);
+ALTER TABLE `m_user` ADD `avatar_url` VARCHAR(255);
+ALTER TABLE `m_user` ADD `activated` TINYINT;
 
 
 # --- !Downs
 
-ALTER TABLE `M_USER` DROP `UUID`;
-ALTER TABLE `M_USER` DROP `PROVIDER_ID`;
-ALTER TABLE `M_USER` DROP `PROVIDER_KEY`;
-ALTER TABLE `M_USER` DROP `FIRST_NAME`;
-ALTER TABLE `M_USER` DROP `LAST_NAME`;
-ALTER TABLE `M_USER` DROP `FULL_NAME`;
-ALTER TABLE `M_USER` DROP `AVATAR_URL`;
-ALTER TABLE `M_USER` DROP `ACTIVATED`;
+ALTER TABLE `m_user` DROP `uuid`;
+ALTER TABLE `m_user` DROP `provider_id`;
+ALTER TABLE `m_user` DROP `provider_key`;
+ALTER TABLE `m_user` DROP `first_name`;
+ALTER TABLE `m_user` DROP `last_name`;
+ALTER TABLE `m_user` DROP `full_name`;
+ALTER TABLE `m_user` DROP `avatar_url`;
+ALTER TABLE `m_user` DROP `activated`;

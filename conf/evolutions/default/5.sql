@@ -1,17 +1,17 @@
 # --- !Ups
 
-CREATE TABLE `M_USERINFO` (
-  `USER_ID` varchar(50) NOT NULL,
-  `PROVIDER_ID` varchar(50),
-  `PROVIDER_KEY` varchar(50),
-  `FIRST_NAME` varchar(30),
-  `LAST_NAME` varchar(30),
-  `FULL_NAME` varchar(50),
-  `EMAIL` varchar(255),
-  `AVATAR_URL` varchar(255),
-  `ACTIVATED` tinyint,
-  PRIMARY KEY (`USER_ID`)
+CREATE TABLE `m_userinfo` (
+  `user_id` VARCHAR(50) NOT NULL,
+  `provider_id` VARCHAR(50),
+  `provider_key` VARCHAR(50),
+  `first_name` VARCHAR(30),
+  `last_name` VARCHAR(30),
+  `full_name` VARCHAR(50),
+  `email` VARCHAR(255),
+  `avatar_url` VARCHAR(255),
+  `activated` TINYINT,
+  PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 
 # --- !Downs
-  drop table M_USERINFO
+  drop table m_userinfo
