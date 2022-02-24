@@ -12,4 +12,4 @@ CREATE TABLE `d_salesforce_transfer_log` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 # --- !Downs
-drop table d_salesforce_transfer_log
+DROP TABLE `d_salesforce_transfer_log`

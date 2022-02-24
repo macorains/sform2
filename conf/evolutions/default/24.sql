@@ -1,59 +1,59 @@
 # --- !Ups
-ALTER TABLE d_authtoken
+ALTER TABLE `d_authtoken`
 CHARACTER SET = utf8mb4 , COLLATE = utf8mb4_bin ;
-ALTER TABLE d_form
+ALTER TABLE `d_form`
 CHARACTER SET = utf8mb4 , COLLATE = utf8mb4_bin ;
-ALTER TABLE d_form_col
+ALTER TABLE `d_form_col`
 CHARACTER SET = utf8mb4 , COLLATE = utf8mb4_bin ;
-ALTER TABLE d_form_col_select
+ALTER TABLE `d_form_col_select`
 CHARACTER SET = utf8mb4 , COLLATE = utf8mb4_bin ;
-ALTER TABLE d_form_col_validation
+ALTER TABLE `d_form_col_validation`
 CHARACTER SET = utf8mb4 , COLLATE = utf8mb4_bin ;
-ALTER TABLE d_postdata
+ALTER TABLE `d_postdata`
 CHARACTER SET = utf8mb4 , COLLATE = utf8mb4_bin ;
-ALTER TABLE d_transfer_detail_log
+ALTER TABLE `d_transfer_detail_log`
 CHARACTER SET = utf8mb4 , COLLATE = utf8mb4_bin ;
-ALTER TABLE d_transfer_log
+ALTER TABLE `d_transfer_log`
 CHARACTER SET = utf8mb4 , COLLATE = utf8mb4_bin ;
-ALTER TABLE d_transfer_tasks
+ALTER TABLE `d_transfer_tasks`
 CHARACTER SET = utf8mb4 , COLLATE = utf8mb4_bin ;
-ALTER TABLE m_authinfo
+ALTER TABLE `m_authinfo`
 CHARACTER SET = utf8mb4 , COLLATE = utf8mb4_bin ;
-ALTER TABLE m_transfers
+ALTER TABLE `m_transfers`
 CHARACTER SET = utf8mb4 , COLLATE = utf8mb4_bin ;
-ALTER TABLE m_user
+ALTER TABLE `m_user`
 CHARACTER SET = utf8mb4 , COLLATE = utf8mb4_bin ;
-ALTER TABLE m_userinfo
+ALTER TABLE `m_userinfo`
 CHARACTER SET = utf8mb4 , COLLATE = utf8mb4_bin ;
-ALTER TABLE play_evolutions
+ALTER TABLE `play_evolutions`
 CHARACTER SET = utf8mb4 , COLLATE = utf8mb4_bin ;
 
 # --- !Downs
-ALTER TABLE d_authtoken
+ALTER TABLE `d_authtoken`
 CHARACTER SET = utf8 , COLLATE = utf8_bin ;
-ALTER TABLE d_form
+ALTER TABLE `d_form`
 CHARACTER SET = utf8 , COLLATE = utf8_bin ;
-ALTER TABLE d_form_col
+ALTER TABLE `d_form_col`
 CHARACTER SET = utf8mb4 , COLLATE = utf8mb4_0900_ai_ci ;
-ALTER TABLE d_form_col_select
+ALTER TABLE `d_form_col_select`
 CHARACTER SET = utf8mb4 , COLLATE = utf8mb4_0900_ai_ci ;
-ALTER TABLE d_form_col_validation
+ALTER TABLE `d_form_col_validation`
 CHARACTER SET = utf8mb4 , COLLATE = utf8mb4_0900_ai_ci ;
-ALTER TABLE d_postdata
+ALTER TABLE `d_postdata`
 CHARACTER SET = utf8 , COLLATE = utf8_bin ;
-ALTER TABLE d_transfer_detail_log
+ALTER TABLE `d_transfer_detail_log`
 CHARACTER SET = utf8 , COLLATE = utf8_bin ;
-ALTER TABLE d_transfer_log
+ALTER TABLE `d_transfer_log`
 CHARACTER SET = utf8 , COLLATE = utf8_bin ;
-ALTER TABLE d_transfer_tasks
+ALTER TABLE `d_transfer_tasks`
 CHARACTER SET = utf8 , COLLATE = utf8_bin ;
-ALTER TABLE m_authinfo
+ALTER TABLE `m_authinfo`
 CHARACTER SET = utf8 , COLLATE = utf8_bin ;
-ALTER TABLE m_transfers
+ALTER TABLE `m_transfers`
 CHARACTER SET = utf8 , COLLATE = utf8_bin ;
-ALTER TABLE m_user
+ALTER TABLE `m_user`
 CHARACTER SET = utf8 , COLLATE = utf8_bin ;
-ALTER TABLE m_userinfo
+ALTER TABLE `m_userinfo`
 CHARACTER SET = utf8 , COLLATE = utf8_bin ;
-ALTER TABLE play_evolutions
+ALTER TABLE `play_evolutions`
 CHARACTER SET = utf8mb4 , COLLATE = utf8mb4_0900_ai_ci ;

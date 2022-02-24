@@ -7,4 +7,4 @@ CREATE TABLE `d_authtoken` (
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 
 # --- !Downs
-  drop table d_authtoken
+DROP TABLE `d_authtoken`;

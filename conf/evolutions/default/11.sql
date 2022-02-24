@@ -11,4 +11,4 @@ CREATE TABLE `d_transfer_tasks` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 # --- !Downs
-drop table d_transfer_tasks
+DROP TABLE `d_transfer_tasks`

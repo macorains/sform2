@@ -1,7 +1,7 @@
 # --- !Ups
 
 CREATE TABLE `d_form` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
   `hashed_id` VARCHAR(45) NOT NULL,
   `form_data` JSON,
   `created_user` VARCHAR(45),
@@ -12,4 +12,4 @@ CREATE TABLE `d_form` (
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 
 # --- !Downs
-  drop table d_form
+DROP TABLE `d_form`;

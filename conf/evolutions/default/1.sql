@@ -1,16 +1,16 @@
 # --- !Ups
 
 CREATE TABLE `m_user` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` varchar(45) NOT NULL,
-  `name` varchar(45) DEFAULT NULL,
-  `email` varchar(100) NOT NULL,
-  `status` int(11) NOT NULL,
-  `password` varchar(128) DEFAULT NULL,
-  `created` datetime DEFAULT NULL,
-  `modified` datetime DEFAULT NULL,
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `uid` VARCHAR(45) NOT NULL,
+  `name` VARCHAR(45) DEFAULT NULL,
+  `email` VARCHAR(100) NOT NULL,
+  `status` INT(11) NOT NULL,
+  `password` VARCHAR(128) DEFAULT NULL,
+  `created` DATETIME DEFAULT NULL,
+  `modified` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 
 # --- !Downs
-  drop table m_user
+DROP TABLE `m_user`;

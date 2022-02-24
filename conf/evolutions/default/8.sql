@@ -6,10 +6,10 @@ CREATE TABLE `m_transfers` (
   `status` INT(11) DEFAULT 1,
   `config` JSON,
   `created` DATETIME default null,
-  `modified` datetime DEFAULT NULL,
+  `modified` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 # --- !Downs
-drop table m_transfers
+DROP TABLE `m_transfers`;
 

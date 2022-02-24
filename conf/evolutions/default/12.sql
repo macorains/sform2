@@ -14,4 +14,4 @@ CREATE TABLE `d_transfer_detail_log` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 # --- !Downs
-drop table d_transfer_detail_log
+DROP TABLE `d_transfer_detail_log`

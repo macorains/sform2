@@ -1,5 +1,5 @@
 # --- !Ups
-drop table d_salesforce_transfer_log
+DROP TABLE `d_salesforce_transfer_log`
 
 # --- !Downs
 CREATE TABLE `d_salesforce_transfer_log` (

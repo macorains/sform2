@@ -14,4 +14,4 @@ CREATE TABLE `m_userinfo` (
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 
 # --- !Downs
-  drop table m_userinfo
+DROP TABLE `m_userinfo`;

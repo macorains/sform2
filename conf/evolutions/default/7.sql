@@ -11,4 +11,4 @@ CREATE TABLE `d_postdata` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 # --- !Downs
-  drop table d_postdata
+DROP TABLE `d_postdata`;

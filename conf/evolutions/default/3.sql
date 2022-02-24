@@ -9,9 +9,7 @@ ALTER TABLE `m_user` ADD `full_name` VARCHAR(50);
 ALTER TABLE `m_user` ADD `avatar_url` VARCHAR(255);
 ALTER TABLE `m_user` ADD `activated` TINYINT;
 
-
 # --- !Downs
-
 ALTER TABLE `m_user` DROP `uuid`;
 ALTER TABLE `m_user` DROP `provider_id`;
 ALTER TABLE `m_user` DROP `provider_key`;
