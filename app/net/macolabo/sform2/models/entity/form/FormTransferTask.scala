@@ -32,7 +32,7 @@ case class FormTransferTask(
 }
 
 object FormTransferTask extends SQLSyntaxSupport[FormTransferTask] {
-  override val tableName = "D_FORM_TRANSFER_TASK"
+  override val tableName = "d_form_transfer_task"
 
   def apply(rs: WrappedResultSet): FormTransferTask = {
     FormTransferTask(

@@ -12,7 +12,7 @@ case class AuthInfo (
                     )
 
 object AuthInfo extends SQLSyntaxSupport[AuthInfo] {
-  override val tableName =  "M_AUTHINFO"
+  override val tableName =  "m_authinfo"
   def apply(rs: WrappedResultSet): AuthInfo = {
     AuthInfo(
       rs.bigInt("authinfo_id"),

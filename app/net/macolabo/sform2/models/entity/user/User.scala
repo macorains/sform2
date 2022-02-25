@@ -49,7 +49,7 @@ case class User(
 }
 
 object User extends SQLSyntaxSupport[User] {
-  override val tableName = "M_USERINFO"
+  override val tableName = "m_userinfo"
   def apply(rs: WrappedResultSet): User = {
     User(
       UUID.fromString(rs.string("user_id")),

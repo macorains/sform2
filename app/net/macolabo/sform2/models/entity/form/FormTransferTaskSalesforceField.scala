@@ -18,7 +18,7 @@ case class FormTransferTaskSalesforceField(
 }
 
 object FormTransferTaskSalesforceField extends SQLSyntaxSupport[FormTransferTaskSalesforceField] {
-  override val tableName = "D_FORM_TRANSFER_TASK_SALESFORCE_FIELD"
+  override val tableName = "d_form_transfer_task_salesforce_field"
 
   def apply(rs: WrappedResultSet): FormTransferTaskSalesforceField = {
     FormTransferTaskSalesforceField(

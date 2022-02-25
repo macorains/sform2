@@ -19,7 +19,7 @@ case class FormTransferTaskCondition(
 }
 
 object FormTransferTaskCondition extends SQLSyntaxSupport[FormTransferTaskCondition] {
-  override val tableName = "D_FORM_TRANSFER_TASK_CONDITION"
+  override val tableName = "d_form_transfer_task_condition"
 
   def apply(rs: WrappedResultSet): FormTransferTaskCondition = {
     FormTransferTaskCondition(

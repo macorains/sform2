@@ -109,7 +109,7 @@ class UserDAOImpl extends UserDAO {
    * @return
    */
   def find(fields: String, key: String, value: String)(implicit session: DBSession): List[Map[String, Any]] = {
-    StringSQLRunner(s"""SELECT $fields FROM M_USERINFO as c WHERE $key = '$value'""").run()
+    StringSQLRunner(s"""SELECT $fields FROM m_userinfo as c WHERE $key = '$value'""").run()
   }
 
   /**

@@ -12,7 +12,7 @@ case class AuthToken(
 )
 
 object AuthToken extends SQLSyntaxSupport[AuthToken] {
-  override val tableName = "D_AUTHTOKEN"
+  override val tableName = "d_authtoken"
   def apply(rs: WrappedResultSet): AuthToken = {
     AuthToken(
       UUID.fromString(rs.string("id")),
