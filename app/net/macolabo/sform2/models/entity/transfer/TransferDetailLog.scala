@@ -21,7 +21,7 @@ case class TransferDetailLog(
                             )
 
 object TransferDetailLog extends SQLSyntaxSupport[TransferDetailLog] {
-  override val tableName = "D_TRANSFER_DETAIL_LOG"
+  override val tableName = "d_transfer_detail_log"
   def apply(rs: WrappedResultSet): TransferDetailLog = {
     TransferDetailLog(
       rs.int("id"),

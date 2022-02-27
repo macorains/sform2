@@ -151,7 +151,6 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     // 作成したフォームを取得
     val newForm = formDAO.get(user.user_group.get, newFormId).get
     assert(newForm.id.equals(newFormId))
-    assert(newForm.hashed_id.equals(formUpdateRequest.hashed_id))
     assert(newForm.name.equals(formUpdateRequest.name))
     assert(newForm.form_index.equals(formUpdateRequest.form_index))
     assert(newForm.status.equals(formUpdateRequest.status))

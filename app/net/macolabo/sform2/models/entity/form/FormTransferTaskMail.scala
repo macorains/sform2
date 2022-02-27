@@ -23,7 +23,7 @@ case class FormTransferTaskMail(
 }
 
 object FormTransferTaskMail extends SQLSyntaxSupport[FormTransferTaskMail] {
-  override val tableName = "D_FORM_TRANSFER_TASK_MAIL"
+  override val tableName = "d_form_transfer_task_mail"
 
   def apply(rs: WrappedResultSet): FormTransferTaskMail = {
     FormTransferTaskMail(

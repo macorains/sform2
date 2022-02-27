@@ -16,7 +16,7 @@ case class TransferLog(
                       )
 
 object TransferLog extends SQLSyntaxSupport[TransferLog] {
-  override val tableName = "D_TRANSFER_LOG"
+  override val tableName = "d_transfer_log"
   def apply(rs: WrappedResultSet): TransferLog = {
     TransferLog(
       rs.bigInt("id"),

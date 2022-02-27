@@ -37,7 +37,7 @@ case class FormCol (
 }
 
 object FormCol extends SQLSyntaxSupport[FormCol] {
-  override val tableName = "D_FORM_COL"
+  override val tableName = "d_form_col"
 
   def apply(rs: WrappedResultSet): FormCol = {
     FormCol(

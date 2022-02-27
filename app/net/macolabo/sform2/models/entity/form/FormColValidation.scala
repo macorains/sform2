@@ -23,7 +23,7 @@ case class FormColValidation(
 }
 
 object FormColValidation extends SQLSyntaxSupport[FormColValidation] {
-  override val tableName = "D_FORM_COL_VALIDATION"
+  override val tableName = "d_form_col_validation"
 
   def apply(rs: WrappedResultSet): FormColValidation = {
     FormColValidation(

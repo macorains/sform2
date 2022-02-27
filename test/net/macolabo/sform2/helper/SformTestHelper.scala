@@ -9,20 +9,19 @@ import scalikejdbc.{AutoSession, ConnectionPool}
 import java.io.File
 
 trait SformTestHelper {
-  //val config: Config = ConfigFactory.load()
   val config: Config = ConfigFactory.parseFile(new File("conf/test.conf")).resolve()
-  Class.forName(config.getString("db.default.driver"))
-  ConnectionPool.singleton(config.getString("db.default.url"), config.getString("db.default.username"), config.getString("db.default.password"))
+  Class.forName(config.getString("db.test.driver"))
+  ConnectionPool.singleton(config.getString("db.test.url"), config.getString("db.test.username"), config.getString("db.test.password"))
   implicit val session: AutoSession.type = AutoSession
 
-  def withSformDatabase[T](block: Database => T) = {
+  def withSformDatabase[T](block: Database => T): T = {
     Databases.withDatabase(
-      driver = config.getString("db.default.driver"),
-      url = config.getString("db.default.url"),
-      name = "sformdb",
+      driver = config.getString("db.test.driver"),
+      url = config.getString("db.test.url"),
+      name = "test",
       config = Map(
-        "user" -> config.getString("db.default.username"),
-        "password" -> config.getString("db.default.password")
+        "user" -> config.getString("db.test.username"),
+        "password" -> config.getString("db.test.password")
       )
     )(block)
   }

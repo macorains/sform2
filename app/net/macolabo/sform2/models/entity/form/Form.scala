@@ -47,7 +47,7 @@ case class Form(
                )
 
 object Form extends SQLSyntaxSupport[Form] {
-  override val tableName = "D_FORM"
+  override val tableName = "d_form"
 
   def apply(rs: WrappedResultSet): Form = {
     Form(
