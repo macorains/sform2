@@ -27,11 +27,11 @@ class ApplicationController @Inject() (
    *
    * @return The result to display.
    */
-  def index: Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
+  def index: Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
     //Future.successful(Ok(views.html.home(request.identity)))
     //println(request.identity)
     // Future.successful(Ok(views.html.index(request.identity)))
-    Future.successful(Ok(""))
+    Ok("")
   }
 
   /**
