@@ -17,7 +17,7 @@ case class Postdata(
                    )
 
 object Postdata extends SQLSyntaxSupport[Postdata] {
-  override val tableName = "D_POSTDATA"
+  override val tableName = "d_postdata"
   def apply(rs: WrappedResultSet): Postdata = {
     Postdata(
       rs.int("postdata_id"),

@@ -40,7 +40,10 @@ class TransferDetailLogDAOImplSpec extends FixtureAnyFlatSpec  with GuiceOneServ
         f.modified_postdata,
         f.result_code,
         f.message,
+        f.user_group,
+        f.created_user,
         f.created,
+        f.modified_user,
         f.modified
       )
         .from(TransferDetailLog as f)

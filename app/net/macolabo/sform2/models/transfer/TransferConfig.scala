@@ -35,7 +35,7 @@ case class TransferConfig(
 }
 
 object TransferConfig extends SQLSyntaxSupport[TransferConfig] {
-  override val tableName = "D_TRANSFER_CONFIG"
+  override val tableName = "d_transfer_config"
   def apply(rs: WrappedResultSet): TransferConfig = {
     TransferConfig(
       rs.bigInt("id"),
