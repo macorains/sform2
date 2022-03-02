@@ -44,4 +44,9 @@ class ApplicationController @Inject() (
     //silhouette.env.eventBus.publish(LogoutEvent(request.identity, request))
     //silhouette.env.authenticatorService.discard(request.authenticator, result)
   }
+
+  def rootOptions = options("/")
+  def options(url: String) = Action { request =>
+    Ok
+  }
 }
