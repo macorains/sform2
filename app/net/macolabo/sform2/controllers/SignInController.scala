@@ -1,6 +1,10 @@
 package net.macolabo.sform2.controllers
 
+import com.amazonaws.regions.Regions
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder
+import com.amazonaws.services.simpleemail.model.{Body, Content, Destination, Message, SendEmailRequest}
 import com.digitaltangible.playguard._
+import net.macolabo.sform2.services.GoogleAuth.GoogleAuthService
 
 import javax.inject.Inject
 import net.macolabo.sform2.services.User.UserService
@@ -15,6 +19,7 @@ import org.pac4j.core.profile.UserProfile
 import org.pac4j.jwt.config.signature.SecretSignatureConfiguration
 import org.pac4j.jwt.profile.JwtGenerator
 import org.pac4j.play.scala.{Security, SecurityComponents}
+import play.api.libs.ws.{WSClient, WSRequest}
 
 import scala.jdk.CollectionConverters._
 import scala.concurrent.{ExecutionContext, Future}
@@ -32,9 +37,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class SignInController @Inject() (
   val controllerComponents: SecurityComponents,
   userService: UserService,
+  googleAuthService: GoogleAuthService,
   configuration: Configuration,
   cache: SyncCacheApi,
-  mailerClient: MailerClient
+  mailerClient: MailerClient,
+  ws: WSClient
 )(
   implicit
   webJarsUtil: WebJarsUtil,
@@ -70,7 +77,23 @@ class SignInController @Inject() (
       else ("","")
     cache.set(profilePrefix + authKey, profiles)
 
+    val mailFrom = "mac.rainshrine@gmail.com"
+    val mailTo = "mac.rainshrine@gmail.com"
+    val mailSubject = "test Test test"
+    val mailTextBody = "Test!"
+    val mailHtmlBody = "<h1>Test!</h1>"
+    val sesClient = AmazonSimpleEmailServiceClientBuilder.standard().withRegion(Regions.AP_NORTHEAST_1).build()
+    val sesRequest = new SendEmailRequest()
+      .withDestination(new Destination().withToAddresses(mailTo))
+      .withMessage(new Message()
+        .withBody(new Body()
+          .withHtml(new Content().withCharset("UTF-8").withData(mailHtmlBody))
+          .withText(new Content().withCharset("UTF-8").withData(mailTextBody)))
+        .withSubject(new Content().withCharset("UTF-8").withData(mailSubject)))
+      .withSource(mailFrom)
+    sesClient.sendEmail(sesRequest)
 
+    /*
     mailerClient.send(Email(
 //      subject = Messages("email.verification.subject"),
 //      from = Messages("email.from"),
@@ -80,6 +103,7 @@ class SignInController @Inject() (
       bodyText = Some(verificationCode),
       bodyHtml = Some("<html><body>hogehoge</body></html>>")
     ))
+     */
     Ok(s"""{"authkey" : "$authKey"}""")
   }
 
@@ -105,6 +129,13 @@ class SignInController @Inject() (
         }).getOrElse(NotFound(""))
       }).asOpt
     }).getOrElse(BadRequest(""))
+  }
+
+  def getOAuthToken: Action[AnyContent] = Action { implicit request =>
+    val code = request.getQueryString("code").getOrElse("")
+    println(s"code: $code")
+    googleAuthService.getToken(code)
+    Ok("")
   }
 
   private val httpErrorRateLimitFunction =

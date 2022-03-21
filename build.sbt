@@ -64,7 +64,9 @@ libraryDependencies ++= Seq(
   "org.pac4j" % "pac4j-couch" % pac4jVersion excludeAll(ExclusionRule(organization = "com.fasterxml.jackson.core")),
   "org.apache.shiro" % "shiro-core" % "1.7.1",
   "com.typesafe.play" % "play-cache_2.13" % playVersion,
-  "commons-io" % "commons-io" % "2.11.0"
+  "commons-io" % "commons-io" % "2.11.0",
+  "com.amazonaws" % "aws-java-sdk" % "1.11.1034",
+  "com.amazonaws" % "aws-java-sdk-ses" % "1.11.1034"
 )
 
 excludeDependencies ++= Seq(
