@@ -26,7 +26,7 @@ class GoogleAuthServiceImpl @Inject()(
         "code" -> code,
         "client_id" -> authInfo.client_id,
         "client_secret" -> authInfo.client_secret,
-        "redirect_url" -> "https://admin.it.sform.app/",
+        "redirect_uri" -> "http://localhost:9001/oauthToken",
         "grant_type" -> "authorization_code"
       )
 
@@ -35,10 +35,11 @@ class GoogleAuthServiceImpl @Inject()(
           .addHttpHeaders("Content-Type" -> "application/x-www-form-urlencoded")
       val response = wsRequest.post(postData)
       response.foreach(res => {
-        println("**********")
+        println("*-*-*-*-*-*-*-*")
         println(res.body)
-        println("**********")
+        println("*-*-*-*-*-*-*-*")
       })
+      response
     })
   }
 
