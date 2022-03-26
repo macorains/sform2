@@ -134,8 +134,9 @@ class SignInController @Inject() (
   def getOAuthToken: Action[AnyContent] = Action { implicit request =>
     val code = request.getQueryString("code").getOrElse("")
     println(s"code: $code")
-    googleAuthService.getToken(code)
-    Ok(net.macolabo.sform2.views.html.oauth())
+    googleAuthService.getToken(code).map(token => {
+      Ok(net.macolabo.sform2.views.html.oauth()).withSession(request.session + ("googleToken" -> token))
+    }).getOrElse(Ok(net.macolabo.sform2.views.html.oauthfailed()))
   }
 
   private val httpErrorRateLimitFunction =

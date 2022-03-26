@@ -4,24 +4,28 @@ import play.api.libs.json.Json
 import play.api.libs.ws.{WSClient, WSRequest}
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext}
 import scala.sys.env
 
 class GoogleAuthServiceImpl @Inject()(
                                  ws:WSClient
                                  )(implicit ex: ExecutionContext)
-  extends GoogleAuthService with GoogleTokenGetResponseJson
+  extends GoogleAuthService
+    with GoogleAuthCodeGetResponseJson
+    with GoogleAuthTokenGetResponseJson
 {
-  def getToken(code: String): Unit = {
-    val googleAuthInfo = env.get("GCP_AUTH_JSON").flatMap(authJson => {
-      Json.parse(authJson).\("web").validate[GoogleTokenGetResponse].asOpt
-    })
-    println(env.get("GCP_AUTH_JSON").getOrElse("None"))
-    println("**********")
-    println(googleAuthInfo.toString)
-    println("**********")
+  def getToken(code: String) = {
 
-    googleAuthInfo.foreach(authInfo => {
+    val googleAuthInfo = env.get("GCP_AUTH_JSON").flatMap(authJson => {
+      Json.parse(authJson).\("web").validate[GoogleAuthCodeGetResponse].asOpt
+    })
+//    println(env.get("GCP_AUTH_JSON").getOrElse("None"))
+//    println("**********")
+//    println(googleAuthInfo.toString)
+//    println("**********")
+
+    googleAuthInfo.flatMap(authInfo => {
       val postData = Map(
         "code" -> code,
         "client_id" -> authInfo.client_id,
@@ -33,13 +37,14 @@ class GoogleAuthServiceImpl @Inject()(
       val wsRequest: WSRequest =
         ws.url(authInfo.token_uri)
           .addHttpHeaders("Content-Type" -> "application/x-www-form-urlencoded")
-      val response = wsRequest.post(postData)
-      response.foreach(res => {
-        println("*-*-*-*-*-*-*-*")
-        println(res.body)
-        println("*-*-*-*-*-*-*-*")
+
+      val accessToken = wsRequest.post(postData).map(res => {
+        Json.parse(res.body).validate[GoogleAuthTokenGetResponse].asOpt.map(_.access_token)
+//        println("*-*-*-*-*-*-*-*")
+//        println(res.body)
+//        println("*-*-*-*-*-*-*-*")
       })
-      response
+      Await.result(accessToken, Duration.Inf)
     })
   }
 

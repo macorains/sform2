@@ -3,7 +3,7 @@ package net.macolabo.sform2.services.GoogleAuth
 import play.api.libs.json.{JsPath, Reads, Writes}
 import play.api.libs.functional.syntax._
 
-case class GoogleTokenGetResponse(
+case class GoogleAuthCodeGetResponse(
                             client_id: String,
                             project_id: String,
                             auth_uri: String,
@@ -14,8 +14,8 @@ case class GoogleTokenGetResponse(
                             javascript_origins: List[String]
                           )
 
-trait GoogleTokenGetResponseJson {
-  implicit val GoogleTokenGetResponseWrites: Writes[GoogleTokenGetResponse] = (
+trait GoogleAuthCodeGetResponseJson {
+  implicit val GoogleAuthCodeGetResponseWrites: Writes[GoogleAuthCodeGetResponse] = (
     (JsPath \ "client_id").write[String] ~
       (JsPath \ "project_id").write[String] ~
       (JsPath \ "auth_uri").write[String] ~
@@ -24,9 +24,9 @@ trait GoogleTokenGetResponseJson {
       (JsPath \ "client_secret").write[String] ~
       (JsPath \ "redirect_uris").write[List[String]] ~
       (JsPath \ "javascript_origins").write[List[String]]
-    )(unlift(GoogleTokenGetResponse.unapply))
+    )(unlift(GoogleAuthCodeGetResponse.unapply))
 
-  implicit val GoogleTokenGetResponseReads: Reads[GoogleTokenGetResponse] = (
+  implicit val GoogleAuthCodeGetResponseReads: Reads[GoogleAuthCodeGetResponse] = (
     (JsPath \ "client_id").read[String] ~
       (JsPath \ "project_id").read[String] ~
       (JsPath \ "auth_uri").read[String] ~
@@ -35,5 +35,5 @@ trait GoogleTokenGetResponseJson {
       (JsPath \ "client_secret").read[String] ~
       (JsPath \ "redirect_uris").read[List[String]] ~
       (JsPath \ "javascript_origins").read[List[String]]
-    )(GoogleTokenGetResponse.apply _)
+    )(GoogleAuthCodeGetResponse.apply _)
 }
