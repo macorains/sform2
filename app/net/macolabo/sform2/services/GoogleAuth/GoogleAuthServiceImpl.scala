@@ -16,14 +16,9 @@ class GoogleAuthServiceImpl @Inject()(
     with GoogleAuthTokenGetResponseJson
 {
   def getToken(code: String) = {
-
     val googleAuthInfo = env.get("GCP_AUTH_JSON").flatMap(authJson => {
       Json.parse(authJson).\("web").validate[GoogleAuthCodeGetResponse].asOpt
     })
-//    println(env.get("GCP_AUTH_JSON").getOrElse("None"))
-//    println("**********")
-//    println(googleAuthInfo.toString)
-//    println("**********")
 
     googleAuthInfo.flatMap(authInfo => {
       val postData = Map(
@@ -40,9 +35,6 @@ class GoogleAuthServiceImpl @Inject()(
 
       val accessToken = wsRequest.post(postData).map(res => {
         Json.parse(res.body).validate[GoogleAuthTokenGetResponse].asOpt.map(_.access_token)
-//        println("*-*-*-*-*-*-*-*")
-//        println(res.body)
-//        println("*-*-*-*-*-*-*-*")
       })
       Await.result(accessToken, Duration.Inf)
     })
