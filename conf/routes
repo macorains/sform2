@@ -12,6 +12,7 @@ POST        /signIn                          net.macolabo.sform2.controllers.Sig
 POST        /verification                    net.macolabo.sform2.controllers.SignInController.verification
 
 GET         /oauthToken                      net.macolabo.sform2.controllers.SignInController.getOAuthToken
+GET         /oauthTokenString                net.macolabo.sform2.controllers.SignInController.getOAuthTokenString
 
 # POST        /password/forgot                 net.macolabo.sform2.controllers.ForgotPasswordController.submit
 # POST        /password/reset/:token           net.macolabo.sform2.controllers.ResetPasswordController.submit(token: java.util.UUID)

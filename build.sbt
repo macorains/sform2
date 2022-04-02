@@ -74,7 +74,8 @@ excludeDependencies ++= Seq(
   ExclusionRule("com.google.appengine", "appengine-jsr107cache")
 )
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
+lazy val root: Project = (project in file("."))
+  .enablePlugins(PlayScala)
 
 routesGenerator := InjectedRoutesGenerator
 

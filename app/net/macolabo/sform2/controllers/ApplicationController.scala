@@ -40,7 +40,7 @@ class ApplicationController @Inject() (
    * @return The result to display.
    */
   def signOut: Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
-    Redirect(routes.ApplicationController.index)
+    Redirect("/")
     //silhouette.env.eventBus.publish(LogoutEvent(request.identity, request))
     //silhouette.env.authenticatorService.discard(request.authenticator, result)
   }

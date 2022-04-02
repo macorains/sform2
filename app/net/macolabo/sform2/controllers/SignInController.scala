@@ -131,15 +131,24 @@ class SignInController @Inject() (
     }).getOrElse(BadRequest(""))
   }
 
+  /**
+   * セッションに保持されているOAuthToken文字列を返す
+   * @return
+   */
+  def getOAuthTokenString: Action[AnyContent] = Action { implicit request =>
+    val token = request.session.get("googleToken").getOrElse("")
+    Ok(s"""{"token": "$token"}""")
+  }
+
+  /**
+   * GoogleOAuth認証コードからOAuthTokenを取得してセッションに保存する
+   * @return
+   */
   def getOAuthToken: Action[AnyContent] = Action { implicit request =>
-    request.session.get("googleToken").map { user =>
-      Ok(net.macolabo.sform2.views.html.oauthtoken())
-    }.getOrElse {
-      val code = request.getQueryString("code").getOrElse("")
-      googleAuthService.getToken(code).map(token => {
-        Ok(net.macolabo.sform2.views.html.oauth()).withSession(request.session + ("googleToken" -> token))
-      }).getOrElse(Ok(net.macolabo.sform2.views.html.oauthfailed()))
-    }
+    val code = request.getQueryString("code").getOrElse("")
+    googleAuthService.getToken(code).map(token => {
+      Ok(net.macolabo.sform2.views.html.oauth()).withSession(request.session + ("googleToken" -> token))
+    }).getOrElse(Ok(net.macolabo.sform2.views.html.oauthfailed()))
   }
 
   private val httpErrorRateLimitFunction =
