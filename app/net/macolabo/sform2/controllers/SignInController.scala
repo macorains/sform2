@@ -80,8 +80,8 @@ class SignInController @Inject() (
     val mailFrom = "mac.rainshrine@gmail.com"
     val mailTo = "mac.rainshrine@gmail.com"
     val mailSubject = "test Test test"
-    val mailTextBody = "Test!"
-    val mailHtmlBody = "<h1>Test!</h1>"
+    val mailTextBody = s"Test! $verificationCode"
+    val mailHtmlBody = s"<h1>Test!</h1><br>$verificationCode"
     val sesClient = AmazonSimpleEmailServiceClientBuilder.standard().withRegion(Regions.AP_NORTHEAST_1).build()
     val sesRequest = new SendEmailRequest()
       .withDestination(new Destination().withToAddresses(mailTo))
