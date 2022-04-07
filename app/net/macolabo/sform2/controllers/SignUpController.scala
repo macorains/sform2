@@ -81,7 +81,7 @@ class SignUpController @Inject() (
 
   private def sendActivationMail(user: User)(implicit requestHeader: RequestHeader) = {
     authTokenService.create(user.id).map(authToken => {
-      val url = net.macolabo.sform2.controllers.routes.ActivateAccountController.activate(authToken.id).absoluteURL()
+      val url = s"activate/${authToken.id}"
       user.email.map(email => {
         mailerClient.send(Email(
           subject = Messages("email.sign.up.subject"),

@@ -1,0 +1,8 @@
+@(redirect_url:String)
+<input type="button" onClick="toSignin()">
+<script>
+    window.location.href = '@(redirect_url)'
+    function toSignin() {
+        window.location.href = '@(redirect_url)'
+    }
+</script>

@@ -8,9 +8,11 @@ GET         /                                net.macolabo.sform2.controllers.App
 GET         /signOut                         net.macolabo.sform2.controllers.ApplicationController.signOut
 
 POST        /signUp                          net.macolabo.sform2.controllers.SignUpController.submit
-
 POST        /signIn                          net.macolabo.sform2.controllers.SignInController.submit
 POST        /verification                    net.macolabo.sform2.controllers.SignInController.verification
+
+GET         /oauthToken                      net.macolabo.sform2.controllers.SignInController.getOAuthToken
+GET         /oauthTokenString                net.macolabo.sform2.controllers.SignInController.getOAuthTokenString
 
 # POST        /password/forgot                 net.macolabo.sform2.controllers.ForgotPasswordController.submit
 # POST        /password/reset/:token           net.macolabo.sform2.controllers.ResetPasswordController.submit(token: java.util.UUID)

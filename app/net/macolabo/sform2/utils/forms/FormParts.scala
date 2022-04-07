@@ -1,11 +1,5 @@
 package net.macolabo.sform2.utils.forms
 
-import java.net.InetAddress
-
-import controllers.routes
-
-//import scala.io.Source
-
 trait FormParts {
 
   object cFormMode {
