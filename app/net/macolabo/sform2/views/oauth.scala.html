@@ -1,9 +1,8 @@
-@()
-<h1>hoge!</h1>
+@(redirect_url:String)
 <input type="button" onClick="toSignin()">
 <script>
-    window.location.href = 'https://www.yahoo.co.jp' // TODO もう一度/oauthTokenを呼ぶことでJSONにトークンを出力させたい
+    window.location.href = '@(redirect_url)'
     function toSignin() {
-        alert('hoge!')
+        window.location.href = '@(redirect_url)'
     }
 </script>

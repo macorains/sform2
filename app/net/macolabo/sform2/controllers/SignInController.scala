@@ -147,7 +147,7 @@ class SignInController @Inject() (
   def getOAuthToken: Action[AnyContent] = Action { implicit request =>
     val code = request.getQueryString("code").getOrElse("")
     googleAuthService.getToken(code).map(token => {
-      Ok(net.macolabo.sform2.views.html.oauth()).withSession(request.session + ("googleToken" -> token))
+      Ok(net.macolabo.sform2.views.html.oauth(configuration.get[String]("sform.oauth.redirectUrl"))).withSession(request.session + ("googleToken" -> token))
     }).getOrElse(Ok(net.macolabo.sform2.views.html.oauthfailed()))
   }
 
