@@ -22,11 +22,11 @@ class SqlAuthencator @Inject() (
   //val db = Databases.apply("com.mysql.jdbc.Driver", "jdbc:mysql://localhost:3306/pac4jtest?allowPublicKeyRetrieval=true&useSSL=false&characterEncoding=UTF8", "default",Map("user"->"pac4j","password"->"Pac4j43210"))
 
   @Override
-  def validate(cred: Credentials, context: WebContext, sessionStore: SessionStore)  = {
+  def validate(cred: Credentials, context: WebContext, sessionStore: SessionStore): Unit = {
     if (cred == null) throw new CredentialsException("No credential")
 
     // 標準のprofile項目以外にDBから読みたいものあれば、カンマ区切りでフィールド名入れる
-    val profile_fields = "user_group"
+    val profile_fields = "user_group,email"
     val userProfileService = new UserProfileService(userDAO)(profile_fields, new ShiroPasswordEncoder(new DefaultPasswordService))
 
     // DBテーブル名はsetUsersTableで変更可能

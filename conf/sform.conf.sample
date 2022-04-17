@@ -5,4 +5,10 @@ sform {
     key = "ChangeMe"
     charset = "utf-8"
   }
+  oauth {
+    redirectUrl = "http://localhost:8081/Signin"
+  }
+  mail {
+    systemMailAddress = "mac.rainshrine@gmail.com"
+  }
 }
