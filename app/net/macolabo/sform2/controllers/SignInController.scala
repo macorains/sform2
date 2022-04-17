@@ -10,7 +10,7 @@ import javax.inject.Inject
 import net.macolabo.sform2.services.User.UserService
 import org.webjars.play.WebJarsUtil
 import play.api.{Configuration, Logger}
-import play.api.i18n.I18nSupport
+import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.Json
 import play.api.libs.mailer._
 import play.api.mvc._
@@ -68,21 +68,27 @@ class SignInController @Inject() (
    */
   def submit: Action[AnyContent] = Secure("DirectFormClient") { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
-    val(authKey,verificationCode) =
-      if(profiles.asScala.nonEmpty)
-        (
-          profiles.get(0).getAttribute("AuthKey").asInstanceOf[String],
-          profiles.get(0).getAttribute("VerificationCode").asInstanceOf[String]
-        )
-      else ("","")
-    cache.set(profilePrefix + authKey, profiles)
+    if(profiles.asScala.nonEmpty) {
+      val profile = profiles.get(0)
+      val authKey = profile.getAttribute("AuthKey").asInstanceOf[String]
+      cache.set(profilePrefix + authKey, profiles)
+      sendAuthkeyMail(profile)
+      Ok(s"""{"authkey" : "$authKey"}""")
+    } else {
+      Ok(s"""{"authkey" : ""}""")
+    }
+  }
 
-    val mailFrom = "mac.rainshrine@gmail.com"
-    val mailTo = "mac.rainshrine@gmail.com"
-    val mailSubject = "test Test test"
-    val mailTextBody = s"Test! $verificationCode"
-    val mailHtmlBody = s"<h1>Test!</h1><br>$verificationCode"
+  private def sendAuthkeyMail(profile: UserProfile)(implicit request:  AuthenticatedRequest[AnyContent]) = {
+    val verificationCode = profile.getAttribute("VerificationCode").asInstanceOf[String]
+    val mailFrom = configuration.get[String]("sform.mail.systemMailAddress")
+    val mailTo = profile.getAttribute("email").asInstanceOf[String]
+    val mailSubject = Messages("sform.mail.subject.verification")
+    val mailTextBody = Messages("sform.mail.body.text.verification", verificationCode)
+    val mailHtmlBody = Messages("sform.mail.body.html.verification", verificationCode)
+
     val sesClient = AmazonSimpleEmailServiceClientBuilder.standard().withRegion(Regions.AP_NORTHEAST_1).build()
+
     val sesRequest = new SendEmailRequest()
       .withDestination(new Destination().withToAddresses(mailTo))
       .withMessage(new Message()
@@ -92,19 +98,6 @@ class SignInController @Inject() (
         .withSubject(new Content().withCharset("UTF-8").withData(mailSubject)))
       .withSource(mailFrom)
     sesClient.sendEmail(sesRequest)
-
-    /*
-    mailerClient.send(Email(
-//      subject = Messages("email.verification.subject"),
-//      from = Messages("email.from"),
-      subject = "hogehoge",
-      from = "mac.rainshrine@gmail.com",
-      to = Seq("mac.rainshrine@gmail.com"),
-      bodyText = Some(verificationCode),
-      bodyHtml = Some("<html><body>hogehoge</body></html>>")
-    ))
-     */
-    Ok(s"""{"authkey" : "$authKey"}""")
   }
 
   /**
@@ -156,14 +149,6 @@ class SignInController @Inject() (
 
   private def getCachedProfiles(authKey: String)  = {
     cache.get[java.util.List[UserProfile]](profilePrefix + authKey)
-
-    // この辺りにauthkeyとverificationcodeの照合ロジック入れればOK
-    // あとは生成したJWTトークンが使えるか・・・
-//    val profile = cache.get("PR_" + key.get()).get().asInstanceOf[UserProfile]
-//    List(profile).asJava
-
-    //val profiles = profileManager.getProfiles()
-    //asScala(profiles).toList
   }
 
 }
