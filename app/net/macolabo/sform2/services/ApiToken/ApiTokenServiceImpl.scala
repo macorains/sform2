@@ -1,26 +1,28 @@
 package net.macolabo.sform2.services.ApiToken
 
+import com.google.inject.Inject
+import net.macolabo.sform2.models.daos.ApiTokenDAO
 import net.macolabo.sform2.models.entity.api_token.ApiToken
 import net.macolabo.sform2.services.ApiToken.insert.ApiTokenInsertRequest
+import scalikejdbc.DB
 
 import java.time.LocalDateTime
 import java.util.UUID
 
-class ApiTokenServiceImpl extends ApiTokenService {
-
-  def generateToken: String = {
-    "" // トークン作って返したい
-  }
+class ApiTokenServiceImpl @Inject()(
+  apiTokenDAO: ApiTokenDAO
+) extends ApiTokenService {
 
   def insert(apiTokenInsertRequest: ApiTokenInsertRequest) = {
-    var apiToken = ApiToken(
-      UUID.randomUUID(),
-      apiTokenInsertRequest.group_name, // 暗号化したい
-      apiTokenInsertRequest.token, // 暗号化したい
-      LocalDateTime.now(),
-      //apiTokenInsertRequest.expiry_daysを 現在日時に足した値にしたい
-      LocalDateTime.now()
-    )
-
+    DB.localTx(implicit session => {
+      val apiToken = ApiToken(
+        UUID.randomUUID(),
+        apiTokenInsertRequest.group_name, // 暗号化したものが入ってくる
+        apiTokenInsertRequest.token, // 暗号化したものが入ってくる
+        LocalDateTime.now().plusDays(apiTokenInsertRequest.expiry_days),
+        LocalDateTime.now()
+      )
+      apiTokenDAO.save(apiToken)
+    })
   }
 }
