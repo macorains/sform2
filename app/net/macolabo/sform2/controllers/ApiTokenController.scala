@@ -5,19 +5,15 @@ import net.macolabo.sform2.services.ApiToken.ApiTokenService
 import net.macolabo.sform2.services.ApiToken.insert.{ApiTokenInsertRequest, ApiTokenInsertRequestJson}
 import net.macolabo.sform2.utils.TokenUtil
 import org.pac4j.core.profile.UserProfile
-import org.pac4j.play.scala.{Pac4jScalaTemplateHelper, Security, SecurityComponents}
-import play.api.Configuration
+import org.pac4j.play.scala.{Security, SecurityComponents}
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
-import play.api.libs.json.Json.toJson
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.ExecutionContext
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 class ApiTokenController @Inject()(
-  config: Configuration,
-  components: ControllerComponents,
   apiTokenService: ApiTokenService,
   val controllerComponents: SecurityComponents
 )(
@@ -34,7 +30,7 @@ class ApiTokenController @Inject()(
     val tokenResponse = Json.parse(
       s"""
         {
-          "token": ${generateToken}
+          "token": $generateToken
         }
       """)
     Ok(tokenResponse)
@@ -48,12 +44,12 @@ class ApiTokenController @Inject()(
     val res = userId.flatMap(id => {
       request.body.asJson.flatMap(r =>
         r.validate[ApiTokenInsertRequest].map(f => {
-          apiTokenService.insert(f)
+          apiTokenService.insert(f, userGroup)
         }).asOpt)
     })
 
     res match {
-      case Some(s: Unit) => Ok
+      case Some(_) => Ok
       case None => BadRequest
     }
   }
