@@ -30,7 +30,7 @@ class ApiTokenController @Inject()(
     val tokenResponse = Json.parse(
       s"""
         {
-          "token": $generateToken
+          "token": "$generateToken"
         }
       """)
     Ok(tokenResponse)
@@ -41,7 +41,7 @@ class ApiTokenController @Inject()(
     val userId = profiles.asScala.headOption.map(_.getId)
     val userGroup = getAttributeValue(profiles, "user_group")
 
-    val res = userId.flatMap(id => {
+    val res = userId.flatMap(_ => {
       request.body.asJson.flatMap(r =>
         r.validate[ApiTokenInsertRequest].map(f => {
           apiTokenService.insert(f, userGroup)
