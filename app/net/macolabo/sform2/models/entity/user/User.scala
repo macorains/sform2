@@ -52,7 +52,7 @@ object User extends SQLSyntaxSupport[User] {
   override val tableName = "m_userinfo"
   def apply(rs: WrappedResultSet): User = {
     User(
-      UUID.fromString(rs.string("user_id")),
+      UUID.fromString(rs.string("id")),
       rs.string("username"),
       rs.string("password"),
       rs.stringOpt("user_group"),

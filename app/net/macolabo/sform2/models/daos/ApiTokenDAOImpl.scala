@@ -2,6 +2,7 @@ package net.macolabo.sform2.models.daos
 
 import net.macolabo.sform2.models.entity.api_token.ApiToken
 import scalikejdbc._
+import java.time.LocalDateTime
 
 class ApiTokenDAOImpl extends ApiTokenDAO {
   def save(apiToken: ApiToken)(implicit session: DBSession): Int = {
@@ -15,5 +16,20 @@ class ApiTokenDAOImpl extends ApiTokenDAO {
         t.created -> apiToken.created
       )
     }.update().apply()
+  }
+
+  def getExpiry(userGroup: String)(implicit session: DBSession): LocalDateTime = {
+    val f = ApiToken.syntax("f")
+    withSQL(
+      select(
+        f.expiry
+      )
+        .from(ApiToken as f)
+        .where
+        .eq(f.user_group, userGroup)
+        .and
+        .gt(f.expiry, LocalDateTime.now())
+        .orderBy(f.expiry).desc
+    ).map(rs => rs.localDateTime("expiry")).list().apply().head
   }
 }

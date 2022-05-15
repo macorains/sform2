@@ -22,9 +22,16 @@ class ApiTokenServiceImpl @Inject()(
         service.encryptPassword(userGroup),
         service.encryptPassword(apiTokenInsertRequest.token),
         LocalDateTime.now().plusDays(apiTokenInsertRequest.expiry_days),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        "", // TODO 作成ユーザー入れる
+        userGroup
       )
       apiTokenDAO.save(apiToken)
+    })
+  }
+  def getExpiry(userGroup: String): LocalDateTime = {
+    DB.localTx(implicit session => {
+      apiTokenDAO.getExpiry(userGroup)
     })
   }
 }

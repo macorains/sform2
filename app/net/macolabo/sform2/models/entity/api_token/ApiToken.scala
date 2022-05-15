@@ -9,7 +9,9 @@ case class ApiToken(
                      username: String, // hash化したgroup名
                      password: String, // 生成したトークン
                      expiry: LocalDateTime,
-                     created: LocalDateTime
+                     created: LocalDateTime,
+                     created_user: String,
+                     user_group: String
 )
 
 object ApiToken extends SQLSyntaxSupport[ApiToken] {
@@ -21,6 +23,8 @@ object ApiToken extends SQLSyntaxSupport[ApiToken] {
       rs.string("password"),
       rs.localDateTime("expiry"),
       rs.localDateTime("created"),
+      rs.string("created_user"),
+      rs.string("user_group")
     )
   }
 }

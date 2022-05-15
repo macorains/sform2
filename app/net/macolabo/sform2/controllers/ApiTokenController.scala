@@ -23,10 +23,9 @@ class ApiTokenController @Inject()(
   with I18nSupport
   with TokenUtil
   with Pac4jUtil
-  with ApiTokenInsertRequestJson
-{
+  with ApiTokenInsertRequestJson {
 
-  def generateApiTokenString: Action[AnyContent]  = Secure("HeaderClient")  { implicit request =>
+  def generateApiTokenString: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
     val tokenResponse = Json.parse(
       s"""
         {
@@ -50,6 +49,19 @@ class ApiTokenController @Inject()(
 
     res match {
       case Some(_) => Ok
+      case None => BadRequest
+    }
+  }
+
+  def getExpiry: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+    val profiles = getProfiles(controllerComponents)(request)
+    val userId = profiles.asScala.headOption.map(_.getId)
+    val userGroup = getAttributeValue(profiles, "user_group")
+
+    val res = userId.map(_ => apiTokenService.getExpiry(userGroup))
+
+    res match {
+      case Some(s) => Ok(Json.toJson(""))
       case None => BadRequest
     }
   }
