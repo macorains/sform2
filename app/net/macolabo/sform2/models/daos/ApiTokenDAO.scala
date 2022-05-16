@@ -7,5 +7,5 @@ import java.time.LocalDateTime
 
 trait ApiTokenDAO {
   def save(apiToken: ApiToken)(implicit session: DBSession): Int
-  def getExpiry(userGroup: String)(implicit session: DBSession): LocalDateTime
+  def getExpiry(userGroup: String)(implicit session: DBSession): Option[LocalDateTime]
 }

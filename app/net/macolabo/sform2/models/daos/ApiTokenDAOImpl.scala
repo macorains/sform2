@@ -13,12 +13,14 @@ class ApiTokenDAOImpl extends ApiTokenDAO {
         t.username -> apiToken.username,
         t.password -> apiToken.password,
         t.expiry -> apiToken.expiry,
-        t.created -> apiToken.created
+        t.created -> apiToken.created,
+        t.created_user -> apiToken.created_user,
+        t.user_group -> apiToken.user_group
       )
     }.update().apply()
   }
 
-  def getExpiry(userGroup: String)(implicit session: DBSession): LocalDateTime = {
+  def getExpiry(userGroup: String)(implicit session: DBSession): Option[LocalDateTime] = {
     val f = ApiToken.syntax("f")
     withSQL(
       select(
@@ -30,6 +32,6 @@ class ApiTokenDAOImpl extends ApiTokenDAO {
         .and
         .gt(f.expiry, LocalDateTime.now())
         .orderBy(f.expiry).desc
-    ).map(rs => rs.localDateTime("expiry")).list().apply().head
+    ).map(rs => rs.localDateTime("expiry")).list().apply().headOption
   }
 }

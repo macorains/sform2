@@ -14,7 +14,7 @@ class ApiTokenServiceImpl @Inject()(
   apiTokenDAO: ApiTokenDAO
 ) extends ApiTokenService {
 
-  def insert(apiTokenInsertRequest: ApiTokenInsertRequest, userGroup: String): Unit = {
+  def insert(apiTokenInsertRequest: ApiTokenInsertRequest, user: String, userGroup: String): Unit = {
     DB.localTx(implicit session => {
       val service = new DefaultPasswordService
       val apiToken = ApiToken(
@@ -23,13 +23,13 @@ class ApiTokenServiceImpl @Inject()(
         service.encryptPassword(apiTokenInsertRequest.token),
         LocalDateTime.now().plusDays(apiTokenInsertRequest.expiry_days),
         LocalDateTime.now(),
-        "", // TODO 作成ユーザー入れる
+        user, // TODO 作成ユーザー入れる
         userGroup
       )
       apiTokenDAO.save(apiToken)
     })
   }
-  def getExpiry(userGroup: String): LocalDateTime = {
+  def getExpiry(userGroup: String): Option[LocalDateTime] = {
     DB.localTx(implicit session => {
       apiTokenDAO.getExpiry(userGroup)
     })

@@ -40,10 +40,10 @@ class ApiTokenController @Inject()(
     val userId = profiles.asScala.headOption.map(_.getId)
     val userGroup = getAttributeValue(profiles, "user_group")
 
-    val res = userId.flatMap(_ => {
+    val res = userId.flatMap(uid => {
       request.body.asJson.flatMap(r =>
         r.validate[ApiTokenInsertRequest].map(f => {
-          apiTokenService.insert(f, userGroup)
+          apiTokenService.insert(f, uid, userGroup)
         }).asOpt)
     })
 
@@ -58,10 +58,10 @@ class ApiTokenController @Inject()(
     val userId = profiles.asScala.headOption.map(_.getId)
     val userGroup = getAttributeValue(profiles, "user_group")
 
-    val res = userId.map(_ => apiTokenService.getExpiry(userGroup))
+    val res = userId.flatMap(_ => apiTokenService.getExpiry(userGroup))
 
     res match {
-      case Some(s) => Ok(Json.toJson(""))
+      case Some(s) => Ok(Json.parse(s"""{"expiry":"$s"}"""))
       case None => BadRequest
     }
   }
