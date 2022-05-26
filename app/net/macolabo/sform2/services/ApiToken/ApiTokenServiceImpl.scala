@@ -19,7 +19,7 @@ class ApiTokenServiceImpl @Inject()(
       val service = new DefaultPasswordService
       val apiToken = ApiToken(
         UUID.randomUUID(),
-        service.encryptPassword(userGroup),
+        userGroup,
         service.encryptPassword(apiTokenInsertRequest.token),
         LocalDateTime.now().plusDays(apiTokenInsertRequest.expiry_days),
         LocalDateTime.now(),
