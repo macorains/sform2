@@ -3,7 +3,7 @@ package net.macolabo.sform2
 import java.time.Clock
 
 import com.google.inject.AbstractModule
-import net.macolabo.sform2.services.{ApplicationTimer, AtomicCounter, Counter}
+import net.macolabo.sform2.domain.services.{ApplicationTimer, AtomicCounter, Counter}
 
 /**
  * This class is a Guice module that tells Guice how to bind several

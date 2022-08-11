@@ -4,6 +4,35 @@ name := """sform2s"""
 version := "1.0-SNAPSHOT"
 scalaVersion := "2.13.3"
 
+lazy val global = (project in file("."))
+  .settings(commonSettings: _*)
+  .aggregate(
+    domain,
+    adminApi
+  )
+
+lazy val domain = project.in(file("sform2-domain"))
+  .enablePlugins(PlayScala)
+  .settings(
+    name := """sform2-domain""",
+    version := "1.0-SNAPSHOT",
+    scalaVersion := "2.13.3"
+  )
+  .settings(commonSettings: _*)
+
+
+lazy val adminApi = project.in(file("sform2-admin-api"))
+  .enablePlugins(PlayScala)
+  .dependsOn(domain)
+  .settings(
+    name := """sform2-admin-api""",
+    version := "1.0-SNAPSHOT",
+    scalaVersion := "2.13.3"
+  )
+  .settings(commonSettings: _*)
+
+
+
 val playPac4jVersion = "11.0.0-PLAY2.8"
 val pac4jVersion = "5.1.3"
 val playVersion = "2.8.8"
@@ -83,15 +112,6 @@ lazy val commonSettings = Seq(
 
 
 unmanagedBase := baseDirectory.value / "lib"
-
-
-lazy val domain = project.in(file("sform2-domain")).enablePlugins(PlayScala).settings(
-  commonSettings
-)
-
-lazy val adminApi = project.in(file("sform2-admin-api")).enablePlugins(PlayScala).dependsOn(domain).aggregate(domain).settings(
-  commonSettings
-)
 
 routesGenerator := InjectedRoutesGenerator
 // routesImport += "net.macolabo.sform2.domain.utils.route.Binders._"
