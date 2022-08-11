@@ -3,7 +3,6 @@ package net.macolabo.sform2.domain.services.External.Salesforce
 import com.sforce.soap.partner._
 import com.sforce.soap.partner.sobject._
 import com.sforce.ws._
-import net.macolabo.sform2.domain.models.transfer.TransferConfigSalesforce
 import net.macolabo.sform2.domain.services.Transfer.TransferGetTransferResponseSalesforceTransferConfig
 import net.macolabo.sform2.domain.utils.Logger
 

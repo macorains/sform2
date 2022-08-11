@@ -5,19 +5,21 @@ import java.time.ZonedDateTime
 import scalikejdbc._
 
 case class TransferConfigSalesforceObjectField(
-                                               id: BigInt,
-                                               transfer_config_salesforce_object_id: BigInt,
-                                               name: String,
-                                               label: String,
-                                               field_type: String,
-                                               active: Boolean,
-                                               user_group: String,
-                                               created_user: String,
-                                               modified_user: String,
-                                               created: ZonedDateTime,
-                                               modified: ZonedDateTime
-                                               ){
+  id: BigInt,
+  transfer_config_salesforce_object_id: BigInt,
+  name: String,
+  label: String,
+  field_type: String,
+  active: Boolean,
+  user_group: String,
+  created_user: String,
+  modified_user: String,
+  created: ZonedDateTime,
+  modified: ZonedDateTime
+) {
+
   import TransferConfigSalesforceObjectField._
+
   def insert: BigInt = create(this)
   def update: BigInt = save(this)
 }
@@ -43,6 +45,7 @@ object TransferConfigSalesforceObjectField extends SQLSyntaxSupport[TransferConf
 
   /**
    * TransferConfigSalesforceObjectFieldのリスト取得
+   *
    * @param userGroup                        ユーザーグループ
    * @param transferConfigSalesforceObjectId TransferConfigSalesforceObject ID
    * @param session                          DB Session
@@ -74,8 +77,9 @@ object TransferConfigSalesforceObjectField extends SQLSyntaxSupport[TransferConf
 
   /**
    * TransferConfigSalesforceObjectField作成
+   *
    * @param transferConfigSalesforceObjectField TransferConfigSalesforceObjectField
-   * @param session DB Session
+   * @param session                             DB Session
    * @return 作成したレコードのID
    */
   def create(transferConfigSalesforceObjectField: TransferConfigSalesforceObjectField)(implicit session: DBSession = autoSession): BigInt = {
@@ -98,8 +102,9 @@ object TransferConfigSalesforceObjectField extends SQLSyntaxSupport[TransferConf
 
   /**
    * TransferConfigSalesforceObjectField保存
+   *
    * @param transferConfigSalesforceObjectField TransferConfigSalesforceObjectField
-   * @param session DB Session
+   * @param session                             DB Session
    * @return result
    */
   def save(transferConfigSalesforceObjectField: TransferConfigSalesforceObjectField)(implicit session: DBSession = autoSession): BigInt = {
@@ -120,9 +125,10 @@ object TransferConfigSalesforceObjectField extends SQLSyntaxSupport[TransferConf
 
   /**
    * TransferConfigSalesforceObjectField削除
-   * @param userGroup ユーザーグループ
+   *
+   * @param userGroup                             ユーザーグループ
    * @param transferConfigSalesforceObjectFieldId TransferConfigSalesforceObjectField ID
-   * @param session DB Session
+   * @param session                               DB Session
    * @return Result
    */
   def erase(userGroup: String, transferConfigSalesforceObjectFieldId: BigInt)(implicit session: DBSession = autoSession): BigInt = {

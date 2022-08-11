@@ -545,6 +545,19 @@
     <orderEntry type="library" name="sbt: software.amazon.ion:ion-java:1.0.2:jar" level="project" />
     <orderEntry type="library" name="sbt: tyrex:tyrex:1.0.1:jar" level="project" />
     <orderEntry type="module-library">
+      <library name="sbt: unmanaged-jars">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/force-wsc-40.1.1-javadoc.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/force-wsc-40.1.1-sources.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/force-wsc-40.1.1-uber.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/force-wsc-40.1.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/force-wsc-partner.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
       <library name="sbt: unmanaged-sources-and-docs">
         <CLASSES />
         <JAVADOC>

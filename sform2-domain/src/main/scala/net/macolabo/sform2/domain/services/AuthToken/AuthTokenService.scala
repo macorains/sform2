@@ -1,5 +1,7 @@
 package net.macolabo.sform2.domain.services.AuthToken
 
+import net.macolabo.sform2.domain.models.entity.user.AuthToken
+
 import java.util.UUID
 import scala.concurrent.Future
 import scala.concurrent.duration._

@@ -16,7 +16,7 @@ class CacheAuthenticator @Inject() (
 )(implicit ec: DatabaseExecutionContext)extends Authenticator {
 
   @Override
-  def validate(cred: Credentials, context: WebContext, sessionStore: SessionStore)  = {
+  def validate(cred: Credentials, context: WebContext, sessionStore: SessionStore): Unit = {
     if (cred == null) throw new CredentialsException("No credential")
 
     // 標準のprofile項目以外にDBから読みたいものあれば、カンマ区切りでフィールド名入れる

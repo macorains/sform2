@@ -48,23 +48,21 @@ trait FormParts {
 
   def buttons(mode: Int, validateResult: Boolean): String = {
     mode match {
-      case cFormMode.LOAD => {
+      case cFormMode.LOAD =>
         """
           |<div class="sform_button_div">
           |<button type="button" id="sform_button_cancel">キャンセル</button>
           |<button type="button" id="sform_button_confirm">次へ</button>
           |</div>
         """.stripMargin
-      }
-      case cFormMode.CONFIRM if validateResult => {
+      case cFormMode.CONFIRM if validateResult =>
         """
           |<div class="sform_button_div">
           |<button type="button" id="sform_button_cancel">キャンセル</button>
           |<button type="button" id="sform_button_confirm">次へ</button>
           |</div>
         """.stripMargin
-      }
-      case cFormMode.CONFIRM if !validateResult => {
+      case cFormMode.CONFIRM if !validateResult =>
         """
           |<div class="sform_button_div">
           |<button type="button" id="sform_button_back">戻る</button>
@@ -72,26 +70,24 @@ trait FormParts {
           |<input type="hidden" id="sform_tmp">
           |</div>
         """.stripMargin
-      }
-      case cFormMode.REGIST => {
+      case cFormMode.REGIST =>
         """
           |<div class="sform_button_div">
           |<button type="button" id="sform_button_finish">完了</button>
           |</div>
        """.stripMargin
-      }
     }
   }
 
   def hashed_id_hidden(hashed_id: String): String = {
     s"""
-      |<input type="hidden" id="hashed_id" name="hashed_id" value="${hashed_id}">
+      |<input type="hidden" id="hashed_id" name="hashed_id" value="$hashed_id">
     """.stripMargin
   }
 
   def validate_result_hidden(result: String): String = {
     s"""
-       |<input type="hidden" id="validate_result" name="validate_result" value="${result}">
+       |<input type="hidden" id="validate_result" name="validate_result" value="$result">
     """.stripMargin
   }
 

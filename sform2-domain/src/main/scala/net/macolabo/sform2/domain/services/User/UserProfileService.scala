@@ -11,6 +11,9 @@ import org.pac4j.core.exception.{AccountNotFoundException, BadCredentialsExcepti
 import org.pac4j.core.profile.definition.CommonProfileDefinition
 import org.pac4j.core.profile.service.AbstractProfileService
 import org.pac4j.sql.profile.DbProfile
+import org.pac4j.core.util.CommonHelper._
+import org.pac4j.core.util.serializer.JsonSerializer
+import org.pac4j.core.util.Pac4jConstants._
 
 import java.util
 import java.util.UUID

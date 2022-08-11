@@ -33,9 +33,9 @@ import play.api.libs.mailer.MailerClient
  */
 class SecurityModule(environment: Environment, configuration: Configuration) extends AbstractModule with ScalaModule {
 
-  val baseUrl = configuration.get[String]("baseUrl")
-  val system = ActorSystem("security")
-  implicit val databaseExecutionContext = new DatabaseExecutionContext(system)
+  val baseUrl: String = configuration.get[String]("baseUrl")
+  val system: ActorSystem = ActorSystem("security")
+  implicit val databaseExecutionContext: DatabaseExecutionContext = new DatabaseExecutionContext(system)
   //val userDAO = new UserDAOImpl()
 
   override def configure(): Unit = {
