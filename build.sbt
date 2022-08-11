@@ -74,7 +74,11 @@ excludeDependencies ++= Seq(
   ExclusionRule("com.google.appengine", "appengine-jsr107cache")
 )
 
+lazy val domain = project.in(file("sform2-domain"))
+
 lazy val root: Project = (project in file("."))
+  .aggregate(domain)
+  .dependsOn(domain)
   .enablePlugins(PlayScala)
 
 routesGenerator := InjectedRoutesGenerator

@@ -4,7 +4,7 @@ import com.amazonaws.regions.Regions
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder
 import com.amazonaws.services.simpleemail.model.{Body, Content, Destination, Message, SendEmailRequest}
 import com.digitaltangible.playguard._
-import net.macolabo.sform2.services.GoogleAuth.GoogleAuthService
+import net.macolabo.sform2.domain.services.GoogleAuth.GoogleAuthService
 
 import javax.inject.Inject
 import net.macolabo.sform2.services.User.UserService

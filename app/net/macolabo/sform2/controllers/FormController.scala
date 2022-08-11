@@ -1,12 +1,12 @@
 package net.macolabo.sform2.controllers
 
-import net.macolabo.sform2.services.Form.delete.FormDeleteResponseJson
-import net.macolabo.sform2.services.Form.get.FormGetResponseJson
-import net.macolabo.sform2.services.Form.list.FormListResponseJson
-import net.macolabo.sform2.services.Form.update.{FormUpdateRequest, FormUpdateRequestJson, FormUpdateResponse, FormUpdateResponseJson}
+import net.macolabo.sform2.domain.services.Form.delete.FormDeleteResponseJson
+import net.macolabo.sform2.domain.services.Form.get.FormGetResponseJson
+import net.macolabo.sform2.domain.services.Form.list.FormListResponseJson
+import net.macolabo.sform2.domain.services.Form.update.{FormUpdateRequest, FormUpdateRequestJson, FormUpdateResponse, FormUpdateResponseJson}
 
 import javax.inject._
-import net.macolabo.sform2.services.Form.FormService
+import net.macolabo.sform2.domain.services.Form.FormService
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json._

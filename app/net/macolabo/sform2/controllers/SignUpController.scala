@@ -1,13 +1,13 @@
 package net.macolabo.sform2.controllers
 
 import net.macolabo.sform2.forms.SignUpForm
-import net.macolabo.sform2.models.entity.user.User
+import net.macolabo.sform2.domain.models.entity.user.User
 
 import java.util.UUID
 import javax.inject.Inject
-import net.macolabo.sform2.models.user.UserSignUpResultJson
-import net.macolabo.sform2.services.AuthToken.AuthTokenService
-import net.macolabo.sform2.services.User.UserService
+import net.macolabo.sform2.domain.models.user.UserSignUpResultJson
+import net.macolabo.sform2.domain.services.AuthToken.AuthTokenService
+import net.macolabo.sform2.domain.services.User.UserService
 import org.apache.shiro.authc.credential.DefaultPasswordService
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.{I18nSupport, Messages, MessagesProvider}

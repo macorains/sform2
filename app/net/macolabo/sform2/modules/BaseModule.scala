@@ -3,10 +3,10 @@ package net.macolabo.sform2.modules
 import com.google.inject.AbstractModule
 import net.macolabo.sform2.models.daos.{ApiTokenDAO, ApiTokenDAOImpl, AuthTokenDAO, AuthTokenDAOImpl, FormDAO, FormDAOImpl, PostdataDAO, PostdataDAOImpl, TransferDetailLogDAO, TransferDetailLogDAOImpl, TransferLogDAO, TransferLogDAOImpl, UserDAO, UserDAOImpl}
 import net.codingwell.scalaguice.ScalaModule
-import net.macolabo.sform2.services.ApiToken.{ApiTokenService, ApiTokenServiceImpl}
-import net.macolabo.sform2.services.AuthToken.{AuthTokenService, AuthTokenServiceImpl}
-import net.macolabo.sform2.services.GoogleAuth.{GoogleAuthService, GoogleAuthServiceImpl}
-import net.macolabo.sform2.services.User.{UserService, UserServiceImpl}
+import net.macolabo.sform2.domain.services.ApiToken.{ApiTokenService, ApiTokenServiceImpl}
+import net.macolabo.sform2.domain.services.AuthToken.{AuthTokenService, AuthTokenServiceImpl}
+import net.macolabo.sform2.domain.services.GoogleAuth.{GoogleAuthService, GoogleAuthServiceImpl}
+import net.macolabo.sform2.domain.services.User.{UserService, UserServiceImpl}
 
 /**
  * The base Guice module.

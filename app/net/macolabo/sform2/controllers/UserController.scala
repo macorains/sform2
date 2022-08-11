@@ -1,9 +1,9 @@
 package net.macolabo.sform2.controllers
 
 import javax.inject._
-import net.macolabo.sform2.models.RsResultSet
-import net.macolabo.sform2.models.daos.UserDAO
-import net.macolabo.sform2.services.User.{UserSaveRequest, UserSaveRequestJson, UserService}
+import net.macolabo.sform2.domain.models.RsResultSet
+import net.macolabo.sform2.domain.models.daos.UserDAO
+import net.macolabo.sform2.domain.services.User.{UserSaveRequest, UserSaveRequestJson, UserService}
 import org.webjars.play.WebJarsUtil
 import play.api.{Environment, _}
 import play.api.db.DBApi
