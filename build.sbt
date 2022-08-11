@@ -104,6 +104,12 @@ lazy val dependencies =
     }
 
 lazy val commonDependencies = Seq(
+  jdbc,
+  ws,
+  evolutions,
+  ehcache,
+  guice,
+  filters,
   dependencies.scalaReflect,
   dependencies.mysqlConnector,
   dependencies.scalikejdbc,
