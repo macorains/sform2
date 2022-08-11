@@ -1,13 +1,13 @@
-package net.macolabo.sform2.model.daos
+package net.macolabo.sform2.domain.model.daos
 
-import net.macolabo.sform2.helper.SformTestHelper
-import net.macolabo.sform2.models.daos.PostdataDAOImpl
-import net.macolabo.sform2.models.entity.Postdata
-import net.macolabo.sform2.models.entity.transfer.TransferDetailLog
+import net.macolabo.sform2.domain.model.helper.SformTestHelper
+import net.macolabo.sform2.domain.models.daos.PostdataDAOImpl
+import net.macolabo.sform2.domain.models.entity.Postdata
+import net.macolabo.sform2.domain.models.entity.transfer.TransferDetailLog
 import org.scalatest.flatspec.FixtureAnyFlatSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import scalikejdbc.{DBSession, insertInto, withSQL}
 import scalikejdbc.scalatest.AutoRollback
+import scalikejdbc.{DBSession, insertInto, withSQL}
 
 import java.time.ZonedDateTime
 

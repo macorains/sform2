@@ -1,11 +1,11 @@
-package net.macolabo.sform2.model.daos
+package net.macolabo.sform2.domain.model.daos
 
-import play.api.libs.json._
-import net.macolabo.sform2.helper.SformTestHelper
-import net.macolabo.sform2.models.daos.TransferLogDAOImpl
-import net.macolabo.sform2.models.entity.transfer.TransferLog
+import net.macolabo.sform2.domain.model.helper.SformTestHelper
+import net.macolabo.sform2.domain.models.daos.TransferLogDAOImpl
+import net.macolabo.sform2.domain.models.entity.transfer.TransferLog
 import org.scalatest.flatspec.FixtureAnyFlatSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import play.api.libs.json._
 import scalikejdbc._
 import scalikejdbc.scalatest.AutoRollback
 

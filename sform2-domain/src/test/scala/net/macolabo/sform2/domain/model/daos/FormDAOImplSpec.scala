@@ -1,17 +1,17 @@
-package net.macolabo.sform2.model.daos
+package net.macolabo.sform2.domain.model.daos
 
-import net.macolabo.sform2.helper.SformTestHelper
-import net.macolabo.sform2.models.daos.FormDAOImpl
-import net.macolabo.sform2.models.entity
-import net.macolabo.sform2.models.entity.transfer.TransferConfig
-import net.macolabo.sform2.models.entity.form.{Form, FormCol, FormColSelect, FormColValidation, FormTransferTask, FormTransferTaskCondition, FormTransferTaskMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField}
-import net.macolabo.sform2.services.Form.get.{FormColGetReponse, FormColSelectGetReponse, FormColValidationGetReponse, FormTransferTaskConditionGetReponse, FormTransferTaskGetResponse, FormTransferTaskMailGetReponse, FormTransferTaskSalesforceFieldGetReponse, FormTransferTaskSalesforceGetReponse}
-import net.macolabo.sform2.services.Form.update.{FormColSelectUpdateRequest, FormColUpdateRequest, FormColValidationUpdateRequest, FormTransferTaskConditionUpdateRequest, FormTransferTaskMailUpdateRequest, FormTransferTaskSalesforceFieldUpdateRequest, FormTransferTaskSalesforceUpdateRequest, FormTransferTaskUpdateRequest, FormUpdateRequest}
+import net.macolabo.sform2.domain.model.helper.SformTestHelper
+import net.macolabo.sform2.domain.models.daos.FormDAOImpl
+import net.macolabo.sform2.domain.models.entity.form.{Form, FormCol, FormColSelect, FormColValidation, FormTransferTask, FormTransferTaskCondition, FormTransferTaskMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField}
+import net.macolabo.sform2.domain.models.entity.user.User
+import net.macolabo.sform2.domain.models.transfer.TransferConfig
+import net.macolabo.sform2.domain.services.Form.get.{FormColGetReponse, FormColSelectGetReponse, FormColValidationGetReponse, FormTransferTaskConditionGetReponse, FormTransferTaskGetResponse, FormTransferTaskMailGetReponse, FormTransferTaskSalesforceFieldGetReponse, FormTransferTaskSalesforceGetReponse}
+import net.macolabo.sform2.domain.services.Form.update.{FormColSelectUpdateRequest, FormColUpdateRequest, FormColValidationUpdateRequest, FormTransferTaskConditionUpdateRequest, FormTransferTaskMailUpdateRequest, FormTransferTaskSalesforceFieldUpdateRequest, FormTransferTaskSalesforceUpdateRequest, FormTransferTaskUpdateRequest, FormUpdateRequest}
 import org.scalatest.flatspec.FixtureAnyFlatSpec
-import scalikejdbc._
-import scalikejdbc.scalatest.AutoRollback
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import scalikejdbc._
 import scalikejdbc.interpolation.SQLSyntax.count
+import scalikejdbc.scalatest.AutoRollback
 
 import java.time.ZonedDateTime
 import java.util.UUID
@@ -20,9 +20,9 @@ import scala.collection.compat.Factory
 class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite with SformTestHelper with AutoRollback {
 
   private val userId = UUID.randomUUID()
-  private val user = entity.user.User(userId, "hoge", "hoge", Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge@hoge.com"), None, activated = true, deletable = false)
-  var formId = BigInt(100)
-  var transferConfigId = BigInt(100)
+  private val user = User(userId, "hoge", "hoge", Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge@hoge.com"), None, activated = true, deletable = false)
+  var formId: BigInt = BigInt(100)
+  var transferConfigId: BigInt = BigInt(100)
 
   behavior of "Form"
 

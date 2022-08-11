@@ -1,9 +1,8 @@
-package net.macolabo.sform2.model.daos
+package net.macolabo.sform2.domain.model.daos
 
-import com.google.inject.Inject
-import net.macolabo.sform2.helper.SformTestHelper
-import net.macolabo.sform2.models.daos.UserDAOImpl
-import net.macolabo.sform2.models.entity.user.User
+import net.macolabo.sform2.domain.model.helper.SformTestHelper
+import net.macolabo.sform2.domain.models.daos.UserDAOImpl
+import net.macolabo.sform2.domain.models.entity.user.User
 import org.scalatest.flatspec.FixtureAnyFlatSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import scalikejdbc._

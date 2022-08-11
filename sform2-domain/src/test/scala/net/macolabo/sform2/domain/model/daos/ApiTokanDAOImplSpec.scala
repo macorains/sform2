@@ -1,8 +1,8 @@
-package net.macolabo.sform2.model.daos
+package net.macolabo.sform2.domain.model.daos
 
-import net.macolabo.sform2.helper.SformTestHelper
-import net.macolabo.sform2.models.daos.ApiTokenDAOImpl
-import net.macolabo.sform2.models.entity.api_token.ApiToken
+import net.macolabo.sform2.domain.model.helper.SformTestHelper
+import net.macolabo.sform2.domain.models.daos.ApiTokenDAOImpl
+import net.macolabo.sform2.domain.models.entity.api_token.ApiToken
 import org.scalatest.flatspec.FixtureAnyFlatSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import scalikejdbc._
@@ -25,7 +25,9 @@ class ApiTokanDAOImplSpec extends FixtureAnyFlatSpec
       "hoge",
       "fuga",
       dateTime,
-      dateTime
+      dateTime,
+      "x",
+      "y"
     )
     val apiTokenDAO = new ApiTokenDAOImpl()
     apiTokenDAO.save(apiToken)
