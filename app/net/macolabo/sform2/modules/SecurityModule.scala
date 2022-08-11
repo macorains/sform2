@@ -3,11 +3,11 @@ package net.macolabo.sform2.modules
 import akka.actor.ActorSystem
 import com.google.inject.{AbstractModule, Inject, Provides}
 import net.codingwell.scalaguice.ScalaModule
-import net.macolabo.sform2.models.daos.{UserDAO, UserDAOImpl}
+import net.macolabo.sform2.domain.models.daos.UserDAOImpl
 import org.pac4j.http.client.direct.HeaderClient
 import org.pac4j.jwt.config.signature.SecretSignatureConfiguration
 import org.pac4j.jwt.credentials.authenticator.JwtAuthenticator
-import net.macolabo.sform2.models.security.{DatabaseExecutionContext, DemoHttpActionAdapter, SqlAuthencator}
+import net.macolabo.sform2.views.models.security.{DatabaseExecutionContext, DemoHttpActionAdapter, SqlAuthencator}
 import org.pac4j.core.client.Clients
 import org.pac4j.http.client.indirect.FormClient
 import org.pac4j.http.credentials.authenticator.test.SimpleTestUsernamePasswordAuthenticator
