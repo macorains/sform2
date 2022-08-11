@@ -1,5 +1,8 @@
 package net.macolabo.sform2.domain.services.User
 
+import net.macolabo.sform2.domain.models.daos.UserDAO
+import net.macolabo.sform2.domain.models.entity.user.User
+
 import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}

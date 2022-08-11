@@ -1,5 +1,7 @@
 package net.macolabo.sform2.domain.services.User
 
+import net.macolabo.sform2.domain.models.entity.user.User
+
 import java.util.UUID
 import scala.concurrent.Future
 

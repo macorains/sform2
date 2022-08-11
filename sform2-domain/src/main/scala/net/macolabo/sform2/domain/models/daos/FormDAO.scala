@@ -1,5 +1,9 @@
 package net.macolabo.sform2.domain.models.daos
 
+import net.macolabo.sform2.domain.services.Form.delete.FormDeleteResponse
+import net.macolabo.sform2.domain.services.Form.get.FormGetResponse
+import net.macolabo.sform2.domain.services.Form.list.FormListResponse
+import net.macolabo.sform2.domain.services.Form.update.{FormUpdateRequest, FormUpdateResponse}
 import scalikejdbc.DBSession
 
 trait FormDAO {

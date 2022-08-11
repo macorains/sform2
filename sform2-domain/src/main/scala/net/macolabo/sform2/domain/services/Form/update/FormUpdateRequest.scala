@@ -2,7 +2,7 @@ package net.macolabo.sform2.domain.services.Form.update
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, Json, Reads, Writes}
-import net.macolabo.sform2.utils.StringUtils.StringImprovements
+import net.macolabo.sform2.domain.utils.StringUtils.StringImprovements
 
 /**
  * フォーム更新API・フォームデータ

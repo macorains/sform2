@@ -1,5 +1,6 @@
 package net.macolabo.sform2.domain.models.daos
 
+import net.macolabo.sform2.domain.models.entity.user.AuthToken
 import scalikejdbc._
 
 import java.time.LocalDateTime

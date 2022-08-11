@@ -1,5 +1,6 @@
 package net.macolabo.sform2.domain.models.daos
 
+import net.macolabo.sform2.domain.models.entity.user.User
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import scalikejdbc._
 import scalikejdbc.interpolation.SQLSyntax.count
