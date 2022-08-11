@@ -97,3 +97,5 @@ scalacOptions ++= Seq(
   "-Ywarn-numeric-widen", // Warn when numerics are widened.
   "-Xlint:-unused,_"
 )
+
+ThisBuild / useCoursier := false
