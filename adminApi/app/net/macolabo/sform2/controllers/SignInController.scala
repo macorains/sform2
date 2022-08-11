@@ -7,7 +7,7 @@ import com.digitaltangible.playguard._
 import net.macolabo.sform2.domain.services.GoogleAuth.GoogleAuthService
 
 import javax.inject.Inject
-import net.macolabo.sform2.services.User.UserService
+import net.macolabo.sform2.domain.services.User.UserService
 import org.webjars.play.WebJarsUtil
 import play.api.{Configuration, Logger}
 import play.api.i18n.{I18nSupport, Messages}

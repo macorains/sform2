@@ -1,6 +1,6 @@
-package net.macolabo.sform2.domain.model.daos
+package net.macolabo.sform2.domain.models.daos
 
-import net.macolabo.sform2.domain.model.helper.SformTestHelper
+import net.macolabo.sform2.domain.models.helper.SformTestHelper
 import net.macolabo.sform2.domain.models.daos.PostdataDAOImpl
 import net.macolabo.sform2.domain.models.entity.Postdata
 import net.macolabo.sform2.domain.models.entity.transfer.TransferDetailLog

@@ -35,7 +35,7 @@ lazy val domain = Project(
   commonScalacOptions,
   commonExcludeDependencies,
   libraryDependencies ++= commonDependencies,
-).enablePlugins(PlayScala)
+)
 
 lazy val adminApi = Project(
   id = "admin",
@@ -51,6 +51,7 @@ lazy val adminApi = Project(
 )
   .dependsOn(domain)
   .aggregate(domain)
+  .enablePlugins(PlayScala)
 
 lazy val dependencies =
   new

@@ -5,15 +5,13 @@ import net.macolabo.sform2.domain.models.RsResultSet
 import net.macolabo.sform2.domain.models.daos.UserDAO
 import net.macolabo.sform2.domain.services.User.{UserSaveRequest, UserSaveRequestJson, UserService}
 import org.webjars.play.WebJarsUtil
-import play.api.{Environment, _}
-import play.api.db.DBApi
 import play.api.i18n.I18nSupport
 import play.api.libs.json._
 import play.api.mvc._
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class UserController @Inject() (
   val controllerComponents: SecurityComponents,

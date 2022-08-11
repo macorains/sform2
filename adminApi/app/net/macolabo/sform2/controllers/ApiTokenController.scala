@@ -3,7 +3,7 @@ package net.macolabo.sform2.controllers
 import com.google.inject.Inject
 import net.macolabo.sform2.domain.services.ApiToken.ApiTokenService
 import net.macolabo.sform2.domain.services.ApiToken.insert.{ApiTokenInsertRequest, ApiTokenInsertRequestJson}
-import net.macolabo.sform2.utils.TokenUtil
+import net.macolabo.sform2.domain.utils.TokenUtil
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
 import play.api.i18n.I18nSupport

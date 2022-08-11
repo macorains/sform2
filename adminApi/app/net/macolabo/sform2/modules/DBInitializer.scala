@@ -1,7 +1,7 @@
 package net.macolabo.sform2.modules
 
 import com.google.inject.AbstractModule
-import net.macolabo.sform2.utils.Logger
+import net.macolabo.sform2.domain.utils.Logger
 import scalikejdbc.config._
 
 class DBInitializer extends Logger {

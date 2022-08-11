@@ -1,4 +1,4 @@
-package net.macolabo.sform2.domain.model.helper
+package net.macolabo.sform2.domain.models.helper
 
 import com.typesafe.config.{Config, ConfigFactory}
 import play.api.Application

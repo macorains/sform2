@@ -10,10 +10,6 @@ import org.pac4j.core.credentials.Credentials
 import org.pac4j.core.credentials.authenticator.Authenticator
 import org.pac4j.core.credentials.password.ShiroPasswordEncoder
 import org.pac4j.core.exception.CredentialsException
-import org.pac4j.sql.profile.service.DbProfileService
-import play.api.cache.SyncCacheApi
-import play.api.db._
-import play.api.libs.mailer.MailerClient
 
 class SqlAuthencator @Inject() (
   userDAO: UserDAO
