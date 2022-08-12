@@ -1,0 +1,2 @@
+id,type_code,config_index,name,status,user_group,created_user,modified_user,created,modified
+1,mail,1,自動返信メール,1,Admin,hoge,hoge,2022-07-30 17:53:28,2022-07-30 17:53:35

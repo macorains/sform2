@@ -1,0 +1,4 @@
+id,form_transfer_task_id,from_address_id,to_address,to_address_id,to_address_field,cc_address,cc_address_id,cc_address_field,bcc_address_id,replyto_address_id,subject,body,user_group,created_user,modified_user,created,modified
+1,1,1,,,email,,,,2,3,テスト自動返信,ほげーほげー,Admin,hoge,hoge,2022-07-30 21:57:59,2022-07-30 21:58:06
+3,2,1,,2,,,,,,,テスト自動返信2,ふがふが,Admin,hoge,hoge,2022-08-02 22:59:48,2022-08-02 22:59:53
+4,3,1,mac.rainshrine+99@gmail.com,,,,,,,,テスト自動返信3,テスト,Admin,hoge,hoge,2022-08-02 23:00:46,2022-08-02 23:00:51

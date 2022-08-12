@@ -1,0 +1,2 @@
+id,transfer_config_id,use_cc,use_bcc,use_replyto,user_group,created_user,modified_user,created,modified
+1,1,1,1,1,Admin,hoge,hoge,2022-07-30 18:07:19,2022-07-30 18:07:27
