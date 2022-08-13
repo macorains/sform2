@@ -1,0 +1,59 @@
+# https://www.playframework.com/documentation/latest/Configuration
+
+baseUrl="http://localhost:9002"
+
+# Secret key
+# ~~~~~
+# The secret key is used to secure cryptographics functions.
+# If you deploy your application to several instances be sure to use the same key!
+play.http.secret.key="changeme"
+
+# The application languages
+# ~~~~~
+play.i18n.langs=["en","ja"]
+
+# Registers the request handler
+# ~~~~~
+play.http.requestHandler = "play.api.http.DefaultHttpRequestHandler"
+
+# Registers the filters
+# ~~~~~
+play.http.filters = "net.macolabo.sform.api.utils.Filters"
+
+play.http.parser.maxMemoryBuffer = 5MB
+play.http.parser.maxDiskBuffer = 100MB
+parsers.anyContent.maxLength = 100MB
+
+play.modules.enabled += "net.macolabo.sform.api.modules.BaseModule"
+# play.modules.enabled += "modules.JobModule"
+# play.modules.enabled += "play.api.libs.mailer.MailerModule"
+play.modules.enabled += "net.macolabo.sform.api.modules.DBInitializerModule"
+play.modules.enabled += "net.macolabo.sform.api.modules.SecurityModule"
+
+db {
+  # You can declare as many datasources as you want.
+  # By convention, the default datasource is named `default`
+  # https://www.playframework.com/documentation/latest/Developing-with-the-H2-Database
+  default.driver=com.mysql.jdbc.Driver
+  default.url="jdbc:mysql://127.0.0.1/sform?useSSL=false"
+  default.username="hoge"
+  default.password="hoge"
+  default.logStatements=true
+
+  # You can turn on SQL logging for any datasource
+  # https://www.playframework.com/documentation/latest/Highlights25#Logging-SQL-statements
+  #default.logSql=true
+}
+
+# Number of database connections
+# See https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing
+fixedConnectionPool = 9
+
+# Job queue sized to HikariCP connection pool
+database.dispatcher {
+  executor = "thread-pool-executor"
+  throughput = 1
+  thread-pool-executor {
+    fixed-pool-size = ${fixedConnectionPool}
+  }
+}
