@@ -12,7 +12,9 @@ import scalikejdbc.DB
 
 import java.math.BigInteger
 import scala.annotation.tailrec
-import scala.collection.JavaConverters.seqAsJavaListConverter
+import scala.collection.JavaConverters.{asJavaIterableConverter, seqAsJavaListConverter}
+import scala.jdk.CollectionConverters._
+import scala.jdk.FunctionConverters.enrichAsJavaFunction
 
 class MailTransfer @Inject()(
   transferConfigMailAddressDAO: TransferConfigMailAddressDAOImpl
@@ -88,7 +90,7 @@ class MailTransfer @Inject()(
   def getReplyToAddress(replyToAddressId: BigInteger): java.util.List[String] = {
     DB.localTx(implicit session => {
       transferConfigMailAddressDAO.get(replyToAddressId).map(rs => rs.address)
-    }).map(address => List(address).asJava).getOrElse(java.util.List.of())
+    }).map(address => List(address).toBuffer.asJava).getOrElse(java.util.List.of())
   }
 
   def createLog(result: Option[SendEmailResult]): String = {

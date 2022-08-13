@@ -2,10 +2,13 @@ package net.macolabo.sform2.domain.services.Form
 
 import akka.actor.ActorRef
 import com.google.inject.Inject
-import net.macolabo.sform2.domain.models.daos.FormDAO
+import net.macolabo.sform2.domain.models.daos.{FormColDAO, FormColSelectDAO, FormColValidationDAO, FormDAO, PostdataDAO}
+import net.macolabo.sform2.domain.models.entity.form.{Form, FormCol, FormColSelect}
 import net.macolabo.sform2.domain.services.Form.load.{FormLoadRequest, FormLoadRequestJson}
 import net.macolabo.sform2.domain.services.Form.post.{FormPostRequest, FormPostRequestJson}
 import net.macolabo.sform2.domain.services.Form.validate.FormValidateResultResponse
+import net.macolabo.sform2.domain.services.Transfer.TransferReceiver.NewTaskRequest
+import net.macolabo.sform2.domain.utils.forms.{FormColType_Checkbox, FormColType_Combo, FormColType_DisplayText, FormColType_Hidden, FormColType_Radio, FormColType_Text, FormColType_TextArea}
 import play.api.cache.SyncCacheApi
 import play.api.libs.json.JsValue
 import scalikejdbc.DB
@@ -108,7 +111,7 @@ extends FormLoadRequestJson with FormPostRequestJson
             cache.get[FormPostRequest](cid).map(formPostRequest => {
               formPostRequest.postdata.map(postdata => {
                 // データ保存
-                val postdataId = postdataDAO.save(request.hashed_form_id, postdata)
+                val postdataId = postdataDAO.save(request.hashed_form_id, postdata.toString())
                 // Transfer実行
                 transferReceiver ! NewTaskRequest(postdata, postdataId, request.hashed_form_id)
                 // 完了画面の出力

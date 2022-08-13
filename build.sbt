@@ -34,7 +34,9 @@ lazy val domain = Project(
   commonResolvers,
   commonScalacOptions,
   commonExcludeDependencies,
-  libraryDependencies ++= commonDependencies,
+  libraryDependencies ++= commonDependencies ++ Seq(
+    dependencies.playJson
+  )
 )
 
 lazy val adminApi = Project(
@@ -119,6 +121,7 @@ lazy val dependencies =
       val awsJavaSdk = "com.amazonaws" % "aws-java-sdk" % "1.11.1034"
       val awsJavaSdkSes = "com.amazonaws" % "aws-java-sdk-ses" % "1.11.1034"
       val akkaTestkit = "com.typesafe.akka" %% "akka-testkit" % akkaVersion
+      val playJson = "com.typesafe.play" %% "play-json" % "2.9.2"
     }
 
 lazy val commonDependencies = Seq(

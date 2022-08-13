@@ -347,12 +347,12 @@
     <orderEntry type="library" name="sbt: com.typesafe.play:play-cache_2.13:2.8.8:jar" level="project" />
     <orderEntry type="library" name="sbt: com.typesafe.play:play-ehcache_2.13:2.8.8:jar" level="project" />
     <orderEntry type="library" name="sbt: com.typesafe.play:play-exceptions:2.8.8:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.typesafe.play:play-functional_2.13:2.8.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.typesafe.play:play-functional_2.13:2.9.2:jar" level="project" />
     <orderEntry type="library" name="sbt: com.typesafe.play:play-guice_2.13:2.8.8:jar" level="project" />
     <orderEntry type="library" name="sbt: com.typesafe.play:play-jdbc-api_2.13:2.8.8:jar" level="project" />
     <orderEntry type="library" name="sbt: com.typesafe.play:play-jdbc-evolutions_2.13:2.8.8:jar" level="project" />
     <orderEntry type="library" name="sbt: com.typesafe.play:play-jdbc_2.13:2.8.8:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.typesafe.play:play-json_2.13:2.8.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.typesafe.play:play-json_2.13:2.9.2:jar" level="project" />
     <orderEntry type="library" name="sbt: com.typesafe.play:play-logback_2.13:2.8.8:jar" level="project" />
     <orderEntry type="library" name="sbt: com.typesafe.play:play-mailer-guice_2.13:8.0.1:jar" level="project" />
     <orderEntry type="library" name="sbt: com.typesafe.play:play-mailer_2.13:8.0.1:jar" level="project" />
