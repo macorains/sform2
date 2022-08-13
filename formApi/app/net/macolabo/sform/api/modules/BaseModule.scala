@@ -1,10 +1,9 @@
 package net.macolabo.sform.api.modules
 
 import com.google.inject.AbstractModule
-import net.macolabo.sform.api.models.daos.{AuthTokenDAO, AuthTokenDAOImpl, FormColDAO, FormColDAOImpl, FormColSelectDAO, FormColSelectDAOImpl, FormColValidationDAO, FormColValidationDAOImpl, FormDAO, FormDAOImpl, FormTransferTaskConditionDAO, FormTransferTaskConditionDAOImpl, FormTransferTaskDAO, FormTransferTaskDAOImpl, FormTransferTaskMailDAO, FormTransferTaskMailDAOImpl, FormTransferTaskSalesforceDAO, FormTransferTaskSalesforceDAOImpl, FormTransferTaskSalesforceFieldDAO, FormTransferTaskSalesforceFieldDAOImpl, PostdataDAO, PostdataDAOImpl}
-import net.macolabo.sform.api.services.{AuthTokenService, AuthTokenServiceImpl}
+import net.macolabo.sform2.domain.models.daos.{AuthTokenDAO, AuthTokenDAOImpl, FormColDAO, FormColDAOImpl, FormColSelectDAO, FormColSelectDAOImpl, FormColValidationDAO, FormColValidationDAOImpl, FormDAO, FormDAOImpl, FormTransferTaskConditionDAO, FormTransferTaskConditionDAOImpl, FormTransferTaskDAO, FormTransferTaskDAOImpl, FormTransferTaskMailDAO, FormTransferTaskMailDAOImpl, FormTransferTaskSalesforceDAO, FormTransferTaskSalesforceDAOImpl, FormTransferTaskSalesforceFieldDAO, FormTransferTaskSalesforceFieldDAOImpl, PostdataDAO, PostdataDAOImpl}
+import net.macolabo.sform2.domain.services.AuthToken.{AuthTokenService, AuthTokenServiceImpl}
 import net.codingwell.scalaguice.ScalaModule
-import net.macolabo.sform.api.models.entity.formtransfertask.FormTransferTaskMail
 
 
 /**

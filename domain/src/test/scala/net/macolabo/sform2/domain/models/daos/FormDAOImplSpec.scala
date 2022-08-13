@@ -3,8 +3,8 @@ package net.macolabo.sform2.domain.models.daos
 import net.macolabo.sform2.domain.models.helper.SformTestHelper
 import net.macolabo.sform2.domain.models.daos.FormDAOImpl
 import net.macolabo.sform2.domain.models.entity.form.{Form, FormCol, FormColSelect, FormColValidation, FormTransferTask, FormTransferTaskCondition, FormTransferTaskMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField}
+import net.macolabo.sform2.domain.models.entity.transfer.TransferConfig
 import net.macolabo.sform2.domain.models.entity.user.User
-import net.macolabo.sform2.domain.models.transfer.TransferConfig
 import net.macolabo.sform2.domain.services.Form.get.{FormColGetReponse, FormColSelectGetReponse, FormColValidationGetReponse, FormTransferTaskConditionGetReponse, FormTransferTaskGetResponse, FormTransferTaskMailGetReponse, FormTransferTaskSalesforceFieldGetReponse, FormTransferTaskSalesforceGetReponse}
 import net.macolabo.sform2.domain.services.Form.update.{FormColSelectUpdateRequest, FormColUpdateRequest, FormColValidationUpdateRequest, FormTransferTaskConditionUpdateRequest, FormTransferTaskMailUpdateRequest, FormTransferTaskSalesforceFieldUpdateRequest, FormTransferTaskSalesforceUpdateRequest, FormTransferTaskUpdateRequest, FormUpdateRequest}
 import org.scalatest.flatspec.FixtureAnyFlatSpec

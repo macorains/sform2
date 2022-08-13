@@ -1,6 +1,6 @@
 package net.macolabo.sform.api.controllers
 
-import net.macolabo.sform.api.services.AuthTokenService
+import net.macolabo.sform2.domain.services.AuthToken.AuthTokenService
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.jwt.config.signature.SecretSignatureConfiguration
 import org.pac4j.jwt.profile.JwtGenerator

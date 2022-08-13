@@ -1,7 +1,8 @@
 package net.macolabo.sform2.domain.services.Transfer
 
 import com.google.inject.Inject
-import net.macolabo.sform2.domain.models.transfer.{TransferConfig, TransferConfigMail, TransferConfigMailAddress, TransferConfigSalesforce, TransferConfigSalesforceObject, TransferConfigSalesforceObjectField}
+import net.macolabo.sform2.domain.models.entity.transfer.{TransferConfig, TransferConfigMail, TransferConfigMailAddress, TransferConfigSalesforce, TransferConfigSalesforceObject, TransferConfigSalesforceObjectField}
+import net.macolabo.sform2.domain.models.entity.transfer.TransferConfigSalesforceObjectField
 
 import java.time.ZonedDateTime
 import scala.concurrent.ExecutionContext

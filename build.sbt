@@ -53,6 +53,22 @@ lazy val adminApi = Project(
   .aggregate(domain)
   .enablePlugins(PlayScala)
 
+lazy val formApi = Project(
+  id = "form",
+  base = file("formApi")
+).settings(
+  name := "formApi",
+  version := "1.0-SNAPSHOT",
+  scalaVersion := "2.13.3",
+  commonResolvers,
+  commonScalacOptions,
+  commonExcludeDependencies,
+  libraryDependencies ++= commonDependencies
+)
+  .dependsOn(domain)
+  .aggregate(domain)
+  .enablePlugins(PlayScala)
+
 lazy val dependencies =
   new
     {
@@ -60,6 +76,7 @@ lazy val dependencies =
       val pac4jVersion = "5.1.3"
       val playVersion = "2.8.8"
       val scalikeJdbcVersion = "3.5.0"
+      val akkaVersion = "2.6.14"
 
       val scalaReflect = "org.scala-lang" % "scala-reflect" % "2.13.3"
       val mysqlConnector = "mysql" % "mysql-connector-java" % "8.0.20"
@@ -101,6 +118,7 @@ lazy val dependencies =
       val playCache = "com.typesafe.play" % "play-cache_2.13" % playVersion
       val awsJavaSdk = "com.amazonaws" % "aws-java-sdk" % "1.11.1034"
       val awsJavaSdkSes = "com.amazonaws" % "aws-java-sdk-ses" % "1.11.1034"
+      val akkaTestkit = "com.typesafe.akka" %% "akka-testkit" % akkaVersion
     }
 
 lazy val commonDependencies = Seq(
@@ -148,7 +166,8 @@ lazy val commonDependencies = Seq(
   dependencies.shiroCore,
   dependencies.playCache,
   dependencies.awsJavaSdk,
-  dependencies.awsJavaSdkSes
+  dependencies.awsJavaSdkSes,
+  dependencies.akkaTestkit
 )
 
 

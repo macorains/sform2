@@ -3,7 +3,8 @@ package net.macolabo.sform.api.controllers
 import java.net.InetAddress
 
 import javax.inject.Inject
-import net.macolabo.sform.api.services.form.{FormService, FormValidationResultJson}
+import net.macolabo.sform2.domain.services.Form.FormExecuteService
+import net.macolabo.sform2.domain.services.Form.validate.FormValidationResultJson
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
 import org.webjars.play.WebJarsUtil
@@ -14,7 +15,7 @@ import scala.concurrent.ExecutionContext
 
 class FormController @Inject()(
                                 val controllerComponents: SecurityComponents,
-                                formService: FormService,
+                                formExecuteService: FormExecuteService,
                               )(
                                 implicit
                                 webJarsUtil: WebJarsUtil,
@@ -32,7 +33,7 @@ class FormController @Inject()(
   def load: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
     request.body.asJson match {
       case Some(f) =>
-        formService.load(f, request.host).map(response => {
+        formExecuteService.load(f, request.host).map(response => {
           Ok(Json.toJson(response))
         }).getOrElse(NotFound)
       case None => BadRequest
@@ -49,7 +50,7 @@ class FormController @Inject()(
   def validateForm: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
     request.body.asJson match {
       case Some(f) =>
-        formService.validate(f, request.host).map(response => {
+        formExecuteService.validate(f, request.host).map(response => {
           Ok(Json.toJson(response))
         }).getOrElse(NotFound)
       case None => BadRequest
@@ -64,7 +65,7 @@ class FormController @Inject()(
   def confirmForm: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
     request.body.asJson match {
       case Some(f) =>
-        formService.confirm(f, request.host).map(response => {
+        formExecuteService.confirm(f, request.host).map(response => {
           Ok(Json.toJson(response))
         }).getOrElse(NotFound)
       case None => BadRequest
@@ -79,7 +80,7 @@ class FormController @Inject()(
   def saveForm: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
     request.body.asJson match {
       case Some(f) =>
-        formService.complete(f, request.host).map(response => {
+        formExecuteService.complete(f, request.host).map(response => {
           Ok(Json.toJson(response))
         }).getOrElse(NotFound)
       case None => BadRequest

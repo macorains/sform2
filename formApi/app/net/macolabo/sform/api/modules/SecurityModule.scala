@@ -3,7 +3,7 @@ package net.macolabo.sform.api.modules
 import akka.actor.ActorSystem
 import com.google.inject.{AbstractModule, Provides}
 import net.codingwell.scalaguice.ScalaModule
-import net.macolabo.sform.api.models.daos.{ApiTokenDAOImpl, AuthTokenDAOImpl}
+import net.macolabo.sform2.domain.models.daos.ApiTokenDAOImpl
 import net.macolabo.sform.api.security.{DatabaseExecutionContext, DemoHttpActionAdapter, SqlAuthencator}
 import org.pac4j.core.client.Clients
 import org.pac4j.core.client.direct.AnonymousClient
