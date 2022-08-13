@@ -1,0 +1,16 @@
+# --- !Ups
+
+CREATE TABLE `m_user` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `uid` VARCHAR(45) NOT NULL,
+  `name` VARCHAR(45) DEFAULT NULL,
+  `email` VARCHAR(100) NOT NULL,
+  `status` INT(11) NOT NULL,
+  `password` VARCHAR(128) DEFAULT NULL,
+  `created` DATETIME DEFAULT NULL,
+  `modified` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
+
+# --- !Downs
+DROP TABLE `m_user`;

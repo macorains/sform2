@@ -13,3 +13,4 @@ application.test.conf
 silhouette.conf
 sform.conf
 null
+/docker/data/

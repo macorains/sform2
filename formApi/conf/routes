@@ -1,0 +1,12 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# https://www.playframework.com/documentation/latest/ScalaRouting
+# ~~~~
+
+POST    /signin                     net.macolabo.sform.api.controllers.SignInController.auth
+GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET     /forminputjs/*path          net.macolabo.sform.api.controllers.FormController.getjs(path)
+POST    /validate                   net.macolabo.sform.api.controllers.FormController.validateForm
+POST    /confirm                    net.macolabo.sform.api.controllers.FormController.confirmForm()
+POST    /save                       net.macolabo.sform.api.controllers.FormController.saveForm
+POST    /load                       net.macolabo.sform.api.controllers.FormController.load

@@ -1,0 +1,13 @@
+https://agohack.com/import-csv-files-load-data-local-infile/
+を参考に
+LOAD DATA LOCAL ...
+を使ってインポート可能なCSVを作っておく
+
+mysqlで↑を使うには、
+サーバ側： SET GLOBAL local_infile=on;
+クライアント側：--local-infile=1　を付ける
+が必要。(mysql8以降）
+
+windowsの場合、
+mysql -u sform -p -e "source ./import.sql" --local-infile=1
+でインポートできる。
