@@ -12,9 +12,7 @@ import scalikejdbc.DB
 
 import java.math.BigInteger
 import scala.annotation.tailrec
-import scala.collection.JavaConverters.{asJavaIterableConverter, seqAsJavaListConverter}
 import scala.jdk.CollectionConverters._
-import scala.jdk.FunctionConverters.enrichAsJavaFunction
 
 class MailTransfer @Inject()(
   transferConfigMailAddressDAO: TransferConfigMailAddressDAOImpl
