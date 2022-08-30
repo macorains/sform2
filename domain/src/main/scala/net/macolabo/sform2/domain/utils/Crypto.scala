@@ -8,14 +8,14 @@ import javax.crypto.spec.{IvParameterSpec, SecretKeySpec}
 import play.api.Configuration
 
 case class Crypto (
-  ivs: Array[Byte],
-  secretKey: Array[Byte],
+  ivsString: String,
+  secretKeyString: String,
   algorithmCipher: String,
   algorithmKey: String,
   charset: String
 ){
-  private val Key = new SecretKeySpec(secretKey, algorithmKey)
-  private val IvSpec = new IvParameterSpec(ivs)
+  private val Key = new SecretKeySpec(secretKeyString.getBytes(charset), algorithmKey)
+  private val IvSpec = new IvParameterSpec(ivsString.getBytes(charset))
   private val encryptCipher = Cipher.getInstance(algorithmCipher)
   private val decryptCipher = Cipher.getInstance(algorithmCipher)
   encryptCipher.init(Cipher.ENCRYPT_MODE, Key, IvSpec)
