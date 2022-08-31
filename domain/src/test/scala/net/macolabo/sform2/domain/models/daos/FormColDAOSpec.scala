@@ -10,13 +10,14 @@ import java.time.{ZoneId, ZonedDateTime}
 
 class FormColDAOSpec extends FixtureAnyFlatSpec with AutoRollback with SformTestHelper {
   override def fixture(implicit session: DBSession): Unit = {
-    sql"insert into d_form_col values(null, 1, 'col1', 'col1', 1, 1, 'a', 'hoge', 'foo', 'foo', '2020-08-01 12:00:00', '2020-08-01 12:00:00')".update().apply()
+    sql"insert into d_form values(1, 'test', 1, 'test1', 'test1', 1, 'http://hogehoge.com', 'http://foobar.com', 'input1', 'confirm1', 'complete1', 'close1', '{}', 'hoge', 'foo', 'foo', '2020-08-01 12:00:00', '2020-08-01 12:00:00')".update().apply()
+    sql"insert into d_form_col values(1, 1, 'col1', 'col1', 1, 1, 'a', 'hoge', 'foo', 'foo', '2020-08-01 12:00:00', '2020-08-01 12:00:00')".update().apply()
   }
 
-  behavior of "DFormCol"
+  behavior of "FormCol"
 
   it should "select a formCol" in { implicit session =>
-    val mockFormColDAO = mock[FormColDAO]
+    val mockFormColDAO = mock[FormColDAOImpl]
 
     val formColList = mockFormColDAO.getList(1)
     assert(formColList.size.equals(1))

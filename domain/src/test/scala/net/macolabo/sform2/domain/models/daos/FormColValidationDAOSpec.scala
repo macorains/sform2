@@ -10,6 +10,8 @@ import java.time.{ZoneId, ZonedDateTime}
 
 class FormColValidationDAOSpec extends FixtureAnyFlatSpec with AutoRollback with SformTestHelper {
   override def fixture(implicit session: DBSession): Unit = {
+    sql"insert into d_form values(1, 'test', 1, 'test1', 'test1', 1, 'http://hogehoge.com', 'http://foobar.com', 'input1', 'confirm1', 'complete1', 'close1', '{}', 'hoge', 'foo', 'foo', '2020-08-01 12:00:00', '2020-08-01 12:00:00')".update().apply()
+    sql"insert into d_form_col values(1, 1, 'col1', 'col1', 1, 1, 'a', 'hoge', 'foo', 'foo', '2020-08-01 12:00:00', '2020-08-01 12:00:00')".update().apply()
     sql"insert into d_form_col_validation values(null, 1, 1, 1, 1, 1, 1, 1, 1, 'hoge', 'foo', 'foo', '2020-08-01 12:00:00', '2020-08-01 12:00:00')".update().apply()
   }
 
@@ -19,7 +21,7 @@ class FormColValidationDAOSpec extends FixtureAnyFlatSpec with AutoRollback with
     val mockFormColValidationDAO = mock[FormColValidationDAO]
 
     val formColValidation = mockFormColValidationDAO.get("hoge", 1, 1)
-    assert(!formColValidation.getOrElse(None).equals(None))
+    assert(formColValidation.nonEmpty)
     val formColValidationData = formColValidation.get
     assert(formColValidationData.form_col_id.equals(1))
     assert(formColValidationData.max_value.get.equals(1))
@@ -34,6 +36,5 @@ class FormColValidationDAOSpec extends FixtureAnyFlatSpec with AutoRollback with
     assert(formColValidationData.created.withZoneSameInstant(ZoneId.of("UTC")).equals(ZonedDateTime.of(2020, 8, 1, 12, 0, 0, 0, ZoneId.of("UTC"))))
     assert(formColValidationData.modified.withZoneSameInstant(ZoneId.of("UTC")).equals(ZonedDateTime.of(2020, 8, 1, 12, 0, 0, 0, ZoneId.of("UTC"))))
   }
-
 }
 
