@@ -19,7 +19,7 @@ class FormDAOSpec extends FixtureAnyFlatSpec with AutoRollback with SformTestHel
     val mockFormDAO = mock[FormDAO]
 
     val form = mockFormDAO.get( "test")
-    assert(!form.getOrElse(None).equals(None))
+    assert(form.nonEmpty)
     val formdata = form.get
     assert(formdata.id.isInstanceOf[BigInt])
     assert(formdata.hashed_id.equals("test"))

@@ -22,10 +22,13 @@ class SalesforceTransfer @Inject()(
       val taskBean = taskList.head
 
       getTransferConfig(taskBean.transfer_config_id).map(tc => {
+        // TODO 実装途中でエラーになるので一旦コメントアウト
+        /*
         loginToSalesforce(tc.api_url, tc.client_id, tc.client_secret, tc.username, tc.password).map{
           case Some(apiToken) => postSalesforceObject(taskBean, postdata, apiToken, tc.api_url)
           case None => println("ほげー") // TODO 何か例外処理を実装する
         }
+        */
       })
       endTask(taskList, postdata, "")
   }

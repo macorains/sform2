@@ -9,7 +9,8 @@ import scalikejdbc.{AutoSession, ConnectionPool}
 import java.io.File
 
 trait SformTestHelper {
-  val config: Config = ConfigFactory.parseFile(new File("conf/test.conf")).resolve()
+  val config: Config = ConfigFactory.parseFile(new File("domain/src/test/resources/test.conf"))
+
   Class.forName(config.getString("db.test.driver"))
   ConnectionPool.singleton(config.getString("db.test.url"), config.getString("db.test.username"), config.getString("db.test.password"))
   implicit val session: AutoSession.type = AutoSession
