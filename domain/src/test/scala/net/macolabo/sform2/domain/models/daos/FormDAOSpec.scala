@@ -10,6 +10,9 @@ import scalikejdbc.scalatest.AutoRollback
 import java.time.{ZoneId, ZonedDateTime}
 
 class FormDAOSpec extends FixtureAnyFlatSpec with AutoRollback with SformTestHelper{
+
+  behavior of "Form"
+
   override def fixture(implicit session: DBSession): Unit =  {
     withSQL {
       val c = Form.column
@@ -34,13 +37,10 @@ class FormDAOSpec extends FixtureAnyFlatSpec with AutoRollback with SformTestHel
         c.modified -> "2020-08-01 12:00:00"
       )
     }.update().apply()
-    //sql"insert into d_form values(null, 'test', 1, 'test1', 'test1', 1, 'http://hogehoge.com', 'http://foobar.com', 'input1', 'confirm1', 'complete1', 'close1', '{}', 'hoge', 'foo', 'foo', '2020-08-01 12:00:00', '2020-08-01 12:00:00')".update().apply()
   }
 
-  behavior of "Form"
-
   it should "select a form" in { implicit session =>
-    val mockFormDAO = mock[FormDAOImpl]
+    val mockFormDAO = new FormDAOImpl()
 
     val form = mockFormDAO.get( "test")
     assert(form.nonEmpty)
