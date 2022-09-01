@@ -11,7 +11,7 @@ import java.time.{ZoneId, ZonedDateTime}
 
 class FormColSelectDAOSpec extends FixtureAnyFlatSpec with AutoRollback with SformTestHelper {
 
-  behavior of "DFormColSelect"
+  behavior of "FormColSelect"
 
   override def fixture(implicit session: DBSession): Unit = {
     withSQL {
@@ -78,7 +78,7 @@ class FormColSelectDAOSpec extends FixtureAnyFlatSpec with AutoRollback with Sfo
   }
 
   it should "select a formCol" in { implicit session =>
-    val mockFormColSelectDAO = mock[FormColSelectDAO]
+    val mockFormColSelectDAO = new FormColSelectDAOImpl()
 
     val formColSelectList = mockFormColSelectDAO.getList(1, 1)
     assert(formColSelectList.size.equals(1))
@@ -95,5 +95,6 @@ class FormColSelectDAOSpec extends FixtureAnyFlatSpec with AutoRollback with Sfo
     assert(formColSelect.created_user.equals("foo"))
     assert(formColSelect.modified_user.equals("foo"))
     assert(formColSelect.created.withZoneSameInstant(ZoneId.of("UTC")).equals(ZonedDateTime.of(2020, 8, 1, 12, 0, 0, 0, ZoneId.of("UTC"))))
-    assert(formColSelect.modified.withZoneSameInstant(ZoneId.of("UTC")).equals(ZonedDateTime.of(2020, 8, 1, 12, 0, 0, 0, ZoneId.of("UTC"))))  }
+    assert(formColSelect.modified.withZoneSameInstant(ZoneId.of("UTC")).equals(ZonedDateTime.of(2020, 8, 1, 12, 0, 0, 0, ZoneId.of("UTC"))))
+  }
 }
