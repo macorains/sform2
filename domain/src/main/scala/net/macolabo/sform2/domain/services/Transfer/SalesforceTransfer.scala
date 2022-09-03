@@ -1,13 +1,15 @@
 package net.macolabo.sform2.domain.services.Transfer
 
 import com.google.inject.Inject
+import net.macolabo.sform2.domain.models.daos.TransferConfigSalesforceDAO
 import net.macolabo.sform2.domain.models.entity.CryptoConfig
 import net.macolabo.sform2.domain.models.entity.transfer.TransferConfigSalesforce
 import net.macolabo.sform2.domain.services.Transfer.SalesforceTransfer.TransferTaskRequest
 import net.macolabo.sform2.domain.utils.Crypto
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-import play.api.libs.json.{Format, JsPath, JsValue, Json}
+import play.api.libs.json.{Format, JsPath, JsSuccess, JsValue, Json}
 import play.api.libs.ws.WSClient
+import scalikejdbc.DB
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -17,7 +19,8 @@ import scala.concurrent.Future
  * @param ws WSClient
  */
 class SalesforceTransfer @Inject()(
-  ws:WSClient
+  ws:WSClient,
+  transferConfigSalesforceDAO: TransferConfigSalesforceDAO
 ) extends BaseTransfer {
   override def receive: Receive = {
     case TransferTaskRequest(taskList, postdata, cryptoConfig) =>
@@ -68,7 +71,9 @@ class SalesforceTransfer @Inject()(
   }
 
   private def getTransferConfigSalesforce(transferConfigId: BigInt): Option[TransferConfigSalesforce] = {
-    ???
+    DB.localTx(implicit session => {
+      transferConfigSalesforceDAO.get(transferConfigId)
+    })
   }
 
   private def postSalesforceObject(taskBean: TransferTaskBean, postdata: JsValue, apiToken: String, apiUrl: String) = {
@@ -79,9 +84,27 @@ class SalesforceTransfer @Inject()(
       .post(createSalesforcePostdata(taskBean, postdata))
   }
 
-  private def createSalesforcePostdata(taskBean: TransferTaskBean, postdata: JsValue): JsValue = {
+  private def getSalesforceObjectFields(taskBean: TransferTaskBean, apiToken: String, apiUrl: String) = {
+    taskBean.t_salesforce.map(ts => {
+      ts.object_name
+      ws
+        .url(apiUrl + "")
+        .addHttpHeaders("Authorization" -> s"Bearer $apiToken")
+        .addHttpHeaders("Content-Type" -> "application/json")
+    })
+  }
 
+
+  private def createSalesforcePostdata(taskBean: TransferTaskBean, postdata: JsValue): JsValue = {
     ???
+    // TODO SFから挿入対象オブジェクトのフィールド情報を取る
+    // SF上の型により、作成するデータの型を決める
+
+    taskBean.t_salesforce.map(ts =>
+      ts.fields.map(f => {
+        f.field_name -> (postdata \ f.form_column_id)
+      })
+    )
   }
 
   case class SalesforceLoginResponse(
