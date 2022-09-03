@@ -21,14 +21,12 @@ class SalesforceTransfer @Inject()(
     case TransferTaskRequest(taskList, postdata) =>
       val taskBean = taskList.head
 
-      getTransferConfig(taskBean.transfer_config_id).map(tc => {
-        // TODO 実装途中でエラーになるので一旦コメントアウト
-        /*
-        loginToSalesforce(tc.api_url, tc.client_id, tc.client_secret, tc.username, tc.password).map{
+      getTransferConfigSalesforce(taskBean.transfer_config_id).map(tc => {
+        val(sfUserName, sfPassword, sfClientId, sfClientSecret) = encodeSecrets(tc)
+        loginToSalesforce(tc.api_url, sfClientId, sfClientSecret, sfUserName, sfPassword).map{
           case Some(apiToken) => postSalesforceObject(taskBean, postdata, apiToken, tc.api_url)
           case None => println("ほげー") // TODO 何か例外処理を実装する
         }
-        */
       })
       endTask(taskList, postdata, "")
   }
@@ -57,7 +55,11 @@ class SalesforceTransfer @Inject()(
       .map(res => Json.parse(res.body).validate[SalesforceLoginResponse].asOpt.map(res => res.access_token))
   }
 
-  private def getTransferConfig(transferConfigId: BigInt): Option[TransferConfigSalesforce] = {
+  private def encodeSecrets(transferConfigSalesforce: TransferConfigSalesforce) = {
+    ("a","b","c","d")
+  }
+
+  private def getTransferConfigSalesforce(transferConfigId: BigInt): Option[TransferConfigSalesforce] = {
     ???
   }
 
@@ -70,6 +72,7 @@ class SalesforceTransfer @Inject()(
   }
 
   private def createSalesforcePostdata(taskBean: TransferTaskBean, postdata: JsValue): JsValue = {
+
     ???
   }
 

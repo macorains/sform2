@@ -189,7 +189,12 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
       transferUpdateTransferRequestSalesforceTransferConfig.transfer_config_id,
       transferUpdateTransferRequestSalesforceTransferConfig.sf_user_name,
       transferUpdateTransferRequestSalesforceTransferConfig.sf_password,
-      transferUpdateTransferRequestSalesforceTransferConfig.sf_security_token,
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
       userGroup,
       userId,
       userId,
@@ -372,7 +377,7 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
         f.transfer_config_id,
         f.sf_user_name,
         f.sf_password,
-        f.sf_security_token,
+        "",
         getTransferConfigSalesforceObject(userGroup, f.id)
       )
     })
