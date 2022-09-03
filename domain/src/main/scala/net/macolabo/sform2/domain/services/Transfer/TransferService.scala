@@ -187,6 +187,7 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
     TransferConfigSalesforce(
       transferUpdateTransferRequestSalesforceTransferConfig.id,
       transferUpdateTransferRequestSalesforceTransferConfig.transfer_config_id,
+      "",
       transferUpdateTransferRequestSalesforceTransferConfig.sf_user_name,
       transferUpdateTransferRequestSalesforceTransferConfig.sf_password,
       "",
