@@ -56,6 +56,7 @@ class SalesforceTransfer @Inject()(
   }
 
   private def encodeSecrets(transferConfigSalesforce: TransferConfigSalesforce) = {
+    transferConfigSalesforce.
     ("a","b","c","d")
   }
 

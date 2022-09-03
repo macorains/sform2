@@ -26,7 +26,6 @@ class TransferReceiver @Inject()(
   override def receive: Receive = {
 
     case NewTaskRequest(postdata, postdataId, hashedFormId) =>
-
       DB.localTx(implicit session => {
 
         // フォームIDからTransferTaskを検索
