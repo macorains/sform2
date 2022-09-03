@@ -1,8 +1,10 @@
 package net.macolabo.sform2.domain.services.Transfer
 
 import com.google.inject.Inject
+import net.macolabo.sform2.domain.models.entity.CryptoConfig
 import net.macolabo.sform2.domain.models.entity.transfer.TransferConfigSalesforce
 import net.macolabo.sform2.domain.services.Transfer.SalesforceTransfer.TransferTaskRequest
+import net.macolabo.sform2.domain.utils.Crypto
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json.{Format, JsPath, JsValue, Json}
 import play.api.libs.ws.WSClient
@@ -18,11 +20,11 @@ class SalesforceTransfer @Inject()(
   ws:WSClient
 ) extends BaseTransfer {
   override def receive: Receive = {
-    case TransferTaskRequest(taskList, postdata) =>
+    case TransferTaskRequest(taskList, postdata, cryptoConfig) =>
       val taskBean = taskList.head
 
       getTransferConfigSalesforce(taskBean.transfer_config_id).map(tc => {
-        val(sfUserName, sfPassword, sfClientId, sfClientSecret) = encodeSecrets(tc)
+        val(sfUserName, sfPassword, sfClientId, sfClientSecret) = encodeSecrets(tc, cryptoConfig)
         loginToSalesforce(tc.api_url, sfClientId, sfClientSecret, sfUserName, sfPassword).map{
           case Some(apiToken) => postSalesforceObject(taskBean, postdata, apiToken, tc.api_url)
           case None => println("ほげー") // TODO 何か例外処理を実装する
@@ -55,9 +57,14 @@ class SalesforceTransfer @Inject()(
       .map(res => Json.parse(res.body).validate[SalesforceLoginResponse].asOpt.map(res => res.access_token))
   }
 
-  private def encodeSecrets(transferConfigSalesforce: TransferConfigSalesforce) = {
-    transferConfigSalesforce.
-    ("a","b","c","d")
+  private def encodeSecrets(tcs: TransferConfigSalesforce, cc: CryptoConfig) = {
+    val crypto = Crypto(cc.secret_key_string, cc.cipher_algorithm, cc.secret_key_algorithm, cc.charset)
+    (
+      crypto.decrypt(tcs.sf_user_name, tcs.iv_user_name),
+      crypto.decrypt(tcs.sf_password, tcs.iv_password),
+      crypto.decrypt(tcs.sf_client_id, tcs.iv_client_id),
+      crypto.decrypt(tcs.sf_client_secret, tcs.iv_client_secret)
+    )
   }
 
   private def getTransferConfigSalesforce(transferConfigId: BigInt): Option[TransferConfigSalesforce] = {
@@ -97,6 +104,6 @@ class SalesforceTransfer @Inject()(
 }
 
 object SalesforceTransfer {
-  case class TransferTaskRequest(taskList: List[TransferTaskBean], postdata: JsValue)
+  case class TransferTaskRequest(taskList: List[TransferTaskBean], postdata: JsValue, cryptoConfig: CryptoConfig)
 }
 
