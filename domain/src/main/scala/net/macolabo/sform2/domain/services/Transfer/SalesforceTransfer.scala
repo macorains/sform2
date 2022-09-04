@@ -57,7 +57,13 @@ class SalesforceTransfer @Inject()(
       .url(apiUrl + "/services/oauth2/token")
       .addHttpHeaders("Content-Type" -> "application/x-www-form-urlencoded")
       .post(postdata)
-      .map(res => Json.parse(res.body).validate[SalesforceLoginResponse].asOpt.map(res => res.access_token))
+      .map(res => res.status match {
+        case 200 => Json.parse(res.body)
+          .validate[SalesforceLoginResponse]
+          .asOpt
+          .map(res => res.access_token)
+        case _ => None
+      })
   }
 
   private def encodeSecrets(tcs: TransferConfigSalesforce, cc: CryptoConfig) = {
@@ -82,6 +88,10 @@ class SalesforceTransfer @Inject()(
       .addHttpHeaders("Authorization" -> s"Bearer $apiToken")
       .addHttpHeaders("Content-Type" -> "application/json")
       .post(createSalesforcePostdata(taskBean, postdata))
+      .map(res => res.status match {
+        case 200 => res.json
+        case _ => None
+      })
   }
 
   private def getSalesforceObjectFields(taskBean: TransferTaskBean, apiToken: String, apiUrl: String) = {
