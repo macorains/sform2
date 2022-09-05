@@ -113,7 +113,8 @@ extends FormLoadRequestJson with FormPostRequestJson
                 // データ保存
                 val postdataId = postdataDAO.save(request.hashed_form_id, postdata.toString())
                 // Transfer実行
-                transferReceiver ! NewTaskRequest(postdata, postdataId, request.hashed_form_id)
+                // TODO 修正必要
+                // transferReceiver ! NewTaskRequest(postdata, postdataId, request.hashed_form_id)
                 // 完了画面の出力
                 createCompleteForm(formdata)
               })

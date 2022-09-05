@@ -29,7 +29,10 @@ class SalesforceTransfer @Inject()(
       getTransferConfigSalesforce(taskBean.transfer_config_id).map(tc => {
         val(sfUserName, sfPassword, sfClientId, sfClientSecret) = encodeSecrets(tc, cryptoConfig)
         loginToSalesforce(tc.api_url, sfClientId, sfClientSecret, sfUserName, sfPassword).map{
-          case Some(apiToken) => postSalesforceObject(taskBean, postdata, apiToken, tc.api_url)
+          case Some(apiToken) =>
+            taskBean.t_salesforce.map(ts => {
+              postSalesforceObject(ts, postdata, apiToken, tc.api_url)
+            }).getOrElse(println("hoge")) // TODO 何か例外処理を実装する
           case None => println("ほげー") // TODO 何か例外処理を実装する
         }
       })
@@ -45,7 +48,7 @@ class SalesforceTransfer @Inject()(
    * @param password パスワード
    * @return BearerToken
    */
-  private def loginToSalesforce(apiUrl: String, clientId: String, clientSecret: String, username: String, password: String): Future[Option[String]] = {
+  def loginToSalesforce(apiUrl: String, clientId: String, clientSecret: String, username: String, password: String): Future[Option[String]] = {
     val postdata = Map(
       "grant_type" -> "password",
       "client_id" -> clientId,
@@ -82,21 +85,21 @@ class SalesforceTransfer @Inject()(
     })
   }
 
-  private def postSalesforceObject(taskBean: TransferTaskBean, postdata: JsValue, apiToken: String, apiUrl: String) = {
-    ws
-      .url(apiUrl + "")
-      .addHttpHeaders("Authorization" -> s"Bearer $apiToken")
-      .addHttpHeaders("Content-Type" -> "application/json")
-      .post(createSalesforcePostdata(taskBean, postdata))
-      .map(res => res.status match {
-        case 200 => res.json
-        case _ => None
-      })
+  def postSalesforceObject(taskBeanSalesforce: TransferTaskBeanSalesforce, postdata: JsValue, apiToken: String, apiUrl: String) = {
+      ws
+        .url(apiUrl + "sobjects/" + taskBeanSalesforce.object_name)
+        .addHttpHeaders("Authorization" -> s"Bearer $apiToken")
+        .addHttpHeaders("Content-Type" -> "application/json")
+        .post(createSalesforcePostdata(taskBeanSalesforce, postdata))
+        .map(res => res.status match {
+          case 200 => res.json
+          case _ => None
+        })
   }
 
-  private def getSalesforceObjectFields(taskBean: TransferTaskBean, apiToken: String, apiUrl: String) = {
+  def getSalesforceObjectFields(taskBean: TransferTaskBean, apiToken: String, apiUrl: String) = {
     taskBean.t_salesforce.map(ts => {
-      ts.object_name
+      //ts.object_name
       ws
         .url(apiUrl + "")
         .addHttpHeaders("Authorization" -> s"Bearer $apiToken")
@@ -105,16 +108,17 @@ class SalesforceTransfer @Inject()(
   }
 
 
-  private def createSalesforcePostdata(taskBean: TransferTaskBean, postdata: JsValue): JsValue = {
+  private def createSalesforcePostdata(taskBeanSalesforce: TransferTaskBeanSalesforce, postdata: JsValue): JsValue = {
     ???
     // TODO SFから挿入対象オブジェクトのフィールド情報を取る
     // SF上の型により、作成するデータの型を決める
 
-    taskBean.t_salesforce.map(ts =>
-      ts.fields.map(f => {
-        f.field_name -> (postdata \ f.form_column_id)
+    /*
+      taskBeanSalesforce.fields.map(f => {
+        f.field_name -> (postdata \ f.form_column_id).getOrElse(Json.parse("{}"))
       })
-    )
+
+     */
   }
 
   case class SalesforceLoginResponse(
