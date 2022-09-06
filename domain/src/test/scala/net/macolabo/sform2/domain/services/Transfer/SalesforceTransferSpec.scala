@@ -14,7 +14,9 @@ import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.libs.ws.WSClient
 import play.api.test.Injecting
 
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
 
 class SalesforceTransferSpec extends TestKit(ActorSystem("test"))
   with ImplicitSender
@@ -33,15 +35,25 @@ class SalesforceTransferSpec extends TestKit(ActorSystem("test"))
 
       val testActorRef = TestActorRef(new SalesforceTransfer(ws, dao))
       val transfer = testActorRef.underlyingActor
-      whenReady(transfer.loginToSalesforce(
-        sys.env("SF_API_URL"),
-        sys.env("SF_CLIENT_ID"),
-        sys.env("SF_CLIENT_SECRET"),
-        sys.env("SF_USERNAME"),
-        sys.env("SF_PASSWORD")
-      ), Timeout(Span(1000, Millis))){token =>
-        whenReady(transfer.getSalesforceObjectFields())
-      }
+      val token = Await.result(
+        transfer.loginToSalesforce(
+          sys.env("SF_API_URL"),
+          sys.env("SF_CLIENT_ID"),
+          sys.env("SF_CLIENT_SECRET"),
+          sys.env("SF_USERNAME"),
+          sys.env("SF_PASSWORD")
+        ), Duration.Inf).get
+
+      val transferTaskBeanSalesforce = TransferTaskBeanSalesforce(
+        1,
+        1,
+        "Accounts",
+        "hoge",
+        List.empty
+      )
+
+
+
     }
   }
 }
