@@ -97,14 +97,11 @@ class SalesforceTransfer @Inject()(
         })
   }
 
-  def getSalesforceObjectFields(taskBean: TransferTaskBean, apiToken: String, apiUrl: String) = {
-    taskBean.t_salesforce.map(ts => {
-      //ts.object_name
+  def getSalesforceObjectFields(taskBeanSalesforce: TransferTaskBeanSalesforce, apiToken: String, apiUrl: String) = {
       ws
         .url(apiUrl + "")
         .addHttpHeaders("Authorization" -> s"Bearer $apiToken")
         .addHttpHeaders("Content-Type" -> "application/json")
-    })
   }
 
 

@@ -28,18 +28,20 @@ class SalesforceTransferSpec extends TestKit(ActorSystem("test"))
 {
   "SalesforceTransfer" must {
     "login to Salesforce" in {
-    val dao = inject[TransferConfigSalesforceDAOImpl]
-    val ws = inject[WSClient]
+      val dao = inject[TransferConfigSalesforceDAOImpl]
+      val ws = inject[WSClient]
 
-    val testActorRef = TestActorRef(new SalesforceTransfer(ws, dao))
-    val transfer = testActorRef.underlyingActor
-    whenReady(transfer.loginToSalesforce(
-      sys.env("SF_API_URL"),
-      sys.env("SF_CLIENT_ID"),
-      sys.env("SF_CLIENT_SECRET"),
-      sys.env("SF_USERNAME"),
-      sys.env("SF_PASSWORD")
-    ), Timeout(Span(1000, Millis))){result => println(result)}
+      val testActorRef = TestActorRef(new SalesforceTransfer(ws, dao))
+      val transfer = testActorRef.underlyingActor
+      whenReady(transfer.loginToSalesforce(
+        sys.env("SF_API_URL"),
+        sys.env("SF_CLIENT_ID"),
+        sys.env("SF_CLIENT_SECRET"),
+        sys.env("SF_USERNAME"),
+        sys.env("SF_PASSWORD")
+      ), Timeout(Span(1000, Millis))){token =>
+        whenReady(transfer.getSalesforceObjectFields())
+      }
     }
   }
 }
