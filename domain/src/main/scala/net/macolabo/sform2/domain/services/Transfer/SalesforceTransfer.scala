@@ -4,10 +4,11 @@ import com.google.inject.Inject
 import net.macolabo.sform2.domain.models.daos.TransferConfigSalesforceDAO
 import net.macolabo.sform2.domain.models.entity.CryptoConfig
 import net.macolabo.sform2.domain.models.entity.transfer.TransferConfigSalesforce
+import net.macolabo.sform2.domain.models.entity.transfer.salesforce.{SalesforceSObjectsDescribeResponse, SalesforceSObjectsDescribeResponseJson}
 import net.macolabo.sform2.domain.services.Transfer.SalesforceTransfer.TransferTaskRequest
 import net.macolabo.sform2.domain.utils.Crypto
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-import play.api.libs.json.{Format, JsPath, JsSuccess, JsValue, Json}
+import play.api.libs.json.{Format, JsError, JsPath, JsSuccess, JsValue, Json}
 import play.api.libs.ws.WSClient
 import scalikejdbc.DB
 
@@ -21,20 +22,21 @@ import scala.concurrent.Future
 class SalesforceTransfer @Inject()(
   ws:WSClient,
   transferConfigSalesforceDAO: TransferConfigSalesforceDAO
-) extends BaseTransfer {
+) extends BaseTransfer
+  with SalesforceSObjectsDescribeResponseJson
+{
   override def receive: Receive = {
     case TransferTaskRequest(taskList, postdata, cryptoConfig) =>
       val taskBean = taskList.head
-
-      getTransferConfigSalesforce(taskBean.transfer_config_id).map(tc => {
-        val(sfUserName, sfPassword, sfClientId, sfClientSecret) = encodeSecrets(tc, cryptoConfig)
-        loginToSalesforce(tc.api_url, sfClientId, sfClientSecret, sfUserName, sfPassword).map{
-          case Some(apiToken) =>
-            taskBean.t_salesforce.map(ts => {
-              postSalesforceObject(ts, postdata, apiToken, tc.api_url)
-            }).getOrElse(println("hoge")) // TODO 何か例外処理を実装する
-          case None => println("ほげー") // TODO 何か例外処理を実装する
-        }
+      taskBean.t_salesforce.flatMap(ts => {
+        getTransferConfigSalesforce(taskBean.transfer_config_id).map(tc => {
+          val(sfUserName, sfPassword, sfClientId, sfClientSecret) = encodeSecrets(tc, cryptoConfig)
+          loginToSalesforce(tc.api_url, sfClientId, sfClientSecret, sfUserName, sfPassword).map{
+            case Some(apiToken) =>
+                postSalesforceObject(ts, postdata, apiToken, tc.api_url)
+            case None => println("ほげー") // TODO 何か例外処理を実装する
+          }
+        })
       })
       endTask(taskList, postdata, "")
   }
@@ -65,7 +67,7 @@ class SalesforceTransfer @Inject()(
           .validate[SalesforceLoginResponse]
           .asOpt
           .map(res => res.access_token)
-        case _ => None
+        case _ => None // TODO ログに何か吐く
       })
   }
 
@@ -85,37 +87,49 @@ class SalesforceTransfer @Inject()(
     })
   }
 
-  def postSalesforceObject(taskBeanSalesforce: TransferTaskBeanSalesforce, postdata: JsValue, apiToken: String, apiUrl: String) = {
-      ws
-        .url(apiUrl + "sobjects/" + taskBeanSalesforce.object_name)
-        .addHttpHeaders("Authorization" -> s"Bearer $apiToken")
-        .addHttpHeaders("Content-Type" -> "application/json")
-        .post(createSalesforcePostdata(taskBeanSalesforce, postdata))
-        .map(res => res.status match {
-          case 200 => res.json
-          case _ => None
-        })
-  }
-
-  def getSalesforceObjectFields(taskBeanSalesforce: TransferTaskBeanSalesforce, apiToken: String, apiUrl: String) = {
-      ws
-        .url(apiUrl + "")
-        .addHttpHeaders("Authorization" -> s"Bearer $apiToken")
-        .addHttpHeaders("Content-Type" -> "application/json")
-  }
-
-
-  private def createSalesforcePostdata(taskBeanSalesforce: TransferTaskBeanSalesforce, postdata: JsValue): JsValue = {
-    ???
-    // TODO SFから挿入対象オブジェクトのフィールド情報を取る
-    // SF上の型により、作成するデータの型を決める
-
-    /*
-      taskBeanSalesforce.fields.map(f => {
-        f.field_name -> (postdata \ f.form_column_id).getOrElse(Json.parse("{}"))
+  def postSalesforceObject(taskBeanSalesforce: TransferTaskBeanSalesforce, postdata: JsValue, apiToken: String, apiUrl: String): Future[Option[JsValue]] = {
+    // TODO apiUrlに何所まで含めるか? APIのバージョンをconfigに入れるか?
+    // TODO SF上に存在しない項目が混じった場合どうなるか確認する
+    println(apiUrl + "/services/data/v54.0/sobjects/" + taskBeanSalesforce.object_name + "/")
+    ws
+      .url(apiUrl + "/services/data/v54.0/sobjects/" + taskBeanSalesforce.object_name + "/")
+      .addHttpHeaders("Authorization" -> s"Bearer $apiToken")
+      .addHttpHeaders("Content-Type" -> "application/json")
+      .post(createSalesforcePostdata(taskBeanSalesforce, postdata))
+      .map(res => res.status match { // TODO 何故か成功時にNoneが返ってくるので要確認
+        case 200 => Some(res.json)
+        case _ =>
+          println(res.json) // TODO ログに吐く
+          None
       })
+  }
 
-     */
+  // TODO たぶんいらない。参考用。
+  /*
+  def getSalesforceObjectFields(taskBeanSalesforce: TransferTaskBeanSalesforce, apiToken: String, apiUrl: String): Future[Option[SalesforceSObjectsDescribeResponse]] = {
+    // apiUrl はhttps://d7f00000010vcuai-dev-ed.my.salesforce.com/ まで。これ以降は足す必要あり。
+    ws
+      .url(apiUrl + s"/services/data/v54.0/sobjects/${taskBeanSalesforce.object_name}/describe")
+      .addHttpHeaders("Authorization" -> s"Bearer $apiToken")
+      .addHttpHeaders("Content-Type" -> "application/json")
+      .get()
+      .map(res => res.status match {
+        case 200 =>
+          res.json.validate[SalesforceSObjectsDescribeResponse] match {
+            case s:JsSuccess[SalesforceSObjectsDescribeResponse] => Some(s.value)
+            case _ => None
+          }
+        case _ => None
+      })
+  }
+   */
+
+
+  def createSalesforcePostdata(taskBeanSalesforce: TransferTaskBeanSalesforce, postdata: JsValue): String = {
+      val data = taskBeanSalesforce.fields.map(f => {
+        f.field_name -> (postdata \ f.form_column_id).asOpt[String].getOrElse("")
+      }).toMap
+      Json.toJson(data).toString()
   }
 
   case class SalesforceLoginResponse(
