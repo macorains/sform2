@@ -104,27 +104,6 @@ class SalesforceTransfer @Inject()(
       })
   }
 
-  // TODO たぶんいらない。参考用。
-  /*
-  def getSalesforceObjectFields(taskBeanSalesforce: TransferTaskBeanSalesforce, apiToken: String, apiUrl: String): Future[Option[SalesforceSObjectsDescribeResponse]] = {
-    // apiUrl はhttps://d7f00000010vcuai-dev-ed.my.salesforce.com/ まで。これ以降は足す必要あり。
-    ws
-      .url(apiUrl + s"/services/data/v54.0/sobjects/${taskBeanSalesforce.object_name}/describe")
-      .addHttpHeaders("Authorization" -> s"Bearer $apiToken")
-      .addHttpHeaders("Content-Type" -> "application/json")
-      .get()
-      .map(res => res.status match {
-        case 200 =>
-          res.json.validate[SalesforceSObjectsDescribeResponse] match {
-            case s:JsSuccess[SalesforceSObjectsDescribeResponse] => Some(s.value)
-            case _ => None
-          }
-        case _ => None
-      })
-  }
-   */
-
-
   def createSalesforcePostdata(taskBeanSalesforce: TransferTaskBeanSalesforce, postdata: JsValue): String = {
       val data = taskBeanSalesforce.fields.map(f => {
         f.field_name -> (postdata \ f.form_column_id).asOpt[String].getOrElse("")
