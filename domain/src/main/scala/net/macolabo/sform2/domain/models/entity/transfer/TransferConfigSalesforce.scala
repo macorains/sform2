@@ -7,7 +7,8 @@ import java.time.ZonedDateTime
 case class TransferConfigSalesforce(
   id: BigInt,
   transfer_config_id: BigInt,
-  api_url: String,
+  sf_domain: String,
+  api_version: String,
   sf_user_name: String,
   sf_password: String,
   sf_client_id: String,
@@ -34,7 +35,8 @@ object TransferConfigSalesforce extends SQLSyntaxSupport[TransferConfigSalesforc
     TransferConfigSalesforce(
       rs.bigInt("id"),
       rs.bigInt("transfer_config_id"),
-      rs.string("api_url"),
+      rs.string("sf_domain"),
+      rs.string("api_version"),
       rs.string("sf_user_name"),
       rs.string("sf_password"),
       rs.string("sf_client_id"),
@@ -51,6 +53,7 @@ object TransferConfigSalesforce extends SQLSyntaxSupport[TransferConfigSalesforc
     )
   }
 
+  // TODO DAO側に統合する
   /**
    * TransferConfigSalesforce取得
    * @param userGroup ユーザーグループ
@@ -64,8 +67,16 @@ object TransferConfigSalesforce extends SQLSyntaxSupport[TransferConfigSalesforc
       select(
         f.id,
         f.transfer_config_id,
+        f.sf_domain,
+        f.api_version,
         f.sf_user_name,
         f.sf_password,
+        f.sf_client_id,
+        f.sf_client_secret,
+        f.iv_user_name,
+        f.iv_password,
+        f.iv_client_id,
+        f.iv_client_secret,
         f.user_group,
         f.created_user,
         f.modified_user,
@@ -80,6 +91,7 @@ object TransferConfigSalesforce extends SQLSyntaxSupport[TransferConfigSalesforc
     ).map(rs=>TransferConfigSalesforce(rs)).single().apply()
   }
 
+  // TODO DAO側に統合する
   /**
    * TransferConfigSalesforce作成
    * @param transferConfigSalesforce TransferConfigSalesforce
@@ -91,8 +103,16 @@ object TransferConfigSalesforce extends SQLSyntaxSupport[TransferConfigSalesforc
       val c = TransferConfigSalesforce.column
       insert.into(TransferConfigSalesforce).namedValues(
         c.transfer_config_id -> transferConfigSalesforce.transfer_config_id,
+        c.sf_domain -> transferConfigSalesforce.sf_domain,
+        c.api_version -> transferConfigSalesforce.api_version,
         c.sf_user_name -> transferConfigSalesforce.sf_user_name,
         c.sf_password -> transferConfigSalesforce.sf_password,
+        c.sf_client_id -> transferConfigSalesforce.sf_client_id,
+        c.sf_client_secret -> transferConfigSalesforce.sf_client_secret,
+        c.iv_user_name -> transferConfigSalesforce.iv_user_name,
+        c.iv_password -> transferConfigSalesforce.iv_password,
+        c.iv_client_id -> transferConfigSalesforce.iv_client_id,
+        c.iv_client_secret -> transferConfigSalesforce.iv_client_secret,
         c.user_group -> transferConfigSalesforce.user_group,
         c.created_user -> transferConfigSalesforce.created_user,
         c.modified_user -> transferConfigSalesforce.modified_user,
@@ -102,6 +122,7 @@ object TransferConfigSalesforce extends SQLSyntaxSupport[TransferConfigSalesforc
     }.updateAndReturnGeneratedKey().apply().toInt
   }
 
+  // TODO DAO側に統合する
   /**
    * TransferConfigSalesforce更新
    * @param transferConfigSalesforce TransferConfigSalesforce
@@ -113,8 +134,16 @@ object TransferConfigSalesforce extends SQLSyntaxSupport[TransferConfigSalesforc
       val c = TransferConfigSalesforce.column
       update(TransferConfigSalesforce).set(
         c.transfer_config_id -> transferConfigSalesforce.transfer_config_id,
+        c.sf_domain -> transferConfigSalesforce.sf_domain,
+        c.api_version -> transferConfigSalesforce.api_version,
         c.sf_user_name -> transferConfigSalesforce.sf_user_name,
         c.sf_password -> transferConfigSalesforce.sf_password,
+        c.sf_client_id -> transferConfigSalesforce.sf_client_id,
+        c.sf_client_secret -> transferConfigSalesforce.sf_client_secret,
+        c.iv_user_name -> transferConfigSalesforce.iv_user_name,
+        c.iv_password -> transferConfigSalesforce.iv_password,
+        c.iv_client_id -> transferConfigSalesforce.iv_client_id,
+        c.iv_client_secret -> transferConfigSalesforce.iv_client_secret,
         c.user_group -> transferConfigSalesforce.user_group,
         c.created_user -> transferConfigSalesforce.created_user,
         c.modified_user -> transferConfigSalesforce.modified_user,
