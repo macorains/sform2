@@ -18,7 +18,7 @@ case class TransferConfigMailAddress(
 )
 
 object TransferConfigMailAddress extends SQLSyntaxSupport[TransferConfigMailAddress] {
-  override val tableName = "D_TRANSFER_CONFIG_MAIL_ADDRESS"
+  override val tableName = "d_transfer_config_mail_address"
   def apply(rs: WrappedResultSet): TransferConfigMailAddress = {
     TransferConfigMailAddress(
       rs.bigInt("id"),

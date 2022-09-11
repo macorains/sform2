@@ -30,7 +30,7 @@ case class TransferConfigSalesforce(
 
 
 object TransferConfigSalesforce extends SQLSyntaxSupport[TransferConfigSalesforce] {
-  override val tableName = "D_TRANSFER_CONFIG_SALESFORCE"
+  override val tableName = "d_transfer_config_salesforce"
   def apply(rs:WrappedResultSet): TransferConfigSalesforce = {
     TransferConfigSalesforce(
       rs.bigInt("id"),

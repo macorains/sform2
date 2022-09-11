@@ -19,7 +19,7 @@ case class TransferConfigSalesforceObjectField(
 )
 
 object TransferConfigSalesforceObjectField extends SQLSyntaxSupport[TransferConfigSalesforceObjectField] {
-  override val tableName = "D_TRANSFER_CONFIG_SALESFORCE_OBJECT_FIELD"
+  override val tableName = "d_transfer_config_salesforce_object_field"
 
   def apply(rs: WrappedResultSet): TransferConfigSalesforceObjectField = {
     TransferConfigSalesforceObjectField(

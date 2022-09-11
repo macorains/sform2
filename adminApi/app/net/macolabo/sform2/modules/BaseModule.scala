@@ -2,7 +2,7 @@ package net.macolabo.sform2.modules
 
 import com.google.inject.AbstractModule
 import net.codingwell.scalaguice.ScalaModule
-import net.macolabo.sform2.domain.models.daos.{ApiTokenDAO, ApiTokenDAOImpl, AuthTokenDAO, AuthTokenDAOImpl, FormDAO, FormDAOImpl, PostdataDAO, PostdataDAOImpl, TransferConfigDAO, TransferConfigDAOImpl, TransferConfigMailAddressDAO, TransferConfigMailAddressDAOImpl, TransferConfigSalesforceDAO, TransferConfigSalesforceDAOImpl, TransferConfigSalesforceObjectDAO, TransferConfigSalesforceObjectDAOImpl, TransferConfigSalesforceObjectFieldDAO, TransferConfigSalesforceObjectFieldDAOImpl, TransferDetailLogDAO, TransferDetailLogDAOImpl, TransferLogDAO, TransferLogDAOImpl, UserDAO, UserDAOImpl}
+import net.macolabo.sform2.domain.models.daos.{ApiTokenDAO, ApiTokenDAOImpl, AuthTokenDAO, AuthTokenDAOImpl, FormDAO, FormDAOImpl, PostdataDAO, PostdataDAOImpl, TransferConfigDAO, TransferConfigDAOImpl, TransferConfigMailAddressDAO, TransferConfigMailAddressDAOImpl, TransferConfigMailDAO, TransferConfigMailDAOImpl, TransferConfigSalesforceDAO, TransferConfigSalesforceDAOImpl, TransferConfigSalesforceObjectDAO, TransferConfigSalesforceObjectDAOImpl, TransferConfigSalesforceObjectFieldDAO, TransferConfigSalesforceObjectFieldDAOImpl, TransferDetailLogDAO, TransferDetailLogDAOImpl, TransferLogDAO, TransferLogDAOImpl, UserDAO, UserDAOImpl}
 import net.macolabo.sform2.domain.services.ApiToken.{ApiTokenService, ApiTokenServiceImpl}
 import net.macolabo.sform2.domain.services.AuthToken.{AuthTokenService, AuthTokenServiceImpl}
 import net.macolabo.sform2.domain.services.GoogleAuth.{GoogleAuthService, GoogleAuthServiceImpl}
@@ -28,6 +28,7 @@ class BaseModule extends AbstractModule with ScalaModule {
     bind[ApiTokenService].to[ApiTokenServiceImpl]
     bind[UserDAO].to[UserDAOImpl]
     bind[GoogleAuthService].to[GoogleAuthServiceImpl]
+    bind[TransferConfigMailDAO].to[TransferConfigMailDAOImpl]
     bind[TransferConfigMailAddressDAO].to[TransferConfigMailAddressDAOImpl]
     bind[TransferConfigSalesforceDAO].to[TransferConfigSalesforceDAOImpl]
     bind[TransferConfigSalesforceObjectDAO].to[TransferConfigSalesforceObjectDAOImpl]
