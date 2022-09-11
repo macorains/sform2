@@ -22,8 +22,8 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
 
   private val userId = UUID.randomUUID()
   private val user = User(userId, "hoge", "hoge", Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge@hoge.com"), None, activated = true, deletable = false)
-  var formId: BigInt = BigInt(100)
-  var transferConfigId: BigInt = BigInt(100)
+  val formId: BigInt = BigInt(100)
+  val transferConfigId: BigInt = BigInt(100)
 
   behavior of "Form"
 

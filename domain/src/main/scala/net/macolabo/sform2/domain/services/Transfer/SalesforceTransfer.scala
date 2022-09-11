@@ -31,9 +31,9 @@ class SalesforceTransfer @Inject()(
       taskBean.t_salesforce.flatMap(ts => {
         getTransferConfigSalesforce(taskBean.transfer_config_id).map(tc => {
           val(sfUserName, sfPassword, sfClientId, sfClientSecret) = encodeSecrets(tc, cryptoConfig)
-          loginToSalesforce(tc.api_url, sfClientId, sfClientSecret, sfUserName, sfPassword).map{
+          loginToSalesforce(tc.sf_domain, sfClientId, sfClientSecret, sfUserName, sfPassword).map{
             case Some(apiToken) =>
-                postSalesforceObject(ts, postdata, apiToken, tc.api_url)
+                postSalesforceObject(ts, postdata, apiToken, tc.sf_domain)
             case None => println("ほげー") // TODO 何か例外処理を実装する
           }
         })
@@ -88,23 +88,45 @@ class SalesforceTransfer @Inject()(
   }
 
   def postSalesforceObject(taskBeanSalesforce: TransferTaskBeanSalesforce, postdata: JsValue, apiToken: String, apiUrl: String): Future[Option[JsValue]] = {
-    // TODO apiUrlに何所まで含めるか? APIのバージョンをconfigに入れるか?
-    // TODO SF上に存在しない項目が混じった場合どうなるか確認する
-    println(apiUrl + "/services/data/v54.0/sobjects/" + taskBeanSalesforce.object_name + "/")
-    ws
-      .url(apiUrl + "/services/data/v54.0/sobjects/" + taskBeanSalesforce.object_name + "/")
-      .addHttpHeaders("Authorization" -> s"Bearer $apiToken")
-      .addHttpHeaders("Content-Type" -> "application/json")
-      .post(createSalesforcePostdata(taskBeanSalesforce, postdata))
-      .map(res => res.status match { // TODO 何故か成功時にNoneが返ってくるので要確認
-        case 200 => Some(res.json)
-        case _ =>
-          println(res.json) // TODO ログに吐く
-          None
-      })
+    // TODO apiUrlに何所まで含めるか? -> /servicesまで　もしくはドメイン部分だけDBに持たせて組み立てる？
+    // TODO APIのバージョンをconfigに入れるか? -> 入れる
+    // TODO SF上に存在しない項目が混じった場合どうなるか確認する -> 400エラーになる（何かしら対応必要）
+    // TODO SF上に存在しない項目が入るとエラーになるので、オブジェクトのフィールド一覧を取得して照合する
+
+    getSalesforceObjectFields(taskBeanSalesforce, apiToken, apiUrl).flatMap {
+      case Some(s: SalesforceSObjectsDescribeResponse) =>
+        ws
+          .url(apiUrl + "/services/data/v54.0/sobjects/" + taskBeanSalesforce.object_name + "/")
+          .addHttpHeaders("Authorization" -> s"Bearer $apiToken")
+          .addHttpHeaders("Content-Type" -> "application/json")
+          .post(createSalesforcePostdata(taskBeanSalesforce, postdata, s))
+          .map(res => res.status match {
+            case 201 => Some(res.json) // オブジェクト作成成功時のレスポンスコードは201
+            case _ =>
+              println(res.json) // TODO ログに吐く
+              None
+          })
+      case _ => Future.successful(None) // TODO ログに何か吐く
+    }
   }
 
-  def createSalesforcePostdata(taskBeanSalesforce: TransferTaskBeanSalesforce, postdata: JsValue): String = {
+  def getSalesforceObjectFields(taskBeanSalesforce: TransferTaskBeanSalesforce, apiToken: String, apiUrl: String): Future[Option[SalesforceSObjectsDescribeResponse]] = {
+    // TODO 毎回取りに行くとAPI呼び出し回数制限に引っかかりそうなので、一定時間キャッシュするように
+    ws
+      .url(apiUrl + s"/services/data/v54.0/sobjects/${taskBeanSalesforce.object_name}/describe")
+      .addHttpHeaders("Authorization" -> s"Bearer $apiToken")
+      .addHttpHeaders("Content-Type" -> "application/json")
+      .get()
+      .map(res => res.status match {
+        case 200 =>
+          res.json.validate[SalesforceSObjectsDescribeResponse] match {
+            case s:JsSuccess[SalesforceSObjectsDescribeResponse] => Some(s.value)
+            case _ => None
+          }
+        case _ => None
+      })
+  }
+  def createSalesforcePostdata(taskBeanSalesforce: TransferTaskBeanSalesforce, postdata: JsValue, salesforceSObjectsDescribeResponse: SalesforceSObjectsDescribeResponse): String = {
       val data = taskBeanSalesforce.fields.map(f => {
         f.field_name -> (postdata \ f.form_column_id).asOpt[String].getOrElse("")
       }).toMap

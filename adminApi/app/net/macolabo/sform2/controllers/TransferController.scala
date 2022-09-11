@@ -1,5 +1,7 @@
 package net.macolabo.sform2.controllers
 
+import net.macolabo.sform2.domain.models.entity.CryptoConfig
+
 import javax.inject._
 import net.macolabo.sform2.domain.services.External.Salesforce.{SalesforceCheckConnectionRequest, SalesforceCheckConnectionRequestJson, SalesforceCheckConnectionResponse, SalesforceCheckConnectionResponseJson, SalesforceConnectionService, SalesforceGetFieldResponse, SalesforceGetFieldResponseJson, SalesforceGetObjectResponse, SalesforceGetObjectResponseJson}
 import net.macolabo.sform2.domain.services.Transfer.{TransferGetTransferConfigListJson, TransferGetTransferConfigResponseJson, TransferGetTransferConfigSelectListJson, TransferService, TransferUpdateTransferConfigRequest, TransferUpdateTransferConfigRequestJson, TransferUpdateTransferConfigResponse, TransferUpdateTransferConfigResponseJson}
@@ -9,6 +11,7 @@ import play.api.libs.json.Json._
 import play.api.mvc._
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
+import play.api.Configuration
 
 import scala.jdk.CollectionConverters._
 import scala.concurrent.ExecutionContext
@@ -16,7 +19,8 @@ import scala.concurrent.ExecutionContext
 class TransferController @Inject() (
   val controllerComponents: SecurityComponents,
   transferService: TransferService,
-  salesforceConnectionService: SalesforceConnectionService
+  salesforceConnectionService: SalesforceConnectionService,
+  configuration: Configuration
 )(
   implicit
   webJarsUtil: WebJarsUtil,
@@ -34,6 +38,13 @@ class TransferController @Inject() (
   with SalesforceGetFieldResponseJson
   with Pac4jUtil
 {
+
+  private val cryptoConfig: CryptoConfig = CryptoConfig(
+    configuration.get[String]("sform.crypto.algorithm.key"),
+    configuration.get[String]("sform.crypto.algorithm.cipher"),
+    configuration.get[String]("sform.crypto.key"),
+    configuration.get[String]("sform.crypto.charset"),
+  )
 
   /**
    * フォーム作成画面のTransferConfig選択リスト生成用のデータ取得
@@ -67,7 +78,7 @@ class TransferController @Inject() (
   def getTransferConfig(transferConfigId: Int): Action[AnyContent] = Secure("HeaderClient") { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
     val userGroup = getAttributeValue(profiles, "user_group")
-    val res = transferService.getTransferConfig(userGroup, transferConfigId)
+    val res = transferService.getTransferConfig(userGroup, transferConfigId, cryptoConfig)
     Ok(toJson(res))
   }
 
@@ -82,7 +93,7 @@ class TransferController @Inject() (
 
     val res = userId.flatMap(id => {request.body.asJson.flatMap(r =>
       r.validate[TransferUpdateTransferConfigRequest].map(f => {
-        transferService.updateTransferConfig(id, userGroup, f)
+        transferService.updateTransferConfig(id, userGroup, f, cryptoConfig)
       }).asOpt)
     })
     res match {
@@ -115,7 +126,7 @@ class TransferController @Inject() (
     val profiles = getProfiles(controllerComponents)(request)
     val userGroup = getAttributeValue(profiles, "user_group")
 
-    val res = transferService.getTransferConfig(userGroup, transferConfigId).flatMap(c => {
+    val res = transferService.getTransferConfig(userGroup, transferConfigId, cryptoConfig).flatMap(c => {
       c.detail.salesforce.flatMap(s => {
         salesforceConnectionService.getObject(s)
       })
@@ -136,7 +147,7 @@ class TransferController @Inject() (
     val profiles = getProfiles(controllerComponents)(request)
     val userGroup = getAttributeValue(profiles, "user_group")
 
-    val res = transferService.getTransferConfig(userGroup, transferConfigId).flatMap(c => {
+    val res = transferService.getTransferConfig(userGroup, transferConfigId, cryptoConfig).flatMap(c => {
       c.detail.salesforce.flatMap(s => {
         salesforceConnectionService.getField(s, objectName)
       })

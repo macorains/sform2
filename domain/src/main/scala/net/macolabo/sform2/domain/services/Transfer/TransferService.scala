@@ -1,13 +1,24 @@
 package net.macolabo.sform2.domain.services.Transfer
 
 import com.google.inject.Inject
+import net.macolabo.sform2.domain.models.daos.{TransferConfigDAO, TransferConfigMailAddressDAO, TransferConfigMailDAO, TransferConfigSalesforceDAO, TransferConfigSalesforceObjectDAO, TransferConfigSalesforceObjectFieldDAO}
+import net.macolabo.sform2.domain.models.entity.CryptoConfig
 import net.macolabo.sform2.domain.models.entity.transfer.{TransferConfig, TransferConfigMail, TransferConfigMailAddress, TransferConfigSalesforce, TransferConfigSalesforceObject, TransferConfigSalesforceObjectField}
 import net.macolabo.sform2.domain.models.entity.transfer.TransferConfigSalesforceObjectField
+import net.macolabo.sform2.domain.utils.Crypto
+import scalikejdbc.{DB, DBSession}
 
 import java.time.ZonedDateTime
 import scala.concurrent.ExecutionContext
 
-class TransferService @Inject() (implicit ex: ExecutionContext)
+class TransferService @Inject()(
+  transferConfigMailDAO: TransferConfigMailDAO,
+  transferConfigMailAddressDAO: TransferConfigMailAddressDAO,
+  transferConfigSalesforceDAO: TransferConfigSalesforceDAO,
+  transferConfigSalesforceObjectDAO: TransferConfigSalesforceObjectDAO,
+  transferConfigSalesforceObjectFieldDAO: TransferConfigSalesforceObjectFieldDAO,
+  transferConfigDAO: TransferConfigDAO
+) (implicit ex: ExecutionContext)
   extends TransferGetTransferConfigSelectListJson
     with TransferGetTransferConfigListJson
     with TransferGetTransferConfigResponseJson
@@ -19,12 +30,14 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
    * @return TransferConfigのID,Nameのリスト
    */
   def getTransferConfigSelectList(userGroup: String): List[TransferGetTransferConfigSelectList] = {
-    TransferConfig.getList(userGroup).map(f => {
-      TransferGetTransferConfigSelectList(
-        f.id,
-        f.name,
-        f.type_code
-      )
+    DB.localTx(implicit session => {
+      transferConfigDAO.getList(userGroup).map(f => {
+        TransferGetTransferConfigSelectList(
+          f.id,
+          f.name,
+          f.type_code
+        )
+      })
     })
   }
 
@@ -34,14 +47,16 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
    * @return TransferConfigのリスト
    */
   def getTransferConfigList(userGroup: String): List[TransferGetTransferConfigListResponse] = {
-    TransferConfig.getList(userGroup).map(f => {
-      TransferGetTransferConfigListResponse(
-        f.id,
-        f.type_code,
-        f.config_index,
-        f.name,
-        f.status
-      )
+    DB.localTx(implicit session => {
+      transferConfigDAO.getList(userGroup).map(f => {
+        TransferGetTransferConfigListResponse(
+          f.id,
+          f.type_code,
+          f.config_index,
+          f.name,
+          f.status
+        )
+      })
     })
   }
 
@@ -51,19 +66,21 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
    * @param transferConfigId TransferConfig ID
    * @return 詳細付きTransferConfig
    */
-  def getTransferConfig(userGroup: String, transferConfigId: Int): Option[TransferGetTransferConfigResponse] = {
-    TransferConfig.get(userGroup, transferConfigId).map(f => {
-      TransferGetTransferConfigResponse(
-        f.id,
-        f.type_code,
-        f.config_index,
-        f.name,
-        f.status,
-        TransferGetTransferResponseConfigDetail(
-          getTransferConfigMail(userGroup, transferConfigId),
-          getTransferConfigSalesforce(userGroup, transferConfigId)
+  def getTransferConfig(userGroup: String, transferConfigId: Int, cryptoConfig: CryptoConfig): Option[TransferGetTransferConfigResponse] = {
+    DB.localTx(implicit session => {
+      transferConfigDAO.get(userGroup, transferConfigId).map(f => {
+        TransferGetTransferConfigResponse(
+          f.id,
+          f.type_code,
+          f.config_index,
+          f.name,
+          f.status,
+          TransferGetTransferResponseConfigDetail(
+            getTransferConfigMail(userGroup, transferConfigId),
+            getTransferConfigSalesforce(userGroup, transferConfigId, cryptoConfig)
+          )
         )
-      )
+      })
     })
   }
 
@@ -74,27 +91,33 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
    * @param transferUpdateTransferConfigRequest TransferConfig更新リクエスト
    * @return Result
    */
-  def updateTransferConfig(userId: String, userGroup: String, transferUpdateTransferConfigRequest: TransferUpdateTransferConfigRequest): TransferUpdateTransferConfigResponse = {
-    TransferConfig(
-      transferUpdateTransferConfigRequest.id,
-      transferUpdateTransferConfigRequest.type_code,
-      transferUpdateTransferConfigRequest.config_index,
-      transferUpdateTransferConfigRequest.name,
-      transferUpdateTransferConfigRequest.status,
-      userGroup,
-      userId,
-      userId,
-      ZonedDateTime.now(),
-      ZonedDateTime.now()
-    ).update
+  def updateTransferConfig(userId: String, userGroup: String, transferUpdateTransferConfigRequest: TransferUpdateTransferConfigRequest, cryptoConfig: CryptoConfig): TransferUpdateTransferConfigResponse = {
+    DB.localTx(implicit session => {
+      transferConfigDAO.save(
+        TransferConfig(
+          transferUpdateTransferConfigRequest.id,
+          transferUpdateTransferConfigRequest.type_code,
+          transferUpdateTransferConfigRequest.config_index,
+          transferUpdateTransferConfigRequest.name,
+          transferUpdateTransferConfigRequest.status,
+          userGroup,
+          userId,
+          userId,
+          ZonedDateTime.now(),
+          ZonedDateTime.now()
+        )
+      )
 
-    transferUpdateTransferConfigRequest.detail.mail.map(d => {
-      updateTransferConfigMail(userGroup, userId, d)
+      transferUpdateTransferConfigRequest.detail.mail.map(d => {
+        updateTransferConfigMail(userGroup, userId, d)
+      })
+
+      transferUpdateTransferConfigRequest.detail.salesforce.map(d => {
+        updateTransferConfigSalesforce(userGroup, userId, d, cryptoConfig)
+      })
+
+      TransferUpdateTransferConfigResponse(transferUpdateTransferConfigRequest.id)
     })
-    transferUpdateTransferConfigRequest.detail.salesforce.map(d => {
-      updateTransferConfigSalesforce(userGroup, userId, d)
-    })
-    TransferUpdateTransferConfigResponse(transferUpdateTransferConfigRequest.id)
   }
 
   /**
@@ -105,29 +128,33 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
    * @return Result
    */
   private def updateTransferConfigMail(userGroup: String, userId: String, transferUpdateTransferRequestMailTransferConfig: TransferUpdateTransferRequestMailTransferConfig): BigInt = {
-    TransferConfigMail(
-      transferUpdateTransferRequestMailTransferConfig.id,
-      transferUpdateTransferRequestMailTransferConfig.transfer_config_id,
-      transferUpdateTransferRequestMailTransferConfig.use_cc,
-      transferUpdateTransferRequestMailTransferConfig.use_bcc,
-      transferUpdateTransferRequestMailTransferConfig.use_replyto,
-      userGroup,
-      userId,
-      userId,
-      ZonedDateTime.now(),
-      ZonedDateTime.now()
-    ).update
-    val updateMailAddressList = transferUpdateTransferRequestMailTransferConfig.mail_address_list.map(m => {
-      m.id match {
-        case Some(s: BigInt) if s > 0 => updateTransferConfigMailAddress(userGroup, userId, m)
-        case _ => insertTransferConfigMailAddress(userGroup, userId, m)
-      }
-    })
-    TransferConfigMailAddress.getList(userGroup, transferUpdateTransferRequestMailTransferConfig.id)
+    DB.localTx(implicit session => {
+      transferConfigMailDAO.save(
+        TransferConfigMail(
+          transferUpdateTransferRequestMailTransferConfig.id,
+          transferUpdateTransferRequestMailTransferConfig.transfer_config_id,
+          transferUpdateTransferRequestMailTransferConfig.use_cc,
+          transferUpdateTransferRequestMailTransferConfig.use_bcc,
+          transferUpdateTransferRequestMailTransferConfig.use_replyto,
+          userGroup,
+          userId,
+          userId,
+          ZonedDateTime.now(),
+          ZonedDateTime.now()
+        )
+      )
+      val updateMailAddressList = transferUpdateTransferRequestMailTransferConfig.mail_address_list.map(m => {
+        m.id match {
+          case Some(s: BigInt) if s > 0 => updateTransferConfigMailAddress(userGroup, userId, m)
+          case _ => insertTransferConfigMailAddress(userGroup, userId, m)
+        }
+      })
+      transferConfigMailAddressDAO.getList(userGroup, transferUpdateTransferRequestMailTransferConfig.id)
         .filterNot(c => updateMailAddressList.contains(c.id))
         .map(c => c.id)
-        .foreach(c => TransferConfigMailAddress.erase(userGroup, c))
-    transferUpdateTransferRequestMailTransferConfig.id
+        .foreach(c => transferConfigMailAddressDAO.erase(userGroup, c))
+      transferUpdateTransferRequestMailTransferConfig.id
+    })
   }
 
   /**
@@ -138,20 +165,23 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
    * @return Result
    */
   private def updateTransferConfigMailAddress(userGroup: String, userId: String, transferUpdateTransferRequestMailTransferConfigMailAddress: TransferUpdateTransferRequestMailTransferConfigMailAddress): BigInt = {
-    val id = transferUpdateTransferRequestMailTransferConfigMailAddress.id.getOrElse(BigInt(0))
-    TransferConfigMailAddress(
-      id,
-      transferUpdateTransferRequestMailTransferConfigMailAddress.transfer_config_mail_id,
-      transferUpdateTransferRequestMailTransferConfigMailAddress.address_index,
-      transferUpdateTransferRequestMailTransferConfigMailAddress.name,
-      transferUpdateTransferRequestMailTransferConfigMailAddress.address,
-      userGroup,
-      userId,
-      userId,
-      ZonedDateTime.now(),
-      ZonedDateTime.now()
-    ).update
-    id
+    DB.localTx(implicit session => {
+      val id = transferUpdateTransferRequestMailTransferConfigMailAddress.id.getOrElse(BigInt(0))
+
+      TransferConfigMailAddress(
+        id,
+        transferUpdateTransferRequestMailTransferConfigMailAddress.transfer_config_mail_id,
+        transferUpdateTransferRequestMailTransferConfigMailAddress.address_index,
+        transferUpdateTransferRequestMailTransferConfigMailAddress.name,
+        transferUpdateTransferRequestMailTransferConfigMailAddress.address,
+        userGroup,
+        userId,
+        userId,
+        ZonedDateTime.now(),
+        ZonedDateTime.now()
+      )
+      id
+    })
   }
 
   /**
@@ -162,18 +192,22 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
    * @return
    */
   private def insertTransferConfigMailAddress(userGroup: String, userId: String, transferUpdateTransferRequestMailTransferConfigMailAddress: TransferUpdateTransferRequestMailTransferConfigMailAddress): BigInt = {
-    TransferConfigMailAddress(
-      transferUpdateTransferRequestMailTransferConfigMailAddress.id.getOrElse(0),
-      transferUpdateTransferRequestMailTransferConfigMailAddress.transfer_config_mail_id,
-      transferUpdateTransferRequestMailTransferConfigMailAddress.address_index,
-      transferUpdateTransferRequestMailTransferConfigMailAddress.name,
-      transferUpdateTransferRequestMailTransferConfigMailAddress.address,
-      userGroup,
-      userId,
-      userId,
-      ZonedDateTime.now(),
-      ZonedDateTime.now()
-    ).insert
+    DB.localTx(implicit session => {
+      transferConfigMailAddressDAO.create(
+        TransferConfigMailAddress(
+          transferUpdateTransferRequestMailTransferConfigMailAddress.id.getOrElse(0),
+          transferUpdateTransferRequestMailTransferConfigMailAddress.transfer_config_mail_id,
+          transferUpdateTransferRequestMailTransferConfigMailAddress.address_index,
+          transferUpdateTransferRequestMailTransferConfigMailAddress.name,
+          transferUpdateTransferRequestMailTransferConfigMailAddress.address,
+          userGroup,
+          userId,
+          userId,
+          ZonedDateTime.now(),
+          ZonedDateTime.now()
+        )
+      )
+    })
   }
 
   /**
@@ -183,40 +217,54 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
    * @param transferUpdateTransferRequestSalesforceTransferConfig TransferConfigSalesforce更新リクエスト
    * @return
    */
-  private def updateTransferConfigSalesforce(userGroup: String, userId: String, transferUpdateTransferRequestSalesforceTransferConfig: TransferUpdateTransferRequestSalesforceTransferConfig): BigInt = {
-    TransferConfigSalesforce(
-      transferUpdateTransferRequestSalesforceTransferConfig.id,
-      transferUpdateTransferRequestSalesforceTransferConfig.transfer_config_id,
-      "",
-      transferUpdateTransferRequestSalesforceTransferConfig.sf_user_name,
-      transferUpdateTransferRequestSalesforceTransferConfig.sf_password,
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      userGroup,
-      userId,
-      userId,
-      ZonedDateTime.now(),
-      ZonedDateTime.now()
-    ).update
+  private def updateTransferConfigSalesforce(userGroup: String, userId: String, transferUpdateTransferRequestSalesforceTransferConfig: TransferUpdateTransferRequestSalesforceTransferConfig, cryptoConfig: CryptoConfig): BigInt = {
+    // 暗号化処理
+    val crypto = Crypto(cryptoConfig.secret_key_string, cryptoConfig.cipher_algorithm, cryptoConfig.secret_key_algorithm, cryptoConfig.charset)
+    val ivUserName = crypto.generateIV
+    val sfUserName = crypto.encrypt(transferUpdateTransferRequestSalesforceTransferConfig.sf_user_name, ivUserName)
+    val ivPassword = crypto.generateIV
+    val sfPassword = crypto.encrypt(transferUpdateTransferRequestSalesforceTransferConfig.sf_password, ivPassword)
+    val ivClientId = crypto.generateIV
+    val sfClientId = crypto.encrypt(transferUpdateTransferRequestSalesforceTransferConfig.sf_client_id, ivClientId)
+    val ivClientSecret = crypto.generateIV
+    val sfClientSecret = crypto.encrypt(transferUpdateTransferRequestSalesforceTransferConfig.sf_client_secret, ivClientSecret)
 
-    val updatedObjects = transferUpdateTransferRequestSalesforceTransferConfig.objects.map(o => {
-      o.id match {
-        case Some(i: BigInt) if i>0 => updateTransferConfigSalesforceObject(userGroup, userId, o)
-        case _ => insertTransferConfigSalesforceObject(userGroup, userId, transferUpdateTransferRequestSalesforceTransferConfig.id, TransferUpdateTransferRequestSalesforceTransferConfigObjectToTransferInsertTransferRequestSalesforceTransferConfigObject(o))
-      }
+    DB.localTx(implicit session => {
+      transferConfigSalesforceDAO.save(TransferConfigSalesforce(
+        transferUpdateTransferRequestSalesforceTransferConfig.id,
+        transferUpdateTransferRequestSalesforceTransferConfig.transfer_config_id,
+        transferUpdateTransferRequestSalesforceTransferConfig.sf_domain,
+        transferUpdateTransferRequestSalesforceTransferConfig.api_version,
+        sfUserName,
+        sfPassword,
+        sfClientId,
+        sfClientSecret,
+        ivUserName,
+        ivPassword,
+        ivClientId,
+        ivClientSecret,
+        userGroup,
+        userId,
+        userId,
+        ZonedDateTime.now(),
+        ZonedDateTime.now()
+      ))
+
+      val updatedObjects = transferUpdateTransferRequestSalesforceTransferConfig.objects.map(o => {
+        o.id match {
+          case Some(i: BigInt) if i > 0 => updateTransferConfigSalesforceObject(userGroup, userId, o)
+          case _ => insertTransferConfigSalesforceObject(userGroup, userId, transferUpdateTransferRequestSalesforceTransferConfig.id, TransferUpdateTransferRequestSalesforceTransferConfigObjectToTransferInsertTransferRequestSalesforceTransferConfigObject(o))
+        }
+      })
+
+      transferConfigSalesforceObjectDAO
+        .getList(userGroup, transferUpdateTransferRequestSalesforceTransferConfig.id)
+        .filterNot(o => updatedObjects.contains(o.id))
+        .map(o => o.id)
+        .foreach(o => transferConfigSalesforceObjectDAO.erase(userGroup, o))
+
+      transferUpdateTransferRequestSalesforceTransferConfig.id
     })
-
-    TransferConfigSalesforceObject
-      .getList(userGroup, transferUpdateTransferRequestSalesforceTransferConfig.id)
-      .filterNot(o => updatedObjects.contains(o.id))
-      .map(o => o.id)
-      .foreach(o => TransferConfigSalesforceObject.erase(userGroup, o))
-
-    transferUpdateTransferRequestSalesforceTransferConfig.id
   }
 
   /**
@@ -227,18 +275,20 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
    * @return 更新したID
    */
   private def updateTransferConfigSalesforceObject(userGroup: String, userId: String, transferUpdateTransferRequestSalesforceTransferConfigObject: TransferUpdateTransferRequestSalesforceTransferConfigObject): BigInt = {
-    TransferConfigSalesforceObject(
-      transferUpdateTransferRequestSalesforceTransferConfigObject.id.getOrElse(BigInt(0)),
-      transferUpdateTransferRequestSalesforceTransferConfigObject.transfer_config_salesforce_id,
-      transferUpdateTransferRequestSalesforceTransferConfigObject.name,
-      transferUpdateTransferRequestSalesforceTransferConfigObject.label,
-      transferUpdateTransferRequestSalesforceTransferConfigObject.active,
-      userGroup,
-      userId,
-      userId,
-      ZonedDateTime.now(),
-      ZonedDateTime.now()
-    ).update
+    transferConfigSalesforceObjectDAO.save(
+      TransferConfigSalesforceObject(
+        transferUpdateTransferRequestSalesforceTransferConfigObject.id.getOrElse(BigInt(0)),
+        transferUpdateTransferRequestSalesforceTransferConfigObject.transfer_config_salesforce_id,
+        transferUpdateTransferRequestSalesforceTransferConfigObject.name,
+        transferUpdateTransferRequestSalesforceTransferConfigObject.label,
+        transferUpdateTransferRequestSalesforceTransferConfigObject.active,
+        userGroup,
+        userId,
+        userId,
+        ZonedDateTime.now(),
+        ZonedDateTime.now()
+      )
+    )
 
     val updatedFields = transferUpdateTransferRequestSalesforceTransferConfigObject.fields.map(f => {
       f.id match {
@@ -247,11 +297,11 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
       }
     })
 
-    TransferConfigSalesforceObjectField
+    transferConfigSalesforceObjectFieldDAO
       .getList(userGroup, transferUpdateTransferRequestSalesforceTransferConfigObject.id.getOrElse(BigInt(0)))
         .filterNot(f => updatedFields.contains(f.id))
         .map(f => f.id)
-        .foreach(f => TransferConfigSalesforceObject.erase(userGroup, f))
+        .foreach(f => transferConfigSalesforceObjectFieldDAO.erase(userGroup, f))
 
     transferUpdateTransferRequestSalesforceTransferConfigObject.id.getOrElse(BigInt(0))
   }
@@ -265,18 +315,20 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
    * @return 作成したレコードのID
    */
   private def insertTransferConfigSalesforceObject(userGroup: String, userId: String, transferConfigSalesforceId: BigInt, transferInsertTransferRequestSalesforceTransferConfigObject: TransferInsertTransferRequestSalesforceTransferConfigObject): BigInt = {
-    TransferConfigSalesforceObject(
-      0,
-      transferConfigSalesforceId,
-      transferInsertTransferRequestSalesforceTransferConfigObject.name,
-      transferInsertTransferRequestSalesforceTransferConfigObject.label,
-      transferInsertTransferRequestSalesforceTransferConfigObject.active,
-      userGroup,
-      userId,
-      userId,
-      ZonedDateTime.now(),
-      ZonedDateTime.now()
-    ).insert
+    transferConfigSalesforceObjectDAO.create(
+      TransferConfigSalesforceObject(
+        0,
+        transferConfigSalesforceId,
+        transferInsertTransferRequestSalesforceTransferConfigObject.name,
+        transferInsertTransferRequestSalesforceTransferConfigObject.label,
+        transferInsertTransferRequestSalesforceTransferConfigObject.active,
+        userGroup,
+        userId,
+        userId,
+        ZonedDateTime.now(),
+        ZonedDateTime.now()
+      )
+    )
   }
 
   /**
@@ -287,19 +339,21 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
    * @return 更新したID
    */
   private def updateTransferConfigSalesforceObjectField(userGroup: String, userId: String, transferUpdateTransferRequestSalesforceTransferConfigObjectField: TransferUpdateTransferRequestSalesforceTransferConfigObjectField): BigInt = {
-    TransferConfigSalesforceObjectField(
-      transferUpdateTransferRequestSalesforceTransferConfigObjectField.id.getOrElse(0),
-      transferUpdateTransferRequestSalesforceTransferConfigObjectField.transfer_config_salesforce_object_id,
-      transferUpdateTransferRequestSalesforceTransferConfigObjectField.name,
-      transferUpdateTransferRequestSalesforceTransferConfigObjectField.label,
-      transferUpdateTransferRequestSalesforceTransferConfigObjectField.field_type,
-      transferUpdateTransferRequestSalesforceTransferConfigObjectField.active,
-      userGroup,
-      userId,
-      userId,
-      ZonedDateTime.now(),
-      ZonedDateTime.now()
-    ).update
+    transferConfigSalesforceObjectFieldDAO.save(
+      TransferConfigSalesforceObjectField(
+        transferUpdateTransferRequestSalesforceTransferConfigObjectField.id.getOrElse(0),
+        transferUpdateTransferRequestSalesforceTransferConfigObjectField.transfer_config_salesforce_object_id,
+        transferUpdateTransferRequestSalesforceTransferConfigObjectField.name,
+        transferUpdateTransferRequestSalesforceTransferConfigObjectField.label,
+        transferUpdateTransferRequestSalesforceTransferConfigObjectField.field_type,
+        transferUpdateTransferRequestSalesforceTransferConfigObjectField.active,
+        userGroup,
+        userId,
+        userId,
+        ZonedDateTime.now(),
+        ZonedDateTime.now()
+      )
+    )
     transferUpdateTransferRequestSalesforceTransferConfigObjectField.id.getOrElse(0)
   }
 
@@ -312,19 +366,21 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
    * @return 作成したレコードのID
    */
   private def insertTransferConfigSalesforceObjectField(userGroup: String, userId: String, transferConfigSalesforceObjectId: BigInt, transferInsertTransferRequestSalesforceTransferConfigObjectField: TransferInsertTransferRequestSalesforceTransferConfigObjectField): BigInt = {
-    TransferConfigSalesforceObjectField(
-      0,
-      transferConfigSalesforceObjectId,
-      transferInsertTransferRequestSalesforceTransferConfigObjectField.name,
-      transferInsertTransferRequestSalesforceTransferConfigObjectField.label,
-      transferInsertTransferRequestSalesforceTransferConfigObjectField.field_type,
-      transferInsertTransferRequestSalesforceTransferConfigObjectField.active,
-      userGroup,
-      userId,
-      userId,
-      ZonedDateTime.now(),
-      ZonedDateTime.now()
-    ).insert
+    transferConfigSalesforceObjectFieldDAO.create(
+      TransferConfigSalesforceObjectField(
+        0,
+        transferConfigSalesforceObjectId,
+        transferInsertTransferRequestSalesforceTransferConfigObjectField.name,
+        transferInsertTransferRequestSalesforceTransferConfigObjectField.label,
+        transferInsertTransferRequestSalesforceTransferConfigObjectField.field_type,
+        transferInsertTransferRequestSalesforceTransferConfigObjectField.active,
+        userGroup,
+        userId,
+        userId,
+        ZonedDateTime.now(),
+        ZonedDateTime.now()
+      )
+    )
   }
 
 
@@ -335,7 +391,7 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
    * @return MailTransfer用のconfig
    */
   private def getTransferConfigMail(userGroup: String, transferConfigId: BigInt): Option[TransferGetTransferResponseMailTransferConfig] = {
-    TransferConfigMail.get(userGroup, transferConfigId).map(f => {
+    transferConfigMailDAO.get(userGroup, transferConfigId).map(f => {
       TransferGetTransferResponseMailTransferConfig(
         f.id,
         f.transfer_config_id,
@@ -354,7 +410,7 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
    * @return MailTransferConfigに付随するメールアドレスリスト
    */
   private def getTransferConfigMailAddress(userGroup: String, transferConfigMailId: BigInt): List[TransferGetTransferResponseMailTransferConfigMailAddress] = {
-    TransferConfigMailAddress.getList(userGroup, transferConfigMailId).map(f => {
+    transferConfigMailAddressDAO.getList(userGroup, transferConfigMailId).map(f => {
       TransferGetTransferResponseMailTransferConfigMailAddress(
         f.id,
         f.transfer_config_mail_id,
@@ -371,8 +427,8 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
    * @param transferConfigId TransferConfig ID
    * @return SalesforceTransfer用のconfig
    */
-  private def getTransferConfigSalesforce(userGroup: String, transferConfigId: BigInt): Option[TransferGetTransferResponseSalesforceTransferConfig] = {
-    TransferConfigSalesforce.get(userGroup, transferConfigId).map(f => {
+  private def getTransferConfigSalesforce(userGroup: String, transferConfigId: BigInt, cryptoConfig: CryptoConfig)(implicit session: DBSession): Option[TransferGetTransferResponseSalesforceTransferConfig] = {
+    transferConfigSalesforceDAO.get(transferConfigId).map(f => {
       TransferGetTransferResponseSalesforceTransferConfig(
         f.id,
         f.transfer_config_id,
@@ -391,7 +447,7 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
    * @return SalesforceTransfer用のconfig Object リスト
    */
   private def getTransferConfigSalesforceObject(userGroup: String, transferConfigSalesforceId: BigInt): List[TransferGetTransferResponseSalesforceTransferConfigObject] = {
-    TransferConfigSalesforceObject.getList(userGroup, transferConfigSalesforceId).map(f => {
+    transferConfigSalesforceObjectDAO.getList(userGroup, transferConfigSalesforceId).map(f => {
       TransferGetTransferResponseSalesforceTransferConfigObject(
         f.id,
         f.transfer_config_salesforce_id,
@@ -410,7 +466,7 @@ class TransferService @Inject() (implicit ex: ExecutionContext)
    * @return SalesforceTransfer用のconfig Object Field リスト
    */
   private def getTransferConfigSalesforceObjectField(userGroup: String, transferConfigSalesforceObjectId: BigInt): List[TransferGetTransferResponseSalesforceTransferConfigObjectField] = {
-    TransferConfigSalesforceObjectField.getList(userGroup, transferConfigSalesforceObjectId).map(f => {
+    transferConfigSalesforceObjectFieldDAO.getList(userGroup, transferConfigSalesforceObjectId).map(f => {
       TransferGetTransferResponseSalesforceTransferConfigObjectField(
         f.id,
         f.transfer_config_salesforce_object_id,

@@ -32,6 +32,8 @@ class SalesforceTransferSpec extends TestKit(ActorSystem("test"))
   //with BeforeAndAfterAll
 {
   "SalesforceTransfer" must {
+    // TODO SFからのレスポンスを使ってmock作ってテストとして実装し直す
+    // mockWSを使えるはず
     "login to Salesforce" in {
       val dao = inject[TransferConfigSalesforceDAOImpl]
       val ws = inject[WSClient]
@@ -69,7 +71,13 @@ class SalesforceTransferSpec extends TestKit(ActorSystem("test"))
            |""".stripMargin
       )
 
-      val jsonData = transfer.createSalesforcePostdata(transferTaskBeanSalesforce, postdata)
+      // TODO ちゃんと動くように直す必要あり
+      val salesforceSObjectsDescribeResponse = SalesforceSObjectsDescribeResponse(
+        "hoge",
+        List.empty
+      )
+
+      val jsonData = transfer.createSalesforcePostdata(transferTaskBeanSalesforce, postdata, salesforceSObjectsDescribeResponse)
       println(jsonData)
 
       val res = Await.result(transfer.postSalesforceObject(transferTaskBeanSalesforce, postdata, token, apiUrl), Duration.Inf)
