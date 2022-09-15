@@ -432,9 +432,12 @@ class TransferService @Inject()(
       TransferGetTransferResponseSalesforceTransferConfig(
         f.id,
         f.transfer_config_id,
+        f.sf_domain,
+        f.api_version,
         f.sf_user_name,
         f.sf_password,
-        "",
+        f.sf_client_id,
+        f.sf_client_secret,
         getTransferConfigSalesforceObject(userGroup, f.id)
       )
     })

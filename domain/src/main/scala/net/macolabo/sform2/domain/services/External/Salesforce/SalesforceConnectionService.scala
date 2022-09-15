@@ -14,7 +14,7 @@ class SalesforceConnectionService extends Logger {
    * @return SalesforceCheckConnectionResponse
    */
   def checkConnection(request: SalesforceCheckConnectionRequest): SalesforceCheckConnectionResponse = {
-    val result = getConnection(request.username, request.password, request.security_token)
+    val result = getConnection(request.username, request.password, "", "")
     val resultCode = result._1 match {
       case c:Some[PartnerConnection] => "OK"
       case _ => "NG"
@@ -28,7 +28,7 @@ class SalesforceConnectionService extends Logger {
    * @return SalesforceGetObjectResponseのリスト
    */
   def getObject(config: TransferGetTransferResponseSalesforceTransferConfig): Option[List[SalesforceGetObjectResponse]] = {
-    getConnection(config.sf_user_name, config.sf_password, config.sf_security_token)._1.map(connection => {
+    getConnection(config.sf_user_name, config.sf_password, config.sf_client_id, config.sf_client_secret)._1.map(connection => {
       connection.describeGlobal().getSobjects()
         .filter(o => { o.getCreateable })
         .filter(o => { o.getDeletable })
@@ -50,7 +50,7 @@ class SalesforceConnectionService extends Logger {
    * @return SalesforceGetFieldResponseのリスト
    */
   def getField(config: TransferGetTransferResponseSalesforceTransferConfig, objectName: String): Option[List[SalesforceGetFieldResponse]] = {
-    getConnection(config.sf_user_name, config.sf_password, config.sf_security_token)._1.map(connection => {
+    getConnection(config.sf_user_name, config.sf_password, config.sf_client_id, config.sf_client_secret)._1.map(connection => {
       connection.describeSObject(objectName).getFields
         .filter(f => f.isCreateable)
         .filter(f => !f.isAutoNumber)
@@ -70,7 +70,10 @@ class SalesforceConnectionService extends Logger {
     None
   }
 
-  def getConnection(user: String, password: String, securityToken: String): (Option[PartnerConnection], String) = {
+  def getConnection(user: String, password: String, client_id: String, client_secret: String): (Option[PartnerConnection], String) = {
+    ???
+    // TODO 必要ならREST APIを使う形で書き直す
+    /*
     val config: ConnectorConfig = new ConnectorConfig()
     config.setUsername(user)
     config.setPassword(password + securityToken)
@@ -94,6 +97,8 @@ class SalesforceConnectionService extends Logger {
         logger.error(e.toString)
         (None,"LoginFailed")
     }
+
+     */
   }
 
   def create(connection: PartnerConnection, sObjectArray: Array[SObject]): Array[SaveResult] = {
