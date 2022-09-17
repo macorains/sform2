@@ -428,16 +428,18 @@ class TransferService @Inject()(
    * @return SalesforceTransfer用のconfig
    */
   private def getTransferConfigSalesforce(userGroup: String, transferConfigId: BigInt, cryptoConfig: CryptoConfig)(implicit session: DBSession): Option[TransferGetTransferResponseSalesforceTransferConfig] = {
+    val crypto = Crypto(cryptoConfig.secret_key_string, cryptoConfig.cipher_algorithm, cryptoConfig.secret_key_algorithm, cryptoConfig.charset)
+
     transferConfigSalesforceDAO.get(transferConfigId).map(f => {
       TransferGetTransferResponseSalesforceTransferConfig(
         f.id,
         f.transfer_config_id,
         f.sf_domain,
         f.api_version,
-        f.sf_user_name,
-        f.sf_password,
-        f.sf_client_id,
-        f.sf_client_secret,
+        crypto.decrypt(f.sf_user_name, f.iv_user_name),
+        crypto.decrypt(f.sf_password, f.iv_password),
+        crypto.decrypt(f.sf_client_id, f.iv_client_id),
+        crypto.decrypt(f.sf_client_secret, f.iv_client_secret),
         getTransferConfigSalesforceObject(userGroup, f.id)
       )
     })
