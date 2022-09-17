@@ -12,6 +12,7 @@ import play.api.mvc._
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
 import play.api.Configuration
+import play.api.libs.json.{JsResult, JsSuccess}
 
 import scala.jdk.CollectionConverters._
 import scala.concurrent.ExecutionContext
@@ -91,14 +92,22 @@ class TransferController @Inject() (
     val userGroup = getAttributeValue(profiles, "user_group")
     val userId = profiles.asScala.headOption.map(_.getId)
 
-    val res = userId.flatMap(id => {request.body.asJson.flatMap(r =>
+    val res = userId.flatMap(id => {request.body.asJson.map(r =>
       r.validate[TransferUpdateTransferConfigRequest].map(f => {
         transferService.updateTransferConfig(id, userGroup, f, cryptoConfig)
-      }).asOpt)
+      }))
     })
     res match {
-      case Some(s: TransferUpdateTransferConfigResponse) => Ok(toJson(s))
-      case None => BadRequest
+      case Some(j: JsResult[TransferUpdateTransferConfigResponse]) =>
+        j match {
+          case s:JsSuccess[TransferUpdateTransferConfigResponse] => Ok(toJson(s.value))
+          case _ =>
+            println(j)
+            BadRequest
+        }
+      case None =>
+        println(res)
+        BadRequest
     }
   }
 
