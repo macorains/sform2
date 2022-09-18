@@ -13,7 +13,10 @@ case class SalesforceSObjectsDescribeResponseField(
   label: String,
   _type: String,
   length: Int,
-  updatable: Boolean
+  createable: Boolean,
+  updateable: Boolean,
+  auto_number: Boolean,
+  calculated: Boolean,
 )
 
 trait SalesforceSObjectsDescribeResponseJson {
@@ -22,7 +25,10 @@ trait SalesforceSObjectsDescribeResponseJson {
       (JsPath \ "label").format[String] ~
       (JsPath \ "type").format[String] ~
       (JsPath \ "length").format[Int] ~
-      (JsPath \ "updateable").format[Boolean]
+      (JsPath \ "createable").format[Boolean] ~
+      (JsPath \ "updateable").format[Boolean] ~
+      (JsPath \ "autoNumber").format[Boolean] ~
+      (JsPath \ "calculated").format[Boolean]
   )(SalesforceSObjectsDescribeResponseField.apply, unlift(SalesforceSObjectsDescribeResponseField.unapply))
 
   implicit val salesforceSObjectsDescribeResponseFormat: Format[SalesforceSObjectsDescribeResponse] = (

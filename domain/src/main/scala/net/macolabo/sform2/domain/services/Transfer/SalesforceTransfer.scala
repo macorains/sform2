@@ -24,6 +24,7 @@ class SalesforceTransfer @Inject()(
   transferConfigSalesforceDAO: TransferConfigSalesforceDAO
 ) extends BaseTransfer
   with SalesforceSObjectsDescribeResponseJson
+  with SalesforceLoginResponseJson
 {
   override def receive: Receive = {
     case TransferTaskRequest(taskList, postdata, cryptoConfig) =>
@@ -133,23 +134,6 @@ class SalesforceTransfer @Inject()(
       Json.toJson(data).toString()
   }
 
-  case class SalesforceLoginResponse(
-    access_token: String,
-    instance_url: String,
-    id: String,
-    token_type: String,
-    issued_at: String,
-    signature: String
-  )
-
-  implicit val salesforceLoginResponseFormat: Format[SalesforceLoginResponse] = (
-    (JsPath \ "access_token").format[String] ~
-      (JsPath \ "instance_url").format[String] ~
-      (JsPath \ "id").format[String] ~
-      (JsPath \ "token_type").format[String] ~
-      (JsPath \ "issued_at").format[String] ~
-      (JsPath \ "signature").format[String]
-  )(SalesforceLoginResponse.apply, unlift(SalesforceLoginResponse.unapply))
 }
 
 object SalesforceTransfer {
