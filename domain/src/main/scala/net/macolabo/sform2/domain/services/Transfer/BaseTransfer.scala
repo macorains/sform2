@@ -6,6 +6,7 @@ import play.api.libs.json.JsValue
 
 trait BaseTransfer extends Actor {
   def endTask(taskList: List[TransferTaskBean], postdata: JsValue, logText: String) = {
-    sender() ! ConsumeTaskRequest(taskList.tail, postdata)
+    // TODO エラーになるので一旦コメントアウト
+    // sender() ! ConsumeTaskRequest(taskList.tail, postdata)
   }
 }

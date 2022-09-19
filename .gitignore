@@ -14,3 +14,4 @@ silhouette.conf
 sform.conf
 null
 /docker/data/
+out/

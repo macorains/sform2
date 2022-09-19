@@ -1,18 +1,24 @@
 package net.macolabo.sform2.domain.services.External.Salesforce
 
-import play.api.libs.json.{JsPath, Reads}
+import play.api.libs.json.{Format, JsPath, Reads}
 import play.api.libs.functional.syntax._
 
 case class SalesforceCheckConnectionRequest(
-                                         username: String,
-                                         password: String,
-                                         security_token: String
-                                         )
+  username: String,
+  password: String,
+  client_id: String,
+  client_secret: String,
+  domain: String,
+  api_version: String
+)
 
 trait SalesforceCheckConnectionRequestJson {
-  implicit val  SalesforceCheckConnectionRequestReads: Reads[SalesforceCheckConnectionRequest] = (
-    (JsPath \ "username").read[String] ~
-      (JsPath \ "password").read[String] ~
-      (JsPath \ "security_token").read[String]
-    )(SalesforceCheckConnectionRequest.apply _)
+  implicit val  SalesforceCheckConnectionRequestFormat: Format[SalesforceCheckConnectionRequest] = (
+    (JsPath \ "username").format[String] ~
+      (JsPath \ "password").format[String] ~
+      (JsPath \ "client_id").format[String] ~
+      (JsPath \ "client_secret").format[String] ~
+      (JsPath \ "domain").format[String] ~
+      (JsPath \ "api_version").format[String]
+    )(SalesforceCheckConnectionRequest.apply, unlift(SalesforceCheckConnectionRequest.unapply))
 }

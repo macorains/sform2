@@ -1,7 +1,7 @@
 package net.macolabo.sform2.domain.services.Transfer
 
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{JsPath, Json, Reads, Writes}
+import play.api.libs.json.{Format, JsPath, Json, Reads, Writes}
 
 case class TransferUpdateTransferRequestMailTransferConfigMailAddress(
                                                                      id: Option[BigInt],
@@ -38,13 +38,16 @@ case class TransferUpdateTransferRequestSalesforceTransferConfigObjectField(
                                                                            )
 
 case class TransferUpdateTransferRequestSalesforceTransferConfig(
-                                                                id: BigInt,
-                                                                transfer_config_id: BigInt,
-                                                                sf_user_name: String,
-                                                                sf_password: String,
-                                                                sf_security_token: String,
-                                                                objects: List[TransferUpdateTransferRequestSalesforceTransferConfigObject]
-                                                              )
+  id: BigInt,
+  transfer_config_id: BigInt,
+  sf_domain: String,
+  api_version: String,
+  sf_user_name: String,
+  sf_password: String,
+  sf_client_id: String,
+  sf_client_secret: String,
+  objects: List[TransferUpdateTransferRequestSalesforceTransferConfigObject]
+)
 
 case class TransferUpdateTransferRequestConfigDetail(
                                                     mail: Option[TransferUpdateTransferRequestMailTransferConfig],
@@ -137,24 +140,18 @@ trait TransferUpdateTransferConfigRequestJson {
     )(TransferUpdateTransferRequestSalesforceTransferConfigObject.apply _)
 
 
-  implicit val TransferUpdateTransferRequestSalesforceTransferConfigWrites: Writes[TransferUpdateTransferRequestSalesforceTransferConfig] =
-    (transferUpdateTransferRequestSalesforceTransferConfig: TransferUpdateTransferRequestSalesforceTransferConfig) => Json.obj(
-      "id" -> transferUpdateTransferRequestSalesforceTransferConfig.id,
-      "transfer_config_id" -> transferUpdateTransferRequestSalesforceTransferConfig.transfer_config_id,
-      "sf_user_name" -> transferUpdateTransferRequestSalesforceTransferConfig.sf_user_name,
-      "sf_password" -> transferUpdateTransferRequestSalesforceTransferConfig.sf_password,
-      "sf_security_token" -> transferUpdateTransferRequestSalesforceTransferConfig.sf_security_token,
-      "objects" -> transferUpdateTransferRequestSalesforceTransferConfig.objects
-    )
+  implicit val TransferUpdateTransferRequestSalesforceTransferConfigFormat: Format[TransferUpdateTransferRequestSalesforceTransferConfig] = (
+    (JsPath \ "id").format[BigInt] ~
+      (JsPath \ "transfer_config_id").format[BigInt] ~
+      (JsPath \ "sf_domain").format[String] ~
+      (JsPath \ "api_version").format[String] ~
+      (JsPath \ "sf_user_name").format[String] ~
+      (JsPath \ "sf_password").format[String] ~
+      (JsPath \ "sf_client_id").format[String] ~
+      (JsPath \ "sf_client_secret").format[String] ~
+      (JsPath \ "objects").format[List[TransferUpdateTransferRequestSalesforceTransferConfigObject]]
+    )(TransferUpdateTransferRequestSalesforceTransferConfig.apply, unlift(TransferUpdateTransferRequestSalesforceTransferConfig.unapply))
 
-  implicit val TransferUpdateTransferRequestSalesforceTransferConfigReads: Reads[TransferUpdateTransferRequestSalesforceTransferConfig] = (
-    (JsPath \ "id").read[BigInt] ~
-      (JsPath \ "transfer_config_id").read[BigInt] ~
-      (JsPath \ "sf_user_name").read[String] ~
-      (JsPath \ "sf_password").read[String] ~
-      (JsPath \ "sf_security_token").read[String] ~
-      (JsPath \ "objects").read[List[TransferUpdateTransferRequestSalesforceTransferConfigObject]]
-    )(TransferUpdateTransferRequestSalesforceTransferConfig.apply _)
 
   implicit val TransferUpdateTransferRequestConfigDetailWrites: Writes[TransferUpdateTransferRequestConfigDetail] = (transferUpdateTransferRequestConfigDetail: TransferUpdateTransferRequestConfigDetail) => Json.obj(
     "mail" -> transferUpdateTransferRequestConfigDetail.mail,

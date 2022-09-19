@@ -1,5 +1,5 @@
 sform {
-  crypt {
+  crypto {
     algorithm.cipher = "AES/CBC/PKCS5Padding"
     algorithm.key = "AES"
     key = "ChangeMe"

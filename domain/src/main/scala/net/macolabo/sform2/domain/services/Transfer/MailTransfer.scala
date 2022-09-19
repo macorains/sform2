@@ -85,9 +85,11 @@ class MailTransfer @Inject()(
     })
   }
 
-  def getReplyToAddress(replyToAddressId: BigInteger): java.util.List[String] = {
+  def getReplyToAddress(replyToAddressId: Option[BigInteger]): java.util.List[String] = {
     DB.localTx(implicit session => {
-      transferConfigMailAddressDAO.get(replyToAddressId).map(rs => rs.address)
+      replyToAddressId.flatMap(id =>
+        transferConfigMailAddressDAO.get(id).map(rs => rs.address)
+      )
     }).map(address => List(address).toBuffer.asJava).getOrElse(java.util.List.of())
   }
 

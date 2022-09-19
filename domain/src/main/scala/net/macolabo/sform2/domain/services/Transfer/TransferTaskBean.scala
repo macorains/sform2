@@ -34,8 +34,8 @@ case class TransferTaskBeanMail (
   cc_address: Option[String],
   cc_address_id: Option[BigInteger],
   cc_address_field: Option[String],
-  bcc_address_id: BigInteger,
-  replyto_address_id: BigInteger,
+  bcc_address_id: Option[BigInteger],
+  replyto_address_id: Option[BigInteger],
   subject: String,
   body: String,
   user_group: String
