@@ -102,16 +102,20 @@ case class FormTransferTaskConditionGetReponse(
  * @param body 本文
  */
 case class FormTransferTaskMailGetReponse(
-                                                    id: BigInt,
-                                                    form_transfer_task_id: BigInt,
-                                                    from_address_id: BigInt,
-                                                    to_address: String,
-                                                    cc_address: String,
-                                                    bcc_address_id: BigInt,
-                                                    replyto_address_id: BigInt,
-                                                    subject: String,
-                                                    body: String
-                                                  )
+  id: BigInt,
+  form_transfer_task_id: BigInt,
+  from_address_id: BigInt,
+  to_address: Option[String],
+  to_address_id: Option[BigInt],
+  to_address_field: Option[String],
+  cc_address: Option[String],
+  cc_address_id: Option[BigInt],
+  cc_address_field: Option[String],
+  bcc_address_id: Option[BigInt],
+  replyto_address_id: Option[BigInt],
+  subject: String,
+  body: String
+)
 
 /**
  * フォーム取得API・FormTransferTask・FormTransferTaskSalesforce
@@ -289,29 +293,21 @@ trait FormGetResponseJson {
       (JsPath \ "cond_value").read[String]
     )(FormTransferTaskConditionGetReponse.apply _)
 
-  implicit val FormTransferTaskMailWrites: Writes[FormTransferTaskMailGetReponse] = (formTransferTaskMail:FormTransferTaskMailGetReponse) => Json.obj(
-    "id" -> formTransferTaskMail.id,
-    "form_transfer_task_id" -> formTransferTaskMail.form_transfer_task_id,
-    "from_address_id" -> formTransferTaskMail.from_address_id,
-    "to_address" -> formTransferTaskMail.to_address,
-    "cc_address" -> formTransferTaskMail.cc_address,
-    "bcc_address_id" -> formTransferTaskMail.bcc_address_id,
-    "replyto_address_id" -> formTransferTaskMail.replyto_address_id,
-    "subject" -> formTransferTaskMail.subject,
-    "body" -> formTransferTaskMail.body
-  )
-
-  implicit val FormTransferTaskMailReads: Reads[FormTransferTaskMailGetReponse] = (
-    (JsPath \ "id").read[BigInt] ~
-      (JsPath \ "form_transfer_task_id").read[BigInt] ~
-      (JsPath \ "from_address_id").read[BigInt] ~
-      (JsPath \ "to_address").read[String] ~
-      (JsPath \ "cc_address").read[String] ~
-      (JsPath \ "bcc_address_id").read[BigInt] ~
-      (JsPath \ "replyto_address_id").read[BigInt] ~
-      (JsPath \ "subject").read[String] ~
-      (JsPath \ "body").read[String]
-    )(FormTransferTaskMailGetReponse.apply _)
+  implicit val FormTransferTaskMailFormat: Format[FormTransferTaskMailGetReponse] = (
+    (JsPath \ "id").format[BigInt] ~
+      (JsPath \ "form_transfer_task_id").format[BigInt] ~
+      (JsPath \ "from_address_id").format[BigInt] ~
+      (JsPath \ "to_address").formatNullable[String] ~
+      (JsPath \ "to_address_id").formatNullable[BigInt] ~
+      (JsPath \ "to_address_field").formatNullable[String] ~
+      (JsPath \ "cc_address").formatNullable[String] ~
+      (JsPath \ "cc_address_id").formatNullable[BigInt] ~
+      (JsPath \ "cc_address_field").formatNullable[String] ~
+      (JsPath \ "bcc_address_id").formatNullable[BigInt] ~
+      (JsPath \ "replyto_address_id").formatNullable[BigInt] ~
+      (JsPath \ "subject").format[String] ~
+      (JsPath \ "body").format[String]
+    )(FormTransferTaskMailGetReponse.apply, unlift(FormTransferTaskMailGetReponse.unapply))
 
   implicit val FormTransferTaskSalesforceFieldWrites: Writes[FormTransferTaskSalesforceFieldGetReponse]
   = (formTransferTaskSalesforceField:FormTransferTaskSalesforceFieldGetReponse) => Json.obj(

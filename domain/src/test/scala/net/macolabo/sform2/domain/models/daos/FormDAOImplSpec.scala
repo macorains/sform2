@@ -1,8 +1,8 @@
 package net.macolabo.sform2.domain.models.daos
 
 import net.macolabo.sform2.domain.models.helper.SformTestHelper
-import net.macolabo.sform2.domain.models.daos.FormDAOImpl
-import net.macolabo.sform2.domain.models.entity.form.{Form, FormCol, FormColSelect, FormColValidation, FormTransferTask, FormTransferTaskCondition, FormTransferTaskMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField}
+import net.macolabo.sform2.domain.models.entity.form.{Form, FormCol, FormColSelect, FormColValidation}
+import net.macolabo.sform2.domain.models.entity.formtransfertask.{FormTransferTask, FormTransferTaskCondition, FormTransferTaskMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField}
 import net.macolabo.sform2.domain.models.entity.transfer.TransferConfig
 import net.macolabo.sform2.domain.models.entity.user.User
 import net.macolabo.sform2.domain.services.Form.get.{FormColGetReponse, FormColSelectGetReponse, FormColValidationGetReponse, FormTransferTaskConditionGetReponse, FormTransferTaskGetResponse, FormTransferTaskMailGetReponse, FormTransferTaskSalesforceFieldGetReponse, FormTransferTaskSalesforceGetReponse}
@@ -103,9 +103,13 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
       assert(formTransferTaskMail.form_transfer_task_id.isValidLong)
       assert(formTransferTaskMail.from_address_id.isValidLong)
       assert(formTransferTaskMail.to_address.nonEmpty)
+      assert(formTransferTaskMail.to_address_id.nonEmpty)
+      assert(formTransferTaskMail.to_address_field.nonEmpty)
       assert(formTransferTaskMail.cc_address.nonEmpty)
-      assert(formTransferTaskMail.bcc_address_id.isValidLong)
-      assert(formTransferTaskMail.replyto_address_id.isValidLong)
+      assert(formTransferTaskMail.cc_address_id.nonEmpty)
+      assert(formTransferTaskMail.cc_address_field.nonEmpty)
+      assert(formTransferTaskMail.bcc_address_id.get.isValidLong)
+      assert(formTransferTaskMail.replyto_address_id.get.isValidLong)
       assert(formTransferTaskMail.subject.nonEmpty)
       assert(formTransferTaskMail.body.nonEmpty)
 
@@ -295,11 +299,16 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
 
     // FormTransferTaskMailのチェック
     val newFormTransferTaskMail = newFormTransferTask.mail.get
+    println(newFormTransferTaskMail)
     assert(newFormTransferTaskMail.from_address_id.equals(2))
-    assert(newFormTransferTaskMail.to_address.equals("hoge2@hoge.com"))
-    assert(newFormTransferTaskMail.cc_address.equals("hoge2@hoge.com"))
-    assert(newFormTransferTaskMail.bcc_address_id.equals(2))
-    assert(newFormTransferTaskMail.replyto_address_id.equals(2))
+    assert(newFormTransferTaskMail.to_address.get.equals("hoge2@hoge.com"))
+    assert(newFormTransferTaskMail.to_address_id.get.equals(11L))
+    assert(newFormTransferTaskMail.to_address_field.get.equals("mail2"))
+    assert(newFormTransferTaskMail.cc_address.get.equals("fuga2@hoge.com"))
+    assert(newFormTransferTaskMail.cc_address_id.get.equals(22L))
+    assert(newFormTransferTaskMail.cc_address_field.get.equals("email2"))
+    assert(newFormTransferTaskMail.bcc_address_id.get.equals(2))
+    assert(newFormTransferTaskMail.replyto_address_id.get.equals(2))
     assert(newFormTransferTaskMail.subject.equals("hogehoge2"))
     assert(newFormTransferTaskMail.body.equals("fugafuga2"))
 
@@ -350,54 +359,10 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     }.map(_.long(1)).list().apply().head
 
     val transferTask = FormTransferTask.syntax("transferTask")
-    val formTransferTaskId = withSQL {
-      select(
-        transferTask.id
-      )
-        .from(FormTransferTask as transferTask)
-        .where
-        .eq(transferTask.form_id, formId)
-    }.map(_.long(1)).list().apply().head
-
     val transferTaskCondition = FormTransferTaskCondition.syntax("transferTaskCondition")
-    val formTransferTaskConditionId = withSQL {
-      select(
-        transferTaskCondition.id
-      )
-        .from(FormTransferTaskCondition as transferTaskCondition)
-        .where
-        .eq(transferTaskCondition.form_transfer_task_id, formTransferTaskId)
-    }.map(_.long(1)).single().apply().get
-
     val transferTaskMail = FormTransferTaskMail.syntax("transferTaskMail")
-    val formTransferTaskMailId = withSQL {
-      select(
-        transferTaskMail.id
-      )
-        .from(FormTransferTaskMail as transferTaskMail)
-        .where
-        .eq(transferTaskMail.form_transfer_task_id, formTransferTaskId)
-    }.map(_.long(1)).single().apply().get
-
     val transferTaskSalesforce = FormTransferTaskSalesforce.syntax("transferTaskSalesforce")
-    val formTransferTaskSalesforceId = withSQL {
-      select(
-        transferTaskSalesforce.id
-      )
-        .from(FormTransferTaskSalesforce as transferTaskSalesforce)
-        .where
-        .eq(transferTaskSalesforce.form_transfer_task_id, formTransferTaskId)
-    }.map(_.long(1)).single().apply().get
-
     val transferTaskSalesforceField = FormTransferTaskSalesforceField.syntax("transferTaskSalesforceField")
-    val formTransferTaskSalesforceFieldId = withSQL {
-      select(
-        transferTaskSalesforceField.id
-      )
-        .from(FormTransferTaskSalesforceField as transferTaskSalesforceField)
-        .where
-        .eq(transferTaskSalesforceField.form_transfer_task_salesforce_id, formTransferTaskSalesforceId)
-    }.map(_.long(1)).list().apply().head
 
     // 削除実行
     formDAO.deleteForm("hoge", formId)
@@ -600,17 +565,6 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
       )
   }
 
-  private def createFormTransferTaskConditionUpdateRequest(formId: BigInt) = {
-    FormTransferTaskConditionUpdateRequest(
-      id = None,
-      form_transfer_task_id = Some(0),
-      form_id = Some(formId),
-      form_col_id = 0,
-      operator = "eq",
-      cond_value = "x"
-    )
-  }
-
   private def createFormTransferTaskConditionUpdateRequest(condition: FormTransferTaskConditionGetReponse) = {
     FormTransferTaskConditionUpdateRequest(
       id = Some(condition.id),
@@ -622,40 +576,21 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     )
   }
 
-  private def createFormTransferTaskMailUpdateRequest() = {
-    FormTransferTaskMailUpdateRequest(
-      id = None,
-      form_transfer_task_id = None,
-      from_address_id = 1,
-      to_address = "hoge@hoge.com",
-      cc_address = Some("hoge@hoge.com"),
-      bcc_address_id = Some(1),
-      replyto_address_id = Some(1),
-      subject = "hogehoge",
-      body = "fugafuga"
-    )
-  }
-
   private def createFormTransferTaskMailUpdateRequest(mail: FormTransferTaskMailGetReponse) = {
     FormTransferTaskMailUpdateRequest(
       id = Some(mail.id),
       form_transfer_task_id = Some(mail.form_transfer_task_id),
       from_address_id = 2,
-      to_address = "hoge2@hoge.com",
-      cc_address = Some("hoge2@hoge.com"),
+      to_address = Some("hoge2@hoge.com"),
+      to_address_id = Some(11L),
+      to_address_field = Some("mail2"),
+      cc_address = Some("fuga2@hoge.com"),
+      cc_address_id = Some(22L),
+      cc_address_field = Some("email2"),
       bcc_address_id = Some(2),
       replyto_address_id = Some(2),
       subject = "hogehoge2",
       body = "fugafuga2"
-    )
-  }
-
-  private def createFormTransferTaskSalesforceFieldUpdateRequest() = {
-    FormTransferTaskSalesforceFieldUpdateRequest(
-      id = None,
-      form_transfer_task_salesforce_id = Some(0),
-      form_column_id = "hoge",
-      field_name = "fuga"
     )
   }
 
@@ -668,34 +603,12 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     )
   }
 
-  private def createFormTransferTaskSalesforceUpdateRequest(salesforceFieldUpdateRequestList: List[FormTransferTaskSalesforceFieldUpdateRequest]) = {
-    FormTransferTaskSalesforceUpdateRequest(
-      id = None,
-      form_transfer_task_id = None,
-      object_name = "fuga",
-      fields = salesforceFieldUpdateRequestList
-    )
-  }
-
   private def createFormTransferTaskSalesforceUpdateRequest(salesforce: FormTransferTaskSalesforceGetReponse,salesforceFieldUpdateRequestList: List[FormTransferTaskSalesforceFieldUpdateRequest]) = {
     FormTransferTaskSalesforceUpdateRequest(
       id = Some(salesforce.id),
       form_transfer_task_id = Some(salesforce.form_transfer_task_id),
       object_name = "fuga",
       fields = salesforceFieldUpdateRequestList
-    )
-  }
-
-  private def createFormTransferTaskUpdateRequest(formId: BigInt, conditionUpdateRequestList: List[FormTransferTaskConditionUpdateRequest], mailUpdateRequest: Option[FormTransferTaskMailUpdateRequest], salesforceUpdateRequest: Option[FormTransferTaskSalesforceUpdateRequest]) = {
-    FormTransferTaskUpdateRequest(
-      id = None,
-      transfer_config_id = 1,
-      form_id = formId,
-      task_index = 1,
-      name = "hoge",
-      form_transfer_task_conditions = conditionUpdateRequestList,
-      mail = mailUpdateRequest,
-      salesforce = salesforceUpdateRequest
     )
   }
 
@@ -880,7 +793,11 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
         c.form_transfer_task_id -> formTransferTaskId,
         c.from_address_id -> 1,
         c.to_address -> "hoge@hoge.com",
-        c.cc_address -> "hoge@hoge.com",
+        c.to_address_id -> 1,
+        c.to_address_field -> "mail",
+        c.cc_address -> "fuga@hoge.com",
+        c.cc_address_id -> 2,
+        c.cc_address_field -> "email",
         c.bcc_address_id -> 1,
         c.replyto_address_id -> 1,
         c.subject -> "Subject",
