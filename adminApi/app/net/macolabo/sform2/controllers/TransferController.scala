@@ -1,22 +1,28 @@
 package net.macolabo.sform2.controllers
 
+import net.macolabo.sform2.domain.models.entity.CryptoConfig
+
 import javax.inject._
 import net.macolabo.sform2.domain.services.External.Salesforce.{SalesforceCheckConnectionRequest, SalesforceCheckConnectionRequestJson, SalesforceCheckConnectionResponse, SalesforceCheckConnectionResponseJson, SalesforceConnectionService, SalesforceGetFieldResponse, SalesforceGetFieldResponseJson, SalesforceGetObjectResponse, SalesforceGetObjectResponseJson}
-import net.macolabo.sform2.domain.services.Transfer.{TransferGetTransferConfigListJson, TransferGetTransferConfigResponseJson, TransferGetTransferConfigSelectListJson, TransferService, TransferUpdateTransferConfigRequest, TransferUpdateTransferConfigRequestJson, TransferUpdateTransferConfigResponse, TransferUpdateTransferConfigResponseJson}
+import net.macolabo.sform2.domain.services.Transfer.{TransferGetTransferConfigListJson, TransferGetTransferConfigResponse, TransferGetTransferConfigResponseJson, TransferGetTransferConfigSelectListJson, TransferGetTransferResponseSalesforceTransferConfig, TransferService, TransferUpdateTransferConfigRequest, TransferUpdateTransferConfigRequestJson, TransferUpdateTransferConfigResponse, TransferUpdateTransferConfigResponseJson}
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json._
 import play.api.mvc._
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
+import play.api.Configuration
+import play.api.libs.json.{JsResult, JsSuccess, JsValue, Json}
 
+import scala.concurrent.duration.Duration
 import scala.jdk.CollectionConverters._
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class TransferController @Inject() (
   val controllerComponents: SecurityComponents,
   transferService: TransferService,
-  salesforceConnectionService: SalesforceConnectionService
+  salesforceConnectionService: SalesforceConnectionService,
+  configuration: Configuration
 )(
   implicit
   webJarsUtil: WebJarsUtil,
@@ -34,6 +40,13 @@ class TransferController @Inject() (
   with SalesforceGetFieldResponseJson
   with Pac4jUtil
 {
+
+  private val cryptoConfig: CryptoConfig = CryptoConfig(
+    configuration.get[String]("sform.crypto.algorithm.key"),
+    configuration.get[String]("sform.crypto.algorithm.cipher"),
+    configuration.get[String]("sform.crypto.key"),
+    configuration.get[String]("sform.crypto.charset"),
+  )
 
   /**
    * フォーム作成画面のTransferConfig選択リスト生成用のデータ取得
@@ -67,7 +80,7 @@ class TransferController @Inject() (
   def getTransferConfig(transferConfigId: Int): Action[AnyContent] = Secure("HeaderClient") { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
     val userGroup = getAttributeValue(profiles, "user_group")
-    val res = transferService.getTransferConfig(userGroup, transferConfigId)
+    val res = transferService.getTransferConfig(userGroup, transferConfigId, cryptoConfig)
     Ok(toJson(res))
   }
 
@@ -80,14 +93,22 @@ class TransferController @Inject() (
     val userGroup = getAttributeValue(profiles, "user_group")
     val userId = profiles.asScala.headOption.map(_.getId)
 
-    val res = userId.flatMap(id => {request.body.asJson.flatMap(r =>
+    val res = userId.flatMap(id => {request.body.asJson.map(r =>
       r.validate[TransferUpdateTransferConfigRequest].map(f => {
-        transferService.updateTransferConfig(id, userGroup, f)
-      }).asOpt)
+        transferService.updateTransferConfig(id, userGroup, f, cryptoConfig)
+      }))
     })
     res match {
-      case Some(s: TransferUpdateTransferConfigResponse) => Ok(toJson(s))
-      case None => BadRequest
+      case Some(j: JsResult[TransferUpdateTransferConfigResponse]) =>
+        j match {
+          case s:JsSuccess[TransferUpdateTransferConfigResponse] => Ok(toJson(s.value))
+          case _ =>
+            println(j)
+            BadRequest
+        }
+      case None =>
+        println(res)
+        BadRequest
     }
   }
 
@@ -96,14 +117,16 @@ class TransferController @Inject() (
    * @return Result
    */
   def checkTransferSalesforce: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
-    val res = request.body.asJson.flatMap(r =>
-      r.validate[SalesforceCheckConnectionRequest].map(f => {
-        salesforceConnectionService.checkConnection(f)
-      }).asOpt)
-    res match {
-      case Some(s: SalesforceCheckConnectionResponse) => Ok(toJson(s))
-      case None => BadRequest
-    }
+    Await.result(request.body.asJson match {
+      case Some(j: JsValue) =>
+        j.validate[SalesforceCheckConnectionRequest].map(r => {
+          salesforceConnectionService.checkConnection(r).map {
+            case Some(token: String) => Ok(token)
+            case None => BadRequest
+          }
+        }).getOrElse(Future.successful(BadRequest))
+      case _ => Future.successful(BadRequest)
+    }, Duration.Inf)
   }
 
   /**
@@ -115,15 +138,19 @@ class TransferController @Inject() (
     val profiles = getProfiles(controllerComponents)(request)
     val userGroup = getAttributeValue(profiles, "user_group")
 
-    val res = transferService.getTransferConfig(userGroup, transferConfigId).flatMap(c => {
-      c.detail.salesforce.flatMap(s => {
-        salesforceConnectionService.getObject(s)
-      })
-    })
-    res match {
-      case Some(s: List[SalesforceGetObjectResponse]) => Ok(toJson(s))
-      case None => BadRequest
+    val result = transferService.getTransferConfig(userGroup, transferConfigId, cryptoConfig) match {
+      case Some(t: TransferGetTransferConfigResponse) =>
+        t.detail.salesforce match {
+          case Some(sf: TransferGetTransferResponseSalesforceTransferConfig) =>
+            salesforceConnectionService.getObject(sf).map {
+              case Some(sr: List[SalesforceGetObjectResponse]) => Ok(toJson(sr))
+              case None => BadRequest
+            }
+          case _ => Future.successful(BadRequest)
+        }
+      case _ => Future.successful(BadRequest)
     }
+    Await.result(result, Duration.Inf)
   }
 
   /**
@@ -136,14 +163,17 @@ class TransferController @Inject() (
     val profiles = getProfiles(controllerComponents)(request)
     val userGroup = getAttributeValue(profiles, "user_group")
 
-    val res = transferService.getTransferConfig(userGroup, transferConfigId).flatMap(c => {
-      c.detail.salesforce.flatMap(s => {
-        salesforceConnectionService.getField(s, objectName)
-      })
-    })
-    res match {
-      case Some(s: List[SalesforceGetFieldResponse]) => Ok(toJson(s))
-      case None => BadRequest
-    }
+    Await.result(transferService.getTransferConfig(userGroup, transferConfigId, cryptoConfig) match {
+      case Some(transferConfig: TransferGetTransferConfigResponse) =>
+        transferConfig.detail.salesforce match {
+          case Some(s: TransferGetTransferResponseSalesforceTransferConfig) =>
+            salesforceConnectionService.getField(s, objectName).map {
+              case Some(response: List[SalesforceGetFieldResponse]) => Ok(toJson(response))
+              case _ => BadRequest
+            }
+          case _ => Future.successful(BadRequest)
+        }
+      case _ => Future.successful(BadRequest)
+    }, Duration.Inf)
   }
 }

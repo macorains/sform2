@@ -16,10 +16,11 @@
       <excludeFolder url="file://$MODULE_DIR$/target/streams" />
       <excludeFolder url="file://$MODULE_DIR$/target/task-temp-directory" />
       <excludeFolder url="file://$MODULE_DIR$/target/web" />
+      <excludeFolder url="file://$MODULE_DIR$/target/universal" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="domain" exported="" />
+    <orderEntry type="module" module-name="sform2.domain" exported="" />
     <orderEntry type="library" name="sbt: aopalliance:aopalliance:1.0:jar" level="project" />
     <orderEntry type="library" name="sbt: ch.qos.logback:logback-classic:1.2.3:jar" level="project" />
     <orderEntry type="library" name="sbt: ch.qos.logback:logback-core:1.2.3:jar" level="project" />

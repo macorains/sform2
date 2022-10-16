@@ -3,6 +3,7 @@ package net.macolabo.sform2.domain.services.Transfer
 import akka.actor.{Actor, ActorRef}
 import com.google.inject.Inject
 import net.macolabo.sform2.domain.models.daos.{FormDAO, FormTransferTaskConditionDAO, FormTransferTaskDAO, FormTransferTaskMailDAO, FormTransferTaskSalesforceDAO, FormTransferTaskSalesforceFieldDAO}
+import net.macolabo.sform2.domain.models.entity.CryptoConfig
 import net.macolabo.sform2.domain.models.entity.formtransfertask.{FormTransferTask, FormTransferTaskCondition, FormTransferTaskMail}
 import net.macolabo.sform2.domain.services.Transfer.MailTransfer.TransferTaskRequest
 import net.macolabo.sform2.domain.services.Transfer.TransferReceiver.{ConsumeTaskRequest, NewTaskRequest}
@@ -25,8 +26,7 @@ class TransferReceiver @Inject()(
 
   override def receive: Receive = {
 
-    case NewTaskRequest(postdata, postdataId, hashedFormId) =>
-
+    case NewTaskRequest(postdata, postdataId, hashedFormId, cryptoConfig) =>
       DB.localTx(implicit session => {
 
         // フォームIDからTransferTaskを検索
@@ -34,11 +34,11 @@ class TransferReceiver @Inject()(
         // タスク処理用オブジェクトのリストを作る
         val taskList: List[TransferTaskBean] = createTransferTaskBeanList(transferTaskList)
 
-        if(taskList.nonEmpty) self ! ConsumeTaskRequest(taskList, postdata)
+        if(taskList.nonEmpty) self ! ConsumeTaskRequest(taskList, postdata, cryptoConfig)
         else logger.error(s"This form does not have any TransferTasks. (hashedFormID:$hashedFormId)")
       })
 
-    case ConsumeTaskRequest(taskList, postdata) =>
+    case ConsumeTaskRequest(taskList, postdata, cryptoConfig) =>
       // リストの先頭を取り出して、その内容で各Transferに振り分ける
       taskList.headOption.map(tl => {
         tl.t_mail.foreach(_ => mailTransfer ! TransferTaskRequest(taskList, postdata))
@@ -130,6 +130,6 @@ class TransferReceiver @Inject()(
 }
 
 object TransferReceiver {
-  case class NewTaskRequest(postdata: JsValue, postdataId: Long, hashedFormId: String)
-  case class ConsumeTaskRequest(taskList: List[TransferTaskBean], postdata: JsValue)
+  case class NewTaskRequest(postdata: JsValue, postdataId: Long, hashedFormId: String, cryptoConfig: CryptoConfig)
+  case class ConsumeTaskRequest(taskList: List[TransferTaskBean], postdata: JsValue, cryptoConfig: CryptoConfig)
 }

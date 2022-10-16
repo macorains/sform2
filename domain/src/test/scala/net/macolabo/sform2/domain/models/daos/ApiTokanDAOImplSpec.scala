@@ -39,7 +39,9 @@ class ApiTokanDAOImplSpec extends FixtureAnyFlatSpec
         t.username,
         t.password,
         t.expiry,
-        t.created
+        t.created,
+        t.created_user,
+        t.user_group
       )
         .from(ApiToken as t)
         .where

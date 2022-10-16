@@ -162,16 +162,20 @@ case class FormTransferTaskConditionUpdateRequest(
  * @param body 本文
  */
 case class FormTransferTaskMailUpdateRequest(
-                                                      id: Option[BigInt],
-                                                      form_transfer_task_id: Option[BigInt],
-                                                      from_address_id: BigInt,
-                                                      to_address: String,
-                                                      cc_address: Option[String],
-                                                      bcc_address_id: Option[BigInt],
-                                                      replyto_address_id: Option[BigInt],
-                                                      subject: String,
-                                                      body: String
-                                                    )
+  id: Option[BigInt],
+  form_transfer_task_id: Option[BigInt],
+  from_address_id: BigInt,
+  to_address: Option[String],
+  to_address_id: Option[BigInt],
+  to_address_field: Option[String],
+  cc_address: Option[String],
+  cc_address_id: Option[BigInt],
+  cc_address_field: Option[String],
+  bcc_address_id: Option[BigInt],
+  replyto_address_id: Option[BigInt],
+  subject: String,
+  body: String
+)
 
 /**
  * フォーム更新API・FormTransferTask・Salesforce
@@ -251,8 +255,12 @@ trait FormUpdateRequestJson {
     (JsPath \ "id").readNullable[BigInt] ~
       (JsPath \ "form_transfer_task_id").readNullable[BigInt] ~
       (JsPath \ "from_address_id").read[BigInt] ~
-      (JsPath \ "to_address").read[String] ~
+      (JsPath \ "to_address").readNullable[String] ~
+      (JsPath \ "to_address_id").readNullable[BigInt] ~
+      (JsPath \ "to_address_field").readNullable[String] ~
       (JsPath \ "cc_address").readNullable[String] ~
+      (JsPath \ "cc_address_id").readNullable[BigInt] ~
+      (JsPath \ "cc_address_field").readNullable[String] ~
       (JsPath \ "bcc_address_id").readNullable[BigInt] ~
       (JsPath \ "replyto_address_id").readNullable[BigInt] ~
       (JsPath \ "subject").read[String] ~

@@ -1,6 +1,7 @@
 package net.macolabo.sform2.domain.models.daos
 
-import net.macolabo.sform2.domain.models.entity.form.{Form, FormCol, FormColSelect, FormColValidation, FormTransferTask, FormTransferTaskCondition, FormTransferTaskMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField}
+import net.macolabo.sform2.domain.models.entity.form.{Form, FormCol, FormColSelect, FormColValidation}
+import net.macolabo.sform2.domain.models.entity.formtransfertask.{FormTransferTask, FormTransferTaskCondition, FormTransferTaskMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField}
 import net.macolabo.sform2.domain.services.Form.delete.FormDeleteResponse
 import net.macolabo.sform2.domain.services.Form.get.{FormColGetReponse, FormColSelectGetReponse, FormColValidationGetReponse, FormGetResponse, FormTransferTaskConditionGetReponse, FormTransferTaskGetResponse, FormTransferTaskMailGetReponse, FormTransferTaskSalesforceFieldGetReponse, FormTransferTaskSalesforceGetReponse}
 import net.macolabo.sform2.domain.services.Form.list.{FormListResponse, FormResponse}
@@ -223,11 +224,15 @@ class FormDAOImpl extends FormDAO {
     FormTransferTaskMailGetReponse(
       formTransferTaskMail.id,
       formTransferTaskMail.form_transfer_task_id,
-      formTransferTaskMail.from_address_id,
+      BigInt.javaBigInteger2bigInt(formTransferTaskMail.from_address_id),
       formTransferTaskMail.to_address,
+      formTransferTaskMail.to_address_id.map(BigInt.javaBigInteger2bigInt),
+      formTransferTaskMail.to_address_field,
       formTransferTaskMail.cc_address,
-      formTransferTaskMail.bcc_address_id,
-      formTransferTaskMail.replyto_address_id,
+      formTransferTaskMail.cc_address_id.map(BigInt.javaBigInteger2bigInt),
+      formTransferTaskMail.cc_address_field,
+      formTransferTaskMail.bcc_address_id.map(BigInt.javaBigInteger2bigInt),
+      formTransferTaskMail.replyto_address_id.map(BigInt.javaBigInteger2bigInt),
       formTransferTaskMail.subject,
       formTransferTaskMail.body
     )
@@ -529,7 +534,11 @@ class FormDAOImpl extends FormDAO {
         f.form_transfer_task_id,
         f.from_address_id,
         f.to_address,
+        f.to_address_id,
+        f.to_address_field,
         f.cc_address,
+        f.cc_address_id,
+        f.cc_address_field,
         f.bcc_address_id,
         f.replyto_address_id,
         f.subject,
@@ -725,7 +734,11 @@ class FormDAOImpl extends FormDAO {
         c.form_transfer_task_id -> formTransferTaskId,
         c.from_address_id -> formTransferTaskMail.from_address_id,
         c.to_address -> formTransferTaskMail.to_address,
+        c.to_address_id -> formTransferTaskMail.to_address_id,
+        c.to_address_field -> formTransferTaskMail.to_address_field,
         c.cc_address -> formTransferTaskMail.cc_address,
+        c.cc_address_id -> formTransferTaskMail.cc_address_id,
+        c.cc_address_field -> formTransferTaskMail.cc_address_field,
         c.bcc_address_id -> formTransferTaskMail.bcc_address_id,
         c.replyto_address_id -> formTransferTaskMail.replyto_address_id,
         c.subject -> formTransferTaskMail.subject,
@@ -890,7 +903,11 @@ class FormDAOImpl extends FormDAO {
         c.form_transfer_task_id -> formTransferTaskMail.form_transfer_task_id,
         c.from_address_id -> formTransferTaskMail.from_address_id,
         c.to_address -> formTransferTaskMail.to_address,
+        c.to_address_id -> formTransferTaskMail.to_address_id,
+        c.to_address_field -> formTransferTaskMail.to_address_field,
         c.cc_address -> formTransferTaskMail.cc_address,
+        c.cc_address_id -> formTransferTaskMail.cc_address_id,
+        c.cc_address_field -> formTransferTaskMail.cc_address_field,
         c.bcc_address_id -> formTransferTaskMail.bcc_address_id,
         c.replyto_address_id -> formTransferTaskMail.replyto_address_id,
         c.subject -> formTransferTaskMail.subject,
