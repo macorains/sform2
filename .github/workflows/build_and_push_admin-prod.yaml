@@ -48,6 +48,7 @@ jobs:
 
       - name: 'Build'
         run: |-
+          gcloud auth login
           cd docker/sform2/
           docker build \
             --tag "$IMAGE" \
