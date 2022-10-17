@@ -51,6 +51,7 @@ jobs:
           cd docker/sform2/
           docker build \
             --tag "$IMAGE" \
+            --build-arg BRANCH="master" \
             --build-arg GITHUB_SHA="$GITHUB_SHA" \
             --build-arg GITHUB_REF="$GITHUB_REF" \
             --build-arg GITHUB_USER="$SFORM_GITHUB_USER" \
