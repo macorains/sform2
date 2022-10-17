@@ -35,12 +35,12 @@ jobs:
           workload_identity_provider: projects/$PROJECT_ID/locations/global/workloadIdentityPools/$WORKLOAD_IDENTITY_POOL_ID/providers/$PROVIDER_ID
           service_account: $SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com
 
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v0'
-
       - name: 'Set Project ID'
         run: |
           gcloud config set project $PROJECT_ID
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v0'
 
       - name: 'Configure Docker'
         run: |-
