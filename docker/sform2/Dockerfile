@@ -6,12 +6,12 @@ RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | tee /etc/ap
     curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | apt-key add && \
     apt -y update && \
     apt -y upgrade && \
-    apt -y install git sbt && \
-    git clone -b ${BRANCH} https://github.com/macorains/sform2.git && \
-    cd sform2/adminApi && \
-    sbt clean && \
+    apt -y install git sbt
+RUN git clone -b ${BRANCH} https://github.com/macorains/sform2.git && \
+    cd sform2 && \
+    sbt admin / clean && \
     # sbt test && \  <- 後々テスト実行するように
-    sbt dist
+    sbt admin / dist
 
 
 FROM openjdk:11-jre
