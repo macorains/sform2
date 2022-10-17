@@ -32,8 +32,8 @@ jobs:
       - name: 'Auth'
         uses: 'google-github-actions/auth@v0'
         with:
-          workload_identity_provider: projects/$PROJECT_ID/locations/global/workloadIdentityPools/$WORKLOAD_IDENTITY_POOL_ID/providers/$PROVIDER_ID
-          service_account: $SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com
+          workload_identity_provider: projects/${{ env.PROJECT_ID }}/locations/global/workloadIdentityPools/${{ env.WORKLOAD_IDENTITY_POOL_ID }}/providers/${{ env.PROVIDER_ID }}
+          service_account: ${{ env.SERVICE_ACCOUNT }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
 
       - name: 'Set Project ID'
         run: |
