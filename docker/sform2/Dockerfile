@@ -24,7 +24,7 @@ COPY --from=sform-builder /sform2/adminApi/target/universal/adminapi-${SFORM_VER
 RUN apt -y update && \
     apt -y upgrade && \
     apt -y install git unzip && \
-    unzip adminapi-${SFORM_VERSION}.zip && \
+    unzip -o adminapi-${SFORM_VERSION}.zip && \
     mv adminapi-${SFORM_VERSION} adminapi && \
     git clone https://${GITHUB_TOKEN}:x-oauth-basic@github.com/macorains/sform2-config.git && \
     cp sform2-config/application.it.conf adminapi/conf
