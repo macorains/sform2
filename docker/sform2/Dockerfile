@@ -20,14 +20,14 @@ ARG GITHUB_TOKEN
 ARG SFORM_VERSION
 
 WORKDIR /app
-COPY --from=sform-builder /sform2/target/universal/sform2s-${SFORM_VERSION}.zip ./
+COPY --from=sform-builder /sform2/adminApi/target/universal/adminapi-${SFORM_VERSION}.zip ./
 RUN apt -y update && \
     apt -y upgrade && \
     apt -y install git unzip && \
-    unzip sform2s-${SFORM_VERSION}.zip && \
-    mv sform2s-${SFORM_VERSION} sform2 && \
+    unzip adminapi-${SFORM_VERSION}.zip && \
+    mv adminapi-${SFORM_VERSION} adminapi && \
     git clone https://${GITHUB_TOKEN}:x-oauth-basic@github.com/macorains/sform2-config.git && \
-    cp sform2-config/application.it.conf sform2/conf
+    cp sform2-config/application.it.conf adminapi/conf
 EXPOSE 9001
-CMD ["nohup", "sform2/bin/sform2s", "-Dport=9001", "-Dconfig.file=sform2/conf/application.it.conf"]
+CMD ["nohup", "adminapi/bin/aminapi", "-Dport=9001", "-Dconfig.file=adminapi/conf/application.it.conf"]
 
