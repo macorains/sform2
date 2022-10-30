@@ -25,7 +25,7 @@ COPY --from=sform-builder /sform2/formApi/target/universal/formapi-${SFORM_VERSI
 RUN apt -y update && \
     apt -y upgrade && \
     apt -y install git unzip && \
-    unzip sform-api-${SFORM_VERSION}.zip && \
+    unzip formapi-${SFORM_VERSION}.zip && \
     mv formapi-${SFORM_VERSION} formapi && \
     git clone https://${GITHUB_TOKEN}:x-oauth-basic@github.com/macorains/sform2-config.git && \
     cp sform2-config/sform-api/application.it.conf formapi/conf

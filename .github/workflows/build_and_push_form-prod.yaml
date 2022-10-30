@@ -1,4 +1,4 @@
-name: Build and Push
+name: SFORM-FORM-API-PROD Build and Push
 
 on:
   push:
