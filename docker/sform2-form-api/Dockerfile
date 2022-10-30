@@ -30,5 +30,5 @@ RUN apt -y update && \
     git clone https://${GITHUB_TOKEN}:x-oauth-basic@github.com/macorains/sform2-config.git && \
     cp sform2-config/sform-api/application.it.conf formapi/conf
 EXPOSE 9002
-CMD ["nohup", "formapi/bin/formapi", "-Dhttp.port=9002", "-Dconfig.file=sformapi/conf/application.it.conf"]
+CMD ["nohup", "formapi/bin/formapi", "-Dhttp.port=9002", "-Dconfig.file=formapi/conf/application.it.conf"]
 
