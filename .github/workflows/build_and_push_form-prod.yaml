@@ -1,4 +1,4 @@
-name: SFORM-ADMIN-API-PROD Build and Push
+name: Build and Push
 
 on:
   push:
@@ -14,7 +14,7 @@ env:
   SERVICE_ACCOUNT_JSON_KEY: ${{ secrets.SERVICE_ACCOUNT_JSON_KEY }}
   SFORM_GITHUB_USER: ${{ secrets.SFORM_GITHUB_USER }}
   SFORM_GITHUB_TOKEN: ${{ secrets.SFORM_GITHUB_TOKEN }}
-  IMAGE: gcr.io/${{ secrets.GCP_PROJECT_ID }}/sform-admin-api-prod:${{ github.sha }}
+  IMAGE: gcr.io/${{ secrets.GCP_PROJECT_ID }}/sform-form-api-prod:${{ github.sha }}
 
 jobs:
   build:
@@ -48,7 +48,7 @@ jobs:
 
       - name: 'Build'
         run: |-
-          cd docker/sform2/
+          cd docker/sform2-form-api
           docker build \
             --tag "$IMAGE" \
             --build-arg BRANCH="master" \
@@ -75,7 +75,7 @@ jobs:
       - uses: 'actions/checkout@v3'
 
       - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v0.2.0'
+        uses: 'google-github-actions/setup-gcloud@v0'
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_key: ${{ secrets.SERVICE_ACCOUNT_JSON_KEY }}
@@ -83,4 +83,4 @@ jobs:
 
       - name: 'Deploy'
         run : |-
-          gcloud run deploy sform-admin-api-prod --service-account ${SERVICE_ACCOUNT} --image ${IMAGE} --region asia-northeast1 --platform managed --add-cloudsql-instances ${PROJECT_ID}:asia-northeast1:sform --port=9001 --ingress internal-and-cloud-load-balancing
+          gcloud run deploy sform-form-api-prod --service-account ${SERVICE_ACCOUNT} --image ${IMAGE} --region asia-northeast1 --platform managed --add-cloudsql-instances ${PROJECT_ID}:asia-northeast1:sform --port 9002 --ingress internal-and-cloud-load-balancing
