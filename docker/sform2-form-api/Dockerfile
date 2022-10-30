@@ -21,14 +21,14 @@ ARG GITHUB_TOKEN
 ARG SFORM_VERSION
 
 WORKDIR /app
-COPY --from=sform-builder /sform-api/target/universal/sform-api-${SFORM_VERSION}.zip ./
+COPY --from=sform-builder /sform2/formApi/target/universal/formapi-${SFORM_VERSION}.zip ./
 RUN apt -y update && \
     apt -y upgrade && \
     apt -y install git unzip && \
     unzip sform-api-${SFORM_VERSION}.zip && \
     mv sform-api-${SFORM_VERSION} sform-api && \
     git clone https://${GITHUB_TOKEN}:x-oauth-basic@github.com/macorains/sform2-config.git && \
-    cp sform2-config/sform-api/application.it.conf sform-api/conf
+    cp sform2-config/sform-api/application.it.conf formapi/conf
 EXPOSE 9002
-CMD ["nohup", "formapi/bin/formapi", "-Dhttp.port=9002", "-Dconfig.file=sform-api/conf/application.it.conf"]
+CMD ["nohup", "formapi/bin/formapi", "-Dhttp.port=9002", "-Dconfig.file=sformapi/conf/application.it.conf"]
 
