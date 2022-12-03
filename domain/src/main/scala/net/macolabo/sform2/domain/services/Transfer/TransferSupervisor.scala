@@ -18,7 +18,7 @@ class TransferSupervisor @Inject()(
   // 各Transfer用のActor
   private val mailTransfer = context.actorOf(Props(classOf[MailTransfer], transferConfigMailAddressDAO), "actor_mail_transfer")
   context.watch(mailTransfer)
-  private val salesforceTransfer = context.actorOf(Props(classOf[SalesforceTransfer]), "actor_salesforce_transfer")
+  private val salesforceTransfer = context.actorOf(Props(classOf[SalesforceTransfer], transferConfigSalesforceDAO), "actor_salesforce_transfer")
   context.watch(salesforceTransfer)
 
   private val transferReceiver = context.actorOf(
