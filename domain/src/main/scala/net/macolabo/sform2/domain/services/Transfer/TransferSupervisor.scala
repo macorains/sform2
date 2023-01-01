@@ -2,10 +2,11 @@ package net.macolabo.sform2.domain.services.Transfer
 
 import akka.actor.{Actor, PoisonPill, Props, Terminated}
 import com.google.inject.Inject
-import net.macolabo.sform2.domain.models.daos.{FormDAO, FormTransferTaskConditionDAO, FormTransferTaskDAO, FormTransferTaskMailDAO, FormTransferTaskSalesforceDAO, FormTransferTaskSalesforceFieldDAO, TransferConfigMailAddressDAOImpl}
+import net.macolabo.sform2.domain.models.daos.{FormDAO, FormTransferTaskConditionDAO, FormTransferTaskDAO, FormTransferTaskMailDAO, FormTransferTaskSalesforceDAO, FormTransferTaskSalesforceFieldDAO, TransferConfigMailAddressDAOImpl, TransferConfigSalesforceDAOImpl}
 
 class TransferSupervisor @Inject()(
   transferConfigMailAddressDAO: TransferConfigMailAddressDAOImpl,
+  transferConfigSalesforceDAO: TransferConfigSalesforceDAOImpl,
   formDAO: FormDAO,
   formTransferTaskDAO: FormTransferTaskDAO,
   formTransferTaskConditionDAO: FormTransferTaskConditionDAO,
@@ -18,7 +19,7 @@ class TransferSupervisor @Inject()(
   // 各Transfer用のActor
   private val mailTransfer = context.actorOf(Props(classOf[MailTransfer], transferConfigMailAddressDAO), "actor_mail_transfer")
   context.watch(mailTransfer)
-  private val salesforceTransfer = context.actorOf(Props(classOf[SalesforceTransfer]), "actor_salesforce_transfer")
+  private val salesforceTransfer = context.actorOf(Props(classOf[SalesforceTransfer], transferConfigSalesforceDAO), "actor_salesforce_transfer")
   context.watch(salesforceTransfer)
 
   private val transferReceiver = context.actorOf(
