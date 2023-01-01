@@ -59,7 +59,7 @@ jobs:
             --build-arg GITHUB_TOKEN="$SFORM_GITHUB_TOKEN" \
             --build-arg SFORM_VERSION="1.0-SNAPSHOT" \
             --build-arg PLAY_ENV="prod" \
-            .
+            -f Dockerfile_prod . 
 
       - name: Publish
         run: |-
