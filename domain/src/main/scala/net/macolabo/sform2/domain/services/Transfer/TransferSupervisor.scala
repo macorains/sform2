@@ -2,10 +2,11 @@ package net.macolabo.sform2.domain.services.Transfer
 
 import akka.actor.{Actor, PoisonPill, Props, Terminated}
 import com.google.inject.Inject
-import net.macolabo.sform2.domain.models.daos.{FormDAO, FormTransferTaskConditionDAO, FormTransferTaskDAO, FormTransferTaskMailDAO, FormTransferTaskSalesforceDAO, FormTransferTaskSalesforceFieldDAO, TransferConfigMailAddressDAOImpl}
+import net.macolabo.sform2.domain.models.daos.{FormDAO, FormTransferTaskConditionDAO, FormTransferTaskDAO, FormTransferTaskMailDAO, FormTransferTaskSalesforceDAO, FormTransferTaskSalesforceFieldDAO, TransferConfigMailAddressDAOImpl, TransferConfigSalesforceDAOImpl}
 
 class TransferSupervisor @Inject()(
   transferConfigMailAddressDAO: TransferConfigMailAddressDAOImpl,
+  transferConfigSalesforceDAO: TransferConfigSalesforceDAOImpl,
   formDAO: FormDAO,
   formTransferTaskDAO: FormTransferTaskDAO,
   formTransferTaskConditionDAO: FormTransferTaskConditionDAO,
