@@ -18,6 +18,7 @@ FROM openjdk:11-jre
 ARG GITHUB_USER
 ARG GITHUB_TOKEN
 ARG SFORM_VERSION
+ARG PLAY_ENV
 
 WORKDIR /app
 COPY --from=sform-builder /sform2/adminApi/target/universal/adminapi-${SFORM_VERSION}.zip ./
@@ -27,7 +28,7 @@ RUN apt -y update && \
     unzip -o adminapi-${SFORM_VERSION}.zip && \
     mv adminapi-${SFORM_VERSION} adminapi && \
     git clone https://${GITHUB_TOKEN}:x-oauth-basic@github.com/macorains/sform2-config.git && \
-    cp sform2-config/application.it.conf adminapi/conf
+    cp sform2-config/application.${PLAY_ENV}.conf adminapi/conf
 EXPOSE 9001
-CMD ["nohup", "adminapi/bin/adminapi", "-Dhttp.port=9001", "-Dconfig.file=adminapi/conf/application.it.conf"]
+CMD ["nohup", "adminapi/bin/adminapi", "-Dhttp.port=9001", "-Dconfig.file=adminapi/conf/application.${PLAY_ENV}.conf"]
 
