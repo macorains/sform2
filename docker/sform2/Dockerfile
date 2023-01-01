@@ -32,5 +32,6 @@ RUN apt -y update && \
     git clone https://${GITHUB_TOKEN}:x-oauth-basic@github.com/macorains/sform2-config.git && \
     cp sform2-config/application.${PLAY_ENV}.conf adminapi/conf
 EXPOSE 9001
-CMD ["nohup", "adminapi/bin/adminapi", "-Dhttp.port=9001", "-Dconfig.file=adminapi/conf/application.$PLAY_ENV.conf"]
+CMD ["nohup", "adminapi/bin/adminapi", "-Dhttp.port=9001", "-Dconfig.file=adminapi/conf/application.prod.conf"]
+# ↑ appilcation.prod.confを後で変数入れるように直す
 
