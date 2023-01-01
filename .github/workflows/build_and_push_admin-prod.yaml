@@ -51,6 +51,7 @@ jobs:
         run: |-
           cd docker/sform2/
           docker build \
+            --f Dockerfile_prod \
             --tag "$IMAGE" \
             --build-arg BRANCH="master" \
             --build-arg GITHUB_SHA="$GITHUB_SHA" \
