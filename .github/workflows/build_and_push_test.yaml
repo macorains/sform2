@@ -80,4 +80,4 @@ jobs:
 
       - name: 'Deploy'
         run : |-
-          gcloud run deploy test --service-account ${SERVICE_ACCOUNT} --image ${IMAGE} --region asia-northeast1 --platform managed --port=8080 --ingress internal-and-cloud-load-balancing
+          gcloud run deploy test --service-account ${SERVICE_ACCOUNT} --image ${IMAGE} --region asia-northeast1 --platform managed --port=80 --ingress internal-and-cloud-load-balancing
