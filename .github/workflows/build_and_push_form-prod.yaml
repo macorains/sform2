@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-      - feature/SFORM-84
+      #- feature/SFORM-84
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
