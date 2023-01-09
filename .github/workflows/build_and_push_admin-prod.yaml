@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - master
-      #- feature/SFORM-84
-# 要修正
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
