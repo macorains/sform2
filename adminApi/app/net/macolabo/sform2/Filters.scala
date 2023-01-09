@@ -1,10 +1,11 @@
 package net.macolabo.sform2
 
 import com.digitaltangible.playguard.GuardFilter
+
 import javax.inject._
-import net.macolabo.sform2.filters.ExampleFilter
 import play.api._
 import play.api.http.HttpFilters
+import net.macolabo.sform2.domain.utils.filter.LoggingFilter
 
 /**
  * This class configures filters that run on every request. This
@@ -16,21 +17,20 @@ import play.api.http.HttpFilters
  * the `application.conf` configuration file.
  *
  * @param env Basic environment settings for the current application.
- * @param exampleFilter A demonstration filter that adds a header to
- * each response.
+ * @param loggingFilter A logging filter.
  * @param guardFilter   the guardFilter to test with this sample app
  */
 @Singleton
 class Filters @Inject() (
   env: Environment,
-  exampleFilter: ExampleFilter,
+  loggingFilter: LoggingFilter,
   guardFilter: GuardFilter) extends HttpFilters {
 
   override val filters = {
     // Use the example filter if we're running development mode. If
     // we're running in production or test mode then don't use any
     // filters at all.
-    if (env.mode == Mode.Dev) Seq(exampleFilter, guardFilter) else Seq(guardFilter)
+    if (env.mode == Mode.Dev) Seq(loggingFilter, guardFilter) else Seq(loggingFilter, guardFilter)
   }
 
 }
