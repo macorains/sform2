@@ -1,5 +1,6 @@
 package net.macolabo.sform2.domain.services.GoogleAuth
 
+import net.macolabo.sform2.domain.utils.Logger
 import play.api.libs.json.Json
 import play.api.libs.ws.{WSClient, WSRequest}
 
@@ -14,6 +15,7 @@ class GoogleAuthServiceImpl @Inject()(
   extends GoogleAuthService
     with GoogleAuthCodeGetResponseJson
     with GoogleAuthTokenGetResponseJson
+    with Logger
 {
   def getToken(code: String) = {
     val googleAuthInfo = env.get("GCP_AUTH_JSON").flatMap(authJson => {
@@ -34,6 +36,8 @@ class GoogleAuthServiceImpl @Inject()(
           .addHttpHeaders("Content-Type" -> "application/x-www-form-urlencoded")
 
       val accessToken = wsRequest.post(postData).map(res => {
+        logger.info("*** GoogleAuthService getToken ***")
+        logger.info(res.json.toString())
         Json.parse(res.body).validate[GoogleAuthTokenGetResponse].asOpt.map(_.access_token)
       })
       Await.result(accessToken, Duration.Inf)
