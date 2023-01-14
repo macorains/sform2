@@ -29,7 +29,7 @@ class GoogleAuthServiceImpl @Inject()(
         "client_secret" -> authInfo.client_secret,
         // TODO ホスト名部分を動的に入れるようにしたい。とりあえず本番用でテストする。
         // "redirect_uri" -> "http://localhost:9001/oauthToken",
-        "redirect_uri" -> "https://admin.sform.app/oauthToken",
+        "redirect_uri" -> "https://admin.sform.app/api/oauthToken",
         "grant_type" -> "authorization_code"
       )
 
