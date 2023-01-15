@@ -139,12 +139,12 @@ class SignInController @Inject() (
    */
   def getOAuthToken: Action[AnyContent] = Action { implicit request =>
     val code = request.getQueryString("code").getOrElse("")
-    googleAuthService.getToken(code).map(token => {
-      Ok(net.macolabo.sform2.views.html.oauth(configuration.get[String]("sform.oauth.redirectUrl"))).withSession(request.session + ("googleToken" -> token))
+    googleAuthService.getToken(code, configuration.get[String]("baseUrl")).map(token => {
+        Ok(net.macolabo.sform2.views.html.oauth(configuration.get[String]("sform.oauth.redirectUrl"))).withSession(request.session + ("googleToken" -> token))
     }).getOrElse(Ok(net.macolabo.sform2.views.html.oauthfailed()))
-  }
+}
 
-  private val httpErrorRateLimitFunction =
+private val httpErrorRateLimitFunction =
     HttpErrorRateLimitFunction[Request](new RateLimiter(1, 1/7f, "test failure rate limit"), _ => Future.successful(BadRequest(Json.parse(s"""{"message":"LoginFailureLimitExceeded"}"""))))
 
   private def getCachedProfiles(authKey: String)  = {

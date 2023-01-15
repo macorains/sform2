@@ -17,7 +17,7 @@ class GoogleAuthServiceImpl @Inject()(
     with GoogleAuthTokenGetResponseJson
     with Logger
 {
-  def getToken(code: String) = {
+  def getToken(code: String,  baseUrl: String) = {
     val googleAuthInfo = env.get("GCP_AUTH_JSON").flatMap(authJson => {
       Json.parse(authJson).\("web").validate[GoogleAuthCodeGetResponse].asOpt
     })
@@ -29,7 +29,8 @@ class GoogleAuthServiceImpl @Inject()(
         "client_secret" -> authInfo.client_secret,
         // TODO ホスト名部分を動的に入れるようにしたい。とりあえず本番用でテストする。
         // "redirect_uri" -> "http://localhost:9001/oauthToken",
-        "redirect_uri" -> "https://admin.sform.app/api/oauthToken",
+        // "redirect_uri" -> "https://admin.sform.app/api/oauthToken",
+        "redirect_uri" -> s"$baseUrl/oauthToken",
         "grant_type" -> "authorization_code"
       )
 
