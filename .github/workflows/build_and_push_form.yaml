@@ -47,7 +47,7 @@ jobs:
 
       - name: 'Build'
         run: |-
-          cd docker/
+          cd docker/sform2-form-api
           docker build \
             --tag "$IMAGE" \
             --build-arg BRANCH="develop-it" \
