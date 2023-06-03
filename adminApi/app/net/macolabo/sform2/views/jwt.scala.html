@@ -1,0 +1,10 @@
+@(redirect_url:String, jwt:String)
+<input type="button" onClick="toSignin()">
+<script>
+    localStorage.setItem('sformToken', '@(jwt)')
+    window.location.href = '@(redirect_url)'
+    function toSignin() {
+    localStorage.setItem('sformToken', '@(jwt)')
+        window.location.href = '@(redirect_url)'
+    }
+</script>

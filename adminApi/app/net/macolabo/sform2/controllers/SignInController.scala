@@ -144,6 +144,17 @@ class SignInController @Inject() (
     }).getOrElse(Ok(net.macolabo.sform2.views.html.oauthfailed()))
 }
 
+  def getJwt(): Action[AnyContent] = Action { implicit  request =>
+    // TODO 必要なくなったら削除
+    println("*** headers ***")
+    request.headers.headers.foreach(h => {
+      println(s"${h._1} -> ${h._2}\n")
+    })
+
+    val jwt = request.headers.headers.filter(_._1.equals("x-goog-iap-jwt-assertion")).map(_._2).head
+    Ok(net.macolabo.sform2.views.html.jwt(configuration.get[String]("sform.oauth.redirectUrl"), jwt))
+  }
+
 private val httpErrorRateLimitFunction =
     HttpErrorRateLimitFunction[Request](new RateLimiter(1, 1/7f, "test failure rate limit"), _ => Future.successful(BadRequest(Json.parse(s"""{"message":"LoginFailureLimitExceeded"}"""))))
 
