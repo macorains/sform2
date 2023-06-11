@@ -47,7 +47,7 @@ jobs:
 
       - name: 'Build'
         run: |-
-          cd docker/
+          cd docker/sform2-form-api
           docker build \
             --tag "$IMAGE" \
             --build-arg BRANCH="develop-it" \
@@ -71,7 +71,7 @@ jobs:
       contents: 'read'
       id-token: 'write'
     steps:
-      - uses: 'actions/checkout@v2\3'
+      - uses: 'actions/checkout@v3'
 
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v0'
