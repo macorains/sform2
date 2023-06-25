@@ -100,7 +100,7 @@ class SignUpController @Inject() (
     val user = User(
       id = UUID.randomUUID(),
       username = data.email,
-      password = password,
+      password = Some(password),
       user_group = Some(data.group),
       role = Some("operator"),
       first_name = Some(data.firstName),

@@ -198,21 +198,38 @@ class UserDAOImpl extends UserDAO {
 
   private def update(user: User): Future[User] = {
     DB localTx { implicit l =>
-      withSQL {
-        val u = User.column
-        QueryDSL.update(User).set(
-          u.username -> user.username,
-          u.password -> user.password,
-          u.first_name -> user.first_name,
-          u.last_name -> user.last_name,
-          u.email -> user.email,
-          u.avatar_url -> user.avatar_url,
-          u.activated -> user.activated,
-          u.deletable -> user.deletable
-        )
-          .where
-          .eq(u.id, user.id.toString)
-      }.update().apply()
+      user.password.map(password => {
+        withSQL {
+          val u = User.column
+          QueryDSL.update(User).set(
+            u.username -> user.username,
+            u.password -> password,
+            u.first_name -> user.first_name,
+            u.last_name -> user.last_name,
+            u.email -> user.email,
+            u.avatar_url -> user.avatar_url,
+            u.activated -> user.activated,
+            u.deletable -> user.deletable
+          )
+            .where
+            .eq(u.id, user.id.toString)
+        }.update().apply()
+      }).getOrElse({
+        withSQL {
+          val u = User.column
+          QueryDSL.update(User).set(
+            u.username -> user.username,
+            u.first_name -> user.first_name,
+            u.last_name -> user.last_name,
+            u.email -> user.email,
+            u.avatar_url -> user.avatar_url,
+            u.activated -> user.activated,
+            u.deletable -> user.deletable
+          )
+            .where
+            .eq(u.id, user.id.toString)
+        }.update().apply()
+      })
       Future.successful(user)
     }
   }
@@ -267,7 +284,7 @@ class UserDAOImpl extends UserDAO {
           UserJson(
             u.id.toString,
             u.username,
-            u.password,
+            u.password.getOrElse(""),
             u.user_group.getOrElse(""),
             u.role.getOrElse(""),
             u.first_name.getOrElse(""),
