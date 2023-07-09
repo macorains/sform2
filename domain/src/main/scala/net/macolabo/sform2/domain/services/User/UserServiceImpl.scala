@@ -48,7 +48,7 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
       id = userId,
       username = userSaveRequest.email,
       password = password,
-      user_group = Option(userSaveRequest.userGroup),
+      user_group = Option(userGroup),
       role = Option(userSaveRequest.role),
       first_name = Option(userSaveRequest.firstName),
       last_name = Option(userSaveRequest.lastName),

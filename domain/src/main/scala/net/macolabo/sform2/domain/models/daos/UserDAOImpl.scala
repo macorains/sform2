@@ -203,13 +203,15 @@ class UserDAOImpl extends UserDAO {
           val u = User.column
           QueryDSL.update(User).set(
             u.username -> user.username,
+            u.user_group -> user.user_group,
             u.password -> password,
             u.first_name -> user.first_name,
             u.last_name -> user.last_name,
             u.email -> user.email,
             u.avatar_url -> user.avatar_url,
             u.activated -> user.activated,
-            u.deletable -> user.deletable
+            u.deletable -> user.deletable,
+            u.role -> user.role
           )
             .where
             .eq(u.id, user.id.toString)
@@ -219,12 +221,14 @@ class UserDAOImpl extends UserDAO {
           val u = User.column
           QueryDSL.update(User).set(
             u.username -> user.username,
+            u.user_group -> user.user_group,
             u.first_name -> user.first_name,
             u.last_name -> user.last_name,
             u.email -> user.email,
             u.avatar_url -> user.avatar_url,
             u.activated -> user.activated,
-            u.deletable -> user.deletable
+            u.deletable -> user.deletable,
+            u.role -> user.role
           )
             .where
             .eq(u.id, user.id.toString)
