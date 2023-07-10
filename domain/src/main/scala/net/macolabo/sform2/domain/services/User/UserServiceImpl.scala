@@ -2,6 +2,8 @@ package net.macolabo.sform2.domain.services.User
 
 import net.macolabo.sform2.domain.models.daos.UserDAO
 import net.macolabo.sform2.domain.models.entity.user.User
+import org.apache.shiro.authc.credential.DefaultPasswordService
+import org.pac4j.core.credentials.password.ShiroPasswordEncoder
 
 import java.util.UUID
 import javax.inject.Inject
@@ -36,23 +38,26 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
   def save(user: User): Future[User] = userDAO.save(user)
 
   def save(userSaveRequest: UserSaveRequest, userGroup: String): Future[User] = {
-    // TODO silhouette関係ない形に直す
-    ???
-    // とりあえず蓋 2021/11/14
-//    val userId = userSaveRequest.userId.map(UUID.fromString).getOrElse(UUID.randomUUID())
-//    save(user.User(
-//      userID = userId,
-//      loginInfo = LoginInfo(userId.toString, s"""${userSaveRequest.email}:${userSaveRequest.userGroup}"""),
-//      group = Option(userGroup),
-//      role = Option("operator"),
-//      firstName = Option(userSaveRequest.firstName),
-//      lastName = Option(userSaveRequest.lastName),
-//      fullName = Option(userSaveRequest.fullName),
-//      email = Option(userSaveRequest.email),
-//      avatarURL = userSaveRequest.avatarUrl,
-//      activated = userSaveRequest.userId.isDefined,
-//      deletable = true
-//    ))
+    val userId = userSaveRequest.userId.map(UUID.fromString).getOrElse(UUID.randomUUID())
+    val encoder = new ShiroPasswordEncoder(new DefaultPasswordService)
+    val password = userSaveRequest.userId
+      .flatMap(_ => userSaveRequest.password)
+      .orElse(Some(encoder.encode(UUID.randomUUID().toString)))
+
+    save(User(
+      id = userId,
+      username = userSaveRequest.email,
+      password = password,
+      user_group = Option(userGroup),
+      role = Option(userSaveRequest.role),
+      first_name = Option(userSaveRequest.firstName),
+      last_name = Option(userSaveRequest.lastName),
+      full_name = Option(userSaveRequest.fullName),
+      email = Option(userSaveRequest.email),
+      avatar_url = userSaveRequest.avatarUrl,
+      activated = userSaveRequest.userId.isDefined,
+      deletable = true
+    ))
   }
 
   def delete(userId: String, group: String): Unit = {

@@ -22,7 +22,7 @@ import java.util.UUID
 case class User(
   id: UUID,
   username: String,
-  password: String,
+  password: Option[String],
   user_group: Option[String],
   role: Option[String],
   first_name: Option[String],
@@ -54,7 +54,7 @@ object User extends SQLSyntaxSupport[User] {
     User(
       UUID.fromString(rs.string("id")),
       rs.string("username"),
-      rs.string("password"),
+      rs.stringOpt("password"),
       rs.stringOpt("user_group"),
       rs.stringOpt("role"),
       rs.stringOpt("first_name"),

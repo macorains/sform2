@@ -5,6 +5,7 @@ import play.api.libs.json.{JsPath, Reads}
 
 case class UserSaveRequest (
                              userId: Option[String],
+                             password: Option[String],
                              userGroup: String,
                              role: String,
                              firstName: String,
@@ -17,6 +18,7 @@ case class UserSaveRequest (
 trait UserSaveRequestJson {
   implicit val UesrSaveRequestReads: Reads[UserSaveRequest] = (
     (JsPath \ "user_id").readNullable[String] ~
+    (JsPath \ "password").readNullable[String] ~
       (JsPath \ "user_group").read[String] ~
       (JsPath \ "role").read[String] ~
       (JsPath \ "first_name").read[String] ~
