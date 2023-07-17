@@ -122,10 +122,14 @@ class TransferController @Inject() (
         j.validate[SalesforceCheckConnectionRequest].map(r => {
           salesforceConnectionService.checkConnection(r).map {
             case Some(token: String) => Ok(token)
-            case None => BadRequest
+            case None =>
+              println("hoge")
+              BadRequest
           }
         }).getOrElse(Future.successful(BadRequest))
-      case _ => Future.successful(BadRequest)
+      case _ =>
+        println("fuga")
+        Future.successful(BadRequest)
     }, Duration.Inf)
   }
 

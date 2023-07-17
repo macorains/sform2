@@ -6,7 +6,7 @@ import net.macolabo.sform2.domain.models.entity.CryptoConfig
 import net.macolabo.sform2.domain.models.entity.transfer.TransferConfigSalesforce
 import net.macolabo.sform2.domain.models.entity.transfer.salesforce.{SalesforceSObjectsDescribeResponse, SalesforceSObjectsDescribeResponseJson}
 import net.macolabo.sform2.domain.services.Transfer.SalesforceTransfer.TransferTaskRequest
-import net.macolabo.sform2.domain.utils.Crypto
+import net.macolabo.sform2.domain.utils.{Crypto, Logger}
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json.{Format, JsError, JsPath, JsSuccess, JsValue, Json}
 import play.api.libs.ws.WSClient
@@ -25,6 +25,7 @@ class SalesforceTransfer @Inject()(
 ) extends BaseTransfer
   with SalesforceSObjectsDescribeResponseJson
   with SalesforceLoginResponseJson
+  with Logger
 {
   override def receive: Receive = {
     case TransferTaskRequest(taskList, postdata, cryptoConfig) =>
@@ -68,8 +69,15 @@ class SalesforceTransfer @Inject()(
           .validate[SalesforceLoginResponse]
           .asOpt
           .map(res => res.access_token)
-        case _ => None // TODO ログに何か吐く
-      })
+        case _ =>
+          logger.error(res.body)
+          None
+      }).recover {
+      case e: Exception =>
+        logger.error(e.getMessage)
+        None
+    }
+
   }
 
   private def encodeSecrets(tcs: TransferConfigSalesforce, cc: CryptoConfig) = {
@@ -107,7 +115,9 @@ class SalesforceTransfer @Inject()(
               println(res.json) // TODO ログに吐く
               None
           })
-      case _ => Future.successful(None) // TODO ログに何か吐く
+      case _ =>
+        logger.error("SalesforceTransfer.postSalesforceObject failed.", null) // TODO nullは何とかする
+        Future.successful(None)
     }
   }
 
@@ -121,10 +131,12 @@ class SalesforceTransfer @Inject()(
       .map(res => res.status match {
         case 200 =>
           res.json.validate[SalesforceSObjectsDescribeResponse] match {
-            case s:JsSuccess[SalesforceSObjectsDescribeResponse] => Some(s.value)
+            case s:JsSuccess[SalesforceSObjectsDescribeResponse] => s.asOpt
             case _ => None
           }
-        case _ => None
+        case _ =>
+          logger.error(res.body)
+          None
       })
   }
   def createSalesforcePostdata(taskBeanSalesforce: TransferTaskBeanSalesforce, postdata: JsValue, salesforceSObjectsDescribeResponse: SalesforceSObjectsDescribeResponse): String = {

@@ -57,7 +57,9 @@ class SalesforceConnectionService @Inject()(
           .validate[SalesforceLoginResponse]
           .asOpt
           .map(res => res.access_token)
-        case _ => None // TODO ログに何か吐く
+        case _ =>
+          logger.error(res.body)
+          None
       })
   }
 
