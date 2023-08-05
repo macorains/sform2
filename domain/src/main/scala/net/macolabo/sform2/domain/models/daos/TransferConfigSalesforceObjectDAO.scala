@@ -14,7 +14,7 @@ trait TransferConfigSalesforceObjectDAO {
    * @param session                    DB Session
    * @return TransferConfigSalesforceObjectのリスト
    */
-  def getList(userGroup: String, transferConfigSalesforceId: BigInt)(implicit session: DBSession = autoSession): List[TransferConfigSalesforceObject]
+  def getList(userGroup: String, transferConfigSalesforceId: Option[BigInt])(implicit session: DBSession = autoSession): List[TransferConfigSalesforceObject]
 
   /**
    * TransferConfigSalesforceObject作成
