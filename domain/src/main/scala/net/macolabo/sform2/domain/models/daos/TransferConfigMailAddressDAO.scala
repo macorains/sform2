@@ -25,6 +25,7 @@ trait TransferConfigMailAddressDAO {
    */
   def getList(userGroup: String, transferConfigMailId: BigInt)(implicit session: DBSession = autoSession): List[TransferConfigMailAddress]
 
+
   /**
    * TransferCOnfigMailAddress作成
    *
@@ -51,7 +52,7 @@ trait TransferConfigMailAddressDAO {
    * @param session                     DB Session
    * @return Result
    */
-  def erase(userGroup: String, transferConfigMailAddressId: BigInt)(implicit session: DBSession = autoSession): BigInt
+  def delete(userGroup: String, transferConfigMailAddressId: BigInt)(implicit session: DBSession = autoSession): BigInt
 }
 
 

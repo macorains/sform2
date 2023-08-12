@@ -89,10 +89,14 @@ class TransferConfigSalesforceObjectDAOImpl extends TransferConfigSalesforceObje
    * @param session DB Session
    * @return Result
    */
-  def erase(userGroup: String, transferConfigSalesforceObjectId: BigInt)(implicit session: DBSession = autoSession): BigInt = {
+  def delete(userGroup: String, transferConfigSalesforceObjectId: BigInt)(implicit session: DBSession = autoSession): BigInt = {
     withSQL {
       val c = TransferConfigSalesforceObject.column
-      delete.from(TransferConfigSalesforceObject).where.eq(c.id, transferConfigSalesforceObjectId).and.eq(c.user_group, userGroup)
+      deleteFrom(TransferConfigSalesforceObject)
+        .where
+        .eq(c.id, transferConfigSalesforceObjectId)
+        .and
+        .eq(c.user_group, userGroup)
     }.update().apply()
   }
 }

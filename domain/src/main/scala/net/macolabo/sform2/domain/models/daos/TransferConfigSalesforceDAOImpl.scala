@@ -5,6 +5,14 @@ import net.macolabo.sform2.domain.models.entity.transfer.TransferConfigSalesforc
 import scalikejdbc._
 
 class TransferConfigSalesforceDAOImpl extends TransferConfigSalesforceDAO {
+
+  /**
+   * TransferConfigSalesforce取得
+   *
+   * @param transferConfigId Id
+   * @param session DB Session
+   * @return 作成したレコードのID
+   */
   def get(transferConfigId: BigInt)(implicit session: DBSession = autoSession): Option[TransferConfigSalesforce] = {
     val t = TransferConfigSalesforce.syntax("t")
     withSQL (
@@ -92,6 +100,15 @@ class TransferConfigSalesforceDAOImpl extends TransferConfigSalesforceDAO {
         c.created -> transferConfigSalesforce.created,
         c.modified -> transferConfigSalesforce.modified
       ).where.eq(c.id, transferConfigSalesforce.id)
+    }.update().apply()
+  }
+
+  def delete(userGroup: String, transferConfigId: BigInt)(implicit session: DBSession): Int = {
+    withSQL {
+      val c = TransferConfigSalesforce.column
+      deleteFrom(TransferConfigSalesforce)
+        .where
+        .eq(c.id, transferConfigId)
     }.update().apply()
   }
 }

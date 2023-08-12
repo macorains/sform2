@@ -42,5 +42,5 @@ trait TransferConfigSalesforceObjectDAO {
    * @param session                          DB Session
    * @return Result
    */
-  def erase(userGroup: String, transferConfigSalesforceObjectId: BigInt)(implicit session: DBSession = autoSession): BigInt
+  def delete(userGroup: String, transferConfigSalesforceObjectId: BigInt)(implicit session: DBSession = autoSession): BigInt
 }

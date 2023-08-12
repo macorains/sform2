@@ -107,4 +107,21 @@ class TransferConfigDAOImpl extends TransferConfigDAO {
     }.update().apply()
   }
 
+  /**
+   * TransferConfig削除
+   *
+   * @param transferConfigId TransferConfig ID
+   * @param session          DB Session
+   * @return TransferConfig
+   */
+  def delete(userGroup: String, transferConfigId: BigInt)(implicit session: DBSession = autoSession): BigInt = {
+    withSQL {
+      val c = TransferConfig.column
+      deleteFrom(TransferConfig)
+        .where
+        .eq(c.id, transferConfigId)
+        .and
+        .eq(c.user_group, userGroup)
+    }.update().apply()
+  }
 }

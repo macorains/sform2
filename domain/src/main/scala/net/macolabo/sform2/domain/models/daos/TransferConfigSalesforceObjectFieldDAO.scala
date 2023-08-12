@@ -14,7 +14,7 @@ trait TransferConfigSalesforceObjectFieldDAO {
    * @param session                          DB Session
    * @return TransferConfigSalesforceObjectFieldのリスト
    */
-  def getList(userGroup: String, transferConfigSalesforceObjectId: BigInt)(implicit session: DBSession = autoSession): List[TransferConfigSalesforceObjectField]
+  def getList(userGroup: String, transferConfigSalesforceObjectId: Option[BigInt])(implicit session: DBSession = autoSession): List[TransferConfigSalesforceObjectField]
 
   /**
    * TransferConfigSalesforceObjectField作成
@@ -42,5 +42,5 @@ trait TransferConfigSalesforceObjectFieldDAO {
    * @param session                               DB Session
    * @return Result
    */
-  def erase(userGroup: String, transferConfigSalesforceObjectFieldId: BigInt)(implicit session: DBSession = autoSession): BigInt
+  def delete(userGroup: String, transferConfigSalesforceObjectFieldId: BigInt)(implicit session: DBSession = autoSession): BigInt
 }
