@@ -35,8 +35,9 @@ class SalesforceTransfer @Inject()(
           val(sfUserName, sfPassword, sfClientId, sfClientSecret) = encodeSecrets(tc, cryptoConfig)
           loginToSalesforce(tc.sf_domain, sfClientId, sfClientSecret, sfUserName, sfPassword).map{
             case Some(apiToken) =>
-                postSalesforceObject(ts, postdata, apiToken, tc.sf_domain)
-            case None => println("ほげー") // TODO 何か例外処理を実装する
+              postSalesforceObject(ts, postdata, apiToken, tc.sf_domain)
+            case None =>
+              logger.error("Salesforceへのログインが失敗しました。")
           }
         })
       })
@@ -112,7 +113,7 @@ class SalesforceTransfer @Inject()(
           .map(res => res.status match {
             case 201 => Some(res.json) // オブジェクト作成成功時のレスポンスコードは201
             case _ =>
-              println(res.json) // TODO ログに吐く
+              logger.error(res.body)
               None
           })
       case _ =>
