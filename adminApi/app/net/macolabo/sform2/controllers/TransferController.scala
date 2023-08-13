@@ -119,13 +119,16 @@ class TransferController @Inject() (
   def checkTransferSalesforce: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
     Await.result(request.body.asJson match {
       case Some(j: JsValue) =>
-        j.validate[SalesforceCheckConnectionRequest].map(r => {
-          salesforceConnectionService.checkConnection(r).map {
-            case Some(token: String) => Ok(token)
-            case None => BadRequest
+        j.validate[SalesforceCheckConnectionRequest].map(cr => {
+          salesforceConnectionService.checkConnection(cr).map(res => Ok(res)).recover {
+            case e: RuntimeException =>
+              println(e.getMessage) // TODO ログに出力する
+              Unauthorized(e.getMessage) // TODO メッセージを解析してエラーを出し分ける
           }
         }).getOrElse(Future.successful(BadRequest))
-      case _ => Future.successful(BadRequest)
+      case _ =>
+        println("fuga")
+        Future.successful(BadRequest)
     }, Duration.Inf)
   }
 
@@ -167,9 +170,10 @@ class TransferController @Inject() (
       case Some(transferConfig: TransferGetTransferConfigResponse) =>
         transferConfig.detail.salesforce match {
           case Some(s: TransferGetTransferResponseSalesforceTransferConfig) =>
-            salesforceConnectionService.getField(s, objectName).map {
-              case Some(response: List[SalesforceGetFieldResponse]) => Ok(toJson(response))
-              case _ => BadRequest
+            salesforceConnectionService.getField(s, objectName).map(field => Ok(toJson(field))).recover {
+              case e: RuntimeException =>
+                println(e.getMessage) // TODO ログ出力する
+                Unauthorized(e.getMessage) // TODO メッセージを解析してエラーを出し分ける
             }
           case _ => Future.successful(BadRequest)
         }
