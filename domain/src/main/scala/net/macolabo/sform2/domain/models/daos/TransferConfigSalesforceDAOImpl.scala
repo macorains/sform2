@@ -103,7 +103,7 @@ class TransferConfigSalesforceDAOImpl extends TransferConfigSalesforceDAO {
     }.update().apply()
   }
 
-  def delete(userGroup: String, transferConfigId: BigInt)(implicit session: DBSession): Int = {
+  def delete(userGroup: String, transferConfigId: BigInt)(implicit session: DBSession = autoSession): Int = {
     withSQL {
       val c = TransferConfigSalesforce.column
       deleteFrom(TransferConfigSalesforce)

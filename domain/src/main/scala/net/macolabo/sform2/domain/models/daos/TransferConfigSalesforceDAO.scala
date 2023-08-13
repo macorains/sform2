@@ -41,7 +41,7 @@ trait TransferConfigSalesforceDAO {
    * @param session          DB Session
    * @return 作成したレコードのID
    */
-  def delete(userGroup: String, transferConfigId: BigInt)(implicit session: DBSession): Int
+  def delete(userGroup: String, transferConfigId: BigInt)(implicit session: DBSession = autoSession): Int
 }
 
 

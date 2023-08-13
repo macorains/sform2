@@ -152,7 +152,7 @@ class TransferService @Inject()(
       transferConfigMailAddressDAO.getList(userGroup, transferUpdateTransferRequestMailTransferConfig.id)
         .filterNot(c => updateMailAddressList.contains(c.id))
         .map(c => c.id)
-        .foreach(c => transferConfigMailAddressDAO.erase(userGroup, c))
+        .foreach(c => transferConfigMailAddressDAO.delete(userGroup, c))
       transferUpdateTransferRequestMailTransferConfig.id
     })
   }
@@ -261,7 +261,7 @@ class TransferService @Inject()(
         .getList(userGroup, transferUpdateTransferRequestSalesforceTransferConfig.id)
         .filterNot(o => updatedObjects.contains(o.id))
         .map(o => o.id)
-        .foreach(o => transferConfigSalesforceObjectDAO.erase(userGroup, o))
+        .foreach(o => transferConfigSalesforceObjectDAO.delete(userGroup, o))
 
       transferUpdateTransferRequestSalesforceTransferConfig.id
     })
@@ -301,7 +301,7 @@ class TransferService @Inject()(
       .getList(userGroup, transferUpdateTransferRequestSalesforceTransferConfigObject.id.getOrElse(BigInt(0)))
         .filterNot(f => updatedFields.contains(f.id))
         .map(f => f.id)
-        .foreach(f => transferConfigSalesforceObjectFieldDAO.erase(userGroup, f))
+        .foreach(f => transferConfigSalesforceObjectFieldDAO.delete(userGroup, f))
 
     transferUpdateTransferRequestSalesforceTransferConfigObject.id.getOrElse(BigInt(0))
   }
