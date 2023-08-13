@@ -21,7 +21,7 @@ import scala.collection.compat.Factory
 class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite with SformTestHelper with AutoRollback {
 
   private val userId = UUID.randomUUID()
-  private val user = User(userId, "hoge", "hoge", Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge@hoge.com"), None, activated = true, deletable = false)
+  private val user = User(userId, "hoge", Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge@hoge.com"), None, activated = true, deletable = false)
   val formId: BigInt = BigInt(100)
   val transferConfigId: BigInt = BigInt(100)
 
