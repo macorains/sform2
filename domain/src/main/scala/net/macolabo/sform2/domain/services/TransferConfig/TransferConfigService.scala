@@ -94,18 +94,18 @@ class TransferConfigService @Inject()(
           ZonedDateTime.now()
         )
       )
-
-      val mailAddressIdList = request.mail_address_list
-        .map(mailAddress => saveMailTransferConfigMailAddress(userId, userGroup, mailAddress))
-
-      // 更新or作成リクエストに含まれていないメールアドレスは削除対象なので削除する
-      transferConfigMailAddressDAO.getList(userGroup, mailTransferConfigId)
-        .filterNot(address => mailAddressIdList.contains(address.id))
-        .map(address => address.id)
-        .foreach(address => transferConfigMailAddressDAO.delete(userGroup, address))
-
-      request.id
     })
+
+    val mailAddressIdList = request.mail_address_list
+      .map(mailAddress => saveMailTransferConfigMailAddress(userId, userGroup, mailAddress))
+
+    // 更新or作成リクエストに含まれていないメールアドレスは削除対象なので削除する
+    transferConfigMailAddressDAO.getList(userGroup, mailTransferConfigId)
+      .filterNot(address => mailAddressIdList.contains(address.id))
+      .map(address => address.id)
+      .foreach(address => transferConfigMailAddressDAO.delete(userGroup, address))
+
+    mailTransferConfigId
   }
 
   def saveMailTransferConfigMailAddress(userId: String, userGroup: String, request: MailTransferConfigMailAddressSaveRequest) = {
