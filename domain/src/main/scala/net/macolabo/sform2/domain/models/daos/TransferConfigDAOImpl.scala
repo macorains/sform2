@@ -74,7 +74,7 @@ class TransferConfigDAOImpl extends TransferConfigDAO {
       val c = TransferConfig.column
       insert.into(TransferConfig).namedValues(
         c.type_code -> transferConfig.type_code,
-        c.config_index -> transferConfig.config_index,
+        c.config_index -> (getMaxIndex(transferConfig.user_group).getOrElse(0) + 1),
         c.name -> transferConfig.name,
         c.status -> transferConfig.status,
         c.user_group -> transferConfig.user_group,
@@ -123,5 +123,15 @@ class TransferConfigDAOImpl extends TransferConfigDAO {
         .and
         .eq(c.user_group, userGroup)
     }.update().apply()
+  }
+
+  private def getMaxIndex(userGroup: String)(implicit session: DBSession = autoSession) = {
+    val s = TransferConfig.syntax("s")
+    withSQL(
+      select(sqls.max(s.config_index))
+        .from(TransferConfig as s)
+        .where
+        .eq(s.user_group, userGroup)
+    ).map(_.int(1)).single().apply()
   }
 }
