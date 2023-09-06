@@ -40,9 +40,9 @@ class TransferConfigService @Inject()(
         transferConfigDAO.create(TransferConfig(
           null, // 作成時は自動発番されるので使わない
           request.type_code,
-          request.config_index,
+          request.config_index, // TODO 送られてこないので既存の最大値+1を設定する 2023/09/04
           request.name,
-          request.status,
+          request.status, // TODO 固定値にする 2023/09/04
           userGroup,
           userId,
           userId,
