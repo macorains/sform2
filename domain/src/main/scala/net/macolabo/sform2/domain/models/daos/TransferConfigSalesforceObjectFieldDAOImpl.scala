@@ -96,7 +96,7 @@ class TransferConfigSalesforceObjectFieldDAOImpl extends TransferConfigSalesforc
    * @param session                               DB Session
    * @return Result
    */
-  def delete(userGroup: String, transferConfigSalesforceObjectFieldId: BigInt)(implicit session: DBSession = autoSession): BigInt = {
+  def delete(userGroup: String, transferConfigSalesforceObjectFieldId: BigInt)(implicit session: DBSession = autoSession): Int = {
     withSQL {
       val c = TransferConfigSalesforceObjectField.column
       deleteFrom(TransferConfigSalesforceObjectField)

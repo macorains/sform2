@@ -46,7 +46,7 @@ trait TransferConfigDAO {
    * @param session          DB Session
    * @return TransferConfig
    */
-  def delete(userGroup: String, transferConfigId: BigInt)(implicit session: DBSession = autoSession): BigInt
+  def delete(userGroup: String, transferConfigId: BigInt)(implicit session: DBSession = autoSession): Int
 
 }
 

@@ -117,7 +117,7 @@ class TransferConfigMailAddressDAOImpl extends TransferConfigMailAddressDAO {
    * @param session DB Session
    * @return Result
    */
-  def delete(userGroup: String, transferConfigMailAddressId: BigInt)(implicit session: DBSession = autoSession): BigInt = {
+  def delete(userGroup: String, transferConfigMailAddressId: BigInt)(implicit session: DBSession = autoSession): Int = {
     withSQL {
       deleteFrom(TransferConfigMailAddress)
         .where
