@@ -211,7 +211,7 @@ class TransferConfigServiceImpl @Inject()(
     val transferConfigSalesforceObjectId = request.id.map(id => {
       transferConfigSalesforceObjectDAO.save(
         TransferConfigSalesforceObject(
-          request.id.getOrElse(BigInt(0)),
+          id,
           request.transfer_config_salesforce_id.get, // 上書き保存の時は必ず入る想定
           request.name,
           request.label,
@@ -290,7 +290,7 @@ class TransferConfigServiceImpl @Inject()(
   }
 
   // Delete
-  def deleteTransferConfig(userId: String, userGroup: String, id: BigInt) = {
+  def deleteTransferConfig(userId: String, userGroup: String, id: BigInt): Int = {
     DB.localTx(implicit session => {
       transferConfigMailDAO.get(userGroup, id).map(tc => deleteMailTransferConfig(userGroup, tc))
       transferConfigSalesforceDAO.get(id).map(tc => deleteSalesforceTransferConfig(userGroup, tc.id))
@@ -298,27 +298,27 @@ class TransferConfigServiceImpl @Inject()(
     })
   }
 
-  def deleteMailTransferConfig(userGroup: String, config: TransferConfigMail) = {
+  def deleteMailTransferConfig(userGroup: String, config: TransferConfigMail): Int = {
     transferConfigMailAddressDAO.getList(userGroup, config.id).map(address => deleteMailTransferConfigMailAddress(userGroup, address.id))
     transferConfigMailDAO.delete(userGroup, config.id)
 
   }
 
-  def deleteMailTransferConfigMailAddress(userGroup: String, id: BigInt) = {
+  def deleteMailTransferConfigMailAddress(userGroup: String, id: BigInt): Int = {
     transferConfigMailAddressDAO.delete(userGroup, id)
   }
 
-  def deleteSalesforceTransferConfig(userGroup: String, id: BigInt) = {
+  def deleteSalesforceTransferConfig(userGroup: String, id: BigInt): Int = {
     transferConfigSalesforceObjectDAO.getList(userGroup, Some(id)).map(tc => deleteSalesforceTransferConfigObject(userGroup, tc.id))
     transferConfigSalesforceDAO.delete(userGroup, id)
   }
 
-  def deleteSalesforceTransferConfigObject(userGroup: String, id: BigInt) = {
+  def deleteSalesforceTransferConfigObject(userGroup: String, id: BigInt): Int = {
     transferConfigSalesforceObjectFieldDAO.getList(userGroup, Some(id)).map(field => deleteSalesforceTransferConfigObjectField(userGroup, field.id))
     transferConfigSalesforceObjectDAO.delete(userGroup, id)
   }
 
-  def deleteSalesforceTransferConfigObjectField(userGroup: String, id: BigInt) = {
+  def deleteSalesforceTransferConfigObjectField(userGroup: String, id: BigInt): Int = {
     transferConfigSalesforceObjectFieldDAO.delete(userGroup, id)
   }
 

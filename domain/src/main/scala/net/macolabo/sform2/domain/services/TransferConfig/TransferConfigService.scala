@@ -22,11 +22,11 @@ trait TransferConfigService {
   def insertSalesforceTransferConfigObjectField(userId: String, userGroup: String, request: SalesforceTransferConfigObjectFieldSaveRequest, transferConfigSalesforceObjectId: BigInt): BigInt
 
   // Delete
-  def deleteTransferConfig(userId: String, userGroup: String, id: BigInt): Any
-  def deleteMailTransferConfig(userGroup: String, config: TransferConfigMail): Any
-  def deleteMailTransferConfigMailAddress(userGroup: String, id: BigInt): Any
-  def deleteSalesforceTransferConfig(userGroup: String, id: BigInt): Any
-  def deleteSalesforceTransferConfigObject(userGroup: String, id: BigInt): Any
-  def deleteSalesforceTransferConfigObjectField(userGroup: String, id: BigInt): Any
+  def deleteTransferConfig(userId: String, userGroup: String, id: BigInt): Int
+  def deleteMailTransferConfig(userGroup: String, config: TransferConfigMail): Int
+  def deleteMailTransferConfigMailAddress(userGroup: String, id: BigInt): Int
+  def deleteSalesforceTransferConfig(userGroup: String, id: BigInt): Int
+  def deleteSalesforceTransferConfigObject(userGroup: String, id: BigInt): Int
+  def deleteSalesforceTransferConfigObjectField(userGroup: String, id: BigInt): Int
 
 }
