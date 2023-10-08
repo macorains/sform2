@@ -64,7 +64,7 @@ case class SalesforceTransferConfigObjectFieldSaveRequest(
   active: Boolean
 )
 
-trait TransferUpdateTransferConfigRequestJson {
+trait TransferConfigSaveRequestJson {
   implicit val mailTransferConfigMailAddressSaveRequestFormat: Format[MailTransferConfigMailAddressSaveRequest] = (
       (JsPath \ "id").formatNullable[BigInt] ~
       (JsPath \ "transfer_config_mail_id").formatNullable[BigInt] ~

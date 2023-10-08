@@ -151,7 +151,9 @@ class SignInController @Inject() (
       println(s"${h._1} -> ${h._2}\n")
     })
 
-    val jwt = request.headers.headers.filter(_._1.equals("x-goog-iap-jwt-assertion")).map(_._2).head
+    // TODO GCP側にアクセスできないとダメっぽいので、開発時だけコマンド叩いて動くようにするなどの対策をする
+    // val jwt = request.headers.headers.filter(_._1.equals("x-goog-iap-jwt-assertion")).map(_._2).head
+    val jwt = request.headers.headers.filter(_._1.equals("x-goog-iap-jwt-assertion")).map(_._2).headOption.getOrElse("pogihapoigh890324thg8iq3pigjaoiwgenvaokreno")
     Ok(net.macolabo.sform2.views.html.jwt(configuration.get[String]("sform.oauth.redirectUrl"), jwt))
   }
 
