@@ -38,6 +38,16 @@ trait TransferConfigDAO {
    * @return Result
    */
   def save(transferConfig: TransferConfig)(implicit session: DBSession = autoSession): BigInt
+
+  /**
+   * TransferConfig削除
+   *
+   * @param transferConfigId TransferConfig ID
+   * @param session          DB Session
+   * @return TransferConfig
+   */
+  def delete(userGroup: String, transferConfigId: BigInt)(implicit session: DBSession = autoSession): Int
+
 }
 
 

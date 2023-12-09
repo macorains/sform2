@@ -33,5 +33,16 @@ trait TransferConfigMailDAO {
    * @return Result
    */
   def save(transferConfigMail: TransferConfigMail)(implicit session: DBSession = autoSession): BigInt
+
+  /**
+   * TransferConfigMail削除
+   *
+   * @param userGroup        ユーザーグループ
+   * @param transferConfigId TransferConfig ID
+   * @param session          DB Session
+   * @return TransferConfigMail
+   */
+  def delete(userGroup: String, transferConfigId: BigInt)(implicit session: DBSession = autoSession): Int
+
 }
 

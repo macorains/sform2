@@ -152,7 +152,7 @@ class TransferService @Inject()(
       transferConfigMailAddressDAO.getList(userGroup, transferUpdateTransferRequestMailTransferConfig.id)
         .filterNot(c => updateMailAddressList.contains(c.id))
         .map(c => c.id)
-        .foreach(c => transferConfigMailAddressDAO.erase(userGroup, c))
+        .foreach(c => transferConfigMailAddressDAO.delete(userGroup, c))
       transferUpdateTransferRequestMailTransferConfig.id
     })
   }
@@ -258,10 +258,10 @@ class TransferService @Inject()(
       })
 
       transferConfigSalesforceObjectDAO
-        .getList(userGroup, transferUpdateTransferRequestSalesforceTransferConfig.id)
+        .getList(userGroup, Some(transferUpdateTransferRequestSalesforceTransferConfig.id))
         .filterNot(o => updatedObjects.contains(o.id))
         .map(o => o.id)
-        .foreach(o => transferConfigSalesforceObjectDAO.erase(userGroup, o))
+        .foreach(o => transferConfigSalesforceObjectDAO.delete(userGroup, o))
 
       transferUpdateTransferRequestSalesforceTransferConfig.id
     })
@@ -298,10 +298,10 @@ class TransferService @Inject()(
     })
 
     transferConfigSalesforceObjectFieldDAO
-      .getList(userGroup, transferUpdateTransferRequestSalesforceTransferConfigObject.id.getOrElse(BigInt(0)))
+      .getList(userGroup, transferUpdateTransferRequestSalesforceTransferConfigObject.id)
         .filterNot(f => updatedFields.contains(f.id))
         .map(f => f.id)
-        .foreach(f => transferConfigSalesforceObjectFieldDAO.erase(userGroup, f))
+        .foreach(f => transferConfigSalesforceObjectFieldDAO.delete(userGroup, f))
 
     transferUpdateTransferRequestSalesforceTransferConfigObject.id.getOrElse(BigInt(0))
   }
@@ -452,7 +452,7 @@ class TransferService @Inject()(
    * @return SalesforceTransfer用のconfig Object リスト
    */
   private def getTransferConfigSalesforceObject(userGroup: String, transferConfigSalesforceId: BigInt): List[TransferGetTransferResponseSalesforceTransferConfigObject] = {
-    transferConfigSalesforceObjectDAO.getList(userGroup, transferConfigSalesforceId).map(f => {
+    transferConfigSalesforceObjectDAO.getList(userGroup, Some(transferConfigSalesforceId)).map(f => {
       TransferGetTransferResponseSalesforceTransferConfigObject(
         f.id,
         f.transfer_config_salesforce_id,
@@ -471,7 +471,7 @@ class TransferService @Inject()(
    * @return SalesforceTransfer用のconfig Object Field リスト
    */
   private def getTransferConfigSalesforceObjectField(userGroup: String, transferConfigSalesforceObjectId: BigInt): List[TransferGetTransferResponseSalesforceTransferConfigObjectField] = {
-    transferConfigSalesforceObjectFieldDAO.getList(userGroup, transferConfigSalesforceObjectId).map(f => {
+    transferConfigSalesforceObjectFieldDAO.getList(userGroup, Some(transferConfigSalesforceObjectId)).map(f => {
       TransferGetTransferResponseSalesforceTransferConfigObjectField(
         f.id,
         f.transfer_config_salesforce_object_id,

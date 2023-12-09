@@ -5,14 +5,16 @@ import net.macolabo.sform2.domain.models.entity.CryptoConfig
 import javax.inject._
 import net.macolabo.sform2.domain.services.External.Salesforce.{SalesforceCheckConnectionRequest, SalesforceCheckConnectionRequestJson, SalesforceCheckConnectionResponse, SalesforceCheckConnectionResponseJson, SalesforceConnectionService, SalesforceGetFieldResponse, SalesforceGetFieldResponseJson, SalesforceGetObjectResponse, SalesforceGetObjectResponseJson}
 import net.macolabo.sform2.domain.services.Transfer.{TransferGetTransferConfigListJson, TransferGetTransferConfigResponse, TransferGetTransferConfigResponseJson, TransferGetTransferConfigSelectListJson, TransferGetTransferResponseSalesforceTransferConfig, TransferService, TransferUpdateTransferConfigRequest, TransferUpdateTransferConfigRequestJson, TransferUpdateTransferConfigResponse, TransferUpdateTransferConfigResponseJson}
+import net.macolabo.sform2.domain.services.TransferConfig.TransferConfigService
+import net.macolabo.sform2.domain.services.TransferConfig.save.{TransferConfigSaveRequest, TransferConfigSaveRequestJson}
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json._
 import play.api.mvc._
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
-import play.api.Configuration
-import play.api.libs.json.{JsResult, JsSuccess, JsValue, Json}
+import play.api.{Configuration, Logger}
+import play.api.libs.json.{JsError, JsResult, JsSuccess, JsValue, Json}
 
 import scala.concurrent.duration.Duration
 import scala.jdk.CollectionConverters._
@@ -21,6 +23,7 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 class TransferController @Inject() (
   val controllerComponents: SecurityComponents,
   transferService: TransferService,
+  transferConfigService: TransferConfigService,
   salesforceConnectionService: SalesforceConnectionService,
   configuration: Configuration
 )(
@@ -29,6 +32,7 @@ class TransferController @Inject() (
   ex: ExecutionContext
 ) extends Security[UserProfile]
   with I18nSupport
+  with TransferConfigSaveRequestJson
   with TransferGetTransferConfigSelectListJson
   with TransferGetTransferConfigListJson
   with TransferGetTransferConfigResponseJson
@@ -40,6 +44,8 @@ class TransferController @Inject() (
   with SalesforceGetFieldResponseJson
   with Pac4jUtil
 {
+
+  private val logger = Logger(this.getClass).logger
 
   private val cryptoConfig: CryptoConfig = CryptoConfig(
     configuration.get[String]("sform.crypto.algorithm.key"),
@@ -93,23 +99,18 @@ class TransferController @Inject() (
     val userGroup = getAttributeValue(profiles, "user_group")
     val userId = profiles.asScala.headOption.map(_.getId)
 
-    val res = userId.flatMap(id => {request.body.asJson.map(r =>
-      r.validate[TransferUpdateTransferConfigRequest].map(f => {
-        transferService.updateTransferConfig(id, userGroup, f, cryptoConfig)
-      }))
-    })
-    res match {
-      case Some(j: JsResult[TransferUpdateTransferConfigResponse]) =>
-        j match {
-          case s:JsSuccess[TransferUpdateTransferConfigResponse] => Ok(toJson(s.value))
-          case _ =>
-            println(j)
-            BadRequest
+    userId.map(uid =>
+      request.body.asJson.map(body =>
+        body.validate[TransferConfigSaveRequest] match {
+          case transferConfigSaveRequest: JsSuccess[TransferConfigSaveRequest] =>
+            transferConfigService.saveTransferConfig(uid, userGroup, transferConfigSaveRequest.get, cryptoConfig)
+            Ok("")
+          case e: JsError =>
+            logger.error(e.toString)
+            BadRequest(s"Json Validate error.($e)")
         }
-      case None =>
-        println(res)
-        BadRequest
-    }
+      ).getOrElse(BadRequest("Json parse error."))
+    ).getOrElse(InternalServerError("Can't get userID."))
   }
 
   /**

@@ -3,9 +3,9 @@ package net.macolabo.sform2.domain.services
 import akka.actor.ActorSystem
 import akka.testkit.{TestActorRef, TestKit, TestProbe}
 import net.macolabo.sform2.domain.models.daos.{FormColDAO, FormColSelectDAO, FormColValidationDAO, FormDAO, PostdataDAO}
-import net.macolabo.sform2.domain.models.entity.form.{Form, FormCol}
+import net.macolabo.sform2.domain.models.entity.form.{Form, FormCol, FormColValidation}
 import net.macolabo.sform2.domain.models.helper.SformTestHelper
-import net.macolabo.sform2.domain.services.Form.FormService
+import net.macolabo.sform2.domain.services.Form.FormExecuteService
 import net.macolabo.sform2.domain.services.Transfer.TransferReceiver
 import org.mockito.MockitoSugar
 import org.scalatest.matchers.must.Matchers
@@ -16,17 +16,15 @@ import play.api.libs.json.Json
 import java.time.{ZoneId, ZonedDateTime}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class FormServiceSpec
+class FormExecuteServiceSpec
   extends TestKit(ActorSystem("Test"))
     with AnyWordSpecLike
     with Matchers
     with MockitoSugar
     with SformTestHelper
 {
-  // TODO エラーが出るので一旦コメントアウト
-  /*
-  "FormService" must {
-    "FormService.load" in {
+  "FormExecuteService" must {
+    "FormExecuteService.load" in {
       val mockCache = mock[SyncCacheApi]
       val mockFormDAO = mock[FormDAO]
       val mockFormColDAO = mock[FormColDAO]
@@ -40,12 +38,12 @@ class FormServiceSpec
 
       when(mockFormDAO.get("hoge")).thenReturn(Option(f))
       when(mockFormColDAO.getList(BigInt(1))).thenReturn(c)
-      val formService = new FormService(mockFormDAO)
+      val formService = new FormExecuteService(mockCache, mockFormDAO, mockFormColDAO, mockFormColSelectDAO, mockFormColValidationDAO, mockPostdataDAO, mockActor)
       val loadRequest = Json.parse("{\"hashed_form_id\":\"hoge\", \"receiver_path\":\"http://\", \"cache_id\":null}")
-      val result = formService.getForm().load(loadRequest, "")
+      val result = formService.load(loadRequest, "")
 
       // 生成されたHTMLを表示
-      println("*** FormService.load ***")
+      println("*** FormExecuteService.load ***")
       println(result.getOrElse(""))
 
       // 結果が空ではない
@@ -55,7 +53,7 @@ class FormServiceSpec
       "<div".r.findAllIn(result.get).size == "</div".r.findAllIn(result.get).size mustBe true
     }
 
-    "FormService.validate without errors" in {
+    "FormExecuteService.validate without errors" in {
       val mockCache = mock[SyncCacheApi]
       val mockFormDAO = mock[FormDAO]
       val mockFormColDAO = mock[FormColDAO]
@@ -71,7 +69,7 @@ class FormServiceSpec
       when(mockFormDAO.get("hoge")).thenReturn(Option(f))
       when(mockFormColDAO.getList(BigInt(1))).thenReturn(c)
       when(mockFormColValidationDAO.get("Admin",BigInt(1),BigInt(1))).thenReturn(Option(v))
-      val formService = new FormService(mockCache, mockFormDAO, mockFormColDAO, mockFormColSelectDAO, mockFormColValidationDAO, mockPostdataDAO, mockActor)
+      val formService = new FormExecuteService(mockCache, mockFormDAO, mockFormColDAO, mockFormColSelectDAO, mockFormColValidationDAO, mockPostdataDAO, mockActor)
       val validateRequestJson =
         s"""
            |{
@@ -83,7 +81,7 @@ class FormServiceSpec
            |}
            |""".stripMargin
       val result = formService.validate(Json.parse(validateRequestJson), "")
-      println("*** FormService.validate without errors ***")
+      println("*** FormExecuteService.validate without errors ***")
       println(result)
 
       // 結果は空ではない
@@ -98,7 +96,7 @@ class FormServiceSpec
       resultContent.validate_result.isEmpty mustBe true
     }
 
-    "FormService.validate with errors" in {
+    "FormExecuteService.validate with errors" in {
       val mockCache = mock[SyncCacheApi]
       val mockFormDAO = mock[FormDAO]
       val mockFormColDAO = mock[FormColDAO]
@@ -135,7 +133,7 @@ class FormServiceSpec
         when(mockFormColValidationDAO.get("Admin", BigInt(1), col.id)).thenReturn(Option(targetValidation))
       })
 
-      val formService = new FormService(mockCache, mockFormDAO, mockFormColDAO, mockFormColSelectDAO, mockFormColValidationDAO, mockPostdataDAO, mockActor)
+      val formService = new FormExecuteService(mockCache, mockFormDAO, mockFormColDAO, mockFormColSelectDAO, mockFormColValidationDAO, mockPostdataDAO, mockActor)
       val validateRequestJson =
         s"""
            |{
@@ -153,7 +151,7 @@ class FormServiceSpec
            |}
            |""".stripMargin
       val result = formService.validate(Json.parse(validateRequestJson), "")
-      println("*** FormService.validate with errors ***")
+      println("*** FormExecuteService.validate with errors ***")
       println(result)
 
       // 結果は空ではない
@@ -168,7 +166,7 @@ class FormServiceSpec
       resultContent.validate_result.nonEmpty mustBe true
     }
 
-    "FormService.confirm" in {
+    "FormExecuteService.confirm" in {
       val mockCache = mock[SyncCacheApi]
       val mockFormDAO = mock[FormDAO]
       val mockFormColDAO = mock[FormColDAO]
@@ -191,7 +189,7 @@ class FormServiceSpec
       when(mockFormDAO.get("hoge")).thenReturn(Option(f))
       when(mockFormColDAO.getList(BigInt(1))).thenReturn(c)
 
-      val formService = new FormService(mockCache, mockFormDAO, mockFormColDAO, mockFormColSelectDAO, mockFormColValidationDAO, mockPostdataDAO, mockActor)
+      val formService = new FormExecuteService(mockCache, mockFormDAO, mockFormColDAO, mockFormColSelectDAO, mockFormColValidationDAO, mockPostdataDAO, mockActor)
       val confirmRequestJson =
         s"""
            |{
@@ -209,7 +207,7 @@ class FormServiceSpec
            |}
            |""".stripMargin
       val result = formService.confirm(Json.parse(confirmRequestJson), "")
-      println("*** FormService.confirm ***")
+      println("*** FormExecuteService.confirm ***")
       println(result)
     }
   }
@@ -266,5 +264,4 @@ class FormServiceSpec
     ZonedDateTime.of(2020, 8, 20, 12, 0, 0, 0, ZoneId.of("Asia/Tokyo")),
     ZonedDateTime.of(2020, 8, 20, 12, 0, 0, 0, ZoneId.of("Asia/Tokyo"))
   )
-   */
 }
