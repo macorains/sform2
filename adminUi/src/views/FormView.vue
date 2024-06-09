@@ -5,5 +5,7 @@ import HeaderMenu from '../components/HeaderMenu.vue'
 <template>
   <main>
     <HeaderMenu />
+
+    Form!
   </main>
 </template>

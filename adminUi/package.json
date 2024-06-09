@@ -11,8 +11,11 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "bootstrap": "^4.5.0",
+    "bootstrap-vue": "^2.23.0",
     "pinia": "^2.1.7",
-    "vue": "^3.4.21",
+    "vue": "^3.4.27",
+    "@vue/compat": "^3.4.27",
     "vue-router": "^4.3.0"
   },
   "devDependencies": {

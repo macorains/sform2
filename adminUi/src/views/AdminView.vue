@@ -5,5 +5,6 @@ import HeaderMenu from '../components/HeaderMenu.vue'
 <template>
   <main>
     <HeaderMenu />
+    Admin!
   </main>
 </template>
