@@ -6,11 +6,12 @@ import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
+import http from './plugins/axios'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 const app = createApp(App)
-
+app.config.globalProperties.$http = http
 app.use(BootstrapVue)
 app.use(IconsPlugin)
 app.use(createPinia())
