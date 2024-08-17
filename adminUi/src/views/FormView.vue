@@ -19,6 +19,7 @@ const $http = instance.appContext.config.globalProperties.$http
 onMounted(() => {
   $http.get('/form/list')
       .then(response => {
+        console.log(data)
         this.$data.loading = false
         this.fields = response.data.forms
       })
