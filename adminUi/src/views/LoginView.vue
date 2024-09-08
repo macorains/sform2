@@ -1,6 +1,7 @@
 <script setup>
 import { getCurrentInstance, ref } from "vue"
 import { useRouter } from 'vue-router'
+import http from "@/plugins/axios.js";
 
 const instance = getCurrentInstance()
 const $http = instance.appContext.config.globalProperties.$http
@@ -14,6 +15,7 @@ const form = ref({
 
 const onLogin = (event) => {
   event.preventDefault()
+  $http.clearToken()
   const params = new URLSearchParams()
   params.append('username', form.value.email)
   params.append('group', form.value.group)

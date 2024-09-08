@@ -10,6 +10,11 @@ import http from './plugins/axios'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
+const token = localStorage.getItem('sformToken');
+if (token) {
+    http.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+}
+
 const app = createApp(App)
 app.config.globalProperties.$http = http
 app.use(BootstrapVue)

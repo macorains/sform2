@@ -13,17 +13,16 @@ const form = ref({
 
 const onVerification = (event) => {
   event.preventDefault()
+  $http.clearToken()
   const reqdata = {
     authkey: route.params.authkey,
     verification_code: form.value.verification_code
   }
   $http.post('/verification', reqdata)
       .then(response => {
-        console.log(response)
         // 認証トークンを受け取ってLocalStorageに格納、axiosのデフォルトヘッダにセットする
         const token = response.headers['x-auth-token']
-        localStorage.setItem('sformToken', token)
-        $http.defaults.headers.common['X-Auth-Token'] = token
+        $http.setToken(token)
         router.push({path: '/form'})
       }).catch(err => { console.log(err) })
 }
