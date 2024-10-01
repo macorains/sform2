@@ -2,8 +2,10 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import AdminView from '../views/AdminView.vue'
 import FormView from '../views/FormView.vue'
+import FormDetailView from '../views/FormDetailView.vue'
 import LoginView from '../views/LoginView.vue'
 import VerificationView from '../views/VerificationView.vue'
+import NotFoundView from "@/views/NotFoundView.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,6 +29,11 @@ const router = createRouter({
       component: FormView
     },
     {
+      path: '/form_detail/:form_id',
+      name: 'form_detail',
+      component: FormDetailView
+    },
+    {
       path: '/admin',
       name: 'admin',
       component: AdminView
@@ -40,7 +47,7 @@ const router = createRouter({
       path: '/verification/:authkey',
       name: 'verification',
       component: VerificationView
-    }
+    },
   ]
 })
 
