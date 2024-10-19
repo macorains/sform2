@@ -1,234 +1,179 @@
 <script setup>
-defineProps(['formColId'])
+import ColumnSelectList from "@/components/form/ColumnSelectList.vue";
+import {inject, onMounted, provide, ref} from "vue";
+
+const props = defineProps({ formColId: { type: Number } })
+
+const isSelectable = () => {
+  return true // TODO 正しい形に直す
+}
+const form = inject('form')
+const formCol = ref({ validations: {}})
+const optionFormColType = ref( [
+  { value: 1, text: 'テキスト', select_list: false },
+  { value: 2, text: 'コンボボックス（単一選択）', select_list: true },
+  { value: 3, text: 'チェックボックス（複数選択）', select_list: true },
+  { value: 4, text: 'ラジオボタン（単一選択）', select_list: true },
+  { value: 5, text: 'テキストエリア', select_list: false },
+  { value: 6, text: '隠しテキスト', select_list: false },
+  { value: 7, text: '表示テキスト（非入力項目）', select_list: false }
+])
+const optionFormColValidation = ref([
+      { value: 0, text: '無制限' },
+      { value: 1, text: '数値のみ' },
+      { value: 2, text: '英数字のみ' },
+      { value: 3, text: 'ひらがなのみ' },
+      { value: 4, text: 'カタカナのみ' },
+      { value: 5, text: 'メールアドレス' },
+      { value: 6, text: '郵便番号' }
+])
+
+const setFormCol = (item) => {
+  formCol.value = item
+}
+
+provide('formCol', formCol)
+
+onMounted(() => {
+  // data.value = props.form.form_cols
+})
+
+defineExpose({
+  setFormCol
+})
+
 </script>
 <template>
-  <b-container class="text-left form-col-edit">
-    <b-row class="mb-3">
-      <b-col cols="4">
+  <BContainer class="text-left form-col-edit">
+    <BRow class="mb-3">
+      <BCol cols="4">
         カラム名
-      </b-col>
-      <b-col>
-        <b-form-input
+      </BCol>
+      <BCol>
+        <BFormInput
             id="formColName"
-            v-model="tmpFormCol.name"
+            v-model="formCol.name"
             type="text"
         />
-      </b-col>
-    </b-row>
-    <b-row class="mb-3">
-      <b-col cols="4">
+      </BCol>
+    </BRow>
+    <BRow class="mb-3">
+      <BCol cols="4">
         カラムID
-      </b-col>
-      <b-col>
-        <b-form-input
+      </BCol>
+      <BCol>
+        <BFormInput
             id="formColId"
-            v-model="tmpFormCol.col_id"
+            v-model="formCol.col_id"
             type="text"
         />
-      </b-col>
-    </b-row>
-    <b-row class="mb-3">
-      <b-col cols="4">
+      </BCol>
+    </BRow>
+    <BRow class="mb-3">
+      <BCol cols="4">
         型
-      </b-col>
-      <b-col>
-        <b-form-select
-            v-model="tmpFormCol.col_type"
+      </BCol>
+      <BCol>
+        <BFormSelect
+            v-model="formCol.col_type"
             :options="optionFormColType"
             class="mb-3"
         />
-      </b-col>
-    </b-row>
-    <b-row
+      </BCol>
+    </BRow>
+    <BRow
         v-if="isSelectable()"
         class="mb-3"
     >
-      <b-col cols="4">
+      <BCol cols="4">
         選択肢
-      </b-col>
-      <b-col>
-        <table class="table table-striped">
-          <thead>
-          <tr>
-            <th scope="col">
-              No.
-            </th>
-            <th scope="col">
-              名称
-            </th>
-            <th scope="col">
-              値
-            </th>
-            <th scope="col">
-              操作
-            </th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr
-              v-for="(item, index) in tmpFormCol.select_list"
-              :key="item.select_index"
-          >
-            <th scope="row">
-              {{ Number(index) + 1 }}
-            </th>
-            <td>
-                    <span v-show="!item.in_edit">
-                      {{ item.select_name }}
-                    </span>
-              <b-form-input
-                  v-show="item.in_edit"
-                  v-model="item.select_name"
-                  type="text"
-              />
-            </td>
-            <td>
-                    <span v-show="!item.in_edit">
-                      {{ item.select_value }}
-                    </span>
-              <b-form-input
-                  v-show="item.in_edit"
-                  v-model="item.select_value"
-                  type="text"
-              />
-            </td>
-            <td>
-              <b-btn
-                  v-show="!item.in_edit"
-                  size="sm"
-                  @click="deleteColSelectList(item.select_index)"
-              >
-                      <span
-                          class="oi oi-trash"
-                          title="trash"
-                          aria-hidden="true"
-                      />
-                {{ $t('message.delete') }}
-              </b-btn>
-              <b-btn
-                  v-show="!item.in_edit"
-                  size="sm"
-                  @click="editColSelectList(item.select_index)"
-              >
-                      <span
-                          class="oi oi-x"
-                          title="x"
-                          aria-hidden="true"
-                      />
-                {{ $t('message.edit') }}
-              </b-btn>
-              <b-btn
-                  v-show="item.in_edit"
-                  size="sm"
-                  @click="endEditColSelectList(item.select_index)"
-              >
-                      <span
-                          class="oi oi-check"
-                          title="check"
-                          aria-hidden="true"
-                      />
-                {{ $t('message.ok') }}
-              </b-btn>
-            </td>
-          </tr>
-          </tbody>
-        </table>
-        <b-btn
-            class="mt-3"
-            block
-            @click="addColSelectList"
-        >
-              <span
-                  class="oi oi-plus"
-                  title="plus"
-                  aria-hidden="true"
-              />
-          {{ $t('message.add') }}
-        </b-btn>
-      </b-col>
-    </b-row>
-    <b-row class="mb-3">
-      <b-col cols="4">
-        {{ $t('message.initial_value') }}
-      </b-col>
-      <b-col>
-        <b-form-input
+      </BCol>
+      <BCol>
+        <ColumnSelectList />
+      </BCol>
+    </BRow>
+    <BRow class="mb-3">
+      <BCol cols="4">
+        初期値
+      </BCol>
+      <BCol>
+        <BFormInput
             id="formColDefault"
-            v-model="tmpFormCol.default_value"
+            v-model="formCol.default_value"
             type="text"
         />
-      </b-col>
-    </b-row>
-    <b-row class="mb-3">
-      <b-col cols="4">
-        {{ $t('message.validation') }}
-      </b-col>
-      <b-col>
-        <b-form-select
-            v-model="tmpFormCol.validations.input_type"
+      </BCol>
+    </BRow>
+    <BRow class="mb-3">
+      <BCol cols="4">
+        バリデーション種別
+      </BCol>
+      <BCol>
+        <BFormSelect
+            v-model="formCol.validations.input_type"
             :options="optionFormColValidation"
             class="mb-3"
         />
-      </b-col>
-    </b-row>
-    <b-row class="mb-3">
-      <b-col cols="4">
-        {{ $t('message.number_range') }}
-      </b-col>
-      <b-col cols="2">
-        <b-form-input
+      </BCol>
+    </BRow>
+    <BRow class="mb-3">
+      <BCol cols="4">
+        数値範囲
+      </BCol>
+      <BCol cols="2">
+        <BFormInput
             id="formColValidationMinValue"
-            v-model="tmpFormCol.validations.min_value"
+            v-model="formCol.validations.min_value"
             type="text"
         />
-      </b-col>
-      <b-col cols="1">
+      </BCol>
+      <BCol cols="1">
         ～
-      </b-col>
-      <b-col cols="2">
-        <b-form-input
+      </BCol>
+      <BCol cols="2">
+        <BFormInput
             id="formColValidationMaxValue"
-            v-model="tmpFormCol.validations.max_value"
+            v-model="formCol.validations.max_value"
             type="text"
         />
-      </b-col>
-      <b-col cols="5" />
-    </b-row>
-    <b-row class="mb-3">
-      <b-col cols="4">
-        {{ $t('message.string_length') }}
-      </b-col>
-      <b-col cols="2">
-        <b-form-input
+      </BCol>
+      <BCol cols="5" />
+    </BRow>
+    <BRow class="mb-3">
+      <BCol cols="4">
+        文字列の長さ
+      </BCol>
+      <BCol cols="2">
+        <BFormInput
             id="formColValidationMinLength"
-            v-model="tmpFormCol.validations.min_length"
+            v-model="formCol.validations.min_length"
             type="text"
         />
-      </b-col>
-      <b-col cols="1">
+      </BCol>
+      <BCol cols="1">
         ～
-      </b-col>
-      <b-col cols="2">
-        <b-form-input
+      </BCol>
+      <BCol cols="2">
+        <BFormInput
             id="formColValidationMaxLength"
-            v-model="tmpFormCol.validations.max_length"
+            v-model="formCol.validations.max_length"
             type="text"
         />
-      </b-col>
-      <b-col cols="5" />
-    </b-row>
-    <b-row class="mb-3">
-      <b-col cols="4">
-        {{ $t('message.required_item') }}
-      </b-col>
-      <b-col>
-        <b-form-checkbox
+      </BCol>
+      <BCol cols="5" />
+    </BRow>
+    <BRow class="mb-3">
+      <BCol cols="4">
+        必須項目
+      </BCol>
+      <BCol>
+        <BFormCheckbox
             id="formColRequired"
-            v-model="tmpFormCol.validations.required"
+            v-model="formCol.validations.required"
             value="true"
             unchecked-value="false"
         />
-      </b-col>
-    </b-row>
-  </b-container>
+      </BCol>
+    </BRow>
+  </BContainer>
 </template>

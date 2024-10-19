@@ -1,6 +1,8 @@
 <script setup>
-import {onMounted, ref} from "vue";
-import ColumnEdit from "@/components/form/ColumnEdit.vue";
+import {onMounted, ref, inject} from "vue";
+import { BButton } from 'bootstrap-vue-3'
+import TransferTaskEditMail from "@/components/form/TransferTaskEditMail.vue";
+import TransferTaskEditSalesforce from "@/components/form/TransferTaskEditSalesforce.vue";
 defineProps(['formId'])
 
 const fields = ref([
@@ -9,35 +11,40 @@ const fields = ref([
   { key: 'config_name', sortable: true, label: '転送設定名'},
   { key: 'actions', label: '操作' },
 ])
-const data = ref([
-  {index: 1, name: 'hoge', config_name: 'hoge'} // TODO APIから取得できるようになったらテストデータ削除
-])
+const form = inject('form')
+const editModalMailVisible = ref(false)
+const editModalSalesforceVisible = ref(false)
 
 onMounted(() => {
-  // TODO 転送タスク一覧取得APIから取得（無ければ作る）
-  /*
-  $http.get('/form/list')
-      .then(response => {
-        // this.$data.loading = false
-        data.value = convert(response.data.forms)
-      })
-   */
+  //
 })
+const edit = (item, index, target) => {
+  console.log(item)
+  if (item.mail) {
+    editModalMailVisible.value = true
+  }
+  if (item.salesforce) {
+    editModalSalesforceVisible.value = true
+  }
+}
 
 </script>
 <template>
   <h4>転送タスク設定</h4>
-  <b-table striped hover :items="data" :fields="fields" @row-clicked="detail">
+  <b-table striped hover :items="form.form_transfer_tasks" :fields="fields">
     <template #cell(actions)="row">
-      <b-button size="sm" @click="edit(row.item, row.index, $event.target)" class="mr-1">
+      <BButton size="sm" @click="edit(row.item, row.index, $event.target)" class="mr-1">
         編集
-      </b-button>
-      <b-button size="sm" @click="delete(row.item)">
+      </BButton>
+      <BButton size="sm" @click="delete(row.item)">
         削除
-      </b-button>
+      </BButton>
     </template>
   </b-table>
-  <b-modal id="my-modal">
-    <ColumnEdit formColId="1"/>
+  <b-modal v-model="editModalMailVisible" size="xl" title="転送タスク編集">
+    <TransferTaskEditMail/>
+  </b-modal>
+  <b-modal v-model="editModalSalesforceVisible" size="xl" title="転送タスク編集">
+    <TransferTaskEditSalesforce/>
   </b-modal>
 </template>

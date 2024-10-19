@@ -13,8 +13,10 @@
   "dependencies": {
     "@vue/compat": "^3.4.27",
     "axios": "^1.7.2",
-    "bootstrap": "^4.5.0",
+    "bootstrap": "^5.2.0",
+    "bootstrap-icons": "^1.11.3",
     "bootstrap-vue": "^2.23.0",
+    "bootstrap-vue-3": "^0.5.1",
     "pinia": "^2.1.7",
     "vue": "^3.4.27",
     "vue-router": "^4.3.0"
