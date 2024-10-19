@@ -30,7 +30,7 @@ const edit = (item, index, target) => {
 
 </script>
 <template>
-  <h4>転送タスク設定</h4>
+  <h4>転送タスク設定 <BButton size="sm">追加</BButton></h4>
   <b-table striped hover :items="form.form_transfer_tasks" :fields="fields">
     <template #cell(actions)="row">
       <BButton size="sm" @click="edit(row.item, row.index, $event.target)" class="mr-1">

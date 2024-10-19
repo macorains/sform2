@@ -1,5 +1,5 @@
 <template>
-  <h4>フォーム項目</h4>
+  <h4>フォーム項目 <BButton size="sm">追加</BButton></h4>
   <BTable striped hover :items="form.form_cols" :fields="fields">
     <template #cell(actions)="row">
       <BButton size="sm" @click="edit(row.item, row.index, $event.target)" class="mr-1">
