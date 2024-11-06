@@ -1,5 +1,6 @@
 <script setup>
 import {getCurrentInstance, onMounted, ref} from "vue";
+import {BTable} from "bootstrap-vue-3";
 
 const instance = getCurrentInstance()
 const $http = instance.appContext.config.globalProperties.$http
@@ -17,6 +18,10 @@ const typeOptions = ref([
   { value: 'mail', text: 'Mail' },
 ])
 
+const mailAddressFields = ref([
+  { key: 'name', sortable: true, label: '名前'},
+  { key: 'mail_address', sortable: true, label: 'メールアドレス'},
+])
 const setConfig = (id) => {
   $http.get('/transfer/config/' + id)
       .then(response => {
@@ -179,7 +184,8 @@ defineExpose({
           </BFormCheckbox>
         </BCol>
       </BRow>
-
+      <BTable striped hover :items="transferConfig.detail.mail.mail_address_list" :fields="mailAddressFields">
+      </BTable>
     </template>
   </BContainer>
 </template>
