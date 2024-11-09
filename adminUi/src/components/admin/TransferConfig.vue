@@ -14,17 +14,24 @@ const fields = ref([
   { key: 'actions', label: '操作' },
 ])
 const configList = ref([])
-const targetConfigId = ref({})
 const editModalVisible = ref(false)
 const configEditRef = ref(null)
 
-const addTransferConfig = () => {
-
+const edit = (row) => {
+  configEditRef.value.loadConfig(row.item.id)
+  editModalVisible.value = true
 }
 
-const edit = (row) => {
-  configEditRef.value.setConfig(row.item.id)
+const add = () => {
   editModalVisible.value = true
+}
+
+const save = () => {
+  configEditRef.value.saveConfig()
+}
+
+const close = () => {
+  configEditRef.value.clearModal()
 }
 
 onMounted(() => {
@@ -51,7 +58,7 @@ onMounted(() => {
       <BCol>
         <BButton
             class="mt-4"
-            @click="addTransferConfig"
+            @click="add"
         >
             <span
                 class="oi oi-plus"
@@ -63,7 +70,7 @@ onMounted(() => {
       </BCol>
     </BRow>
   </div>
-  <BModal v-model="editModalVisible" size="xl" title="転送設定編集">
+  <BModal v-model="editModalVisible" size="xl" title="転送設定編集" @ok="save" @hidden="close">
     <TransferConfigEdit ref="configEditRef"  />
   </BModal>
 

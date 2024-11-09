@@ -6,10 +6,9 @@ const instance = getCurrentInstance()
 const $http = instance.appContext.config.globalProperties.$http
 
 const transferConfig = ref({
-  mail: {},
-  salesforce: {},
   detail: {
-    mail: {}
+    mail: {},
+    salesforce: {}
   }
 })
 
@@ -22,13 +21,26 @@ const mailAddressFields = ref([
   { key: 'name', sortable: true, label: '名前'},
   { key: 'mail_address', sortable: true, label: 'メールアドレス'},
 ])
-const setConfig = (id) => {
+const loadConfig = (id) => {
   $http.get('/transfer/config/' + id)
       .then(response => {
         transferConfig.value = response.data
         setTypeOptions(transferConfig.value.type_code)
         console.log(response.data)
       })
+}
+
+const saveConfig = () => {
+  alert('&')
+}
+
+const clearModal = () => {
+  transferConfig.value = {
+    detail: {
+      mail: {},
+      salesforce: {}
+    }
+  }
 }
 
 const setTypeOptions = (type) => {
@@ -41,7 +53,9 @@ const setTypeOptions = (type) => {
 }
 
 defineExpose({
-  setConfig
+  loadConfig,
+  saveConfig,
+  clearModal,
 })
 
 </script>
