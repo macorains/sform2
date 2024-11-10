@@ -41,7 +41,11 @@ function detail(data) {
 <template>
   <main>
     <HeaderMenu />
-    Form!
-    <b-table striped hover :items="data" :fields="fields" @row-clicked="detail"></b-table>
+    <div class="container">
+      <h1 class="mt-5 mb-5">
+        フォーム
+      </h1>
+      <b-table striped hover :items="data" :fields="fields" @row-clicked="detail"></b-table>
+    </div>
   </main>
 </template>
