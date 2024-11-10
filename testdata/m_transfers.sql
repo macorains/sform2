@@ -1,0 +1,2 @@
+INSERT INTO sform.m_transfers (id, type_code, name, status, user_group, created_user, created, modified_user, modified) VALUES (1, 'mail', 'メール', 1, 'Admin', 'Admin', '2024-10-28 21:39:49', 'Admin', '2024-10-28 21:39:52');
+INSERT INTO sform.m_transfers (id, type_code, name, status, user_group, created_user, created, modified_user, modified) VALUES (2, 'salesforce', 'Salesforce', 1, 'Admin', 'Admin', '2024-10-28 21:40:16', 'Admin', '2024-10-28 21:40:18');
