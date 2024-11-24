@@ -1,7 +1,7 @@
 <template>
   <BContainer class="text-left">
     <BForm>
-      <BRow class="mb-2">
+      <BRow>
         <BCol>
           <BFormGroup label="転送タイプ" label-for="transferConfigTypeCode" label-cols="2">
             <BFormSelect
@@ -18,7 +18,7 @@
           </BFormGroup>
         </BCol>
       </BRow>
-      <BRow class="mb-2">
+      <BRow>
         <BCol>
           <BFormGroup label="転送設定名" label-for="transferConfigName" label-cols="2">
             <BFormInput
@@ -35,7 +35,7 @@
           </BFormGroup>
         </BCol>
       </BRow>
-      <BRow class="mb-2">
+      <BRow>
         <BCol>
           <BFormGroup label="ステータス" label-for="transferConfigStatus" label-cols="2">
             <BFormSelect
@@ -53,12 +53,12 @@
         </BCol>
       </BRow>
       <template v-if="transferConfig.type_code == 'salesforce'">
-        <BRow class="mb-2 mt-4">
+        <BRow class="mb-1 mt-4">
           <BCol>
             <h5>Salesforce設定項目</h5>
           </BCol>
         </BRow>
-        <BRow class="mb-2">
+        <BRow>
           <BCol>
             <BFormGroup label="ユーザー名" label-for="transferConfigSalesforceUser" label-cols="2">
               <BFormInput
@@ -75,7 +75,7 @@
             </BFormGroup>
           </BCol>
         </BRow>
-        <BRow class="mb-2">
+        <BRow>
           <BCol>
             <BFormGroup label="パスワード" label-for="transferConfigSalesforcePassword" label-cols="2">
               <BFormInput
@@ -92,7 +92,7 @@
             </BFormGroup>
           </BCol>
         </BRow>
-        <BRow class="mb-2">
+        <BRow>
           <BCol>
             <BFormGroup label="クライアントID" label-for="transferConfigSalesforceClientId" label-cols="2">
               <BFormInput
@@ -109,7 +109,7 @@
             </BFormGroup>
           </BCol>
         </BRow>
-        <BRow class="mb-2">
+        <BRow>
           <BCol>
             <BFormGroup label="クライアントシークレット" label-for="transferConfigSalesforceClientSecret" label-cols="2">
               <BFormInput
@@ -126,7 +126,7 @@
             </BFormGroup>
           </BCol>
         </BRow>
-        <BRow class="mb-2">
+        <BRow>
           <BCol>
             <BFormGroup label="ドメイン" label-for="transferConfigSalesforceDomain" label-cols="2">
               <BFormInput
@@ -143,7 +143,7 @@
             </BFormGroup>
           </BCol>
         </BRow>
-        <BRow class="mb-2">
+        <BRow>
           <BCol>
             <BFormGroup label="APIバージョン" label-for="transferConfigSalesforceApiVersion" label-cols="2">
               <BFormInput
@@ -160,9 +160,15 @@
             </BFormGroup>
           </BCol>
         </BRow>
+        <BRow>
+          <BCol>
+            <BButton class="button" @click="salesforceTest">テスト</BButton>
+          </BCol>
+          <BCol>{{ salesforceCheckResult.message }}</BCol>
+        </BRow>
       </template>
       <template v-if="transferConfig.type_code == 'mail'">
-        <BRow class="mb-2 mt-4">
+        <BRow class="mb-1 mt-4">
           <BCol>
             <h5>Mail設定項目</h5>
           </BCol>
@@ -200,7 +206,7 @@
             </BFormCheckbox>
           </BCol>
         </BRow>
-        <BRow class="mb-2 mt-4">
+        <BRow class="mb-1 mt-4">
           <BCol>
             <b>cc, bcc, reply-toで使用するメールアドレス</b><BButton class="ms-auto d-block small" @click="addMailAddress">メールアドレス追加</BButton>
           </BCol>
@@ -227,8 +233,8 @@
 </template>
 
 <script setup>
-import {getCurrentInstance, onMounted, ref, computed, reactive } from "vue";
-import {BTable} from "bootstrap-vue-3";
+import {getCurrentInstance, onMounted, ref, computed, reactive } from "vue"
+import {BTable} from "bootstrap-vue-3"
 
 const instance = getCurrentInstance()
 const $http = instance.appContext.config.globalProperties.$http
@@ -270,6 +276,12 @@ const mailAddressFields = ref([
   { key: 'name', sortable: true, label: '名前'},
   { key: 'address', sortable: true, label: 'メールアドレス'},
 ])
+
+const salesforceCheckResult = ref({
+  code: null,
+  message: ''
+})
+
 const loadConfig = (id) => {
   $http.get('/transfer/config/' + id)
       .then(response => {
@@ -312,6 +324,23 @@ const updateMailAddress = (index, key, value) => {
   transferConfig.detail.mail.mail_address_list = [...transferConfig.detail.mail.mail_address_list];
 };
 
+const salesforceTest = () => {
+  const requestData = {
+    username: transferConfig.detail.salesforce.sf_user_name,
+    password: transferConfig.detail.salesforce.sf_password,
+    client_id: transferConfig.detail.salesforce.sf_client_id,
+    client_secret: transferConfig.detail.salesforce.sf_client_secret,
+    api_version: transferConfig.detail.salesforce.api_version,
+    domain: transferConfig.detail.salesforce.sf_domain
+  }
+
+  $http.post('/transfer/salesforce/check', requestData)
+      .then(response => {
+        console.log(response.request.status)
+        salesforceCheckResult.value.code = response.request.status
+        salesforceCheckResult.value.message = response.request.statusText
+      })
+}
 const clearModal = () => {
   transferConfig.id = null
   transferConfig.type_code = ''
