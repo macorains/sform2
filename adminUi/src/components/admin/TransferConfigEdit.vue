@@ -234,6 +234,7 @@ const instance = getCurrentInstance()
 const $http = instance.appContext.config.globalProperties.$http
 
 const transferConfig = reactive({
+  id: null,
   type_code: '',
   name: '',
   status: 1,
@@ -272,7 +273,9 @@ const mailAddressFields = ref([
 const loadConfig = (id) => {
   $http.get('/transfer/config/' + id)
       .then(response => {
+        transferConfig.id = response.data.id
         transferConfig.name = response.data.name
+        transferConfig.config_index = response.data.config_index
         transferConfig.type_code = response.data.type_code
         transferConfig.detail = response.data.detail
         setTypeOptions(transferConfig.type_code)
@@ -300,7 +303,7 @@ const addMailAddress = () => {
   if (!Array.isArray(transferConfig.detail.mail.mail_address_list)) {
     transferConfig.detail.mail.mail_address_list = [];
   }
-  transferConfig.detail.mail.mail_address_list.push({ name:'', address:'', address_index: transferConfig.detail.mail.mail_address_list.length + 1 })
+  transferConfig.detail.mail.mail_address_list.push({ transferconfig_mail_id: transferConfig.detail.mail.id, name:'', address:'', address_index: transferConfig.detail.mail.mail_address_list.length + 1 })
 }
 
 const updateMailAddress = (index, key, value) => {
@@ -310,6 +313,7 @@ const updateMailAddress = (index, key, value) => {
 };
 
 const clearModal = () => {
+  transferConfig.id = null
   transferConfig.type_code = ''
   transferConfig.name = ''
   transferConfig.status = 1
