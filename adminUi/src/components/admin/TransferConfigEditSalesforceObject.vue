@@ -7,11 +7,11 @@
   </BRow>
   <BRow>
     <BCol>
-      <BTable striped hover :items="sfObjectList.objectList" :fields="sfObjectFields" select-mode="single">
-        <template #cell(valid)="data">
+      <BTable striped hover :items="sfObjectList.objectList" :fields="sfObjectFields">
+        <template #cell(active)="data">
           <BFormCheckbox
-              v-model="data.item.valid"
-              name="valid"
+              v-model="data.item.active"
+              name="active"
           ></BFormCheckbox>
         </template>
         <template #cell(label)="data">
@@ -48,7 +48,7 @@ const sfObjectFieldRef = ref([])
 const sfObjectList = reactive({})
 
 const sfObjectFields = ref([
-  { key: 'valid', sortable: true, label: '有効'},
+  { key: 'active', sortable: true, label: '有効'},
   { key: 'label', sortable: true, label: 'オブジェクト名'},
 ])
 
@@ -64,8 +64,14 @@ const getData = () => {
 const importObject = () => {
   $http.get('/transfer/salesforce/object/' + sfObjectList.transferConfigId)
       .then(response => {
-        sfObjectList.objectList = response.data
+        sfObjectList.objectList = response.data.map(d => convert(d))
       })
+}
+
+const convert = (src) => {
+  src.active = false
+  src.fields = []
+  return src
 }
 
 const setRef = (item) => (el) => {

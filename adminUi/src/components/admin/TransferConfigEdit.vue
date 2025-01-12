@@ -150,6 +150,8 @@ const saveConfig = () => {
       .then(response => {
         alert('ok')
       })
+
+
 }
 
 const addMailAddress = () => {
