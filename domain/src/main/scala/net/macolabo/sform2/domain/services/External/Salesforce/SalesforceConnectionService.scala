@@ -92,7 +92,7 @@ class SalesforceConnectionService @Inject()(
       config.api_version)
       .map (token => {
         Await.result(ws
-          .url(config.sf_domain + s"/services/data/${config.api_version}/sobjects")
+          .url(config.sf_domain + s"/services/data/v${config.api_version}/sobjects")
           .addHttpHeaders("Authorization" -> s"Bearer $token")
           .addHttpHeaders("Content-Type" -> "application/json")
           .get()
@@ -107,9 +107,11 @@ class SalesforceConnectionService @Inject()(
                     .filter(so => so.queryable)
                     .filter(so => so.searchable)
                     .map(so => SalesforceGetObjectResponse(so.name, so.label)))
-                case _ => None
+                case _ => None // 何か吐かせる 2024/11/30
               }
-            case _ => None
+            case _ =>
+              System.out.println(res.body)
+              None // 何か吐かせる 2024/11/30
           }), Duration.Inf)
       })
   }
@@ -130,7 +132,7 @@ class SalesforceConnectionService @Inject()(
       config.api_version)
       .flatMap (token => {
           Await.result(ws
-            .url(config.sf_domain + s"/services/data/${config.api_version}/sobjects/$objectName/describe")
+            .url(config.sf_domain + s"/services/data/v${config.api_version}/sobjects/$objectName/describe")
             .addHttpHeaders("Authorization" -> s"Bearer $token")
             .addHttpHeaders("Content-Type" -> "application/json")
             .get()

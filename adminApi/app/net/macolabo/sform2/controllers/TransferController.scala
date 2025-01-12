@@ -148,11 +148,11 @@ class TransferController @Inject() (
           case Some(sf: TransferGetTransferResponseSalesforceTransferConfig) =>
             salesforceConnectionService.getObject(sf).map {
               case Some(sr: List[SalesforceGetObjectResponse]) => Ok(toJson(sr))
-              case None => BadRequest
+              case None => BadRequest // ここにくる(2024/11/30)
             }
           case _ => Future.successful(BadRequest)
         }
-      case _ => Future.successful(BadRequest)
+      case _ => Future.successful(NotFound)
     }
     Await.result(result, Duration.Inf)
   }

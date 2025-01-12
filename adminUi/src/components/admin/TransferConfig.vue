@@ -70,7 +70,7 @@ onMounted(() => {
       </BCol>
     </BRow>
   </div>
-  <BModal v-model="editModalVisible" size="xl" title="転送設定編集" @ok="save" @hidden="close">
+  <BModal v-model="editModalVisible" size="xl" title="転送設定編集" @ok="save" @hidden="close" scrollable>
     <TransferConfigEdit ref="configEditRef"  />
   </BModal>
 
