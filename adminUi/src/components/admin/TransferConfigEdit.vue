@@ -146,6 +146,7 @@ const saveConfig = () => {
   console.log(saveData)
   // データの確認のため一旦コメントアウト後で戻す
 
+
   $http.post('/transfer/config', saveData)
       .then(response => {
         alert('ok')

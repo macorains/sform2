@@ -168,6 +168,8 @@ const validateTransferConfigSalesforceApiVersion = () => {
 }
 
 const loadData = (data) => {
+    transferConfigDetailSalesforce.id = data.id
+    transferConfigDetailSalesforce.transfer_config_id = data.transfer_config_id
     transferConfigDetailSalesforce.sf_user_name = data.sf_user_name
     transferConfigDetailSalesforce.sf_password = data.sf_password
     transferConfigDetailSalesforce.sf_client_id = data.sf_client_id
