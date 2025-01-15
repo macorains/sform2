@@ -1,4 +1,7 @@
 <template>
+  <div v-if="isLoading" class="loading-overlay">
+    <BSpinner label="Processing..." variant="light" />
+  </div>
   <BContainer class="text-left">
     <BForm>
       <BRow>
@@ -60,7 +63,7 @@
 
 <script setup>
 import {getCurrentInstance, onMounted, ref, computed, reactive, nextTick} from "vue"
-import {BTable} from "bootstrap-vue-3"
+import {BSpinner} from "bootstrap-vue-3"
 import TransferConfigEditMail from "@/components/admin/TransferConfigEditMail.vue";
 import TransferConfigEditSalesforce from "@/components/admin/TransferConfigEditSalesforce.vue";
 
@@ -70,6 +73,7 @@ const $http = instance.appContext.config.globalProperties.$http
 const configEditMailRef = ref({ loadData: () => {} })
 const configEditSalesforceRef = ref({ loadData: () => {} })
 
+const isLoading = ref(false)
 const transferConfig = reactive({
   id: null,
   type_code: '',
@@ -129,6 +133,7 @@ const loadConfig = (id) => {
 
 const saveConfig = () => {
   console.log(configEditSalesforceRef)
+  isLoading.value = true
   if (transferConfig.type_code === 'mail') {
     transferConfig.detail.mail = configEditMailRef.value.getData()
   }
@@ -150,6 +155,7 @@ const saveConfig = () => {
   $http.post('/transfer/config', saveData)
       .then(response => {
         alert('ok')
+        isLoading.value = false
       })
 
 
@@ -226,3 +232,4 @@ defineExpose({
 })
 
 </script>
+

@@ -12,6 +12,7 @@
           <BFormCheckbox
               v-model="data.item.active"
               name="active"
+              @change="updateObject(data.item)"
           ></BFormCheckbox>
         </template>
         <template #cell(label)="data">
@@ -101,6 +102,10 @@ const updateField = (objectName, list) => {
   const target = sfObjectList.objectList.filter(obj => obj.name === objectName)[0]
   target.fields = list
   target.isExpand = true
+}
+
+const updateObject = (item) => {
+  sfObjectList.objectList.filter(obj => obj.name === item.name)[0].active = item.active
 }
 
 defineExpose({

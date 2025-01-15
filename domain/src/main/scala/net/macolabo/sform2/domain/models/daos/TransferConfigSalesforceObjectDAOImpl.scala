@@ -80,6 +80,7 @@ class TransferConfigSalesforceObjectDAOImpl extends TransferConfigSalesforceObje
         c.modified -> transferConfigSalesforceObject.modified
       ).where.eq(c.id, transferConfigSalesforceObject.id)
     }.update().apply()
+    transferConfigSalesforceObject.id
   }
 
   /**

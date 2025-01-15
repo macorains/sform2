@@ -1,48 +1,7 @@
-<script setup>
-import {getCurrentInstance, onMounted, ref} from "vue";
-import {BButton, BModal, BTable} from "bootstrap-vue-3";
-import TransferConfigEdit from "@/components/admin/TransferConfigEdit.vue";
-
-const instance = getCurrentInstance()
-const $http = instance.appContext.config.globalProperties.$http
-
-const fields = ref([
-  { key: 'config_index', sortable: true, label: 'No'},
-  { key: 'name', sortable: true, label: '名前'},
-  { key: 'status', sortable: true, label: 'ステータス'},
-  { key: 'type_code', sortable: true, label: '転送タイプ'},
-  { key: 'actions', label: '操作' },
-])
-const configList = ref([])
-const editModalVisible = ref(false)
-const configEditRef = ref(null)
-
-const edit = (row) => {
-  configEditRef.value.loadConfig(row.item.id)
-  editModalVisible.value = true
-}
-
-const add = () => {
-  editModalVisible.value = true
-}
-
-const save = () => {
-  configEditRef.value.saveConfig()
-}
-
-const close = () => {
-  configEditRef.value.clearModal()
-}
-
-onMounted(() => {
-  $http.get('/transfer/config/list')
-      .then(response => {
-        configList.value = response.data
-      })
-})
-
-</script>
 <template>
+  <div v-if="isLoading" class="loading-overlay">
+    <BSpinner label="Processing..." variant="light" />
+  </div>
   <div class="container">
     <BTable striped hover :items="configList" :fields="fields">
       <template #cell(actions)="row">
@@ -73,18 +32,54 @@ onMounted(() => {
   <BModal v-model="editModalVisible" size="xl" title="転送設定編集" @ok="save" @hidden="close" scrollable>
     <TransferConfigEdit ref="configEditRef"  />
   </BModal>
-
-  <!--
-  <mailTransferConfig
-      :is-visible="modalState.mail"
-      :transfer-config-id="transferConfigId"
-      @changeModalState="changeModalState"
-  />
-  <salesforceTransferConfig
-      :is-visible="modalState.salesforce"
-      :transfer-config-id="transferConfigId"
-      @changeModalState="changeModalState"
-  />
-  -->
-
 </template>
+
+<script setup>
+import {getCurrentInstance, onMounted, ref} from "vue";
+import {BButton, BModal, BSpinner, BTable} from "bootstrap-vue-3";
+import TransferConfigEdit from "@/components/admin/TransferConfigEdit.vue";
+
+const instance = getCurrentInstance()
+const $http = instance.appContext.config.globalProperties.$http
+
+const fields = ref([
+  { key: 'config_index', sortable: true, label: 'No'},
+  { key: 'name', sortable: true, label: '名前'},
+  { key: 'status', sortable: true, label: 'ステータス'},
+  { key: 'type_code', sortable: true, label: '転送タイプ'},
+  { key: 'actions', label: '操作' },
+])
+const configList = ref([])
+const editModalVisible = ref(false)
+const configEditRef = ref(null)
+const isLoading = ref(false)
+
+
+const edit = (row) => {
+  configEditRef.value.loadConfig(row.item.id)
+  editModalVisible.value = true
+}
+
+const add = () => {
+  editModalVisible.value = true
+}
+
+const save = () => {
+  configEditRef.value.saveConfig()
+}
+
+const close = () => {
+  configEditRef.value.clearModal()
+}
+
+onMounted(() => {
+  isLoading.value = true
+  $http.get('/transfer/config/list')
+      .then(response => {
+        configList.value = response.data
+        isLoading.value = false
+      })
+})
+
+</script>
+
