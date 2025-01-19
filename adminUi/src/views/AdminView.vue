@@ -1,17 +1,3 @@
-<script setup>
-import HeaderMenu from '../components/HeaderMenu.vue'
-import TransferConfig from '../components/admin/TransferConfig.vue'
-import ApiToken from '../components/admin/ApiToken.vue'
-import UserConfig from '../components/admin/UserConfig.vue'
-</script>
-
-<style>
-.custom-tabs .nav-link.active {
-  background-color: #007bff !important; /* 任意の背景色 */
-  color: white; /* 任意の文字色 */
-}
-</style>
-
 <template>
     <HeaderMenu />
       <div class="container">
@@ -46,7 +32,7 @@ import UserConfig from '../components/admin/UserConfig.vue'
               </template>
               <UserConfig />
             </BTab>
-            <BTab>
+            <BTab @click="loadToken">
               <template #title>
               <span
                   class="oi oi-person"
@@ -55,9 +41,32 @@ import UserConfig from '../components/admin/UserConfig.vue'
               />
                 APIトークン
               </template>
-              <ApiToken />
+              <ApiToken ref="apiTokenRef"/>
             </BTab>
           </BTabs>
         </BCard>
       </div>
 </template>
+
+
+
+
+<style>
+.custom-tabs .nav-link.active {
+  background-color: #007bff !important; /* 任意の背景色 */
+  color: white; /* 任意の文字色 */
+}
+</style>
+
+<script setup>
+import {ref} from "vue"
+import HeaderMenu from '../components/HeaderMenu.vue'
+import TransferConfig from '../components/admin/TransferConfig.vue'
+import ApiToken from '../components/admin/ApiToken.vue'
+import UserConfig from '../components/admin/UserConfig.vue'
+
+const apiTokenRef = ref(null)
+const loadToken = () => {
+  apiTokenRef.value.load()
+}
+</script>
