@@ -11,6 +11,10 @@
       APIトークン作成
     </BButton>
   </div>
+  <div v-if="apitoken" class="alert alert-danger mt-4">
+    <p>APIトークン: {{ apitoken }}</p>
+    <p>※この画面から移動すると再度表示はできません。</p>
+  </div>
 </template>
 
 <script setup>
