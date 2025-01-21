@@ -1,6 +1,6 @@
 <template>
   <div v-if="expiry">
-    <p>APIトークン有効期限: {{ expiry }}</p>
+    <p>APIトークン有効期限: {{ format(parseISO(expiry), 'yyyy/MM/dd HH:mm:ss')}}</p>
     <BButton size="sm" @click="generate()" class="mr-1">
       APIトークン更新
     </BButton>
@@ -19,6 +19,7 @@
 
 <script setup>
 import {getCurrentInstance, onMounted, ref} from "vue"
+import {parseISO, format} from "date-fns"
 
 const instance = getCurrentInstance()
 const $http = instance.appContext.config.globalProperties.$http
