@@ -41,4 +41,7 @@ import {onMounted, ref, inject} from "vue"
 import TransferTaskEditSalesforceColumn from "@/components/form/TransferTaskEditSalesforceColumn.vue"
 
 const transferTask = ref({ salesforce: {}})
+const object_list = ref([])
+
+const updateFieldList = () => {}
 </script>

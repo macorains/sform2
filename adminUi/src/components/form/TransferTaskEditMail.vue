@@ -184,6 +184,8 @@ import {onBeforeMount, ref} from "vue";
 
 const transferTask = ref({ mail: {}})
 const transferConfig = ref({ detail: { mail: { use_cc: true }}})
+const fieldList = ref([])
+const mailAddressList = ref([])
 
 onBeforeMount(() => {
   // TODO 本実装する
