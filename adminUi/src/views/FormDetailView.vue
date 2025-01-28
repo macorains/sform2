@@ -115,7 +115,7 @@
           :max-rows="10"
       />
     </BFormGroup>
-    <ColumnList @update-column="updateColumn" v-if="form"/>
+    <ColumnList ref="columnListRef" @update-column="updateColumn" v-if="form"/>
     <TransferTaskList />
     <BButton
         class="mt-3"
@@ -154,6 +154,7 @@ onMounted(async () => {
   $http.get('/form/' + route.params.form_id)
       .then(response => {
         form.value = response.data
+        columnListRef.value.load(response.data.form_cols)
       })
 })
 
