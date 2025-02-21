@@ -72,7 +72,12 @@ class SignInController @Inject() (
       val profile = profiles.get(0)
       val authKey = profile.getAttribute("AuthKey").asInstanceOf[String]
       cache.set(profilePrefix + authKey, profiles)
-      sendAuthkeyMail(profile)
+
+      // Test SESの設定終わるまでこちらで
+      val vc = profile.getAttribute("VerificationCode").asInstanceOf[String]
+      println(vc)
+
+      // sendAuthkeyMail(profile)
       Ok(s"""{"authkey" : "$authKey"}""")
     } else {
       Ok(s"""{"authkey" : ""}""")

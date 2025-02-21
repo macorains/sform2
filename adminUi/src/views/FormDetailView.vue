@@ -116,7 +116,7 @@
       />
     </BFormGroup>
     <ColumnList ref="columnListRef" @update-column="updateColumn" v-if="form"/>
-    <TransferTaskList />
+    <TransferTaskList ref="transferTaskListRef" />
     <BButton
         class="mt-3"
         block
@@ -146,15 +146,16 @@ const formStatusOptions = [
   { text: '有効', value:1 },
   { text: '休止', value:2 }
 ]
-
-provide('form', form)
+const transferTaskListRef = ref(null)
 
 // ライフサイクルフック
 onMounted(async () => {
   $http.get('/form/' + route.params.form_id)
       .then(response => {
+        console.log(response)
         form.value = response.data
         columnListRef.value.load(response.data.form_cols)
+        transferTaskListRef.value.load(response.data)
       })
 })
 

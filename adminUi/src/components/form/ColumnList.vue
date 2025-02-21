@@ -8,12 +8,12 @@
       <BButton size="sm" @click="edit(row.item, row.index, $event.target)" class="mr-1">
         編集
       </BButton>
-      <BButton size="sm" @click="delete(row.item)">
+      <BButton size="sm" @click="deleteColumn(row.item)">
         削除
       </BButton>
     </template>
   </BTable>
-  <BModal v-model="editModalVisible" size="xl" title="フォーム項目編集">
+  <BModal v-model="editModalVisible" size="xl" title="フォーム項目編集" @ok="updateColumn">
     <ColumnEdit ref="columnEditRef" :formColId="selectedFormColId"/>
   </BModal>
 </template>
@@ -24,7 +24,7 @@ import {onMounted, ref, inject, reactive} from "vue"
 import { BButton, BTable, BModal } from 'bootstrap-vue-3'
 const emit = defineEmits(['update-column'])
 
-const form = inject('form')
+//const form = inject('form')
 const fields = ref([
   { key: 'col_index', sortable: true, label: 'No'},
   { key: 'name', sortable: true, label: '名前'},
@@ -49,6 +49,14 @@ const load = (col_list) => {
 
 const saveColumn = () => {
   emit('update-column', { name: '新しい名前' });
+}
+
+const updateColumn = () => {
+  const formCol = columnEditRef.value.getFormCol()
+  const target_index = form_cols.findIndex(col => col.col_index === formCol.col_index)
+  if (target_index !== -1) {
+    Object.assign(form_cols[target_index], formCol)
+  }
 }
 
 const addColumn = () => {
@@ -78,6 +86,13 @@ const addColumn = () => {
   form_cols.push(tmp)
 }
 
+const deleteColumn = (item) => {
+  form_cols.splice(item.col_index, 1)
+  const cols_count = form_cols.length
+  for(let i = 0; i < cols_count; i++) {
+    form_cols[i].col_index = i
+  }
+}
 const edit = (item, index, target) => {
   columnEditRef.value.setFormCol(item)
   selectedFormColId.value = item.id

@@ -1,48 +1,3 @@
-<script setup>
-import ColumnSelectList from "@/components/form/ColumnSelectList.vue";
-import {inject, onMounted, provide, ref} from "vue";
-
-const props = defineProps({ formColId: { type: Number } })
-
-const isSelectable = () => {
-  return true // TODO 正しい形に直す
-}
-const form = inject('form')
-const formCol = ref({ validations: {}})
-const optionFormColType = ref( [
-  { value: 1, text: 'テキスト', select_list: false },
-  { value: 2, text: 'コンボボックス（単一選択）', select_list: true },
-  { value: 3, text: 'チェックボックス（複数選択）', select_list: true },
-  { value: 4, text: 'ラジオボタン（単一選択）', select_list: true },
-  { value: 5, text: 'テキストエリア', select_list: false },
-  { value: 6, text: '隠しテキスト', select_list: false },
-  { value: 7, text: '表示テキスト（非入力項目）', select_list: false }
-])
-const optionFormColValidation = ref([
-      { value: 0, text: '無制限' },
-      { value: 1, text: '数値のみ' },
-      { value: 2, text: '英数字のみ' },
-      { value: 3, text: 'ひらがなのみ' },
-      { value: 4, text: 'カタカナのみ' },
-      { value: 5, text: 'メールアドレス' },
-      { value: 6, text: '郵便番号' }
-])
-
-const setFormCol = (item) => {
-  formCol.value = item
-}
-
-provide('formCol', formCol)
-
-onMounted(() => {
-  // data.value = props.form.form_cols
-})
-
-defineExpose({
-  setFormCol
-})
-
-</script>
 <template>
   <BContainer class="text-left form-col-edit">
     <BRow class="mb-3">
@@ -106,7 +61,7 @@ defineExpose({
     </BRow>
     <BRow class="mb-3">
       <BCol cols="4">
-        バリデーション種別
+        入力形式
       </BCol>
       <BCol>
         <BFormSelect
@@ -116,7 +71,7 @@ defineExpose({
         />
       </BCol>
     </BRow>
-    <BRow class="mb-3">
+    <BRow class="mb-3" v-if="formCol.validations.input_type==1">
       <BCol cols="4">
         数値範囲
       </BCol>
@@ -139,7 +94,7 @@ defineExpose({
       </BCol>
       <BCol cols="5" />
     </BRow>
-    <BRow class="mb-3">
+    <BRow class="mb-3" v-if="formCol.validations.input_type !== 6">
       <BCol cols="4">
         文字列の長さ
       </BCol>
@@ -177,3 +132,60 @@ defineExpose({
     </BRow>
   </BContainer>
 </template>
+
+<script setup>
+import ColumnSelectList from "@/components/form/ColumnSelectList.vue";
+import {inject, onMounted, provide, reactive, ref} from "vue";
+
+const isSelectable = () => {
+  return [2,3,4].includes(formCol.col_type) // TODO 正しい形に直す
+}
+const formCol = reactive({ col_type: null, validations: {}})
+const optionFormColType = ref( [
+  { value: 1, text: 'テキスト', select_list: false },
+  { value: 2, text: 'コンボボックス（単一選択）', select_list: true },
+  { value: 3, text: 'チェックボックス（複数選択）', select_list: true },
+  { value: 4, text: 'ラジオボタン（単一選択）', select_list: true },
+  { value: 5, text: 'テキストエリア', select_list: false },
+  { value: 6, text: '隠しテキスト', select_list: false },
+  { value: 7, text: '表示テキスト（非入力項目）', select_list: false }
+])
+const optionFormColValidation = ref([
+      { value: 0, text: '無制限' },
+      { value: 1, text: '数値のみ' },
+      { value: 2, text: '英数字のみ' },
+      { value: 3, text: 'ひらがなのみ' },
+      { value: 4, text: 'カタカナのみ' },
+      { value: 5, text: 'メールアドレス' },
+      { value: 6, text: '郵便番号' }
+])
+
+const setFormCol = (item) => {
+  console.log(item)
+  formCol.name = item.name
+  formCol.col_id = item.col_id
+  formCol.col_type = item.col_type
+  formCol.col_index = item.col_index
+  formCol.col_type = item.col_type
+  formCol.default_value = item.default_value
+  formCol.form_id = item.form_id
+  formCol.select_list = item.select_list
+  formCol.validations = item.validations
+}
+
+const getFormCol = () => {
+  return formCol
+}
+
+provide('formCol', formCol)
+
+onMounted(() => {
+  // data.value = props.form.form_cols
+})
+
+defineExpose({
+  setFormCol,
+  getFormCol
+})
+
+</script>

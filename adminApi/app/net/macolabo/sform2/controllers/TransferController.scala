@@ -176,9 +176,13 @@ class TransferController @Inject() (
                 println(e.getMessage) // TODO ログ出力する
                 Unauthorized(e.getMessage) // TODO メッセージを解析してエラーを出し分ける
             }
-          case _ => Future.successful(BadRequest)
+          case _ =>
+            println("1")
+            Future.successful(BadRequest)
         }
-      case _ => Future.successful(BadRequest)
+      case _ =>
+        println("2")
+        Future.successful(BadRequest)
     }, Duration.Inf)
   }
 }
