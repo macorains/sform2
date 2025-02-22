@@ -47,10 +47,6 @@ const load = (col_list) => {
   col_list.forEach(col => form_cols.push(col))
 }
 
-const saveColumn = () => {
-  emit('update-column', { name: '新しい名前' });
-}
-
 const updateColumn = () => {
   const formCol = columnEditRef.value.getFormCol()
   const target_index = form_cols.findIndex(col => col.col_index === formCol.col_index)
@@ -84,6 +80,7 @@ const addColumn = () => {
     select_list: []
   }
   form_cols.push(tmp)
+  emit('update-column', form_cols);
 }
 
 const deleteColumn = (item) => {
@@ -99,7 +96,6 @@ const edit = (item, index, target) => {
   editModalVisible.value = true
 }
 defineExpose({
-  saveColumn,
   load
 });
 </script>

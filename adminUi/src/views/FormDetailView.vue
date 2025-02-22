@@ -162,13 +162,14 @@ onMounted(async () => {
 const columnListRef = ref(null)
 
 const saveForm = () =>  {
-  if (columnListRef.value) {
-    columnListRef.value.saveColumn()
-  }
+  console.log('*** saveForm ***')
+  console.log(form)
 }
 
-const updateColumn = () => {
-  alert('updateColumn!')
+const updateColumn = (columnList) => {
+  if (columnList) {
+    form.form_cols = columnList
+  }
 }
 </script>
 
