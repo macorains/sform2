@@ -319,14 +319,14 @@ trait FormGetResponseJson {
   implicit val FormTransferTaskSalesforceFieldWrites: Writes[FormTransferTaskSalesforceFieldGetReponse]
   = (formTransferTaskSalesforceField:FormTransferTaskSalesforceFieldGetReponse) => Json.obj(
     "id" -> formTransferTaskSalesforceField.id,
-    "form_ransfer_task_salesforce_id" -> formTransferTaskSalesforceField.form_transfer_task_salesforce_id,
+    "form_transfer_task_salesforce_id" -> formTransferTaskSalesforceField.form_transfer_task_salesforce_id,
     "form_column_id" -> formTransferTaskSalesforceField.form_column_id,
     "field_name" -> formTransferTaskSalesforceField.field_name
   )
 
   implicit val FormTransferTaskSalesforceFieldReads: Reads[FormTransferTaskSalesforceFieldGetReponse] = (
     (JsPath \ "id").read[BigInt] ~
-      (JsPath \ "transfer_task_salesforce_id").read[BigInt] ~
+      (JsPath \ "form_transfer_task_salesforce_id").read[BigInt] ~
       (JsPath \ "form_column_id").read[String] ~
       (JsPath \ "field_name").read[String]
     )(FormTransferTaskSalesforceFieldGetReponse.apply _)

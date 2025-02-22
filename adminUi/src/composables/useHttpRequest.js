@@ -11,8 +11,14 @@ export function useHttpRequest() {
         $http.get(url).then(response => callback(response)).finally(() => loading.value = false)
     }
 
+    const requestPost = (url, data, callback) => {
+        loading.value = true
+        $http.post(url, data).then(response => callback(response)).finally(() => loading.value = false)
+    }
+
     return {
         requestGet,
+        requestPost,
         loading
     }
 }

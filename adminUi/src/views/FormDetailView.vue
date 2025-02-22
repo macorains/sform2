@@ -132,10 +132,12 @@
 import {onMounted, onBeforeMount, getCurrentInstance, ref, provide} from "vue"
 import {useRoute, useRouter} from "vue-router"
 import { BButton, BFormGroup, BFormRadioGroup, BFormRadio, BFormInput, BFormTextarea } from 'bootstrap-vue-3'
+import { useHttpRequest } from "@/composables/useHttpRequest.js"
 import HeaderMenu from "@/components/HeaderMenu.vue"
 import ColumnList from "@/components/form/ColumnList.vue"
 import TransferTaskList from "@/components/form/TransferTaskList.vue"
 
+const { requestGet, requestPost, loading } = useHttpRequest()
 const instance = getCurrentInstance()
 const $http = instance.appContext.config.globalProperties.$http
 const router = useRouter()
@@ -164,6 +166,9 @@ const columnListRef = ref(null)
 const saveForm = () =>  {
   console.log('*** saveForm ***')
   console.log(form)
+  requestPost('/form', form.value, response => {
+    console.log(response)
+  })
 }
 
 const updateColumn = (columnList) => {
