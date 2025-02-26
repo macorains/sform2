@@ -6,7 +6,7 @@ import com.sforce.soap.partner.sobject._
 import net.macolabo.sform2.domain.models.entity.transfer.salesforce.{SalesforceSObjectsDescribeResponse, SalesforceSObjectsDescribeResponseJson, SalesforceSObjectsListResponse, SalesforceSObjectsListResponseJson}
 import net.macolabo.sform2.domain.services.Transfer.{SalesforceLoginResponse, SalesforceLoginResponseJson, TransferGetTransferResponseSalesforceTransferConfig}
 import net.macolabo.sform2.domain.utils.Logger
-import play.api.libs.json.{JsError, JsSuccess, Json}
+import play.api.libs.json.{JsError, JsResult, JsSuccess, Json}
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -26,7 +26,7 @@ class SalesforceConnectionService @Inject()(
    * @param request SalesforceCheckConnectionRequest
    * @return SalesforceCheckConnectionResponse
    */
-  def checkConnection(request: SalesforceCheckConnectionRequest): Future[String] = {
+  def checkConnection(request: SalesforceCheckConnectionRequest): Future[Either[String,String]] = {
     getConnection(request.username, request.password, request.client_id, request.client_secret, request.domain, request.api_version)
   }
 
@@ -40,7 +40,7 @@ class SalesforceConnectionService @Inject()(
    * @param version APIバージョン v57.0
    * @return JWTトークン
    */
-  def getConnection(username: String, password: String, clientId: String, clientSecret: String, domain: String, version: String) = {
+  def getConnection(username: String, password: String, clientId: String, clientSecret: String, domain: String, version: String): Future[Either[String, String]]= {
     val postdata = Map(
       "grant_type" -> "password",
       "client_id" -> clientId,
@@ -52,28 +52,17 @@ class SalesforceConnectionService @Inject()(
       .url(domain + "/services/oauth2/token")
       .addHttpHeaders("Content-Type" -> "application/x-www-form-urlencoded")
       .post(postdata)
-      /*
-      .map(res => res.status match {
-        case 200 => Json.parse(res.body)
-          .validate[SalesforceLoginResponse]
-          .asOpt
-          .map(res => res.access_token)
-        case _ =>
-          logger.error(res.body)
-          None
-      })
 
-       */
-    result.flatMap(res => res.status match {
+    result.map(res => res.status match {
       case 200 => {
         Json.parse(res.body).validate[SalesforceLoginResponse] match {
-          case s: JsSuccess[SalesforceLoginResponse] => Future.successful(s.value.access_token)
-          case e: JsError => Future.failed(new RuntimeException("Json parse error."))
+          case s: JsResult[SalesforceLoginResponse] if s.isSuccess => Right(s.get.access_token)
+          case e: JsResult[SalesforceLoginResponse] if e.isError => Left("Json parse error.")
         }
       }
       case _ =>
         logger.error(res.body)
-        Future.failed(new RuntimeException(res.body))
+        Left(res.body)
     })
   }
 

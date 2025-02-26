@@ -121,10 +121,11 @@ class TransferController @Inject() (
     Await.result(request.body.asJson match {
       case Some(j: JsValue) =>
         j.validate[SalesforceCheckConnectionRequest].map(cr => {
-          salesforceConnectionService.checkConnection(cr).map(res => Ok(res)).recover {
-            case e: RuntimeException =>
-              println(e.getMessage) // TODO ログに出力する
-              Unauthorized(e.getMessage) // TODO メッセージを解析してエラーを出し分ける
+          salesforceConnectionService.checkConnection(cr).map {
+            case Right(res) => Ok(res)
+            case Left(error) =>
+              println(error) // TODO ログに出力する
+              Unauthorized(error)
           }
         }).getOrElse(Future.successful(BadRequest))
       case _ =>
@@ -147,6 +148,7 @@ class TransferController @Inject() (
         t.detail.salesforce match {
           case Some(sf: TransferGetTransferResponseSalesforceTransferConfig) =>
             salesforceConnectionService.getObject(sf).map {
+                    // TODO SFに接続できないときにエラーメッセージを返したい
               case Some(sr: List[SalesforceGetObjectResponse]) => Ok(toJson(sr))
               case None => BadRequest // ここにくる(2024/11/30)
             }
