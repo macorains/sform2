@@ -80,6 +80,7 @@ class TransferConfigMailDAOImpl extends TransferConfigMailDAO {
         c.modified -> transferConfigMail.modified
       ).where.eq(c.id, transferConfigMail.id)
     }.update().apply()
+    transferConfigMail.id
   }
 
   /**

@@ -42,7 +42,7 @@ class TransferConfigServiceImpl @Inject()(
           request.type_code,
           0, // createの場合、DAO側で既存最大値+1を挿入する
           request.name,
-          1, // active固定
+          request.status,
           userGroup,
           userId,
           userId,

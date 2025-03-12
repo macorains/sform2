@@ -121,10 +121,11 @@ class TransferController @Inject() (
     Await.result(request.body.asJson match {
       case Some(j: JsValue) =>
         j.validate[SalesforceCheckConnectionRequest].map(cr => {
-          salesforceConnectionService.checkConnection(cr).map(res => Ok(res)).recover {
-            case e: RuntimeException =>
-              println(e.getMessage) // TODO ログに出力する
-              Unauthorized(e.getMessage) // TODO メッセージを解析してエラーを出し分ける
+          salesforceConnectionService.checkConnection(cr).map {
+            case Right(res) => Ok(res)
+            case Left(error) =>
+              println(error) // TODO ログに出力する
+              Unauthorized(error)
           }
         }).getOrElse(Future.successful(BadRequest))
       case _ =>
@@ -138,23 +139,22 @@ class TransferController @Inject() (
    * @param transferConfigId TransferConfig ID
    * @return SalesforceのObject情報リスト
    */
-  def getTransferSalesforceObject(transferConfigId: Int): Action[AnyContent] =  Secure("HeaderClient") { implicit request =>
+  def getTransferSalesforceObject(transferConfigId: Int): Action[AnyContent] =  Secure("HeaderClient").async { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
     val userGroup = getAttributeValue(profiles, "user_group")
 
-    val result = transferService.getTransferConfig(userGroup, transferConfigId, cryptoConfig) match {
+    transferService.getTransferConfig(userGroup, transferConfigId, cryptoConfig) match {
       case Some(t: TransferGetTransferConfigResponse) =>
         t.detail.salesforce match {
           case Some(sf: TransferGetTransferResponseSalesforceTransferConfig) =>
             salesforceConnectionService.getObject(sf).map {
-              case Some(sr: List[SalesforceGetObjectResponse]) => Ok(toJson(sr))
-              case None => BadRequest
+              case Left(e: String) => BadRequest(e)
+              case Right(sr: List[SalesforceGetObjectResponse]) => Ok(toJson(sr))
             }
           case _ => Future.successful(BadRequest)
         }
-      case _ => Future.successful(BadRequest)
+      case _ => Future.successful(NotFound)
     }
-    Await.result(result, Duration.Inf)
   }
 
   /**
@@ -163,22 +163,28 @@ class TransferController @Inject() (
    * @param objectName オブジェクト名
    * @return SalesforceのField情報リスト
    */
-  def getTransferSalesforceField(transferConfigId: Int, objectName: String): Action[AnyContent] =  Secure("HeaderClient") { implicit request =>
+  def getTransferSalesforceField(transferConfigId: Int, objectName: String): Action[AnyContent] =  Secure("HeaderClient").async { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
     val userGroup = getAttributeValue(profiles, "user_group")
 
-    Await.result(transferService.getTransferConfig(userGroup, transferConfigId, cryptoConfig) match {
+    transferService.getTransferConfig(userGroup, transferConfigId, cryptoConfig) match {
       case Some(transferConfig: TransferGetTransferConfigResponse) =>
         transferConfig.detail.salesforce match {
           case Some(s: TransferGetTransferResponseSalesforceTransferConfig) =>
-            salesforceConnectionService.getField(s, objectName).map(field => Ok(toJson(field))).recover {
-              case e: RuntimeException =>
-                println(e.getMessage) // TODO ログ出力する
-                Unauthorized(e.getMessage) // TODO メッセージを解析してエラーを出し分ける
+            salesforceConnectionService.getField(s, objectName).map {
+              case Left(e: String) =>
+                println(e)
+                Unauthorized(e)
+              case Right(field: List[SalesforceGetFieldResponse]) =>
+                Ok(toJson(field))
             }
-          case _ => Future.successful(BadRequest)
+          case _ =>
+            println("1")
+            Future.successful(BadRequest)
         }
-      case _ => Future.successful(BadRequest)
-    }, Duration.Inf)
+      case _ =>
+        println("2")
+        Future.successful(BadRequest)
+    }
   }
 }
