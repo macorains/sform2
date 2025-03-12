@@ -9,6 +9,7 @@
               pills
               card
               class="custom-tabs"
+              :aria-selected="null"
           >
             <BTab active>
               <template #title>

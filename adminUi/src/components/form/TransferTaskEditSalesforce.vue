@@ -40,12 +40,13 @@
 </template>
 
 <script setup>
-import {ref, reactive, toRaw} from "vue"
+import {ref, reactive, toRaw, inject} from "vue"
 import TransferTaskEditSalesforceColumn from "@/components/form/TransferTaskEditSalesforceColumn.vue"
 import { useHttpRequest } from "@/composables/useHttpRequest.js"
 import { BSpinner } from "bootstrap-vue-3";
 
 const { requestGet, loading } = useHttpRequest()
+const showError = inject("showError")
 
 const transferTask = reactive({ salesforce: {}})
 const formCols = reactive([])
@@ -64,11 +65,26 @@ const load = (data, form_cols) => {
   salesforceColumnRef.value.load(data.transfer_config_id, transferTask.salesforce, formCols)
 
   const url = `/transfer/salesforce/object/${data.transfer_config_id}`
-  requestGet(url, response => {
-    response.data.forEach(dt => {
-      object_list.value.push({value: dt.name, text: dt.label})
-    })
-  })
+  requestGet(
+      url,
+      response => {
+        response.data.forEach(dt => {
+          object_list.value.push({value: dt.name, text: dt.label})
+        })
+      },
+      error => {
+        // TODO もうちょっと体裁何とかする
+        console.log(error)
+        const msg = error.response.data.map(dt => convertSalesforceErrorCode(dt.errorCode)).join("<br />")
+        showError(msg || "不明なエラーが発生しました");
+      })
+}
+
+const convertSalesforceErrorCode = (code) => {
+  if (code === 'INVALID_OPERATION_WITH_EXPIRED_PASSWORD') {
+    return 'Salesforceのパスワード有効期限切れです'
+  }
+  return code
 }
 const updateFieldList = () => {
   salesforceColumnRef.value.onObjectChange(transferTask.transfer_config_id, transferTask.salesforce.object_name, formCols)

@@ -54,12 +54,11 @@ class SalesforceConnectionService @Inject()(
       .post(postdata)
 
     result.map(res => res.status match {
-      case 200 => {
+      case 200 =>
         Json.parse(res.body).validate[SalesforceLoginResponse] match {
           case s: JsResult[SalesforceLoginResponse] if s.isSuccess => Right(s.get.access_token)
           case e: JsResult[SalesforceLoginResponse] if e.isError => Left("Json parse error.")
         }
-      }
       case _ =>
         logger.error(res.body)
         Left(res.body)
@@ -71,38 +70,37 @@ class SalesforceConnectionService @Inject()(
    * @param config TransferConfigSalesforce
    * @return SalesforceGetObjectResponseのリスト
    */
-  def getObject(config: TransferGetTransferResponseSalesforceTransferConfig): Future[Option[List[SalesforceGetObjectResponse]]] = {
-     getConnection (
+  def getObject(config: TransferGetTransferResponseSalesforceTransferConfig): Future[Either[String, List[SalesforceGetObjectResponse]]] = {
+    getConnection(
       config.sf_user_name,
       config.sf_password,
       config.sf_client_id,
       config.sf_client_secret,
       config.sf_domain,
       config.api_version)
-      .map (token => {
-        Await.result(ws
-          .url(config.sf_domain + s"/services/data/v${config.api_version}/sobjects")
-          .addHttpHeaders("Authorization" -> s"Bearer $token")
-          .addHttpHeaders("Content-Type" -> "application/json")
-          .get()
-          .map(res => res.status match {
-            case 200 =>
-              res.json.validate[SalesforceSObjectsListResponse] match {
-                case s: JsSuccess[SalesforceSObjectsListResponse] =>
-                  Some(s.value.sobjects
-                    .filter(so => so.createable)
-                    .filter(so => so.updateable)
-                    .filter(so => so.deletable)
-                    .filter(so => so.queryable)
-                    .filter(so => so.searchable)
-                    .map(so => SalesforceGetObjectResponse(so.name, so.label)))
-                case _ => None // 何か吐かせる 2024/11/30
-              }
-            case _ =>
-              System.out.println(res.body)
-              None // 何か吐かせる 2024/11/30
-          }), Duration.Inf)
-      })
+      .flatMap {
+        case Left(error: String) => Future.successful(Left(error))
+        case Right(token: String) =>
+          ws
+            .url(config.sf_domain + s"/services/data/v${config.api_version}/sobjects")
+            .addHttpHeaders("Authorization" -> s"Bearer $token")
+            .addHttpHeaders("Content-Type" -> "application/json")
+            .get()
+            .map(res => res.status match {
+              case 200 =>
+                res.json.validate[SalesforceSObjectsListResponse] match {
+                  case JsSuccess(sObjectList, _) =>
+                    val objectList = sObjectList.sobjects
+                      .filter(so => so.createable && so.updateable && so.deletable && so.queryable && so.searchable)
+                      .map(so => SalesforceGetObjectResponse(so.name, so.label))
+                    Right(objectList)
+                  case _ => Left("SalesforceConnectionService.getObject: Json parse error.")
+                }
+              case _ =>
+                println(res.body)
+                Left(res.body)
+            })
+      }
   }
 
   /**
@@ -111,7 +109,7 @@ class SalesforceConnectionService @Inject()(
    * @param objectName オブジェクト名
    * @return SalesforceGetFieldResponseのリスト
    */
-  def getField(config: TransferGetTransferResponseSalesforceTransferConfig, objectName: String): Future[List[SalesforceGetFieldResponse]] = {
+  def getField(config: TransferGetTransferResponseSalesforceTransferConfig, objectName: String): Future[Either[String, List[SalesforceGetFieldResponse]]] = {
     getConnection(
       config.sf_user_name,
       config.sf_password,
@@ -119,8 +117,10 @@ class SalesforceConnectionService @Inject()(
       config.sf_client_secret,
       config.sf_domain,
       config.api_version)
-      .flatMap (token => {
-          Await.result(ws
+      .flatMap {
+        case Left(error: String) => Future.successful(Left(error))
+        case Right(token: String) =>
+          ws
             .url(config.sf_domain + s"/services/data/v${config.api_version}/sobjects/$objectName/describe")
             .addHttpHeaders("Authorization" -> s"Bearer $token")
             .addHttpHeaders("Content-Type" -> "application/json")
@@ -128,18 +128,21 @@ class SalesforceConnectionService @Inject()(
             .map(res => res.status match {
               case 200 =>
                 res.json.validate[SalesforceSObjectsDescribeResponse] match {
-                  case s: JsSuccess[SalesforceSObjectsDescribeResponse] =>
-                    Future.successful(s.value.fields
+                  case JsSuccess(s, _) =>
+                    val fieldList = s.fields
                       .filter(so => so.createable)
                       .filter(so => so.updateable)
                       .filter(so => !so.auto_number)
                       .filter(so => !so.calculated)
-                      .map(so => SalesforceGetFieldResponse(so.name, so.label, so._type)))
-                  case _ => Future.failed(new RuntimeException("Json parse failed."))
+                      .map(so => SalesforceGetFieldResponse(so.name, so.label, so._type))
+                    Right(fieldList)
+                  case _ => Left("SalesforceConnectionService.getField: Json parse error.")
                 }
-              case _ => Future.failed(new RuntimeException(s"/services/data/${config.api_version}/sobjects/$objectName/describe failed."))
-            }), Duration.Inf)
-      })
+              case _ =>
+                println(res.body)
+                Left(res.body)
+            })
+      }
   }
 
   // 開発時用ダミー

@@ -1,8 +1,5 @@
-<script setup>
-import { RouterLink, RouterView } from 'vue-router'
-</script>
-
 <template>
+  <ErrorModal ref="errorModal" />
   <RouterView />
 </template>
 
@@ -69,3 +66,16 @@ nav a:first-of-type {
   }
 }
 </style>
+
+<script setup>
+import { RouterLink, RouterView } from 'vue-router'
+import {provide, ref} from "vue";
+import ErrorModal from '@/components/ErrorModal.vue';
+
+const errorModal = ref(null);
+
+const showError = (message) => {
+  errorModal.value?.openModal(message);
+};
+provide("showError", showError);
+</script>
