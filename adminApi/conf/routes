@@ -56,3 +56,6 @@ POST /apitoken net.macolabo.sform2.controllers.ApiTokenController.save()
 
 #JWT
 GET /jwt net.macolabo.sform2.controllers.SignInController.getJwt()
+
+#test
+GET /oidc net.macolabo.sform2.controllers.SignInController.oidcSignin()

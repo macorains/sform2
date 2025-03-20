@@ -8,6 +8,7 @@ import org.pac4j.http.client.direct.HeaderClient
 import org.pac4j.jwt.config.signature.SecretSignatureConfiguration
 import org.pac4j.jwt.credentials.authenticator.JwtAuthenticator
 import net.macolabo.sform2.views.models.security.{DatabaseExecutionContext, DemoHttpActionAdapter, SqlAuthencator}
+import org.pac4j.core.authorization.generator.DefaultRolesAuthorizationGenerator
 import org.pac4j.core.client.Clients
 import org.pac4j.http.client.indirect.FormClient
 import org.pac4j.http.credentials.authenticator.test.SimpleTestUsernamePasswordAuthenticator
@@ -21,8 +22,9 @@ import org.pac4j.core.config.Config
 import org.pac4j.core.context.session.SessionStore
 import org.pac4j.core.profile.CommonProfile
 import org.pac4j.http.client.direct.DirectFormClient
+import org.pac4j.oidc.client.OidcClient
+import org.pac4j.oidc.config.OidcConfiguration
 import org.pac4j.play.scala.{DefaultSecurityComponents, Pac4jScalaTemplateHelper, SecurityComponents}
-import play.api.libs.mailer.MailerClient
 
 /**
  * Guice DI module to be included in application.conf
@@ -45,12 +47,7 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
 
     val playSessionStore = new PlayCookieSessionStore(dataEncrypter)
     bind(classOf[SessionStore]).toInstance(playSessionStore)
-
-
-    // bind[UserDAO].toInstance(new UserDAOImpl)
-
     bind(classOf[SecurityComponents]).to(classOf[DefaultSecurityComponents])
-
     bind(classOf[Pac4jScalaTemplateHelper[CommonProfile]])
 
 
@@ -84,8 +81,19 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
   }
 
   @Provides
-  def provideConfig(formClient: FormClient, directFormClient: DirectFormClient, headerClient: HeaderClient): Config = {
-    val clients = new Clients(baseUrl + "/callback", formClient, directFormClient, headerClient, new AnonymousClient())
+  def provideOidcClient: OidcClient = {
+    val oidcConfiguration = new OidcConfiguration()
+    oidcConfiguration.setClientId(configuration.get[String]("sform.oauth.client_id"))
+    oidcConfiguration.setSecret(configuration.get[String]("sform.oauth.client_secret"))
+    oidcConfiguration.setDiscoveryURI("https://accounts.google.com/.well-known/openid-configuration")
+    oidcConfiguration.addCustomParam("prompt", "consent")
+    val oidcClient = new OidcClient(oidcConfiguration)
+    oidcClient.addAuthorizationGenerator(new DefaultRolesAuthorizationGenerator)
+    oidcClient
+  }
+  @Provides
+  def provideConfig(formClient: FormClient, directFormClient: DirectFormClient, headerClient: HeaderClient, oidcClient: OidcClient): Config = {
+    val clients = new Clients(baseUrl + "/callback", formClient, directFormClient, headerClient, oidcClient, new AnonymousClient())
 
     val config = new Config(clients)
 //    config.addAuthorizer("admin", new RequireAnyRoleAuthorizer("ROLE_ADMIN"))

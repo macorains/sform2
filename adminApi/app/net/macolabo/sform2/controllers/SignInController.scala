@@ -84,6 +84,11 @@ class SignInController @Inject() (
     }
   }
 
+  def oidcSignin: Action[AnyContent] = Secure("OidcClient") { implicit request =>
+    val profiles = getProfiles(controllerComponents)(request)
+    Ok(profiles.toString)
+  }
+
   private def sendAuthkeyMail(profile: UserProfile)(implicit request:  AuthenticatedRequest[AnyContent]) = {
     val verificationCode = profile.getAttribute("VerificationCode").asInstanceOf[String]
     val mailFrom = configuration.get[String]("sform.mail.systemMailAddress")

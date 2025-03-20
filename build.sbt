@@ -74,8 +74,8 @@ lazy val formApi = Project(
 lazy val dependencies =
   new
     {
-      val playPac4jVersion = "11.0.0-PLAY2.8"
-      val pac4jVersion = "5.1.3"
+      val playPac4jVersion = "12.0.0-PLAY2.8"
+      val pac4jVersion = "5.7.2"
       val playVersion = "2.8.8"
       val scalikeJdbcVersion = "3.5.0"
       val akkaVersion = "2.6.14"

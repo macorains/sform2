@@ -3,7 +3,7 @@ package net.macolabo.sform2.domain.services.User
 import com.google.inject.Inject
 import net.macolabo.sform2.domain.models.daos.UserDAO
 import scalikejdbc.DB
-import org.pac4j.core.context.WebContext
+import org.pac4j.core.context.{CallContext, WebContext}
 import org.pac4j.core.context.session.SessionStore
 import org.pac4j.core.credentials.{Credentials, UsernamePasswordCredentials}
 import org.pac4j.core.credentials.password.PasswordEncoder
@@ -16,7 +16,7 @@ import org.pac4j.core.util.serializer.JsonSerializer
 import org.pac4j.core.util.Pac4jConstants._
 
 import java.util
-import java.util.UUID
+import java.util.{Optional, UUID}
 import scala.concurrent.ExecutionContext
 import scala.jdk.CollectionConverters._
 
@@ -36,20 +36,20 @@ class UserProfileService @Inject()(
   setPasswordEncoder(passwordEncoder)
 
 
-  override protected def internalInit = {
+  override protected def internalInit(forceReinit: Boolean): Unit = {
     assertNotNull("passwordEncoder", getPasswordEncoder)
-    defaultProfileDefinition(new CommonProfileDefinition(_ => new DbProfile()))
+    // defaultProfileDefinition(new CommonProfileDefinition(_ => new DbProfile()))
     setSerializer(new JsonSerializer(classOf[DbProfile]))
-    super.internalInit()
+    super.internalInit(forceReinit)
   }
 
-  override protected def insert(attributes: util.Map[String, AnyRef]) = {
+  override protected def insert(attributes: util.Map[String, AnyRef]): Unit = {
     DB.localTx(implicit session => {
       userDAO.insert(attributes.asScala.toSeq)
     })
   }
 
-  override protected def update(attributes: util.Map[String, AnyRef]) = {
+  override protected def update(attributes: util.Map[String, AnyRef]): Unit = {
     DB.localTx(implicit session => {
       userDAO.update(attributes.asScala.toSeq)
     })
@@ -59,7 +59,7 @@ class UserProfileService @Inject()(
     userDAO.delete(id)
   }
 
-  protected def execute(query: String, args: Any *) = {
+  protected def execute(query: String, args: Any *): Unit = {
 
   }
 
@@ -74,7 +74,7 @@ class UserProfileService @Inject()(
     })
   }
 
-  override def validate(cred: Credentials, context: WebContext, sessionStore: SessionStore) = {
+  override def validate(context: CallContext, cred: Credentials): Optional[Credentials] = {
     println("init()")
     init()
     assertNotNull("credentials", cred)
@@ -88,15 +88,15 @@ class UserProfileService @Inject()(
     attributesToRead.add(getPasswordAttribute)
 
     try {
-      val listAttributes = read(attributesToRead, getUsernameAttribute(), username)
-      if(listAttributes == null || listAttributes.isEmpty()) {
+      val listAttributes = read(attributesToRead, getUsernameAttribute, username)
+      if(listAttributes == null || listAttributes.isEmpty) {
         println("No account found for: " + username)
         throw new AccountNotFoundException("No account found for: " + username)
       } else if (listAttributes.size() > 1) {
         println("Too many accounts found for: " + username)
         throw new MultipleAccountsFoundException("Too many accounts found for: " + username)
       } else {
-        val retrievedPassword = listAttributes.get(0).get(getPasswordAttribute()).asInstanceOf[String]
+        val retrievedPassword = listAttributes.get(0).get(getPasswordAttribute).asInstanceOf[String]
         if (!passwordEncoder.matches(password, retrievedPassword)) {
           println("Bad credentials for: " + username)
           throw new BadCredentialsException("Bad credentials for: " + username)
@@ -112,11 +112,10 @@ class UserProfileService @Inject()(
           profile.addAttribute("VerificationCode", verificationCode)
 
           credentials.setUserProfile(profile)
+          Optional.of(credentials)
 
           // 401エラーの時のhogeはDemoHttpActionAdapterに定義されている
-
         }
-
       }
     } catch {
       case e: TechnicalException =>
@@ -124,6 +123,8 @@ class UserProfileService @Inject()(
         throw e
     }
   }
+
+
 /*
   override def validate(cred: Credentials, context: WebContext, sessionStore: SessionStore) = {
     init()
