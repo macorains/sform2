@@ -34,6 +34,7 @@ lazy val domain = Project(
   commonResolvers,
   commonScalacOptions,
   commonExcludeDependencies,
+  commonDependencyOverrides,
   libraryDependencies ++= commonDependencies ++ Seq(
     dependencies.playJson
   )
@@ -49,6 +50,7 @@ lazy val adminApi = Project(
     commonResolvers,
     commonScalacOptions,
     commonExcludeDependencies,
+    commonDependencyOverrides,
     libraryDependencies ++= commonDependencies
 )
   .dependsOn(domain)
@@ -65,6 +67,7 @@ lazy val formApi = Project(
   commonResolvers,
   commonScalacOptions,
   commonExcludeDependencies,
+  commonDependencyOverrides,
   libraryDependencies ++= commonDependencies
 )
   .dependsOn(domain)
@@ -78,7 +81,7 @@ lazy val dependencies =
       val pac4jVersion = "5.7.2"
       val playVersion = "2.8.8"
       val scalikeJdbcVersion = "3.5.0"
-      val akkaVersion = "2.6.14"
+      val akkaVersion = "2.6.21"
 
       val scalaReflect = "org.scala-lang" % "scala-reflect" % "2.13.3"
       val mysqlConnector = "mysql" % "mysql-connector-java" % "8.0.20"
@@ -122,6 +125,13 @@ lazy val dependencies =
       val awsJavaSdkSes = "com.amazonaws" % "aws-java-sdk-ses" % "1.11.1034"
       val akkaTestkit = "com.typesafe.akka" %% "akka-testkit" % akkaVersion
       val playJson = "com.typesafe.play" %% "play-json" % "2.9.2"
+      val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.4.14"
+      val slf4jApi = "org.slf4j" % "slf4j-api" % "2.0.12"
+      val playLogback = "com.typesafe.play" %% "play-logback" % "2.9.0"
+      val jacksonCore = "com.fasterxml.jackson.core" % "jackson-core" % "2.14.3"
+      val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.3"
+      val jacksonAnnotations = "com.fasterxml.jackson.core" % "jackson-annotations" % "2.14.3"
+      val jacksonModuleScala = "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.14.3"
     }
 
 lazy val commonDependencies = Seq(
@@ -170,7 +180,14 @@ lazy val commonDependencies = Seq(
   dependencies.playCache,
   dependencies.awsJavaSdk,
   dependencies.awsJavaSdkSes,
-  dependencies.akkaTestkit
+  dependencies.akkaTestkit,
+  dependencies.logbackClassic,
+  dependencies.slf4jApi,
+  dependencies.playLogback,
+  dependencies.jacksonCore,
+  dependencies.jacksonDatabind,
+  dependencies.jacksonAnnotations,
+  dependencies.jacksonModuleScala
 )
 
 
@@ -186,6 +203,10 @@ lazy val commonResolvers = resolvers ++= Seq(
 lazy val commonExcludeDependencies = excludeDependencies ++= Seq(
   ExclusionRule("com.google.appengine", "appengine-api-1.0-sdk"),
   ExclusionRule("com.google.appengine", "appengine-jsr107cache")
+)
+
+lazy val commonDependencyOverrides = dependencyOverrides ++= Seq(
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.3"
 )
 
 lazy val commonScalacOptions = scalacOptions ++= Seq(
