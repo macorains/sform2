@@ -4,7 +4,6 @@ import com.amazonaws.regions.Regions
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder
 import com.amazonaws.services.simpleemail.model.{Body, Content, Destination, Message, SendEmailRequest}
 import com.digitaltangible.playguard._
-import net.macolabo.sform2.domain.services.GoogleAuth.GoogleAuthService
 
 import javax.inject.Inject
 import net.macolabo.sform2.domain.services.User.UserService
@@ -19,7 +18,7 @@ import org.pac4j.core.profile.UserProfile
 import org.pac4j.jwt.config.signature.SecretSignatureConfiguration
 import org.pac4j.jwt.profile.JwtGenerator
 import org.pac4j.play.scala.{Security, SecurityComponents}
-import play.api.libs.ws.{WSClient, WSRequest}
+import play.api.libs.ws.WSClient
 
 import scala.jdk.CollectionConverters._
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,7 +36,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class SignInController @Inject() (
   val controllerComponents: SecurityComponents,
   userService: UserService,
-  googleAuthService: GoogleAuthService,
   configuration: Configuration,
   cache: SyncCacheApi,
   mailerClient: MailerClient,
@@ -133,26 +131,6 @@ class SignInController @Inject() (
       }).asOpt
     }).getOrElse(BadRequest(""))
   }
-
-  /**
-   * セッションに保持されているOAuthToken文字列を返す
-   * @return
-   */
-  def getOAuthTokenString: Action[AnyContent] = Action { implicit request =>
-    val token = request.session.get("googleToken").getOrElse("")
-    Ok(s"""{"token": "$token"}""")
-  }
-
-  /**
-   * GoogleOAuth認証コードからOAuthTokenを取得してセッションに保存する
-   * @return
-   */
-  def getOAuthToken: Action[AnyContent] = Action { implicit request =>
-    val code = request.getQueryString("code").getOrElse("")
-    googleAuthService.getToken(code, configuration.get[String]("baseUrl")).map(token => {
-        Ok(net.macolabo.sform2.views.html.oauth(configuration.get[String]("sform.oauth.redirectUrl"))).withSession(request.session + ("googleToken" -> token))
-    }).getOrElse(Ok(net.macolabo.sform2.views.html.oauthfailed()))
-}
 
   def getJwt(): Action[AnyContent] = Action { implicit  request =>
     // TODO 必要なくなったら削除

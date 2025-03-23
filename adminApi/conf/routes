@@ -11,9 +11,6 @@ POST        /signUp                          net.macolabo.sform2.controllers.Sig
 POST        /signIn                          net.macolabo.sform2.controllers.SignInController.submit()
 POST        /verification                    net.macolabo.sform2.controllers.SignInController.verification
 
-GET         /oauthToken                      net.macolabo.sform2.controllers.SignInController.getOAuthToken
-GET         /oauthTokenString                net.macolabo.sform2.controllers.SignInController.getOAuthTokenString
-
 GET         /account/activate/:token         net.macolabo.sform2.controllers.ActivateAccountController.activate(token: java.util.UUID)
 
 # Map static resources from the /public folder to the /assets URL path

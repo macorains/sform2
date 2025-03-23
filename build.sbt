@@ -77,61 +77,62 @@ lazy val formApi = Project(
 lazy val dependencies =
   new
     {
-      val playPac4jVersion = "12.0.0-PLAY2.8"
-      val pac4jVersion = "5.7.2"
-      val playVersion = "2.8.8"
-      val scalikeJdbcVersion = "3.5.0"
       val akkaVersion = "2.6.21"
+      val pac4jVersion = "5.7.2"
+      val playPac4jVersion = "12.0.0-PLAY2.8"
+      val playVersion = "2.8.20"
+      val scalikeJdbcVersion = "3.5.0"
 
-      val scalaReflect = "org.scala-lang" % "scala-reflect" % "2.13.3"
-      val mysqlConnector = "mysql" % "mysql-connector-java" % "8.0.20"
-      val scalikejdbc = "org.scalikejdbc" %% "scalikejdbc" % scalikeJdbcVersion
-      val scalikejdbcConfig = "org.scalikejdbc" %% "scalikejdbc-config" % scalikeJdbcVersion
-      val scalikejdbcPlayFixture = "org.scalikejdbc" %% "scalikejdbc-play-fixture" % "2.8.0-scalikejdbc-3.5"
-      val scalikejdbcSyntaxSupportMacro = "org.scalikejdbc" %% "scalikejdbc-syntax-support-macro" % scalikeJdbcVersion
-      val scalikejdbcJodaTime = "org.scalikejdbc" %% "scalikejdbc-joda-time" % scalikeJdbcVersion
-      val scalikejdbcTest = "org.scalikejdbc" %% "scalikejdbc-test" % scalikeJdbcVersion
-      val webjarsPlay = "org.webjars" %% "webjars-play" % "2.8.0-1"
-      val playMailer = "com.typesafe.play" %% "play-mailer" % "8.0.1"
-      val playMailerGuice = "com.typesafe.play" %% "play-mailer-guice" % "8.0.1"
-      val scalaGuice = "net.codingwell" %% "scala-guice" % "4.2.10"
-      val ficus = "com.iheart" %% "ficus" % "1.4.7"
       val akkaQuartzScheduler = "com.enragedginger" %% "akka-quartz-scheduler" % "1.9.0-akka-2.6.x"
-      val playBootstrap = "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B4"
-      val playGuard = "com.digitaltangible" %% "play-guard" % "2.5.0"
-      val commonsLang3 = "org.apache.commons" % "commons-lang3" % "3.10"
-      val commonsIo = "commons-io" % "commons-io" % "2.11.0"
-      val scalatestplusPlay = "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0"
-      val mockitoScalaScalatest = "org.mockito" %% "mockito-scala-scalatest" % "1.13.11"
-      val playTest = "com.typesafe.play" %% "play-test"% "2.8.1"
-      val scalaTest = "org.scalatest" %% "scalatest" % "3.1.2"
-
-      val pac4j = "org.pac4j" %% "play-pac4j" % playPac4jVersion
-      val pac4jHttp = "org.pac4j" % "pac4j-http" % pac4jVersion excludeAll(ExclusionRule(organization = "com.fasterxml.jackson.core"))
-      val pac4jCas = "org.pac4j" % "pac4j-cas" % pac4jVersion exclude("com.fasterxml.jackson.core", "jackson-databind")
-      val pac4jOauth = "org.pac4j" % "pac4j-oauth" % pac4jVersion excludeAll(ExclusionRule(organization = "com.fasterxml.jackson.core"))
-      val pac4jSaml = "org.pac4j" % "pac4j-saml" % pac4jVersion excludeAll(ExclusionRule(organization = "com.fasterxml.jackson.core"))
-      val pac4jOidc = "org.pac4j" % "pac4j-oidc" % pac4jVersion  excludeAll(ExclusionRule("commons-io" , "commons-io"), ExclusionRule(organization = "com.fasterxml.jackson.core"))
-      val pac4jGae = "org.pac4j" % "pac4j-gae" % pac4jVersion
-      val pac4jJwt = "org.pac4j" % "pac4j-jwt" % pac4jVersion exclude("commons-io" , "commons-io")
-      val pac4jLdap = "org.pac4j" % "pac4j-ldap" % pac4jVersion excludeAll(ExclusionRule(organization = "com.fasterxml.jackson.core"))
-      val pac4jSql = "org.pac4j" % "pac4j-sql" % pac4jVersion exclude("com.fasterxml.jackson.core", "jackson-databind")
-      val pac4jMongo = "org.pac4j" % "pac4j-mongo" % pac4jVersion excludeAll(ExclusionRule(organization = "com.fasterxml.jackson.core"))
-      val pac4jKerberos = "org.pac4j" % "pac4j-kerberos" % pac4jVersion exclude("org.springframework", "spring-core")
-      val pac4jCouch = "org.pac4j" % "pac4j-couch" % pac4jVersion excludeAll(ExclusionRule(organization = "com.fasterxml.jackson.core"))
-      val shiroCore = "org.apache.shiro" % "shiro-core" % "1.7.1"
-      val playCache = "com.typesafe.play" % "play-cache_2.13" % playVersion
+      val akkaTestkit = "com.typesafe.akka" %% "akka-testkit" % akkaVersion
       val awsJavaSdk = "com.amazonaws" % "aws-java-sdk" % "1.11.1034"
       val awsJavaSdkSes = "com.amazonaws" % "aws-java-sdk-ses" % "1.11.1034"
-      val akkaTestkit = "com.typesafe.akka" %% "akka-testkit" % akkaVersion
-      val playJson = "com.typesafe.play" %% "play-json" % "2.9.2"
-      val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.4.14"
-      val slf4jApi = "org.slf4j" % "slf4j-api" % "2.0.12"
-      val playLogback = "com.typesafe.play" %% "play-logback" % "2.9.0"
+      val commonsIo = "commons-io" % "commons-io" % "2.11.0"
+      val commonsLang3 = "org.apache.commons" % "commons-lang3" % "3.10"
+      val ficus = "com.iheart" %% "ficus" % "1.4.7"
+      val jacksonAnnotations = "com.fasterxml.jackson.core" % "jackson-annotations" % "2.14.3"
       val jacksonCore = "com.fasterxml.jackson.core" % "jackson-core" % "2.14.3"
       val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.3"
-      val jacksonAnnotations = "com.fasterxml.jackson.core" % "jackson-annotations" % "2.14.3"
       val jacksonModuleScala = "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.14.3"
+      val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.4.14"
+      val mockitoScalaScalatest = "org.mockito" %% "mockito-scala-scalatest" % "1.13.11"
+      val mysqlConnector = "mysql" % "mysql-connector-java" % "8.0.20"
+      val pac4j = "org.pac4j" %% "play-pac4j" % playPac4jVersion
+      val pac4jCas = "org.pac4j" % "pac4j-cas" % pac4jVersion exclude("com.fasterxml.jackson.core", "jackson-databind")
+      val pac4jCouch = "org.pac4j" % "pac4j-couch" % pac4jVersion excludeAll (ExclusionRule(organization = "com.fasterxml.jackson.core"))
+      val pac4jGae = "org.pac4j" % "pac4j-gae" % pac4jVersion
+      val pac4jHttp = "org.pac4j" % "pac4j-http" % pac4jVersion excludeAll (ExclusionRule(organization = "com.fasterxml.jackson.core"))
+      val pac4jJwt = "org.pac4j" % "pac4j-jwt" % pac4jVersion exclude("commons-io", "commons-io")
+      val pac4jKerberos = "org.pac4j" % "pac4j-kerberos" % pac4jVersion exclude("org.springframework", "spring-core")
+      val pac4jLdap = "org.pac4j" % "pac4j-ldap" % pac4jVersion excludeAll (ExclusionRule(organization = "com.fasterxml.jackson.core"))
+      val pac4jMongo = "org.pac4j" % "pac4j-mongo" % pac4jVersion excludeAll (ExclusionRule(organization = "com.fasterxml.jackson.core"))
+      val pac4jOauth = "org.pac4j" % "pac4j-oauth" % pac4jVersion excludeAll (ExclusionRule(organization = "com.fasterxml.jackson.core"))
+      val pac4jOidc = "org.pac4j" % "pac4j-oidc" % pac4jVersion excludeAll(ExclusionRule("commons-io", "commons-io"), ExclusionRule(organization = "com.fasterxml.jackson.core"))
+      val pac4jSaml = "org.pac4j" % "pac4j-saml" % pac4jVersion excludeAll (ExclusionRule(organization = "com.fasterxml.jackson.core"))
+      val pac4jSql = "org.pac4j" % "pac4j-sql" % pac4jVersion exclude("com.fasterxml.jackson.core", "jackson-databind")
+      val playBootstrap = "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B4"
+      val playCache = "com.typesafe.play" % "play-cache_2.13" % playVersion
+      val playJson = "com.typesafe.play" %% "play-json" % "2.9.2"
+      val playTest = "com.typesafe.play" %% "play-test"% "2.8.1"
+      val playLogback = "com.typesafe.play" %% "play-logback" % "2.9.0"
+      val playMailer = "com.typesafe.play" %% "play-mailer" % "8.0.1"
+      val playMailerGuice = "com.typesafe.play" %% "play-mailer-guice" % "8.0.1"
+      val playGuard = "com.digitaltangible" %% "play-guard" % "2.5.0"
+      var playWs = "com.typesafe.play" %% "play-ahc-ws" % "2.8.20"
+      val scalaGuice = "net.codingwell" %% "scala-guice" % "4.2.10"
+      val scalaReflect = "org.scala-lang" % "scala-reflect" % "2.13.3"
+      val scalaTest = "org.scalatest" %% "scalatest" % "3.1.2"
+      val scalatestplusPlay = "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0"
+      val scalikejdbc = "org.scalikejdbc" %% "scalikejdbc" % scalikeJdbcVersion
+      val scalikejdbcConfig = "org.scalikejdbc" %% "scalikejdbc-config" % scalikeJdbcVersion
+      val scalikejdbcJodaTime = "org.scalikejdbc" %% "scalikejdbc-joda-time" % scalikeJdbcVersion
+      val scalikejdbcPlayFixture = "org.scalikejdbc" %% "scalikejdbc-play-fixture" % "2.8.0-scalikejdbc-3.5"
+      val scalikejdbcSyntaxSupportMacro = "org.scalikejdbc" %% "scalikejdbc-syntax-support-macro" % scalikeJdbcVersion
+      val scalikejdbcTest = "org.scalikejdbc" %% "scalikejdbc-test" % scalikeJdbcVersion
+      val slf4jApi = "org.slf4j" % "slf4j-api" % "2.0.12"
+      val shiroCore = "org.apache.shiro" % "shiro-core" % "1.7.1"
+      val sslConfigCore = "com.typesafe" %% "ssl-config-core" % "0.6.1"
+      val webjarsPlay = "org.webjars" %% "webjars-play" % "2.8.0-1"
     }
 
 lazy val commonDependencies = Seq(
@@ -184,10 +185,12 @@ lazy val commonDependencies = Seq(
   dependencies.logbackClassic,
   dependencies.slf4jApi,
   dependencies.playLogback,
+  dependencies.playWs,
   dependencies.jacksonCore,
   dependencies.jacksonDatabind,
   dependencies.jacksonAnnotations,
-  dependencies.jacksonModuleScala
+  dependencies.jacksonModuleScala,
+  dependencies.sslConfigCore
 )
 
 
@@ -206,7 +209,11 @@ lazy val commonExcludeDependencies = excludeDependencies ++= Seq(
 )
 
 lazy val commonDependencyOverrides = dependencyOverrides ++= Seq(
-  "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.3"
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.3",
+  "org.pac4j" %% "pac4j-core" % "5.7.2",
+  "org.pac4j" %% "pac4j-http" % "5.7.2",
+  "org.pac4j" %% "pac4j-oidc" % "5.7.2",
+  "org.pac4j" %% "pac4j-play" % "5.7.2"
 )
 
 lazy val commonScalacOptions = scalacOptions ++= Seq(

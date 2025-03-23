@@ -64,36 +64,46 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
   }
 
   @Provides
-  def provideFormClient: FormClient = new FormClient(baseUrl + "/loginForm", new SimpleTestUsernamePasswordAuthenticator())
+  def provideFormClient: FormClient = {
+    val client = new FormClient()
+    client.setLoginUrl(baseUrl + "/loginForm")
+    client.setAuthenticator(new SimpleTestUsernamePasswordAuthenticator())
+    client
+  }
 
   @Provides
   def provideDirectFormClient: DirectFormClient = {
     val userDAO = new UserDAOImpl()
-    new DirectFormClient(new SqlAuthencator(userDAO))
+    val client = new DirectFormClient()
+    client.setAuthenticator(new SqlAuthencator(userDAO))
+    client
   }
 
   @Provides
   def provideHeaderClient: HeaderClient = {
     val jwtAuthenticator = new JwtAuthenticator()
     jwtAuthenticator.addSignatureConfiguration(new SecretSignatureConfiguration("12345678901234567890123456789012"))
-    val headerClient = new HeaderClient("X-Auth-Token", jwtAuthenticator)
-    headerClient
+    val client = new HeaderClient()
+    client.setHeaderName("X-Auth-Token")
+    client.setAuthenticator(jwtAuthenticator)
+    client
   }
 
+//  @Provides
+//  def provideOidcClient: OidcClient = {
+//    val oidcConfiguration = new OidcConfiguration()
+//    oidcConfiguration.setClientId(configuration.get[String]("sform.oauth.client_id"))
+//    oidcConfiguration.setSecret(configuration.get[String]("sform.oauth.client_secret"))
+//    oidcConfiguration.setDiscoveryURI("https://accounts.google.com/.well-known/openid-configuration")
+//    oidcConfiguration.addCustomParam("prompt", "consent")
+//    val client = new OidcClient()
+//    client.setConfiguration(oidcConfiguration)
+//    client.addAuthorizationGenerator(new DefaultRolesAuthorizationGenerator)
+//    client
+//  }
   @Provides
-  def provideOidcClient: OidcClient = {
-    val oidcConfiguration = new OidcConfiguration()
-    oidcConfiguration.setClientId(configuration.get[String]("sform.oauth.client_id"))
-    oidcConfiguration.setSecret(configuration.get[String]("sform.oauth.client_secret"))
-    oidcConfiguration.setDiscoveryURI("https://accounts.google.com/.well-known/openid-configuration")
-    oidcConfiguration.addCustomParam("prompt", "consent")
-    val oidcClient = new OidcClient(oidcConfiguration)
-    oidcClient.addAuthorizationGenerator(new DefaultRolesAuthorizationGenerator)
-    oidcClient
-  }
-  @Provides
-  def provideConfig(formClient: FormClient, directFormClient: DirectFormClient, headerClient: HeaderClient, oidcClient: OidcClient): Config = {
-    val clients = new Clients(baseUrl + "/callback", formClient, directFormClient, headerClient, oidcClient, new AnonymousClient())
+  def provideConfig(formClient: FormClient, directFormClient: DirectFormClient, headerClient: HeaderClient/*, oidcClient: OidcClient*/): Config = {
+    val clients = new Clients(baseUrl + "/callback", formClient, directFormClient, headerClient/*, oidcClient*/, new AnonymousClient())
 
     val config = new Config(clients)
 //    config.addAuthorizer("admin", new RequireAnyRoleAuthorizer("ROLE_ADMIN"))
