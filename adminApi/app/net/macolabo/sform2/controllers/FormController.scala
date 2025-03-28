@@ -50,7 +50,7 @@ class FormController @Inject() (
    * GET /form/list
    * @return フォームデータのリスト
    */
-  def getList: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+  def getList: Action[AnyContent] = Secure("OidcClient") { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
     val userGroup = getAttributeValue(profiles, "user_group")
     val res = formService.getList(userGroup)

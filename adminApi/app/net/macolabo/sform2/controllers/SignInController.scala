@@ -145,6 +145,10 @@ class SignInController @Inject() (
     Ok(net.macolabo.sform2.views.html.jwt(configuration.get[String]("sform.oauth.redirectUrl"), jwt))
   }
 
+  def callback(): Action[AnyContent] = Action { implicit request => {
+    Ok("hogehoge")
+  }}
+
 private val httpErrorRateLimitFunction =
     HttpErrorRateLimitFunction[Request](new RateLimiter(1, 1/7f, "test failure rate limit"), _ => Future.successful(BadRequest(Json.parse(s"""{"message":"LoginFailureLimitExceeded"}"""))))
 

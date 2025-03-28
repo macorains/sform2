@@ -16,15 +16,20 @@ import org.pac4j.play.{CallbackController, LogoutController}
 import play.api.{Configuration, Environment}
 
 import java.nio.charset.StandardCharsets
-import org.pac4j.play.store.{PlayCookieSessionStore, ShiroAesDataEncrypter}
+import org.pac4j.play.store.{PlayCacheSessionStore, PlayCookieSessionStore, ShiroAesDataEncrypter}
 import org.pac4j.core.client.direct.AnonymousClient
 import org.pac4j.core.config.Config
-import org.pac4j.core.context.session.SessionStore
+import org.pac4j.core.context.{CallContext, FrameworkParameters}
+import org.pac4j.core.context.session.{SessionStore, SessionStoreFactory}
+import org.pac4j.core.http.ajax.DefaultAjaxRequestResolver
+import org.pac4j.core.logout.handler.SessionLogoutHandler
 import org.pac4j.core.profile.CommonProfile
 import org.pac4j.http.client.direct.DirectFormClient
 import org.pac4j.oidc.client.OidcClient
 import org.pac4j.oidc.config.OidcConfiguration
 import org.pac4j.play.scala.{DefaultSecurityComponents, Pac4jScalaTemplateHelper, SecurityComponents}
+
+import java.util.Optional
 
 /**
  * Guice DI module to be included in application.conf
@@ -38,14 +43,15 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
   val baseUrl: String = configuration.get[String]("baseUrl")
   val system: ActorSystem = ActorSystem("security")
   implicit val databaseExecutionContext: DatabaseExecutionContext = new DatabaseExecutionContext(system)
-  //val userDAO = new UserDAOImpl()
 
   override def configure(): Unit = {
 
+    println("Secret Key: " + configuration.get[String]("play.http.secret.key"))
     val sKey = configuration.get[String]("play.http.secret.key").substring(0, 16)
     val dataEncrypter = new ShiroAesDataEncrypter(sKey.getBytes(StandardCharsets.UTF_8))
 
     val playSessionStore = new PlayCookieSessionStore(dataEncrypter)
+
     bind(classOf[SessionStore]).toInstance(playSessionStore)
     bind(classOf[SecurityComponents]).to(classOf[DefaultSecurityComponents])
     bind(classOf[Pac4jScalaTemplateHelper[CommonProfile]])
@@ -53,7 +59,7 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
 
     // callback
     val callbackController = new CallbackController()
-    callbackController.setDefaultUrl("/?defaulturlafterlogout")
+    callbackController.setDefaultUrl("/form/list")
     bind(classOf[CallbackController]).toInstance(callbackController)
 
     // logout
@@ -89,29 +95,33 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
     client
   }
 
-//  @Provides
-//  def provideOidcClient: OidcClient = {
-//    val oidcConfiguration = new OidcConfiguration()
-//    oidcConfiguration.setClientId(configuration.get[String]("sform.oauth.client_id"))
-//    oidcConfiguration.setSecret(configuration.get[String]("sform.oauth.client_secret"))
-//    oidcConfiguration.setDiscoveryURI("https://accounts.google.com/.well-known/openid-configuration")
-//    oidcConfiguration.addCustomParam("prompt", "consent")
-//    val client = new OidcClient()
-//    client.setConfiguration(oidcConfiguration)
-//    client.addAuthorizationGenerator(new DefaultRolesAuthorizationGenerator)
-//    client
-//  }
   @Provides
-  def provideConfig(formClient: FormClient, directFormClient: DirectFormClient, headerClient: HeaderClient/*, oidcClient: OidcClient*/): Config = {
-    val clients = new Clients(baseUrl + "/callback", formClient, directFormClient, headerClient/*, oidcClient*/, new AnonymousClient())
+  def provideOidcClient: OidcClient = {
+    val oidcConfiguration = new OidcConfiguration()
+    oidcConfiguration.setClientId(configuration.get[String]("sform.oauth.client_id"))
+    oidcConfiguration.setSecret(configuration.get[String]("sform.oauth.client_secret"))
+    oidcConfiguration.setDiscoveryURI("https://accounts.google.com/.well-known/openid-configuration")
+    oidcConfiguration.addCustomParam("prompt", "consent")
 
+    val client = new OidcClient()
+    client.setConfiguration(oidcConfiguration)
+    client.addAuthorizationGenerator(new DefaultRolesAuthorizationGenerator)
+    client.setAjaxRequestResolver(new DefaultAjaxRequestResolver())
+    client.setCallbackUrl(configuration.get[String]("baseUrl") + "/callback")
+    client
+  }
+
+  @Provides
+  def provideConfig(formClient: FormClient, directFormClient: DirectFormClient, headerClient: HeaderClient, oidcClient: OidcClient, sessionStore: PlayCacheSessionStore): Config = {
+    val clients = new Clients(configuration.get[String]("baseUrl") + "/callback", formClient, directFormClient, headerClient, oidcClient, new AnonymousClient())
     val config = new Config(clients)
-//    config.addAuthorizer("admin", new RequireAnyRoleAuthorizer("ROLE_ADMIN"))
-//    config.addAuthorizer("hoge", new RequireAnyRoleAuthorizer("ROLE_HOGE"))
-//    config.addAuthorizer("custom", new CustomAuthorizer)
-//    config.addMatcher("excludedPath", new PathMatcher().excludeRegex("^/facebook/notprotected\\.html$"))
+
+    // セッションストアの設定
+    config.setSessionStoreFactory(new SessionStoreFactory {
+      override def newSessionStore(parameters: FrameworkParameters): SessionStore = sessionStore
+    })
+
     config.setHttpActionAdapter(new DemoHttpActionAdapter())
     config
   }
-
 }

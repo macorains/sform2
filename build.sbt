@@ -78,7 +78,7 @@ lazy val dependencies =
   new
     {
       val akkaVersion = "2.6.21"
-      val pac4jVersion = "5.7.2"
+      val pac4jVersion = "6.1.1"
       val playPac4jVersion = "12.0.0-PLAY2.8"
       val playVersion = "2.8.20"
       val scalikeJdbcVersion = "3.5.0"
@@ -100,7 +100,8 @@ lazy val dependencies =
       val pac4j = "org.pac4j" %% "play-pac4j" % playPac4jVersion
       val pac4jCas = "org.pac4j" % "pac4j-cas" % pac4jVersion exclude("com.fasterxml.jackson.core", "jackson-databind")
       val pac4jCouch = "org.pac4j" % "pac4j-couch" % pac4jVersion excludeAll (ExclusionRule(organization = "com.fasterxml.jackson.core"))
-      val pac4jGae = "org.pac4j" % "pac4j-gae" % pac4jVersion
+      val pac4jCore = "org.pac4j" % "pac4j-core" % pac4jVersion excludeAll (ExclusionRule(organization = "com.fasterxml.jackson.core"))
+      val pac4jGae = "org.pac4j" % "pac4j-gae" % pac4jVersion excludeAll (ExclusionRule(organization = "com.fasterxml.jackson.core"))
       val pac4jHttp = "org.pac4j" % "pac4j-http" % pac4jVersion excludeAll (ExclusionRule(organization = "com.fasterxml.jackson.core"))
       val pac4jJwt = "org.pac4j" % "pac4j-jwt" % pac4jVersion exclude("commons-io", "commons-io")
       val pac4jKerberos = "org.pac4j" % "pac4j-kerberos" % pac4jVersion exclude("org.springframework", "spring-core")
@@ -118,7 +119,7 @@ lazy val dependencies =
       val playMailer = "com.typesafe.play" %% "play-mailer" % "8.0.1"
       val playMailerGuice = "com.typesafe.play" %% "play-mailer-guice" % "8.0.1"
       val playGuard = "com.digitaltangible" %% "play-guard" % "2.5.0"
-      var playWs = "com.typesafe.play" %% "play-ahc-ws" % "2.8.20"
+      val playWs = "com.typesafe.play" %% "play-ahc-ws" % "2.9.0"
       val scalaGuice = "net.codingwell" %% "scala-guice" % "4.2.10"
       val scalaReflect = "org.scala-lang" % "scala-reflect" % "2.13.3"
       val scalaTest = "org.scalatest" %% "scalatest" % "3.1.2"
@@ -167,6 +168,8 @@ lazy val commonDependencies = Seq(
   dependencies.pac4j,
   dependencies.pac4jHttp,
   dependencies.pac4jCas,
+  dependencies.pac4jCouch,
+  dependencies.pac4jCore,
   dependencies.pac4jOauth,
   // dependencies.pac4jSaml,
   dependencies.pac4jOidc,
@@ -176,7 +179,6 @@ lazy val commonDependencies = Seq(
   dependencies.pac4jSql,
   dependencies.pac4jMongo,
   dependencies.pac4jKerberos,
-  dependencies.pac4jCouch,
   dependencies.shiroCore,
   dependencies.playCache,
   dependencies.awsJavaSdk,
@@ -209,11 +211,7 @@ lazy val commonExcludeDependencies = excludeDependencies ++= Seq(
 )
 
 lazy val commonDependencyOverrides = dependencyOverrides ++= Seq(
-  "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.3",
-  "org.pac4j" %% "pac4j-core" % "5.7.2",
-  "org.pac4j" %% "pac4j-http" % "5.7.2",
-  "org.pac4j" %% "pac4j-oidc" % "5.7.2",
-  "org.pac4j" %% "pac4j-play" % "5.7.2"
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.3"
 )
 
 lazy val commonScalacOptions = scalacOptions ++= Seq(

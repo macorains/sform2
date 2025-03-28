@@ -56,3 +56,4 @@ GET /jwt net.macolabo.sform2.controllers.SignInController.getJwt()
 
 #test
 GET /oidc net.macolabo.sform2.controllers.SignInController.oidcSignin()
+GET /callback @org.pac4j.play.CallbackController.callback(request: play.mvc.Http.Request)
