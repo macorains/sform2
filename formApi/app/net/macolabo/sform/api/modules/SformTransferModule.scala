@@ -1,6 +1,6 @@
 package net.macolabo.sform.api.modules
 
-import akka.actor.{ActorRef, ActorSelection, ActorSystem}
+import org.apache.pekko.actor.{ActorRef, ActorSelection, ActorSystem}
 import com.google.inject.{AbstractModule, Inject, Provides}
 import net.macolabo.sform2.domain.services.Transfer.{MailTransfer, SalesforceTransfer, TransferReceiver, TransferSupervisor}
 import play.api.libs.concurrent.AkkaGuiceSupport

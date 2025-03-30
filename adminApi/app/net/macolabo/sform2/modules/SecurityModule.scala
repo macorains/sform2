@@ -1,11 +1,12 @@
 package net.macolabo.sform2.modules
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import com.google.inject.{AbstractModule, Inject, Provides}
+import com.nimbusds.jose.JWSAlgorithm
 import net.codingwell.scalaguice.ScalaModule
 import net.macolabo.sform2.domain.models.daos.UserDAOImpl
 import org.pac4j.http.client.direct.HeaderClient
-import org.pac4j.jwt.config.signature.SecretSignatureConfiguration
+import org.pac4j.jwt.config.signature.{RSASignatureConfiguration, SecretSignatureConfiguration}
 import org.pac4j.jwt.credentials.authenticator.JwtAuthenticator
 import net.macolabo.sform2.views.models.security.{DatabaseExecutionContext, DemoHttpActionAdapter, SqlAuthencator}
 import org.pac4j.core.authorization.generator.DefaultRolesAuthorizationGenerator
@@ -27,6 +28,7 @@ import org.pac4j.core.profile.CommonProfile
 import org.pac4j.http.client.direct.DirectFormClient
 import org.pac4j.oidc.client.OidcClient
 import org.pac4j.oidc.config.OidcConfiguration
+import org.pac4j.play.http.PlayHttpActionAdapter
 import org.pac4j.play.scala.{DefaultSecurityComponents, Pac4jScalaTemplateHelper, SecurityComponents}
 
 import java.util.Optional
@@ -59,12 +61,12 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
 
     // callback
     val callbackController = new CallbackController()
-    callbackController.setDefaultUrl("/form/list")
+    callbackController.setDefaultUrl("/oidcTest")
     bind(classOf[CallbackController]).toInstance(callbackController)
 
     // logout
     val logoutController = new LogoutController()
-    logoutController.setDefaultUrl("/")
+    logoutController.setDefaultUrl("/oidcTest")
     bind(classOf[LogoutController]).toInstance(logoutController)
 
   }
@@ -102,6 +104,14 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
     oidcConfiguration.setSecret(configuration.get[String]("sform.oauth.client_secret"))
     oidcConfiguration.setDiscoveryURI("https://accounts.google.com/.well-known/openid-configuration")
     oidcConfiguration.addCustomParam("prompt", "consent")
+    oidcConfiguration.setScope("openid email profile")
+    oidcConfiguration.setResponseType("code")
+    oidcConfiguration.setUseNonce(true)
+
+    // JWT の署名アルゴリズムを RS256 に設定
+    val rsaSignatureConfig = new RSASignatureConfiguration()
+    rsaSignatureConfig.setAlgorithm(JWSAlgorithm.RS256)
+    oidcConfiguration.setPreferredJwsAlgorithm(rsaSignatureConfig.getAlgorithm)
 
     val client = new OidcClient()
     client.setConfiguration(oidcConfiguration)
@@ -112,8 +122,8 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
   }
 
   @Provides
-  def provideConfig(formClient: FormClient, directFormClient: DirectFormClient, headerClient: HeaderClient, oidcClient: OidcClient, sessionStore: PlayCacheSessionStore): Config = {
-    val clients = new Clients(configuration.get[String]("baseUrl") + "/callback", formClient, directFormClient, headerClient, oidcClient, new AnonymousClient())
+  def provideConfig(formClient: FormClient, directFormClient: DirectFormClient, headerClient: HeaderClient, oidcClient: OidcClient, sessionStore: SessionStore): Config = {
+    val clients = new Clients(configuration.get[String]("baseUrl") + "/callback", formClient, directFormClient, headerClient, oidcClient)
     val config = new Config(clients)
 
     // セッションストアの設定

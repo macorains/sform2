@@ -1,6 +1,6 @@
 package net.macolabo.sform2.domain.services.Transfer
 
-import akka.actor.Actor
+import org.apache.pekko.actor.Actor
 import net.macolabo.sform2.domain.services.Transfer.TransferReceiver.ConsumeTaskRequest
 import play.api.libs.json.JsValue
 

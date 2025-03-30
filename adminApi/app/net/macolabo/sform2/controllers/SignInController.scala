@@ -83,8 +83,13 @@ class SignInController @Inject() (
   }
 
   def oidcSignin: Action[AnyContent] = Secure("OidcClient") { implicit request =>
-    val profiles = getProfiles(controllerComponents)(request)
-    Ok(profiles.toString)
+//    val profiles = getProfiles(controllerComponents)(request)
+//    Ok(profiles.toString)
+    Ok("fuga")
+  }
+
+  def testAction: Action[AnyContent] = Secure("OidcClient") { implicit request=>
+    Ok("hoge")
   }
 
   private def sendAuthkeyMail(profile: UserProfile)(implicit request:  AuthenticatedRequest[AnyContent]) = {
@@ -149,8 +154,8 @@ class SignInController @Inject() (
     Ok("hogehoge")
   }}
 
-private val httpErrorRateLimitFunction =
-    HttpErrorRateLimitFunction[Request](new RateLimiter(1, 1/7f, "test failure rate limit"), _ => Future.successful(BadRequest(Json.parse(s"""{"message":"LoginFailureLimitExceeded"}"""))))
+//  private val httpErrorRateLimitFunction =
+//    HttpErrorRateLimitFunction[Request](new RateLimiter(1, 1/7f, "test failure rate limit"), _ => Future.successful(BadRequest(Json.parse(s"""{"message":"LoginFailureLimitExceeded"}"""))))
 
   private def getCachedProfiles(authKey: String)  = {
     cache.get[java.util.List[UserProfile]](profilePrefix + authKey)

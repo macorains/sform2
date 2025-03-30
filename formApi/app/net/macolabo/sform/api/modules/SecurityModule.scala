@@ -1,6 +1,6 @@
 package net.macolabo.sform.api.modules
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import com.google.inject.{AbstractModule, Provides}
 import net.codingwell.scalaguice.ScalaModule
 import net.macolabo.sform2.domain.models.daos.ApiTokenDAOImpl

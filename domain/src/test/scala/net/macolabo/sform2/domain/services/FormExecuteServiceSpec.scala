@@ -1,7 +1,7 @@
 package net.macolabo.sform2.domain.services
 
-import akka.actor.ActorSystem
-import akka.testkit.{TestActorRef, TestKit, TestProbe}
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.testkit.{TestActorRef, TestKit, TestProbe}
 import net.macolabo.sform2.domain.models.daos.{FormColDAO, FormColSelectDAO, FormColValidationDAO, FormDAO, PostdataDAO}
 import net.macolabo.sform2.domain.models.entity.form.{Form, FormCol, FormColValidation}
 import net.macolabo.sform2.domain.models.helper.SformTestHelper
