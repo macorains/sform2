@@ -82,8 +82,9 @@ lazy val formApi = Project(
 lazy val dependencies =
   new
     {
-      val akkaVersion = "2.6.21"
+      //val akkaVersion = "2.6.21"
       val pac4jVersion = "6.1.1"
+      val pekkoVersion = "1.0.3"
       val playPac4jVersion = "12.0.0-PLAY3.0"
       val playVersion = "3.0.7"
       val scalikeJdbcVersion = "3.5.0"
@@ -117,10 +118,14 @@ lazy val dependencies =
       val pac4jOidc = "org.pac4j" % "pac4j-oidc" % pac4jVersion excludeAll(ExclusionRule("commons-io", "commons-io"), ExclusionRule(organization = "com.fasterxml.jackson.core"))
       val pac4jSaml = "org.pac4j" % "pac4j-saml" % pac4jVersion excludeAll (ExclusionRule(organization = "com.fasterxml.jackson.core"))
       val pac4jSql = "org.pac4j" % "pac4j-sql" % pac4jVersion exclude("com.fasterxml.jackson.core", "jackson-databind")
+      val pekkoActorTyped = "org.apache.pekko" %% "pekko-actor-typed" % pekkoVersion
+      val pekkoStream = "org.apache.pekko" %% "pekko-stream" % pekkoVersion
+      val pekkoSlf4j = "org.apache.pekko" %% "pekko-slf4j" % pekkoVersion
       val pekkoHttpServer = "org.playframework" %% "play-pekko-http-server" % "3.0.0"
       val pekkoHttp2Support = "org.playframework" %% "play-pekko-http2-support" % "3.0.0"
       val playCache = "org.playframework" %% "play-cache" % playVersion
-      val playJava = "org.playframework" %% "play-java" % "3.0.0"
+      val playGuice = "org.playframework" %% "play-guice" % playVersion
+      val playJava = "org.playframework" %% "play-java" % playVersion
       val playJson = "org.playframework" %% "play-json" % "3.0.4"
       val playTest = "org.playframework" %% "play-test"% playVersion
       val playLogback = "org.playframework" %% "play-logback" % playVersion
@@ -159,7 +164,11 @@ lazy val commonDependencies = Seq(
   dependencies.scalikejdbcJodaTime,
   dependencies.scalikejdbcTest % "test",
   dependencies.webjarsPlay,
-  dependencies.guice,
+  //dependencies.guice,
+  dependencies.pekkoActorTyped,
+  dependencies.pekkoStream,
+  dependencies.pekkoSlf4j,
+  dependencies.playGuice,
   dependencies.playJava,
   dependencies.playMailer,
   dependencies.playMailerGuice,
