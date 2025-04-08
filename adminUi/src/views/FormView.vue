@@ -20,8 +20,9 @@ onMounted(() => {
   $http.get('/form/list')
       .then(response => {
         // this.$data.loading = false
+        console.log(response)
         data.value = convert(response.data.forms)
-      })
+      }).catch(error => console.log(error))
 })
 
 function convert(data) {
@@ -40,7 +41,7 @@ function detail(data) {
 
 <template>
   <main>
-    <HeaderMenu />
+    <HeaderMenu :hasMenu="true"/>
     <div class="container">
       <h1 class="mt-5 mb-5">
         フォーム

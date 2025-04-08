@@ -17,21 +17,17 @@ import org.pac4j.play.{CallbackController, LogoutController}
 import play.api.{Configuration, Environment}
 
 import java.nio.charset.StandardCharsets
-import org.pac4j.play.store.{PlayCacheSessionStore, PlayCookieSessionStore, ShiroAesDataEncrypter}
-import org.pac4j.core.client.direct.AnonymousClient
+import org.pac4j.play.store.{PlayCookieSessionStore, ShiroAesDataEncrypter}
 import org.pac4j.core.config.Config
-import org.pac4j.core.context.{CallContext, FrameworkParameters}
+import org.pac4j.core.context.FrameworkParameters
 import org.pac4j.core.context.session.{SessionStore, SessionStoreFactory}
 import org.pac4j.core.http.ajax.DefaultAjaxRequestResolver
-import org.pac4j.core.logout.handler.SessionLogoutHandler
 import org.pac4j.core.profile.CommonProfile
 import org.pac4j.http.client.direct.DirectFormClient
 import org.pac4j.oidc.client.OidcClient
 import org.pac4j.oidc.config.OidcConfiguration
-import org.pac4j.play.http.PlayHttpActionAdapter
 import org.pac4j.play.scala.{DefaultSecurityComponents, Pac4jScalaTemplateHelper, SecurityComponents}
 
-import java.util.Optional
 
 /**
  * Guice DI module to be included in application.conf
@@ -42,13 +38,13 @@ import java.util.Optional
  */
 class SecurityModule(environment: Environment, configuration: Configuration) extends AbstractModule with ScalaModule {
 
-  val baseUrl: String = configuration.get[String]("baseUrl")
   val system: ActorSystem = ActorSystem("security")
   implicit val databaseExecutionContext: DatabaseExecutionContext = new DatabaseExecutionContext(system)
 
+  private val baseUrl: String = configuration.get[String]("baseUrl")
+
   override def configure(): Unit = {
 
-    println("Secret Key: " + configuration.get[String]("play.http.secret.key"))
     val sKey = configuration.get[String]("play.http.secret.key").substring(0, 16)
     val dataEncrypter = new ShiroAesDataEncrypter(sKey.getBytes(StandardCharsets.UTF_8))
 
@@ -90,6 +86,7 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
   @Provides
   def provideHeaderClient: HeaderClient = {
     val jwtAuthenticator = new JwtAuthenticator()
+    // TODO secretを環境変数からとるようにする
     jwtAuthenticator.addSignatureConfiguration(new SecretSignatureConfiguration("12345678901234567890123456789012"))
     val client = new HeaderClient()
     client.setHeaderName("X-Auth-Token")

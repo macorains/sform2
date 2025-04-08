@@ -13,8 +13,8 @@ import play.api.libs.json.Json._
 import play.api.mvc._
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
-import scala.jdk.CollectionConverters._
 
+import scala.jdk.CollectionConverters._
 import scala.concurrent.ExecutionContext
 
 class FormController @Inject() (
@@ -50,7 +50,7 @@ class FormController @Inject() (
    * GET /form/list
    * @return フォームデータのリスト
    */
-  def getList: Action[AnyContent] = Secure("OidcClient") { implicit request =>
+  def getList: Action[AnyContent] = Secure(clients = "HeaderClient") { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
     val userGroup = getAttributeValue(profiles, "user_group")
     val res = formService.getList(userGroup)
