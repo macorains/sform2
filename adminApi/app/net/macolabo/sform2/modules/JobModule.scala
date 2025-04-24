@@ -2,12 +2,12 @@ package net.macolabo.sform2.modules
 
 import net.codingwell.scalaguice.ScalaModule
 import net.macolabo.sform2.jobs.Scheduler
-import play.api.libs.concurrent.AkkaGuiceSupport
+import play.api.libs.concurrent.PekkoGuiceSupport
 
 /**
  * The job module.
  */
-class JobModule extends ScalaModule with AkkaGuiceSupport {
+class JobModule extends ScalaModule with PekkoGuiceSupport {
 
   /**
    * Configures the module.

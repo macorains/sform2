@@ -7,6 +7,8 @@ sform {
   }
   oauth {
     redirectUrl = "http://localhost:8081/Signin"
+    client_id = "hogehoge.apps.googleusercontent.com"
+    client_secret = ${?SFORM_OIDC_CLIENT_SECRET}
   }
   mail {
     systemMailAddress = "mac.rainshrine@gmail.com"

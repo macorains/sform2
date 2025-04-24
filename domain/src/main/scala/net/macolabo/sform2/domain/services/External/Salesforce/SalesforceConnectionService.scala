@@ -56,8 +56,8 @@ class SalesforceConnectionService @Inject()(
     result.map(res => res.status match {
       case 200 =>
         Json.parse(res.body).validate[SalesforceLoginResponse] match {
-          case s: JsResult[SalesforceLoginResponse] if s.isSuccess => Right(s.get.access_token)
-          case e: JsResult[SalesforceLoginResponse] if e.isError => Left("Json parse error.")
+          case JsSuccess(s,_) => Right(s.access_token)
+          case JsError(e) => Left("Json parse error.")
         }
       case _ =>
         logger.error(res.body)

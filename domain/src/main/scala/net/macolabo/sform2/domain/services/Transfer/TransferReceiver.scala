@@ -1,6 +1,6 @@
 package net.macolabo.sform2.domain.services.Transfer
 
-import akka.actor.{Actor, ActorRef}
+import org.apache.pekko.actor.{Actor, ActorRef}
 import com.google.inject.Inject
 import net.macolabo.sform2.domain.models.daos.{FormDAO, FormTransferTaskConditionDAO, FormTransferTaskDAO, FormTransferTaskMailDAO, FormTransferTaskSalesforceDAO, FormTransferTaskSalesforceFieldDAO}
 import net.macolabo.sform2.domain.models.entity.CryptoConfig

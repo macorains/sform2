@@ -76,6 +76,7 @@ trait FormParts {
           |<button type="button" id="sform_button_finish">完了</button>
           |</div>
        """.stripMargin
+      case _ => ""
     }
   }
 

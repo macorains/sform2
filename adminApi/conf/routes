@@ -4,55 +4,58 @@
 
 # Home page
 
-GET         /                                net.macolabo.sform2.controllers.ApplicationController.index
-GET         /signOut                         net.macolabo.sform2.controllers.ApplicationController.signOut
+GET         /                                @net.macolabo.sform2.controllers.ApplicationController.index
+GET         /signOut                         @net.macolabo.sform2.controllers.ApplicationController.signOut
 
-POST        /signUp                          net.macolabo.sform2.controllers.SignUpController.submit()
-POST        /signIn                          net.macolabo.sform2.controllers.SignInController.submit()
-POST        /verification                    net.macolabo.sform2.controllers.SignInController.verification
+# TODO 2025/04/04 使わなくても動かせるので一旦無効化し、削除するか後ほど検討
+# POST        /signUp                          @net.macolabo.sform2.controllers.SignUpController.submit()
 
-GET         /oauthToken                      net.macolabo.sform2.controllers.SignInController.getOAuthToken
-GET         /oauthTokenString                net.macolabo.sform2.controllers.SignInController.getOAuthTokenString
-
-GET         /account/activate/:token         net.macolabo.sform2.controllers.ActivateAccountController.activate(token: java.util.UUID)
+GET         /account/activate/:token         @net.macolabo.sform2.controllers.ActivateAccountController.activate(token: java.util.UUID)
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file                    controllers.Assets.at(path="/public", file)
+GET         /assets/*file                    @controllers.Assets.at(path="/public", file)
 ->          /webjars                         webjars.Routes
 
-GET /formpost/:hashed_form_id net.macolabo.sform2.controllers.FormPostDataController.getPostData(hashed_form_id: String)
+GET /formpost/:hashed_form_id @net.macolabo.sform2.controllers.FormPostDataController.getPostData(hashed_form_id: String)
 
 # form
-GET /form/list net.macolabo.sform2.controllers.FormController.getList()
-GET /form/:hashed_form_id net.macolabo.sform2.controllers.FormController.get(hashed_form_id: String)
-POST /form/new net.macolabo.sform2.controllers.FormController.create()
-POST /form net.macolabo.sform2.controllers.FormController.save()
-DELETE /form/:hashed_form_id net.macolabo.sform2.controllers.FormController.delete(hashed_form_id: String)
+GET /form/list @net.macolabo.sform2.controllers.FormController.getList()
+GET /form/:hashed_form_id @net.macolabo.sform2.controllers.FormController.get(hashed_form_id: String)
+POST /form/new @net.macolabo.sform2.controllers.FormController.create()
+POST /form @net.macolabo.sform2.controllers.FormController.save()
+DELETE /form/:hashed_form_id @net.macolabo.sform2.controllers.FormController.delete(hashed_form_id: String)
 
 # transfer
-GET /transfer/config/list net.macolabo.sform2.controllers.TransferController.getTransferConfigList()
-GET /transfer/selectlist net.macolabo.sform2.controllers.TransferController.getSelectList()
-GET /transfer/config/:transfer_config_id net.macolabo.sform2.controllers.TransferController.getTransferConfig(transfer_config_id: Int)
-POST /transfer/config net.macolabo.sform2.controllers.TransferController.saveTransferConfig()
-POST /transfer/salesforce/check net.macolabo.sform2.controllers.TransferController.checkTransferSalesforce()
-GET /transfer/salesforce/object/:transfer_config_id net.macolabo.sform2.controllers.TransferController.getTransferSalesforceObject(transfer_config_id: Int)
-GET /transfer/salesforce/field/:transfer_config_id/:object_name net.macolabo.sform2.controllers.TransferController.getTransferSalesforceField(transfer_config_id: Int, object_name: String)
+GET /transfer/config/list @net.macolabo.sform2.controllers.TransferController.getTransferConfigList()
+GET /transfer/selectlist @net.macolabo.sform2.controllers.TransferController.getSelectList()
+GET /transfer/config/:transfer_config_id @net.macolabo.sform2.controllers.TransferController.getTransferConfig(transfer_config_id: Int)
+POST /transfer/config @net.macolabo.sform2.controllers.TransferController.saveTransferConfig()
+POST /transfer/salesforce/check @net.macolabo.sform2.controllers.TransferController.checkTransferSalesforce()
+GET /transfer/salesforce/object/:transfer_config_id @net.macolabo.sform2.controllers.TransferController.getTransferSalesforceObject(transfer_config_id: Int)
+GET /transfer/salesforce/field/:transfer_config_id/:object_name @net.macolabo.sform2.controllers.TransferController.getTransferSalesforceField(transfer_config_id: Int, object_name: String)
 
 # user
-GET /user net.macolabo.sform2.controllers.UserController.getList()
-POST /user net.macolabo.sform2.controllers.UserController.save()
-DELETE /user/:user_id net.macolabo.sform2.controllers.UserController.delete(user_id: String)
-GET /user/isadmin net.macolabo.sform2.controllers.UserController.isAdmin()
+GET /user @net.macolabo.sform2.controllers.UserController.getList()
+POST /user @net.macolabo.sform2.controllers.UserController.save()
+DELETE /user/:user_id @net.macolabo.sform2.controllers.UserController.delete(user_id: String)
+GET /user/isadmin @net.macolabo.sform2.controllers.UserController.isAdmin()
 
 # adminExistsCheck
-GET /adminExistsCheck net.macolabo.sform2.controllers.AdminExistsCheckController.check()
-OPTIONS / net.macolabo.sform2.controllers.ApplicationController.rootOptions()
-OPTIONS /*url   net.macolabo.sform2.controllers.ApplicationController.options(url: String)
+GET /adminExistsCheck @net.macolabo.sform2.controllers.AdminExistsCheckController.check()
+OPTIONS / @net.macolabo.sform2.controllers.ApplicationController.rootOptions()
+OPTIONS /*url   @net.macolabo.sform2.controllers.ApplicationController.options(url: String)
 
 # ApiToken
-GET /apitoken/expiry net.macolabo.sform2.controllers.ApiTokenController.getExpiry()
-GET /apitoken/generate net.macolabo.sform2.controllers.ApiTokenController.generateApiTokenString()
-POST /apitoken net.macolabo.sform2.controllers.ApiTokenController.save()
+GET /apitoken/expiry @net.macolabo.sform2.controllers.ApiTokenController.getExpiry()
+GET /apitoken/generate @net.macolabo.sform2.controllers.ApiTokenController.generateApiTokenString()
+POST /apitoken @net.macolabo.sform2.controllers.ApiTokenController.save()
 
-#JWT
-GET /jwt net.macolabo.sform2.controllers.SignInController.getJwt()
+
+# OIDC
+GET /oidc @net.macolabo.sform2.controllers.SignInController.oidcSignin()
+GET /callback @org.pac4j.play.CallbackController.callback(request: play.mvc.Http.Request)
+POST /callback @org.pac4j.play.CallbackController.callback(request: play.mvc.Http.Request)
+GET /logout @org.pac4j.play.LogoutController.logout(request: play.mvc.Http.Request)
+
+# Session
+GET /checkSession @net.macolabo.sform2.controllers.SignInController.checkSession()

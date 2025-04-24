@@ -1,5 +1,5 @@
 <template>
-  <h4>フォーム項目 <BButton size="sm" @click="addColumn">追加</BButton></h4>
+  <h4>フォーム項目<BButton class="ms-2" size="sm" @click="addColumn">追加</BButton></h4>
   <BTable striped hover :items="form_cols" :fields="fields">
     <template #cell(col_index)="row">
       {{ row.item.col_index + 1 }}
@@ -8,7 +8,7 @@
       <BButton size="sm" @click="edit(row.item, row.index, $event.target)" class="mr-1">
         編集
       </BButton>
-      <BButton size="sm" @click="deleteColumn(row.item)">
+      <BButton class="ms-2" size="sm" @click="deleteColumn(row.item)">
         削除
       </BButton>
     </template>

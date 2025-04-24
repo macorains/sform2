@@ -122,7 +122,7 @@
         block
         @click="saveForm"
     >
-      保存
+      <i class="bi bi-cloud-arrow-down me-1"></i>保存
     </BButton>
 
   </main>
@@ -152,22 +152,21 @@ const transferTaskListRef = ref(null)
 
 // ライフサイクルフック
 onMounted(async () => {
-  $http.get('/form/' + route.params.form_id)
-      .then(response => {
-        console.log(response)
+  requestGet(
+      '/form/' + route.params.form_id,
+      response => {
         form.value = response.data
         columnListRef.value.load(response.data.form_cols)
         transferTaskListRef.value.load(response.data)
-      })
+      }
+  )
 })
 
 const columnListRef = ref(null)
 
 const saveForm = () =>  {
-  console.log('*** saveForm ***')
-  console.log(form)
   requestPost('/form', form.value, response => {
-    console.log(response)
+    router.push('/form')
   })
 }
 

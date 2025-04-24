@@ -1,6 +1,6 @@
 package net.macolabo.sform.api.modules
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import com.google.inject.{AbstractModule, Provides}
 import net.codingwell.scalaguice.ScalaModule
 import net.macolabo.sform2.domain.models.daos.ApiTokenDAOImpl
@@ -53,20 +53,29 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
   }
 
   @Provides
-  def provideFormClient: FormClient = new FormClient(baseUrl + "/loginForm", new SimpleTestUsernamePasswordAuthenticator())
+  def provideFormClient: FormClient = {
+    val client = new FormClient()
+    client.setLoginUrl(baseUrl + "/loginForm")
+    client.setAuthenticator(new SimpleTestUsernamePasswordAuthenticator())
+    client
+  }
 
   @Provides
   def provideDirectFormClient: DirectFormClient = {
     val apiTokenDAO = new ApiTokenDAOImpl()
-    new DirectFormClient(new SqlAuthencator(apiTokenDAO))
+    val client = new DirectFormClient()
+    client.setAuthenticator(new SqlAuthencator(apiTokenDAO))
+    client
   }
 
   @Provides
   def provideHeaderClient: HeaderClient = {
     val jwtAuthenticator = new JwtAuthenticator()
     jwtAuthenticator.addSignatureConfiguration(new SecretSignatureConfiguration("12345678901234567890123456789012"))
-    val headerClient = new HeaderClient("X-Auth-Token", jwtAuthenticator)
-    headerClient
+    val client = new HeaderClient()
+    client.setHeaderName("X-Auth-Token")
+    client.setAuthenticator(jwtAuthenticator)
+    client
   }
 
   @Provides

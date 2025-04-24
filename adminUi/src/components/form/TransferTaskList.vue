@@ -1,11 +1,11 @@
 <template>
-  <h4>転送タスク設定<BButton size="sm" @click="selectTransferConfig()">追加</BButton></h4>
+  <h4>転送タスク設定<BButton class="ms-2" size="sm" @click="selectTransferConfig()">追加</BButton></h4>
   <b-table striped hover :items="form.form_transfer_tasks" :fields="fields">
     <template #cell(actions)="row">
       <BButton size="sm" @click="edit(row.item, row.index, $event.target)" class="mr-1">
         編集
       </BButton>
-      <BButton size="sm" @click="delete(row.item)">
+      <BButton class="ms-2" size="sm" @click="delete(row.item)">
         削除
       </BButton>
     </template>

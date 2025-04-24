@@ -1,0 +1,8 @@
+@(redirect_url:String)
+<input type="button" onClick="doRedirect()">
+<script>
+    window.location.href = '@(redirect_url)'
+    function doRedirect() {
+    window.location.href = '@(redirect_url)'
+    }
+</script>
