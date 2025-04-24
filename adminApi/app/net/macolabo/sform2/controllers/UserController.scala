@@ -30,7 +30,8 @@ class UserController @Inject() (
   // GET /user
   def getList: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = getAttributeValue(profiles, "user_group")
+    val userGroup = request.session.get("user_group").getOrElse("")
+
     val res = RsResultSet("OK", "OK", userDAO.getList(userGroup))
     Ok(Json.toJson(res))
   }
@@ -47,7 +48,7 @@ class UserController @Inject() (
   // POST /user
   def save: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = getAttributeValue(profiles, "user_group")
+    val userGroup = request.session.get("user_group").getOrElse("")
     request.body.asJson.flatMap(bodyJson => {
       bodyJson.validate[UserSaveRequest].asOpt.map(userSaveRequest => {
         userService.save(userSaveRequest, userGroup)
@@ -60,7 +61,7 @@ class UserController @Inject() (
   // DELETE /user
   def delete(userId: String): Action[AnyContent] = Secure("HeaderClient") { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = getAttributeValue(profiles, "user_group")
+    val userGroup = request.session.get("user_group").getOrElse("")
     userService.delete(userId, userGroup)
     val res = RsResultSet("OK", "OK", Json.toJson(""))
     Ok(Json.toJson(res))

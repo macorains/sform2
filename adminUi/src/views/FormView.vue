@@ -2,6 +2,7 @@
 import { ref, onMounted, getCurrentInstance } from 'vue'
 import HeaderMenu from '../components/HeaderMenu.vue'
 import {useRouter} from "vue-router";
+import { useHttpRequest } from "@/composables/useHttpRequest.js"
 
 // Composition APIを使うので、export default {} は不要
 const data = ref([])
@@ -11,18 +12,19 @@ const fields = ref([
     { key: 'title', sortable: true, label: 'フォームタイトル'},
     { key: 'status_name', sortable: true, label: 'ステータス'},
 ])
-const instance = getCurrentInstance()
-const $http = instance.appContext.config.globalProperties.$http
 const router = useRouter()
+const { requestGet, loading } = useHttpRequest()
+
 
 // ライフサイクルフック
 onMounted(() => {
-  $http.get('/form/list')
-      .then(response => {
-        // this.$data.loading = false
-        console.log(response)
+  requestGet(
+      '/form/list',
+      response => {
         data.value = convert(response.data.forms)
-      }).catch(error => console.log(error))
+      },
+      error => console.log(error)
+  )
 })
 
 function convert(data) {

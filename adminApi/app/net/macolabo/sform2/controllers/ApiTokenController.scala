@@ -38,7 +38,8 @@ class ApiTokenController @Inject()(
   def save: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
     val userId = profiles.asScala.headOption.map(_.getId)
-    val userGroup = getAttributeValue(profiles, "user_group")
+    val userGroup = request.session.get("user_group").getOrElse("")
+
     val res = userId.flatMap(uid => {
       request.body.asJson.flatMap(r =>
         r.validate[ApiTokenInsertRequest].map(f => {
@@ -55,7 +56,8 @@ class ApiTokenController @Inject()(
   def getExpiry: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
     val userId = profiles.asScala.headOption.map(_.getId)
-    val userGroup = getAttributeValue(profiles, "user_group")
+    val userGroup = request.session.get("user_group").getOrElse("")
+
 
     val res = userId.flatMap(_ => apiTokenService.getExpiry(userGroup))
 

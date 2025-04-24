@@ -61,7 +61,7 @@ class TransferController @Inject() (
    */
   def getSelectList: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = getAttributeValue(profiles, "user_group")
+    val userGroup = request.session.get("user_group").getOrElse("")
     val res = transferService.getTransferConfigSelectList(userGroup)
     Ok(toJson(res))
   }
@@ -73,7 +73,7 @@ class TransferController @Inject() (
    */
   def getTransferConfigList: Action[AnyContent] =  Secure("HeaderClient") { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = getAttributeValue(profiles, "user_group")
+    val userGroup = request.session.get("user_group").getOrElse("")
     val res = transferService.getTransferConfigList(userGroup)
     Ok(toJson(res))
   }
@@ -85,7 +85,7 @@ class TransferController @Inject() (
    */
   def getTransferConfig(transferConfigId: Int): Action[AnyContent] = Secure("HeaderClient") { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = getAttributeValue(profiles, "user_group")
+    val userGroup = request.session.get("user_group").getOrElse("")
     val res = transferService.getTransferConfig(userGroup, transferConfigId, cryptoConfig)
     Ok(toJson(res))
   }
@@ -96,7 +96,7 @@ class TransferController @Inject() (
    */
   def saveTransferConfig: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = getAttributeValue(profiles, "user_group")
+    val userGroup = request.session.get("user_group").getOrElse("")
     val userId = profiles.asScala.headOption.map(_.getId)
 
     userId.map(uid =>
@@ -141,7 +141,7 @@ class TransferController @Inject() (
    */
   def getTransferSalesforceObject(transferConfigId: Int): Action[AnyContent] =  Secure("HeaderClient").async { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = getAttributeValue(profiles, "user_group")
+    val userGroup = request.session.get("user_group").getOrElse("")
 
     transferService.getTransferConfig(userGroup, transferConfigId, cryptoConfig) match {
       case Some(t: TransferGetTransferConfigResponse) =>
@@ -165,7 +165,7 @@ class TransferController @Inject() (
    */
   def getTransferSalesforceField(transferConfigId: Int, objectName: String): Action[AnyContent] =  Secure("HeaderClient").async { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = getAttributeValue(profiles, "user_group")
+    val userGroup = request.session.get("user_group").getOrElse("")
 
     transferService.getTransferConfig(userGroup, transferConfigId, cryptoConfig) match {
       case Some(transferConfig: TransferGetTransferConfigResponse) =>

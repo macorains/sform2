@@ -40,7 +40,7 @@ class FormController @Inject() (
    */
   def get(hashed_form_id: String): Action[AnyContent] = Secure("HeaderClient")  { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = getAttributeValue(profiles, "user_group")
+    val userGroup = request.session.get("user_group").getOrElse("")
     val res = formService.getForm(userGroup, hashed_form_id)
     Ok(toJson(res))
   }
@@ -52,7 +52,7 @@ class FormController @Inject() (
    */
   def getList: Action[AnyContent] = Secure(clients = "HeaderClient") { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = getAttributeValue(profiles, "user_group")
+    val userGroup = request.session.get("user_group").getOrElse("")
     val res = formService.getList(userGroup)
     Ok(toJson(res))
   }
@@ -64,7 +64,7 @@ class FormController @Inject() (
   def save(): Action[AnyContent] = Secure("HeaderClient")  { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
     val userId = profiles.asScala.headOption.map(_.getId)
-    val userGroup = getAttributeValue(profiles, "user_group")
+    val userGroup = request.session.get("user_group").getOrElse("")
 
     println(request.body.asJson.get.validate[FormUpdateRequest].toString)
 
@@ -88,7 +88,7 @@ class FormController @Inject() (
   def create(): Action[AnyContent] = Secure("HeaderClient")  { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
     val userId = profiles.asScala.headOption.map(_.getId)
-    val userGroup = getAttributeValue(profiles, "user_group")
+    val userGroup = request.session.get("user_group").getOrElse("")
 
     val res = userId.flatMap(id => {
       request.body.asJson.flatMap(r =>
@@ -110,8 +110,8 @@ class FormController @Inject() (
    * @return
    */
   def delete(hashed_form_id: String): Action[AnyContent] = Secure("HeaderClient")  { implicit request =>
-  val profiles = getProfiles(controllerComponents)(request)
-  val userGroup = getAttributeValue(profiles, "user_group")
+    val profiles = getProfiles(controllerComponents)(request)
+    val userGroup = request.session.get("user_group").getOrElse("")
     val res = formService.deleteForm(userGroup, hashed_form_id)
     Ok(toJson(res))
   }

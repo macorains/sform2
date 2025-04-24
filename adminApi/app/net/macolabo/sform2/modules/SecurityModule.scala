@@ -17,7 +17,7 @@ import org.pac4j.play.{CallbackController, LogoutController}
 import play.api.{Configuration, Environment}
 
 import java.nio.charset.StandardCharsets
-import org.pac4j.play.store.{PlayCookieSessionStore, ShiroAesDataEncrypter}
+import org.pac4j.play.store.{PlayCacheSessionStore, PlayCookieSessionStore, ShiroAesDataEncrypter}
 import org.pac4j.core.config.Config
 import org.pac4j.core.context.FrameworkParameters
 import org.pac4j.core.context.session.{SessionStore, SessionStoreFactory}
@@ -58,6 +58,8 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
     // callback
     val callbackController = new CallbackController()
     callbackController.setDefaultUrl("/oidcTest")
+    callbackController.setRenewSession(false)
+    callbackController.setDefaultUrl(configuration.get[String]("sform.oauth.loginUrl"))
     bind(classOf[CallbackController]).toInstance(callbackController)
 
     // logout

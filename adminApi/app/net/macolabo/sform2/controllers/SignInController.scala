@@ -4,17 +4,26 @@ import net.macolabo.sform2.domain.models.entity.user.User
 
 import javax.inject.Inject
 import net.macolabo.sform2.domain.services.User.UserService
+import org.pac4j.core.config.Config
+import org.pac4j.core.context.{FrameworkParameters, WebContext}
+import org.pac4j.core.context.session.{SessionStore, SessionStoreFactory}
 import org.webjars.play.WebJarsUtil
 import play.api.{Configuration, Logger}
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.mailer._
 import play.api.mvc._
 import play.api.cache.SyncCacheApi
-import org.pac4j.core.profile.UserProfile
+import org.pac4j.core.profile.{ProfileManager, UserProfile}
+import org.pac4j.core.profile.factory.ProfileManagerFactory
+import org.pac4j.http.client.direct.HeaderClient
 import org.pac4j.jwt.config.signature.SecretSignatureConfiguration
+import org.pac4j.jwt.credentials.authenticator.JwtAuthenticator
 import org.pac4j.jwt.profile.JwtGenerator
+import org.pac4j.play.PlayWebContext
+import org.pac4j.play.context.{PlayContextFactory, PlayFrameworkParameters}
 import org.pac4j.play.scala.{Security, SecurityComponents}
 import play.api.libs.ws.WSClient
+import play.core.j.PlayMagicForJava.`collection AsScalaIterable`
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -34,7 +43,8 @@ class SignInController @Inject() (
   configuration: Configuration,
   cache: SyncCacheApi,
   mailerClient: MailerClient,
-  ws: WSClient
+  ws: WSClient,
+  playContextFactory: PlayContextFactory
 )(
   implicit
   webJarsUtil: WebJarsUtil,
@@ -53,11 +63,14 @@ class SignInController @Inject() (
 
   def oidcSignin: Action[AnyContent] = Secure("OidcClient").async { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
-    checkUser(profiles.get(0)).map {
+    val profile = profiles.get(0)
+    checkUser(profile).map {
       case Some(u) =>
         val generator = new JwtGenerator(new SecretSignatureConfiguration("12345678901234567890123456789012"))
-        val token = generator.generate(profiles.get(0))
+        val token = generator.generate(profile)
         Ok(net.macolabo.sform2.views.html.jwt(configuration.get[String]("sform.oauth.redirectUrl"), token))
+          .addingToSession("user_group" -> "Admin") // TODO 実際にはDBから検索してセットする。
+        // TODO 複数グループに属するユーザーの場合どうするか考える
       case None =>
         Forbidden(net.macolabo.sform2.views.html.redirect("http://localhost:5173/login_failed"))
     }
@@ -68,6 +81,16 @@ class SignInController @Inject() (
       case s: String =>
         userService.retrieve(s)
       case _ => Future.successful(None)
+    }
+  }
+
+  def checkSession: Action[AnyContent] = Secure("HeaderClient")  { request =>
+    try {
+      val profiles = getProfiles(controllerComponents)(request)
+      val userGroup = request.session.get("user_group")
+      userGroup.map(ug => Ok("Token is valid")).getOrElse(Unauthorized("Session Expired."))
+    } catch {
+      case e: NullPointerException => Unauthorized("Token is invalid or missing")
     }
   }
 }
