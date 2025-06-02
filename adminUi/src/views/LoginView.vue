@@ -20,6 +20,6 @@ import HeaderMenu from "@/components/HeaderMenu.vue";
 
 const onLogin = (event) => {
   event.preventDefault()
-  location.href = 'http://localhost:9001/oidc'
+  location.href = import.meta.env.VITE_APP_API_URL + '/oidc'
 }
 </script>
