@@ -72,7 +72,7 @@ class SignInController @Inject() (
           .addingToSession("user_group" -> "Admin") // TODO 実際にはDBから検索してセットする。
         // TODO 複数グループに属するユーザーの場合どうするか考える
       case None =>
-        Forbidden(net.macolabo.sform2.views.html.redirect("http://localhost:5173/login_failed"))
+        Forbidden(net.macolabo.sform2.views.html.redirect(configuration.get[String]("sform.oauth.loginFailedUrl")))
     }
   }
 
