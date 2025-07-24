@@ -7,9 +7,6 @@
 GET         /                                @net.macolabo.sform2.controllers.ApplicationController.index
 GET         /signOut                         @net.macolabo.sform2.controllers.ApplicationController.signOut
 
-# TODO 2025/04/04 使わなくても動かせるので一旦無効化し、削除するか後ほど検討
-# POST        /signUp                          @net.macolabo.sform2.controllers.SignUpController.submit()
-
 GET         /account/activate/:token         @net.macolabo.sform2.controllers.ActivateAccountController.activate(token: java.util.UUID)
 
 # Map static resources from the /public folder to the /assets URL path
