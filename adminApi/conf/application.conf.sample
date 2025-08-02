@@ -26,7 +26,6 @@ play.http.session.maxAge = 1h
 # The application DI modules
 # ~~~~~
 play.modules.enabled += "net.macolabo.sform2.modules.BaseModule"
-play.modules.enabled += "net.macolabo.sform2.modules.JobModule"
 play.modules.enabled += "net.macolabo.sform2.modules.SecurityModule"
 play.modules.enabled += "play.api.libs.mailer.MailerModule"
 play.modules.enabled += "net.macolabo.sform2.modules.DBInitializerModule"
