@@ -34,10 +34,13 @@ class SignInController @Inject() (
   with Pac4jUtil
 {
 
+  // フォームで認証→JWT発行の流れでの認証処理
+  // ApiTokenDAOを通じてd_apitokenの内容を参照している
   def auth: Action[AnyContent] = Secure("DirectFormClient") { implicit request: Request[AnyContent] =>
     val profiles = getProfiles(controllerComponents)(request)
     val token = if(profiles.asScala.nonEmpty) {
       val profile = profiles.get(0)
+      // TODO Secretを環境変数からとるようにする 2025/08/03
       val generator = new JwtGenerator(new SecretSignatureConfiguration("12345678901234567890123456789012"))
       Some(generator.generate(profile))
     } else None

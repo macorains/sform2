@@ -8,7 +8,8 @@ import net.macolabo.sform.api.security.{DatabaseExecutionContext, DemoHttpAction
 import org.pac4j.core.client.Clients
 import org.pac4j.core.client.direct.AnonymousClient
 import org.pac4j.core.config.Config
-import org.pac4j.core.context.session.SessionStore
+import org.pac4j.core.context.FrameworkParameters
+import org.pac4j.core.context.session.{SessionStore, SessionStoreFactory}
 import org.pac4j.core.profile.CommonProfile
 import org.pac4j.http.client.direct.{DirectFormClient, HeaderClient}
 import org.pac4j.http.client.indirect.FormClient
@@ -79,9 +80,15 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
   }
 
   @Provides
-  def provideConfig(formClient: FormClient, directFormClient: DirectFormClient, headerClient: HeaderClient): Config = {
-    val clients = new Clients(baseUrl + "/callback", formClient, directFormClient, headerClient, new AnonymousClient())
+  def provideConfig(formClient: FormClient, directFormClient: DirectFormClient, headerClient: HeaderClient, sessionStore: SessionStore): Config = {
+    val clients = new Clients(configuration.get[String]("baseUrl") + "/callback", formClient, directFormClient, headerClient, new AnonymousClient())
     val config = new Config(clients)
+
+    // セッションストアの設定
+    config.setSessionStoreFactory(new SessionStoreFactory {
+      override def newSessionStore(parameters: FrameworkParameters): SessionStore = sessionStore
+    })
+
     config.setHttpActionAdapter(new DemoHttpActionAdapter())
     config
   }
