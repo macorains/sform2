@@ -5,7 +5,6 @@ import FormView from '../views/FormView.vue'
 import FormDetailView from '../views/FormDetailView.vue'
 import LoginView from '../views/LoginView.vue'
 import LoginFailedView from '../views/LoginFailedView.vue'
-import VerificationView from '../views/VerificationView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

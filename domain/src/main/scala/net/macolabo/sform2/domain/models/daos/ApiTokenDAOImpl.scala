@@ -46,7 +46,7 @@ class ApiTokenDAOImpl extends ApiTokenDAO {
    * @return
    */
   def find(fields: String, key: String, value: String)(implicit session: DBSession): List[Map[String, Any]] = {
-    StringSQLRunner(s"""SELECT $fields FROM d_apitoken as c WHERE $key = '$value'""").run()
+    StringSQLRunner(s"""SELECT $fields FROM d_apitoken as c WHERE $key = '$value' AND expiry > NOW()""").run()
   }
 
 }

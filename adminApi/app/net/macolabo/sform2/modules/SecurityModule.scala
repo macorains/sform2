@@ -81,7 +81,6 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
   def provideDirectFormClient: DirectFormClient = {
     val userDAO = new UserDAOImpl()
     val client = new DirectFormClient()
-    client.init()
     client.setAuthenticator(new SqlAuthencator(userDAO))
     client
   }
