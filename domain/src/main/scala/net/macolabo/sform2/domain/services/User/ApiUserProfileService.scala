@@ -6,6 +6,7 @@ import org.pac4j.core.context.CallContext
 import org.pac4j.core.credentials.password.PasswordEncoder
 import org.pac4j.core.credentials.{Credentials, UsernamePasswordCredentials}
 import org.pac4j.core.exception.{AccountNotFoundException, BadCredentialsException, MultipleAccountsFoundException, TechnicalException}
+import org.pac4j.core.profile.definition.CommonProfileDefinition
 import org.pac4j.core.profile.service.AbstractProfileService
 import org.pac4j.core.util.CommonHelper._
 import org.pac4j.core.util.Pac4jConstants._
@@ -31,7 +32,7 @@ class ApiUserProfileService @Inject()(
 
   override protected def internalInit(forceReinit: Boolean): Unit = {
     assertNotNull("passwordEncoder", getPasswordEncoder)
-    // defaultProfileDefinition(new CommonProfileDefinition(_ => new DbProfile()))
+    setProfileDefinition(new CommonProfileDefinition(_ => new DbProfile()))
     setSerializer(new JsonSerializer(classOf[DbProfile]))
     super.internalInit(forceReinit)
   }
