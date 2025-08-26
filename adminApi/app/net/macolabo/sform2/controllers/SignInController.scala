@@ -66,11 +66,13 @@ class SignInController @Inject() (
     val profile = profiles.get(0)
     checkUser(profile).map {
       case Some(u) =>
-        val generator = new JwtGenerator(new SecretSignatureConfiguration("12345678901234567890123456789012"))
-        val token = generator.generate(profile)
-        Ok(net.macolabo.sform2.views.html.jwt(configuration.get[String]("sform.oauth.redirectUrl"), token))
-          .addingToSession("user_group" -> "Admin") // TODO 実際にはDBから検索してセットする。
-        // TODO 複数グループに属するユーザーの場合どうするか考える
+        configuration.getOptional[String]("sform.jwt.secret").map(jwtSecret => {
+          val generator = new JwtGenerator(new SecretSignatureConfiguration(jwtSecret))
+          val token = generator.generate(profile)
+          Ok(net.macolabo.sform2.views.html.jwt(configuration.get[String]("sform.oauth.redirectUrl"), token))
+            .addingToSession("user_group" -> u.user_group.get)
+          // TODO 複数グループに属するユーザーの場合どうするか考える
+        }).getOrElse(InternalServerError("sfrom.jwt.secret not found."))
       case None =>
         Forbidden(net.macolabo.sform2.views.html.redirect(configuration.get[String]("sform.oauth.loginFailedUrl")))
     }

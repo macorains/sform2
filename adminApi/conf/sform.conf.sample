@@ -12,6 +12,9 @@ sform {
     client_id = "hogehoge.apps.googleusercontent.com"
     client_secret = ${?SFORM_OIDC_CLIENT_SECRET}
   }
+  jwt {
+    secret = ${?SFORM_JWT_SECRET}
+  }
   mail {
     systemMailAddress = "mac.rainshrine@gmail.com"
   }

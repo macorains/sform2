@@ -112,6 +112,33 @@ class UserDAOImpl extends UserDAO {
     StringSQLRunner(s"""SELECT $fields FROM m_userinfo as c WHERE $key = '$value'""").run()
   }
 
+  def findByEmail(email: String): Future[Option[User]] = {
+    Future.successful(
+      DB localTx { implicit l =>
+        val u = User.syntax("u")
+        withSQL(
+          select(
+            u.id,
+            u.username,
+            u.password,
+            u.user_group,
+            u.role,
+            u.first_name,
+            u.last_name,
+            u.full_name,
+            u.email,
+            u.avatar_url,
+            u.activated,
+            u.deletable
+          )
+            .from(User as u)
+            .where
+            .eq(u.email, email)
+        ).map(rs => User(rs)).single().apply()
+      }
+    )
+  }
+
   /**
    * ユーザー作成(pac4j)
    * @param attributes 属性リスト

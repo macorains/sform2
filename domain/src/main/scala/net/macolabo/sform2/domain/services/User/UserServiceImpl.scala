@@ -29,6 +29,11 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
     userDAO.find(username)
   }
 
+  def retrieveByEmail(email: String): Future[Option[User]] = {
+    userDAO.findByEmail(email)
+  }
+
+
   /**
    * Saves a user.
    *
