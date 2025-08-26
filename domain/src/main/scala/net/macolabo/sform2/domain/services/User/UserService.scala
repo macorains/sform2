@@ -20,6 +20,8 @@ trait UserService {
   def retrieve(id: UUID): Future[Option[User]]
   def retrieve(username: String): Future[Option[User]]
 
+  def retrieveByEmail(email: String): Future[Option[User]]
+
   /**
    * Saves a user.
    *

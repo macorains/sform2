@@ -20,6 +20,7 @@ trait UserDAO {
    */
   def find(userID: UUID): Future[Option[User]]
   def find(username: String): Future[Option[User]]
+  def findByEmail(email: String): Future[Option[User]]
 
   /**
    * ユーザー検索(pac4j)
