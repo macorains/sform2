@@ -1,0 +1,21 @@
+sform {
+  crypto {
+    algorithm.cipher = "AES/CBC/PKCS5Padding"
+    algorithm.key = "AES"
+    key = "ChangeMe"
+    charset = "utf-8"
+  }
+  oauth {
+    redirectUrl = "http://localhost:8081/Signin"
+    loginUrl = "http://localhost:8081/login"
+    loginFailedUrl = "http://localhost:8081/login_failed"
+    client_id = "hogehoge.apps.googleusercontent.com"
+    client_secret = ${?SFORM_OIDC_CLIENT_SECRET}
+  }
+  jwt {
+    secret = ${?SFORM_JWT_SECRET}
+  }
+  mail {
+    systemMailAddress = "mac.rainshrine@gmail.com"
+  }
+}

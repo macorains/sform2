@@ -1,7 +1,7 @@
 <script setup>
-import { ref, onMounted, getCurrentInstance } from 'vue'
+import { ref, onMounted } from 'vue'
 import HeaderMenu from '../components/HeaderMenu.vue'
-import {useRouter} from "vue-router";
+import { useRouter } from "vue-router";
 import { useHttpRequest } from "@/composables/useHttpRequest.js"
 
 // Composition APIを使うので、export default {} は不要
@@ -22,8 +22,7 @@ onMounted(() => {
       '/form/list',
       response => {
         data.value = convert(response.data.forms)
-      },
-      error => console.log(error)
+      }
   )
 })
 

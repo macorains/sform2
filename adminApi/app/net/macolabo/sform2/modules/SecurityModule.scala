@@ -64,7 +64,10 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
 
     // logout
     val logoutController = new LogoutController()
-    logoutController.setDefaultUrl("/oidcTest")
+    logoutController.setLocalLogout(true)
+    logoutController.setCentralLogout(true)
+    logoutController.setDestroySession(true)
+    logoutController.setDefaultUrl(configuration.get[String]("sform.oauth.loginUrl"))
     bind(classOf[LogoutController]).toInstance(logoutController)
 
   }
@@ -106,6 +109,7 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
     oidcConfiguration.setScope("openid email profile")
     oidcConfiguration.setResponseType("code")
     oidcConfiguration.setUseNonce(true)
+    oidcConfiguration.setLogoutUrl(configuration.get[String]("sform.oauth.loginUrl"))
 
     // JWT の署名アルゴリズムを RS256 に設定
     val rsaSignatureConfig = new RSASignatureConfiguration()
