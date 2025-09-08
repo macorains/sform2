@@ -15,7 +15,7 @@
               <a class="nav-link" href="/admin">管理</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">ログアウト</a>
+              <a class="nav-link" href="/logout">ログアウト</a>
             </li>
           </ul>
         </div>

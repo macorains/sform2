@@ -5,6 +5,7 @@ import FormView from '../views/FormView.vue'
 import FormDetailView from '../views/FormDetailView.vue'
 import LoginView from '../views/LoginView.vue'
 import LoginFailedView from '../views/LoginFailedView.vue'
+import LogoutView from '../views/LogoutView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -38,7 +39,12 @@ const router = createRouter({
       path: '/login_failed',
       name: 'loginFailed',
       component: LoginFailedView
-    }
+    },
+    {
+      path: '/logout',
+      name: 'logout',
+      component: LogoutView
+    },
   ]
 })
 

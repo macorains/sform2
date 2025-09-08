@@ -35,12 +35,12 @@
 </template>
 
 <script setup>
-import {getCurrentInstance, onMounted, ref} from "vue";
-import {BButton, BModal, BSpinner, BTable} from "bootstrap-vue-3";
+import { onMounted, ref } from "vue";
+import { BButton, BModal, BSpinner, BTable } from "bootstrap-vue-3";
 import TransferConfigEdit from "@/components/admin/TransferConfigEdit.vue";
+import { useHttpRequest } from "@/composables/useHttpRequest.js"
 
-const instance = getCurrentInstance()
-const $http = instance.appContext.config.globalProperties.$http
+const { requestGet, loading } = useHttpRequest()
 
 const fields = ref([
   { key: 'config_index', sortable: true, label: 'No'},
@@ -74,11 +74,13 @@ const close = () => {
 
 onMounted(() => {
   isLoading.value = true
-  $http.get('/transfer/config/list')
-      .then(response => {
+  requestGet(
+      '/transfer/config/list',
+      response => {
         configList.value = response.data
         isLoading.value = false
-      })
+      }
+  )
 })
 
 </script>
