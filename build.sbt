@@ -102,7 +102,8 @@ lazy val dependencies =
       val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.3"
       val jacksonModuleScala = "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.14.3"
       val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.4.14"
-      val mockitoScalaScalatest = "org.mockito" %% "mockito-scala-scalatest" % "1.13.11"
+      val mockitoScalaScalatest = "org.mockito" %% "mockito-scala-scalatest" % "1.13.11" % Test
+      val mockitoScala = "org.mockito" %% "mockito-scala" % "1.13.11" % Test
       val mysqlConnector = "mysql" % "mysql-connector-java" % "8.0.20"
       val pac4j = "org.pac4j" %% "play-pac4j" % playPac4jVersion
       val pac4jCas = "org.pac4j" % "pac4j-cas" % pac4jVersion exclude("com.fasterxml.jackson.core", "jackson-databind")
@@ -121,6 +122,7 @@ lazy val dependencies =
       val pekkoActorTyped = "org.apache.pekko" %% "pekko-actor-typed" % pekkoVersion
       val pekkoStream = "org.apache.pekko" %% "pekko-stream" % pekkoVersion
       val pekkoSlf4j = "org.apache.pekko" %% "pekko-slf4j" % pekkoVersion
+      val pekkoTestkit = "org.apache.pekko" %% "pekko-testkit" % pekkoVersion % Test
       val pekkoHttpServer = "org.playframework" %% "play-pekko-http-server" % "3.0.0"
       val pekkoHttp2Support = "org.playframework" %% "play-pekko-http2-support" % "3.0.0"
       val playCache = "org.playframework" %% "play-cache" % playVersion
@@ -165,6 +167,7 @@ lazy val commonDependencies = Seq(
   dependencies.jacksonDatabind,
   dependencies.jacksonModuleScala,
   dependencies.logbackClassic,
+  dependencies.mockitoScala,
   dependencies.mockitoScalaScalatest,
   dependencies.mysqlConnector,
   dependencies.pac4j,
@@ -186,6 +189,7 @@ lazy val commonDependencies = Seq(
   dependencies.pekkoHttp2Support,
   dependencies.pekkoStream,
   dependencies.pekkoSlf4j,
+  dependencies.pekkoTestkit,
   dependencies.playCache,
   dependencies.playGuard,
   dependencies.playGuice,

@@ -196,7 +196,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     assert(newFormColSelect.select_index.equals(formColSelectUpdateRequest.select_index))
     assert(newFormColSelect.select_name.equals(formColSelectUpdateRequest.select_name))
     assert(newFormColSelect.select_value.equals(formColSelectUpdateRequest.select_value))
-    assert(newFormColSelect.is_default.equals(formColSelectUpdateRequest.is_default))
+    assert(newFormColSelect.is_default == formColSelectUpdateRequest.is_default)
     assert(newFormColSelect.view_style.equals(formColSelectUpdateRequest.view_style))
     assert(newFormColSelect.edit_style.equals(formColSelectUpdateRequest.edit_style))
   }
@@ -271,7 +271,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     assert(newFormColSelect.select_index.equals(2))
     assert(newFormColSelect.select_name.equals("hoge2"))
     assert(newFormColSelect.select_value.equals("hoge2"))
-    assert(newFormColSelect.is_default.equals(true))
+    assert(newFormColSelect.is_default)
     assert(newFormColSelect.edit_style.equals("hogehoge"))
     assert(newFormColSelect.view_style.equals("hogehoge"))
 
@@ -282,7 +282,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     assert(newFormColValidation.max_length.get.equals(11))
     assert(newFormColValidation.min_length.get.equals(3))
     assert(newFormColValidation.input_type.equals(2))
-    assert(newFormColValidation.required.equals(true))
+    assert(newFormColValidation.required)
 
     // FormTransferTaskのチェック
     val newFormTransferTask = newForm.form_transfer_tasks.head
@@ -300,15 +300,15 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     // FormTransferTaskMailのチェック
     val newFormTransferTaskMail = newFormTransferTask.mail.get
     println(newFormTransferTaskMail)
-    assert(newFormTransferTaskMail.from_address_id.equals(2))
+    assert(newFormTransferTaskMail.from_address_id == 2)
     assert(newFormTransferTaskMail.to_address.get.equals("hoge2@hoge.com"))
-    assert(newFormTransferTaskMail.to_address_id.get.equals(11L))
+    assert(newFormTransferTaskMail.to_address_id.get == 11)
     assert(newFormTransferTaskMail.to_address_field.get.equals("mail2"))
     assert(newFormTransferTaskMail.cc_address.get.equals("fuga2@hoge.com"))
-    assert(newFormTransferTaskMail.cc_address_id.get.equals(22L))
+    assert(newFormTransferTaskMail.cc_address_id.get == 22)
     assert(newFormTransferTaskMail.cc_address_field.get.equals("email2"))
-    assert(newFormTransferTaskMail.bcc_address_id.get.equals(2))
-    assert(newFormTransferTaskMail.replyto_address_id.get.equals(2))
+    assert(newFormTransferTaskMail.bcc_address_id.get == 2)
+    assert(newFormTransferTaskMail.replyto_address_id.get == 2)
     assert(newFormTransferTaskMail.subject.equals("hogehoge2"))
     assert(newFormTransferTaskMail.body.equals("fugafuga2"))
 

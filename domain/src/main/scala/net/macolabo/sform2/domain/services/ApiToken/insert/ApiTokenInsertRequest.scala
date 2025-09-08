@@ -1,16 +1,12 @@
 package net.macolabo.sform2.domain.services.ApiToken.insert
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
-import play.api.libs.json.{JsPath, Reads}
+import play.api.libs.json.{JsPath, Json, OFormat, Reads}
 
 case class ApiTokenInsertRequest(
-                                token: String,
                                 expiry_days: Long
                                 )
 
-trait ApiTokenInsertRequestJson {
-  implicit val ApiTokenInsertRequestReads: Reads[ApiTokenInsertRequest] = (
-      (JsPath \ "token").read[String] ~
-      (JsPath \ "expiry_days").read[Long]
-  )(ApiTokenInsertRequest.apply _)
+object ApiTokenInsertRequest {
+  implicit val format: OFormat[ApiTokenInsertRequest] = Json.format[ApiTokenInsertRequest]
 }
