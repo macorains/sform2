@@ -83,7 +83,7 @@ class FormColValidationDAOSpec extends FixtureAnyFlatSpec with AutoRollback with
 
     assert(formColValidation.nonEmpty)
     val formColValidationData = formColValidation.get
-    assert(formColValidationData.form_col_id.equals(2))
+    assert(formColValidationData.form_col_id == 2)
     assert(formColValidationData.max_value.get.equals(1))
     assert(formColValidationData.min_value.get.equals(1))
     assert(formColValidationData.max_length.get.equals(1))

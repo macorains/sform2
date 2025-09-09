@@ -65,7 +65,7 @@ class FormColDAOSpec extends FixtureAnyFlatSpec with AutoRollback with SformTest
     assert(formColList.size.equals(1))
     val formCol = formColList.last
     println(formCol)
-    assert(formCol.form_id.equals(1))
+    assert(formCol.form_id == 1)
     assert(formCol.name.equals("col1"))
     assert(formCol.col_id.equals("col1"))
     assert(formCol.col_index.equals(1))

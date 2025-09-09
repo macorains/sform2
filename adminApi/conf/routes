@@ -42,9 +42,7 @@ OPTIONS /*url   @net.macolabo.sform2.controllers.ApplicationController.options(u
 
 # ApiToken
 GET /apitoken/expiry @net.macolabo.sform2.controllers.ApiTokenController.getExpiry()
-GET /apitoken/generate @net.macolabo.sform2.controllers.ApiTokenController.generateApiTokenString()
 POST /apitoken @net.macolabo.sform2.controllers.ApiTokenController.save()
-
 
 # OIDC
 GET /oidc @net.macolabo.sform2.controllers.SignInController.oidcSignin()

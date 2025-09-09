@@ -4,10 +4,12 @@ import net.macolabo.sform2.domain.models.entity.api_token.ApiToken
 import scalikejdbc.DBSession
 
 import java.time.LocalDateTime
+import java.util.UUID
 
 trait ApiTokenDAO {
   def save(apiToken: ApiToken)(implicit session: DBSession): Int
   def getExpiry(userGroup: String)(implicit session: DBSession): Option[LocalDateTime]
+  def clearToken(userGroup: String, newTokenId:UUID)(implicit session: DBSession): Unit
 
   /**
    * ユーザー検索(pac4j専用)

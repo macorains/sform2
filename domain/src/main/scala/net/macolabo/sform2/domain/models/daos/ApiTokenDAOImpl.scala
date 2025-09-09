@@ -4,6 +4,7 @@ import net.macolabo.sform2.domain.models.entity.api_token.ApiToken
 import scalikejdbc._
 
 import java.time.LocalDateTime
+import java.util.UUID
 
 class ApiTokenDAOImpl extends ApiTokenDAO {
   def save(apiToken: ApiToken)(implicit session: DBSession): Int = {
@@ -34,6 +35,18 @@ class ApiTokenDAOImpl extends ApiTokenDAO {
         .gt(f.expiry, LocalDateTime.now())
         .orderBy(f.expiry).desc
     ).map(rs => rs.localDateTime("expiry")).list().apply().headOption
+  }
+
+  def clearToken(userGroup: String, newTokenId:UUID)(implicit session: DBSession): Unit = {
+    withSQL {
+      val c = ApiToken.column
+      update(ApiToken).set(
+        c.expiry -> LocalDateTime.now()
+      ).where
+        .eq(c.user_group, userGroup)
+        .and
+        .ne(c.id, newTokenId.toString)
+    }.update().apply()
   }
 
   /**

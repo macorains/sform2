@@ -2,7 +2,7 @@ package net.macolabo.sform2.controllers
 
 import com.google.inject.Inject
 import net.macolabo.sform2.domain.services.ApiToken.ApiTokenService
-import net.macolabo.sform2.domain.services.ApiToken.insert.{ApiTokenInsertRequest, ApiTokenInsertRequestJson}
+import net.macolabo.sform2.domain.services.ApiToken.insert.ApiTokenInsertRequest
 import net.macolabo.sform2.domain.utils.TokenUtil
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
@@ -22,35 +22,20 @@ class ApiTokenController @Inject()(
 ) extends Security[UserProfile]
   with I18nSupport
   with TokenUtil
-  with Pac4jUtil
-  with ApiTokenInsertRequestJson {
-
-  def generateApiTokenString: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
-    val tokenResponse = Json.parse(
-      s"""
-        {
-          "token": "$generateToken"
-        }
-      """)
-    Ok(tokenResponse)
-  }
+  with Pac4jUtil {
 
   def save: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
     val userId = profiles.asScala.headOption.map(_.getId)
     val userGroup = request.session.get("user_group").getOrElse("")
 
-    val res = userId.flatMap(uid => {
+    val result = userId.flatMap(uid => {
       request.body.asJson.flatMap(r =>
         r.validate[ApiTokenInsertRequest].map(f => {
           apiTokenService.insert(f, uid, userGroup)
         }).asOpt)
     })
-
-    res match {
-      case Some(_) => Ok
-      case None => BadRequest
-    }
+    result.map(res => Ok(Json.toJson(res))).getOrElse(BadRequest)
   }
 
   def getExpiry: Action[AnyContent] = Secure("HeaderClient") { implicit request =>

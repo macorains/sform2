@@ -18,40 +18,35 @@
 </template>
 
 <script setup>
-import {getCurrentInstance, onMounted, ref} from "vue"
+import {getCurrentInstance, ref} from "vue"
 import {parseISO, format} from "date-fns"
+import { useHttpRequest } from "@/composables/useHttpRequest.js"
+
 
 const instance = getCurrentInstance()
-const $http = instance.appContext.config.globalProperties.$http
+const { requestGet, requestPost, loading } = useHttpRequest()
 
 const expiry = ref(null)
 const apitoken = ref(null)
 const isTokenRegisterSuccess = ref(null)
 const load = () => {
-  $http.get('/apitoken/expiry')
-      .then(response => {
-        expiry.value = response.data.expiry
-      })
-      .catch(error => {
-        if (error.code === 'ERR_BAD_REQUEST') {
-          expiry.value = null
-        }
-      })
+  requestGet('/apitoken/expiry', response => {
+    expiry.value = response.data.expiry
+  }, error => {
+    if (error.code === 'ERR_BAD_REQUEST') {
+      expiry.value = null
+    }
+  })
 }
 
 const generate = () => {
-  $http.get('/apitoken/generate')
-      .then(response => {
-        apitoken.value = response.data.token
-        const requestData = {
-          token: apitoken.value,
-          expiry_days: 365
-        }
-        $http.post('/apitoken', requestData)
-            .then(saveResponse => {
-              isTokenRegisterSuccess.value = true
-            })
-      })
+  const requestData = {
+    expiry_days: 365
+  }
+  requestPost('/apitoken', requestData, response => {
+    isTokenRegisterSuccess.value = true
+    apitoken.value = response.data.token
+  })
 }
 
 defineExpose({
