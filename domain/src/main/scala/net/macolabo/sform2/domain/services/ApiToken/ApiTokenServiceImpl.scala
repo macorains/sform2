@@ -19,8 +19,9 @@ class ApiTokenServiceImpl @Inject()(
     DB.localTx(implicit session => {
       val tokenString = generateToken
       val service = new DefaultPasswordService
+      val id = UUID.randomUUID()
       val apiToken = ApiToken(
-        UUID.randomUUID(),
+        id,
         userGroup,
         service.encryptPassword(tokenString),
         LocalDateTime.now().plusDays(apiTokenInsertRequest.expiry_days),
@@ -29,6 +30,7 @@ class ApiTokenServiceImpl @Inject()(
         userGroup
       )
       apiTokenDAO.save(apiToken)
+      apiTokenDAO.clearToken(userGroup, id)
       ApiTokenInsertResponse(tokenString)
     })
   }
