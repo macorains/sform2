@@ -70,6 +70,7 @@ class SignInController @Inject() (
           val generator = new JwtGenerator(new SecretSignatureConfiguration(jwtSecret))
           val token = generator.generate(profile)
           Ok(net.macolabo.sform2.views.html.jwt(configuration.get[String]("sform.oauth.redirectUrl"), token))
+            .addingToSession("user_id" -> u.id.toString)
             .addingToSession("user_group" -> u.user_group.get)
           // TODO 複数グループに属するユーザーの場合どうするか考える
         }).getOrElse(InternalServerError("sfrom.jwt.secret not found."))
