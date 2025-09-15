@@ -26,15 +26,13 @@ class ApiTokenController @Inject()(
 
   def save: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
-    val userId = profiles.asScala.headOption.map(_.getId)
-    val userGroup = request.session.get("user_group").getOrElse("")
+    val userId = request.session.get("user_id").getOrElse(profiles.asScala.headOption.map(_.getId).getOrElse("Unknown"))
+    val userGroup = request.session.get("user_group").getOrElse("Unknown")
 
-    val result = userId.flatMap(uid => {
-      request.body.asJson.flatMap(r =>
-        r.validate[ApiTokenInsertRequest].map(f => {
-          apiTokenService.insert(f, uid, userGroup)
-        }).asOpt)
-    })
+    val result = request.body.asJson.flatMap(r =>
+      r.validate[ApiTokenInsertRequest].map(f => {
+        apiTokenService.insert(f, userId, userGroup)
+      }).asOpt)
     result.map(res => Ok(Json.toJson(res))).getOrElse(BadRequest)
   }
 
