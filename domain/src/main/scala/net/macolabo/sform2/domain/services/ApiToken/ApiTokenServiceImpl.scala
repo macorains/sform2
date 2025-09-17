@@ -6,6 +6,7 @@ import net.macolabo.sform2.domain.models.entity.api_token.ApiToken
 import net.macolabo.sform2.domain.services.ApiToken.insert.{ApiTokenInsertRequest, ApiTokenInsertResponse}
 import net.macolabo.sform2.domain.utils.TokenUtil
 import org.apache.shiro.authc.credential.DefaultPasswordService
+import play.api.mvc.Session
 import scalikejdbc.DB
 
 import java.time.LocalDateTime
@@ -15,28 +16,31 @@ class ApiTokenServiceImpl @Inject()(
   apiTokenDAO: ApiTokenDAO
 ) extends ApiTokenService with TokenUtil {
 
-  def insert(apiTokenInsertRequest: ApiTokenInsertRequest, user: String, userGroup: String): ApiTokenInsertResponse = {
+  def insert(apiTokenInsertRequest: ApiTokenInsertRequest, session: Session): ApiTokenInsertResponse = {
+    val user = session.get("user_id").getOrElse("")
+    val group = session.get("user_group").getOrElse("")
     DB.localTx(implicit session => {
       val tokenString = generateToken
       val service = new DefaultPasswordService
       val id = UUID.randomUUID()
       val apiToken = ApiToken(
         id,
-        userGroup,
+        group,
         service.encryptPassword(tokenString),
         LocalDateTime.now().plusDays(apiTokenInsertRequest.expiry_days),
         LocalDateTime.now(),
-        user, // TODO 作成ユーザー入れる
-        userGroup
+        user,
+        group
       )
       apiTokenDAO.save(apiToken)
-      apiTokenDAO.clearToken(userGroup, id)
+      apiTokenDAO.clearToken(group, id)
       ApiTokenInsertResponse(tokenString)
     })
   }
-  def getExpiry(userGroup: String): Option[LocalDateTime] = {
+  def getExpiry(session: Session): Option[LocalDateTime] = {
+    val group = session.get("user_group").getOrElse("")
     DB.localTx(implicit session => {
-      apiTokenDAO.getExpiry(userGroup)
+      apiTokenDAO.getExpiry(group)
     })
   }
 }
