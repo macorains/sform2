@@ -31,7 +31,8 @@ class ApiTokenController @Inject()(
 
     val result = request.body.asJson.flatMap(r =>
       r.validate[ApiTokenInsertRequest].map(f => {
-        apiTokenService.insert(f, userId, userGroup)
+        // apiTokenService.insert(f, userId, userGroup)
+        apiTokenService.insert(f, request.session)
       }).asOpt)
     result.map(res => Ok(Json.toJson(res))).getOrElse(BadRequest)
   }
@@ -42,7 +43,8 @@ class ApiTokenController @Inject()(
     val userGroup = request.session.get("user_group").getOrElse("")
 
 
-    val res = userId.flatMap(_ => apiTokenService.getExpiry(userGroup))
+    //val res = userId.flatMap(_ => apiTokenService.getExpiry(userGroup))
+    val res = userId.flatMap(_ => apiTokenService.getExpiry(request.session))
 
     res match {
       case Some(s) => Ok(Json.parse(s"""{"expiry":"$s"}"""))
