@@ -25,26 +25,15 @@ class ApiTokenController @Inject()(
   with Pac4jUtil {
 
   def save: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
-    val profiles = getProfiles(controllerComponents)(request)
-    val userId = request.session.get("user_id").getOrElse(profiles.asScala.headOption.map(_.getId).getOrElse("Unknown"))
-    val userGroup = request.session.get("user_group").getOrElse("Unknown")
-
     val result = request.body.asJson.flatMap(r =>
       r.validate[ApiTokenInsertRequest].map(f => {
-        // apiTokenService.insert(f, userId, userGroup)
         apiTokenService.insert(f, request.session)
       }).asOpt)
     result.map(res => Ok(Json.toJson(res))).getOrElse(BadRequest)
   }
 
   def getExpiry: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
-    val profiles = getProfiles(controllerComponents)(request)
-    val userId = profiles.asScala.headOption.map(_.getId)
-    val userGroup = request.session.get("user_group").getOrElse("")
-
-
-    //val res = userId.flatMap(_ => apiTokenService.getExpiry(userGroup))
-    val res = userId.flatMap(_ => apiTokenService.getExpiry(request.session))
+    val res = apiTokenService.getExpiry(request.session)
 
     res match {
       case Some(s) => Ok(Json.parse(s"""{"expiry":"$s"}"""))

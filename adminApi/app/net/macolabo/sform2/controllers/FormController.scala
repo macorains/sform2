@@ -39,9 +39,7 @@ class FormController @Inject() (
    * @return フォームデータ
    */
   def get(hashed_form_id: String): Action[AnyContent] = Secure("HeaderClient")  { implicit request =>
-    val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = request.session.get("user_group").getOrElse("")
-    val res = formService.getForm(userGroup, hashed_form_id)
+    val res = formService.getForm(hashed_form_id, request.session)
     Ok(toJson(res))
   }
 
@@ -51,9 +49,7 @@ class FormController @Inject() (
    * @return フォームデータのリスト
    */
   def getList: Action[AnyContent] = Secure(clients = "HeaderClient") { implicit request =>
-    val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = request.session.get("user_group").getOrElse("")
-    val res = formService.getList(userGroup)
+    val res = formService.getList(request.session)
     Ok(toJson(res))
   }
 
@@ -62,18 +58,10 @@ class FormController @Inject() (
    * @return
    */
   def save(): Action[AnyContent] = Secure("HeaderClient")  { implicit request =>
-    val profiles = getProfiles(controllerComponents)(request)
-    val userId = profiles.asScala.headOption.map(_.getId)
-    val userGroup = request.session.get("user_group").getOrElse("")
-
-    println(request.body.asJson.get.validate[FormUpdateRequest].toString)
-
-    val res = userId.flatMap(id => {
-      request.body.asJson.flatMap(r =>
+    val res = request.body.asJson.flatMap(r =>
         r.validate[FormUpdateRequest].map(f => {
-          formService.update(id, userGroup, f)
+          formService.update(f, request.session)
         }).asOpt)
-    })
 
     res match {
       case Some(s :FormUpdateResponse) => Ok(toJson(s))
@@ -86,16 +74,10 @@ class FormController @Inject() (
    * @return
    */
   def create(): Action[AnyContent] = Secure("HeaderClient")  { implicit request =>
-    val profiles = getProfiles(controllerComponents)(request)
-    val userId = profiles.asScala.headOption.map(_.getId)
-    val userGroup = request.session.get("user_group").getOrElse("")
-
-    val res = userId.flatMap(id => {
-      request.body.asJson.flatMap(r =>
+    val res = request.body.asJson.flatMap(r =>
         r.validate[FormUpdateRequest].map(f => {
-          formService.insert(id, userGroup, f)
+          formService.insert(f, request.session)
         }).asOpt)
-    })
 
     res match {
       case Some(s :FormUpdateResponse) => Ok(toJson(s))
@@ -110,9 +92,7 @@ class FormController @Inject() (
    * @return
    */
   def delete(hashed_form_id: String): Action[AnyContent] = Secure("HeaderClient")  { implicit request =>
-    val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = request.session.get("user_group").getOrElse("")
-    val res = formService.deleteForm(userGroup, hashed_form_id)
+    val res = formService.deleteForm(hashed_form_id, request.session)
     Ok(toJson(res))
   }
 }
