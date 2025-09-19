@@ -1,6 +1,7 @@
 package net.macolabo.sform2.domain.services.ApiToken
 
 import com.google.inject.Inject
+import net.macolabo.sform2.domain.models.SessionInfo
 import net.macolabo.sform2.domain.models.daos.ApiTokenDAO
 import net.macolabo.sform2.domain.models.entity.api_token.ApiToken
 import net.macolabo.sform2.domain.services.ApiToken.insert.{ApiTokenInsertRequest, ApiTokenInsertResponse}
@@ -17,30 +18,29 @@ class ApiTokenServiceImpl @Inject()(
 ) extends ApiTokenService with TokenUtil {
 
   def insert(apiTokenInsertRequest: ApiTokenInsertRequest, session: Session): ApiTokenInsertResponse = {
-    val user = session.get("user_id").getOrElse("")
-    val group = session.get("user_group").getOrElse("")
+    val sessionInfo = SessionInfo(session)
     DB.localTx(implicit session => {
       val tokenString = generateToken
       val service = new DefaultPasswordService
       val id = UUID.randomUUID()
       val apiToken = ApiToken(
         id,
-        group,
+        sessionInfo.user_group,
         service.encryptPassword(tokenString),
         LocalDateTime.now().plusDays(apiTokenInsertRequest.expiry_days),
         LocalDateTime.now(),
-        user,
-        group
+        sessionInfo.user_id,
+        sessionInfo.user_group
       )
       apiTokenDAO.save(apiToken)
-      apiTokenDAO.clearToken(group, id)
+      apiTokenDAO.clearToken(sessionInfo.user_group, id)
       ApiTokenInsertResponse(tokenString)
     })
   }
   def getExpiry(session: Session): Option[LocalDateTime] = {
-    val group = session.get("user_group").getOrElse("")
+    val sessionInfo = SessionInfo(session)
     DB.localTx(implicit session => {
-      apiTokenDAO.getExpiry(group)
+      apiTokenDAO.getExpiry(sessionInfo.user_group)
     })
   }
 }
