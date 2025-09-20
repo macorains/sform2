@@ -1,6 +1,7 @@
 package net.macolabo.sform2.domain.services.TransferConfig
 
 import com.google.inject.Inject
+import net.macolabo.sform2.domain.models.SessionInfo
 import net.macolabo.sform2.domain.models.daos.{TransferConfigDAO, TransferConfigMailAddressDAO, TransferConfigMailDAO, TransferConfigSalesforceDAO, TransferConfigSalesforceObjectDAO, TransferConfigSalesforceObjectFieldDAO}
 import net.macolabo.sform2.domain.models.entity.CryptoConfig
 import net.macolabo.sform2.domain.models.entity.transfer.{TransferConfig, TransferConfigMail, TransferConfigMailAddress, TransferConfigSalesforce, TransferConfigSalesforceObject, TransferConfigSalesforceObjectField}
@@ -14,19 +15,19 @@ import scala.concurrent.ExecutionContext
 trait TransferConfigService {
 
   // Insert or Update
-  def saveTransferConfig(userId: String, userGroup: String, request: TransferConfigSaveRequest, cryptoConfig: CryptoConfig): BigInt
-  def saveMailTransferConfig(userId: String, userGroup: String, request: MailTransferConfigSaveRequest, transferConfigId: BigInt): BigInt
-  def saveMailTransferConfigMailAddress(userId: String, userGroup: String, request: MailTransferConfigMailAddressSaveRequest, transferConfigMailId: BigInt): BigInt
-  def saveSalesforceTransferConfig(userId: String, userGroup: String, request: SalesforceTransferConfigSaveRequest, cryptoConfig: CryptoConfig, transferConfigId: BigInt): BigInt
-  def saveSalesforceTransferConfigObject(userId: String, userGroup: String, request: SalesforceTransferConfigObjectSaveRequest, transferConfigSalesforceId: BigInt): BigInt
-  def insertSalesforceTransferConfigObjectField(userId: String, userGroup: String, request: SalesforceTransferConfigObjectFieldSaveRequest, transferConfigSalesforceObjectId: BigInt): BigInt
+  def saveTransferConfig(request: TransferConfigSaveRequest, cryptoConfig: CryptoConfig, sessionInfo: SessionInfo): BigInt
+  def saveMailTransferConfig(request: MailTransferConfigSaveRequest, transferConfigId: BigInt, sessionInfo: SessionInfo): BigInt
+  def saveMailTransferConfigMailAddress(request: MailTransferConfigMailAddressSaveRequest, transferConfigMailId: BigInt, sessionInfo: SessionInfo): BigInt
+  def saveSalesforceTransferConfig(request: SalesforceTransferConfigSaveRequest, cryptoConfig: CryptoConfig, transferConfigId: BigInt, sessionInfo: SessionInfo): BigInt
+  def saveSalesforceTransferConfigObject(request: SalesforceTransferConfigObjectSaveRequest, transferConfigSalesforceId: BigInt, sessionInfo: SessionInfo): BigInt
+  def insertSalesforceTransferConfigObjectField(request: SalesforceTransferConfigObjectFieldSaveRequest, transferConfigSalesforceObjectId: BigInt, sessionInfo: SessionInfo): BigInt
 
   // Delete
-  def deleteTransferConfig(userId: String, userGroup: String, id: BigInt): Int
-  def deleteMailTransferConfig(userGroup: String, config: TransferConfigMail): Int
-  def deleteMailTransferConfigMailAddress(userGroup: String, id: BigInt): Int
-  def deleteSalesforceTransferConfig(userGroup: String, id: BigInt): Int
-  def deleteSalesforceTransferConfigObject(userGroup: String, id: BigInt): Int
-  def deleteSalesforceTransferConfigObjectField(userGroup: String, id: BigInt): Int
+  def deleteTransferConfig(id: BigInt, sessionInfo: SessionInfo): Int
+  def deleteMailTransferConfig(config: TransferConfigMail, sessionInfo: SessionInfo): Int
+  def deleteMailTransferConfigMailAddress(id: BigInt, sessionInfo: SessionInfo): Int
+  def deleteSalesforceTransferConfig(id: BigInt, sessionInfo: SessionInfo): Int
+  def deleteSalesforceTransferConfigObject(id: BigInt, sessionInfo: SessionInfo): Int
+  def deleteSalesforceTransferConfigObjectField(id: BigInt, sessionInfo: SessionInfo): Int
 
 }
