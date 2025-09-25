@@ -123,6 +123,7 @@ class FormController @Inject() (
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         val result = formService.deleteForm(hashed_form_id, sessionInfo)
+        Ok(toJson(result))
       case Failure(e) =>
         BadRequest(s"Session invalid. ${e.getMessage}")
     }
