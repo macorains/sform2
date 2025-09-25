@@ -17,8 +17,7 @@ class ApiTokenServiceImpl @Inject()(
   apiTokenDAO: ApiTokenDAO
 ) extends ApiTokenService with TokenUtil {
 
-  def insert(apiTokenInsertRequest: ApiTokenInsertRequest, session: Session): ApiTokenInsertResponse = {
-    val sessionInfo = SessionInfo(session)
+  def insert(apiTokenInsertRequest: ApiTokenInsertRequest, sessionInfo: SessionInfo): ApiTokenInsertResponse = {
     DB.localTx(implicit session => {
       val tokenString = generateToken
       val service = new DefaultPasswordService
@@ -37,8 +36,7 @@ class ApiTokenServiceImpl @Inject()(
       ApiTokenInsertResponse(tokenString)
     })
   }
-  def getExpiry(session: Session): Option[LocalDateTime] = {
-    val sessionInfo = SessionInfo(session)
+  def getExpiry(sessionInfo: SessionInfo): Option[LocalDateTime] = {
     DB.localTx(implicit session => {
       apiTokenDAO.getExpiry(sessionInfo.user_group)
     })

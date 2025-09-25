@@ -1,6 +1,7 @@
 package net.macolabo.sform2.domain.services.TransferConfig
 
 import com.google.inject.Inject
+import net.macolabo.sform2.domain.models.SessionInfo
 import net.macolabo.sform2.domain.models.daos._
 import net.macolabo.sform2.domain.models.entity.CryptoConfig
 import net.macolabo.sform2.domain.models.entity.transfer.{TransferConfig, TransferConfigMail, TransferConfigMailAddress, TransferConfigSalesforce, TransferConfigSalesforceObject, TransferConfigSalesforceObjectField}
@@ -21,7 +22,7 @@ class TransferConfigServiceImpl @Inject()(
 ) (implicit ex: ExecutionContext) extends TransferConfigService {
 
   // Insert or Update
-  def saveTransferConfig(userId: String, userGroup: String, request: TransferConfigSaveRequest, cryptoConfig: CryptoConfig): BigInt = {
+  def saveTransferConfig(request: TransferConfigSaveRequest, cryptoConfig: CryptoConfig, sessionInfo: SessionInfo): BigInt = {
     DB.localTx(implicit session => {
       val transferConfigId = request.id.map(id => {
         transferConfigDAO.save(TransferConfig(
@@ -30,9 +31,9 @@ class TransferConfigServiceImpl @Inject()(
           request.config_index.get, // 上書き保存の時は必ず入る想定
           request.name,
           request.status,
-          userGroup,
-          userId,
-          userId,
+          sessionInfo.user_group,
+          sessionInfo.user_id,
+          sessionInfo.user_id,
           ZonedDateTime.now(),
           ZonedDateTime.now()
         ))
@@ -43,27 +44,27 @@ class TransferConfigServiceImpl @Inject()(
           0, // createの場合、DAO側で既存最大値+1を挿入する
           request.name,
           request.status,
-          userGroup,
-          userId,
-          userId,
+          sessionInfo.user_group,
+          sessionInfo.user_id,
+          sessionInfo.user_id,
           ZonedDateTime.now(),
           ZonedDateTime.now()
         ))
       })
 
       request.detail.mail.map(detail => {
-        saveMailTransferConfig(userId, userGroup, detail, transferConfigId)
+        saveMailTransferConfig(detail, transferConfigId, sessionInfo)
       })
 
       request.detail.salesforce.map(detail => {
-        saveSalesforceTransferConfig(userId, userGroup, detail, cryptoConfig, transferConfigId)
+        saveSalesforceTransferConfig(detail, cryptoConfig, transferConfigId, sessionInfo)
       })
 
       transferConfigId
     })
   }
 
-  def saveMailTransferConfig(userId: String, userGroup: String, request: MailTransferConfigSaveRequest, transferConfigId: BigInt): BigInt = {
+  def saveMailTransferConfig(request: MailTransferConfigSaveRequest, transferConfigId: BigInt, sessionInfo: SessionInfo): BigInt = {
     val transferConfigMailId = request.id.map(id => {
       transferConfigMailDAO.save(
         TransferConfigMail(
@@ -72,9 +73,9 @@ class TransferConfigServiceImpl @Inject()(
           request.use_cc,
           request.use_bcc,
           request.use_replyto,
-          userGroup,
-          userId,
-          userId,
+          sessionInfo.user_group,
+          sessionInfo.user_id,
+          sessionInfo.user_id,
           ZonedDateTime.now(),
           ZonedDateTime.now()
         )
@@ -87,9 +88,9 @@ class TransferConfigServiceImpl @Inject()(
           request.use_cc,
           request.use_bcc,
           request.use_replyto,
-          userGroup,
-          userId,
-          userId,
+          sessionInfo.user_group,
+          sessionInfo.user_id,
+          sessionInfo.user_id,
           ZonedDateTime.now(),
           ZonedDateTime.now()
         )
@@ -97,18 +98,18 @@ class TransferConfigServiceImpl @Inject()(
     })
 
     val mailAddressIdList = request.mail_address_list
-      .map(mailAddress => saveMailTransferConfigMailAddress(userId, userGroup, mailAddress, transferConfigMailId))
+      .map(mailAddress => saveMailTransferConfigMailAddress(mailAddress, transferConfigMailId, sessionInfo))
 
     // 更新or作成リクエストに含まれていないメールアドレスは削除対象なので削除する
-    transferConfigMailAddressDAO.getList(userGroup, transferConfigMailId)
+    transferConfigMailAddressDAO.getList(sessionInfo.user_group, transferConfigMailId)
       .filterNot(address => mailAddressIdList.contains(address.id))
       .map(address => address.id)
-      .foreach(address => transferConfigMailAddressDAO.delete(userGroup, address))
+      .foreach(address => transferConfigMailAddressDAO.delete(sessionInfo.user_group, address))
 
     transferConfigMailId
   }
 
-  def saveMailTransferConfigMailAddress(userId: String, userGroup: String, request: MailTransferConfigMailAddressSaveRequest, transferConfigMailId: BigInt): BigInt = {
+  def saveMailTransferConfigMailAddress(request: MailTransferConfigMailAddressSaveRequest, transferConfigMailId: BigInt, sessionInfo: SessionInfo): BigInt = {
     request.id.map(id => {
       transferConfigMailAddressDAO.save(TransferConfigMailAddress(
         id,
@@ -116,9 +117,9 @@ class TransferConfigServiceImpl @Inject()(
         request.address_index,
         request.name,
         request.address,
-        userGroup,
-        userId,
-        userId,
+        sessionInfo.user_group,
+        sessionInfo.user_id,
+        sessionInfo.user_id,
         ZonedDateTime.now(),
         ZonedDateTime.now()
       ))
@@ -129,16 +130,16 @@ class TransferConfigServiceImpl @Inject()(
         request.address_index,
         request.name,
         request.address,
-        userGroup,
-        userId,
-        userId,
+        sessionInfo.user_group,
+        sessionInfo.user_id,
+        sessionInfo.user_id,
         ZonedDateTime.now(),
         ZonedDateTime.now()
       ))
     })
   }
 
-  def saveSalesforceTransferConfig(userId: String, userGroup: String, request: SalesforceTransferConfigSaveRequest, cryptoConfig: CryptoConfig, transferConfigId: BigInt): BigInt = {
+  def saveSalesforceTransferConfig(request: SalesforceTransferConfigSaveRequest, cryptoConfig: CryptoConfig, transferConfigId: BigInt, sessionInfo: SessionInfo): BigInt = {
     // 暗号化処理
     val crypto = Crypto(cryptoConfig.secret_key_string, cryptoConfig.cipher_algorithm, cryptoConfig.secret_key_algorithm, cryptoConfig.charset)
     val ivUserName = crypto.generateIV
@@ -164,9 +165,9 @@ class TransferConfigServiceImpl @Inject()(
         ivPassword,
         ivClientId,
         ivClientSecret,
-        userGroup,
-        userId,
-        userId,
+        sessionInfo.user_group,
+        sessionInfo.user_id,
+        sessionInfo.user_id,
         ZonedDateTime.now(),
         ZonedDateTime.now()
       ))
@@ -184,9 +185,9 @@ class TransferConfigServiceImpl @Inject()(
         ivPassword,
         ivClientId,
         ivClientSecret,
-        userGroup,
-        userId,
-        userId,
+        sessionInfo.user_group,
+        sessionInfo.user_id,
+        sessionInfo.user_id,
         ZonedDateTime.now(),
         ZonedDateTime.now()
       ))
@@ -194,20 +195,20 @@ class TransferConfigServiceImpl @Inject()(
 
     // Transferで使用するSalesforceオブジェクト一覧の保存
     val updatedObjects = request.objects.map(o => {
-      saveSalesforceTransferConfigObject(userId, userGroup, o, transferConfigSalesforceId)
+      saveSalesforceTransferConfigObject(o, transferConfigSalesforceId, sessionInfo)
     })
 
     // 不要になったSalesforceオブジェクトの削除
     transferConfigSalesforceObjectDAO
-      .getList(userGroup, request.id)
+      .getList(sessionInfo.user_group, request.id)
       .filterNot(o => updatedObjects.contains(o.id))
       .map(o => o.id)
-      .foreach(o => transferConfigSalesforceObjectDAO.delete(userGroup, o))
+      .foreach(o => transferConfigSalesforceObjectDAO.delete(sessionInfo.user_group, o))
 
     transferConfigSalesforceId
   }
 
-  def saveSalesforceTransferConfigObject(userId: String, userGroup: String, request: SalesforceTransferConfigObjectSaveRequest, transferConfigSalesforceId: BigInt): BigInt = {
+  def saveSalesforceTransferConfigObject(request: SalesforceTransferConfigObjectSaveRequest, transferConfigSalesforceId: BigInt, sessionInfo: SessionInfo): BigInt = {
     val transferConfigSalesforceObjectId = request.id.map(id => {
       transferConfigSalesforceObjectDAO.save(
         TransferConfigSalesforceObject(
@@ -216,9 +217,9 @@ class TransferConfigServiceImpl @Inject()(
           request.name,
           request.label,
           request.active,
-          userGroup,
-          userId,
-          userId,
+          sessionInfo.user_group,
+          sessionInfo.user_id,
+          sessionInfo.user_id,
           ZonedDateTime.now(),
           ZonedDateTime.now()
         )
@@ -231,9 +232,9 @@ class TransferConfigServiceImpl @Inject()(
           request.name,
           request.label,
           request.active,
-          userGroup,
-          userId,
-          userId,
+          sessionInfo.user_group,
+          sessionInfo.user_id,
+          sessionInfo.user_id,
           ZonedDateTime.now(),
           ZonedDateTime.now()
         )
@@ -241,19 +242,19 @@ class TransferConfigServiceImpl @Inject()(
     })
 
     // オブジェクトのフィールド情報保存
-    val updateFields = request.fields.map(f => insertSalesforceTransferConfigObjectField(userId, userGroup, f, transferConfigSalesforceObjectId))
+    val updateFields = request.fields.map(f => insertSalesforceTransferConfigObjectField(f, transferConfigSalesforceObjectId, sessionInfo))
 
     // 不要になったオブジェクトのフィールドを削除
     transferConfigSalesforceObjectFieldDAO
-      .getList(userGroup, request.id)
+      .getList(sessionInfo.user_group, request.id)
       .filterNot(f =>updateFields.contains(f.id))
       .map(f => f.id)
-      .foreach(f => transferConfigSalesforceObjectFieldDAO.delete(userGroup, f))
+      .foreach(f => transferConfigSalesforceObjectFieldDAO.delete(sessionInfo.user_group, f))
 
     transferConfigSalesforceObjectId
   }
 
-  def insertSalesforceTransferConfigObjectField(userId: String, userGroup: String, request: SalesforceTransferConfigObjectFieldSaveRequest, transferConfigSalesforceObjectId: BigInt): BigInt = {
+  def insertSalesforceTransferConfigObjectField(request: SalesforceTransferConfigObjectFieldSaveRequest, transferConfigSalesforceObjectId: BigInt, sessionInfo: SessionInfo): BigInt = {
     request.id.map(id => {
       transferConfigSalesforceObjectFieldDAO.save(
         TransferConfigSalesforceObjectField(
@@ -263,9 +264,9 @@ class TransferConfigServiceImpl @Inject()(
           request.label,
           request.field_type,
           request.active,
-          userGroup,
-          userId,
-          userId,
+          sessionInfo.user_group,
+          sessionInfo.user_id,
+          sessionInfo.user_id,
           ZonedDateTime.now(),
           ZonedDateTime.now()
         )
@@ -279,9 +280,9 @@ class TransferConfigServiceImpl @Inject()(
           request.label,
           request.field_type,
           request.active,
-          userGroup,
-          userId,
-          userId,
+          sessionInfo.user_group,
+          sessionInfo.user_id,
+          sessionInfo.user_id,
           ZonedDateTime.now(),
           ZonedDateTime.now()
         )
@@ -290,36 +291,36 @@ class TransferConfigServiceImpl @Inject()(
   }
 
   // Delete
-  def deleteTransferConfig(userId: String, userGroup: String, id: BigInt): Int = {
+  def deleteTransferConfig(id: BigInt, sessionInfo: SessionInfo): Int = {
     DB.localTx(implicit session => {
-      transferConfigMailDAO.get(userGroup, id).map(tc => deleteMailTransferConfig(userGroup, tc))
-      transferConfigSalesforceDAO.get(id).map(tc => deleteSalesforceTransferConfig(userGroup, tc.id))
-      transferConfigDAO.delete(userGroup, id)
+      transferConfigMailDAO.get(sessionInfo.user_group, id).map(tc => deleteMailTransferConfig(tc, sessionInfo))
+      transferConfigSalesforceDAO.get(id).map(tc => deleteSalesforceTransferConfig(tc.id, sessionInfo))
+      transferConfigDAO.delete(sessionInfo.user_group, id)
     })
   }
 
-  def deleteMailTransferConfig(userGroup: String, config: TransferConfigMail): Int = {
-    transferConfigMailAddressDAO.getList(userGroup, config.id).map(address => deleteMailTransferConfigMailAddress(userGroup, address.id))
-    transferConfigMailDAO.delete(userGroup, config.id)
+  def deleteMailTransferConfig(config: TransferConfigMail, sessionInfo: SessionInfo): Int = {
+    transferConfigMailAddressDAO.getList(sessionInfo.user_group, config.id).map(address => deleteMailTransferConfigMailAddress(address.id, sessionInfo))
+    transferConfigMailDAO.delete(sessionInfo.user_group, config.id)
 
   }
 
-  def deleteMailTransferConfigMailAddress(userGroup: String, id: BigInt): Int = {
-    transferConfigMailAddressDAO.delete(userGroup, id)
+  def deleteMailTransferConfigMailAddress(id: BigInt, sessionInfo: SessionInfo): Int = {
+    transferConfigMailAddressDAO.delete(sessionInfo.user_group, id)
   }
 
-  def deleteSalesforceTransferConfig(userGroup: String, id: BigInt): Int = {
-    transferConfigSalesforceObjectDAO.getList(userGroup, Some(id)).map(tc => deleteSalesforceTransferConfigObject(userGroup, tc.id))
-    transferConfigSalesforceDAO.delete(userGroup, id)
+  def deleteSalesforceTransferConfig(id: BigInt, sessionInfo: SessionInfo): Int = {
+    transferConfigSalesforceObjectDAO.getList(sessionInfo.user_group, Some(id)).map(tc => deleteSalesforceTransferConfigObject(tc.id, sessionInfo))
+    transferConfigSalesforceDAO.delete(sessionInfo.user_group, id)
   }
 
-  def deleteSalesforceTransferConfigObject(userGroup: String, id: BigInt): Int = {
-    transferConfigSalesforceObjectFieldDAO.getList(userGroup, Some(id)).map(field => deleteSalesforceTransferConfigObjectField(userGroup, field.id))
-    transferConfigSalesforceObjectDAO.delete(userGroup, id)
+  def deleteSalesforceTransferConfigObject(id: BigInt, sessionInfo: SessionInfo): Int = {
+    transferConfigSalesforceObjectFieldDAO.getList(sessionInfo.user_group, Some(id)).map(field => deleteSalesforceTransferConfigObjectField(field.id, sessionInfo))
+    transferConfigSalesforceObjectDAO.delete(sessionInfo.user_group, id)
   }
 
-  def deleteSalesforceTransferConfigObjectField(userGroup: String, id: BigInt): Int = {
-    transferConfigSalesforceObjectFieldDAO.delete(userGroup, id)
+  def deleteSalesforceTransferConfigObjectField(id: BigInt, sessionInfo: SessionInfo): Int = {
+    transferConfigSalesforceObjectFieldDAO.delete(sessionInfo.user_group, id)
   }
 
 }
