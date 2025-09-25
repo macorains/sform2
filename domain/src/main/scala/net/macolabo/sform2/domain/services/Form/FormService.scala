@@ -19,12 +19,11 @@ class FormService @Inject()(
   /**
    * フォーム詳細データ取得
    *
-   * @param userSession セッション
    * @param hashed_form_id フォームhashed ID
+   * @param sessionInfo セッションデータ
    * @return フォームデータ
    */
-  def getForm(hashed_form_id: String, userSession: Session): Option[FormGetResponse] = {
-    val sessionInfo = SessionInfo(userSession)
+  def getForm(hashed_form_id: String, sessionInfo: SessionInfo): Option[FormGetResponse] = {
     DB.localTx(implicit session => {
       formDAO.getByHashedId(sessionInfo.user_group, hashed_form_id)
     })
@@ -33,11 +32,10 @@ class FormService @Inject()(
   /**
    * フォームリスト取得
    *
-   * @param userSession セッション
+   * @param sessionInfo セッションデータ
    * @return フォームリスト
    */
-  def getList(userSession: Session): FormListResponse = {
-    val sessionInfo = SessionInfo(userSession)
+  def getList(sessionInfo: SessionInfo): FormListResponse = {
     DB.localTx(implicit session => {
       formDAO.getList(sessionInfo.user_group)
     })
@@ -46,12 +44,11 @@ class FormService @Inject()(
   /**
    * フォーム作成
    *
-   * @param userSession セッション
    * @param formUpdateRequest フォーム作成リクエストデータ
+   * @param sessionInfo セッションデータ
    * @return フォーム作成結果レスポンス
    */
-  def insert(formUpdateRequest: FormUpdateRequest, userSession: Session): FormUpdateResponse = {
-    val sessionInfo = SessionInfo(userSession)
+  def insert(formUpdateRequest: FormUpdateRequest, sessionInfo: SessionInfo): FormUpdateResponse = {
     DB.localTx(implicit session => {
       formDAO.update(sessionInfo.user_id, sessionInfo.user_group, formUpdateRequest)
     })
@@ -61,11 +58,10 @@ class FormService @Inject()(
    * フォーム更新
    *
    * @param formUpdateRequest フォーム更新リクエストデータ
-   * @param userSession セッション
+   * @param sessionInfo セッションデータ
    * @return フォーム更新結果レスポンス
    */
-  def update(formUpdateRequest: FormUpdateRequest, userSession: Session): FormUpdateResponse = {
-    val sessionInfo = SessionInfo(userSession)
+  def update(formUpdateRequest: FormUpdateRequest, sessionInfo: SessionInfo): FormUpdateResponse = {
     DB.localTx(implicit session => {
       formDAO.update(sessionInfo.user_id, sessionInfo.user_group, formUpdateRequest)
     })
@@ -75,11 +71,10 @@ class FormService @Inject()(
    * フォーム削除
    *
    * @param hashed_form_id ハッシュ化フォームID
-   * @param userSession セッション
+   * @param sessionInfo セッションデータ
    * @return フォーム削除結果レスポンス
    */
-  def deleteForm(hashed_form_id: String, userSession: Session): FormDeleteResponse = {
-    val sessionInfo = SessionInfo(userSession)
+  def deleteForm(hashed_form_id: String, sessionInfo: SessionInfo): FormDeleteResponse = {
     DB.localTx(implicit session => {
       formDAO.deleteByHashedId(sessionInfo.user_group, hashed_form_id)
     })
