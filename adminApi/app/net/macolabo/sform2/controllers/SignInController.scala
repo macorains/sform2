@@ -1,29 +1,19 @@
 package net.macolabo.sform2.controllers
 
-import net.macolabo.sform2.domain.models.entity.user.User
-
 import javax.inject.Inject
 import net.macolabo.sform2.domain.services.User.UserService
-import org.pac4j.core.config.Config
-import org.pac4j.core.context.{FrameworkParameters, WebContext}
-import org.pac4j.core.context.session.{SessionStore, SessionStoreFactory}
 import org.webjars.play.WebJarsUtil
 import play.api.{Configuration, Logger}
-import play.api.i18n.{I18nSupport, Messages}
+import play.api.i18n.I18nSupport
 import play.api.libs.mailer._
 import play.api.mvc._
 import play.api.cache.SyncCacheApi
-import org.pac4j.core.profile.{ProfileManager, UserProfile}
-import org.pac4j.core.profile.factory.ProfileManagerFactory
-import org.pac4j.http.client.direct.HeaderClient
+import org.pac4j.core.profile.UserProfile
 import org.pac4j.jwt.config.signature.SecretSignatureConfiguration
-import org.pac4j.jwt.credentials.authenticator.JwtAuthenticator
 import org.pac4j.jwt.profile.JwtGenerator
-import org.pac4j.play.PlayWebContext
-import org.pac4j.play.context.{PlayContextFactory, PlayFrameworkParameters}
+import org.pac4j.play.context.PlayContextFactory
 import org.pac4j.play.scala.{Security, SecurityComponents}
 import play.api.libs.ws.WSClient
-import play.core.j.PlayMagicForJava.`collection AsScalaIterable`
 
 import scala.concurrent.{ExecutionContext, Future}
 

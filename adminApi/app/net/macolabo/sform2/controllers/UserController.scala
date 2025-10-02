@@ -1,8 +1,7 @@
 package net.macolabo.sform2.controllers
 
 import javax.inject._
-import net.macolabo.sform2.domain.models.{RsResultSet, SessionInfo}
-import net.macolabo.sform2.domain.models.daos.UserDAO
+import net.macolabo.sform2.domain.models.SessionInfo
 import net.macolabo.sform2.domain.services.User.{UserSaveRequest, UserSaveRequestJson, UserService}
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
