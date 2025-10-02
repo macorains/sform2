@@ -39,7 +39,7 @@ const load = () => {
   isLoading.value = true
   $http.get('/user')
       .then(response => {
-        userList.value = response.data.dataset.map(d => convert(d))
+        userList.value = response.data.user_list.map(d => convert(d))
         isLoading.value = false
       })
 }
