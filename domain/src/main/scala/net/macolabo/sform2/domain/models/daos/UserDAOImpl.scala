@@ -287,10 +287,10 @@ class UserDAOImpl extends UserDAO {
     }
   }
 
-  def getList(userGroup: String): JsValue = {
+  def getList(userGroup: String): List[User] = {
     DB localTx { implicit l =>
       val u = User.syntax("u")
-      val userList = withSQL(
+      withSQL(
         select(
           u.id,
           u.username,
@@ -309,26 +309,6 @@ class UserDAOImpl extends UserDAO {
           .where
           .eq(u.user_group, userGroup)
       ).map(rs => User(rs)).list().apply()
-
-      val userListJson = userList.map(
-        u => {
-          UserJson(
-            u.id.toString,
-            u.username,
-            u.password.getOrElse(""),
-            u.user_group.getOrElse(""),
-            u.role.getOrElse(""),
-            u.first_name.getOrElse(""),
-            u.last_name.getOrElse(""),
-            u.full_name.getOrElse(""),
-            u.email.getOrElse(""),
-            u.avatar_url.getOrElse(""),
-            u.activated,
-            u.deletable
-          )
-        }
-      )
-      Json.toJson(userListJson)
     }
   }
 

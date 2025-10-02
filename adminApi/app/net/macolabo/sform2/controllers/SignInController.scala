@@ -72,6 +72,7 @@ class SignInController @Inject() (
           Ok(net.macolabo.sform2.views.html.jwt(configuration.get[String]("sform.oauth.redirectUrl"), token))
             .addingToSession("user_id" -> u.id.toString)
             .addingToSession("user_group" -> u.user_group.get)
+            .addingToSession("user_role" -> u.role.getOrElse(""))
           // TODO 複数グループに属するユーザーの場合どうするか考える
         }).getOrElse(InternalServerError("sfrom.jwt.secret not found."))
       case None =>

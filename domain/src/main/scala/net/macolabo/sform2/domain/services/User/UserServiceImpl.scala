@@ -1,5 +1,6 @@
 package net.macolabo.sform2.domain.services.User
 
+import net.macolabo.sform2.domain.models.SessionInfo
 import net.macolabo.sform2.domain.models.daos.UserDAO
 import net.macolabo.sform2.domain.models.entity.user.User
 import org.apache.shiro.authc.credential.DefaultPasswordService
@@ -33,6 +34,22 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
     userDAO.findByEmail(email)
   }
 
+  def getList(sessionInfo: SessionInfo): UserListResponse = {
+    UserListResponse(userDAO.getList(sessionInfo.user_group).map(user => {
+      UserResponse(
+        user.username,
+        user.password,
+        user.user_group,
+        user.role,
+        user.first_name,
+        user.last_name,
+        user.email,
+        user.avatar_url,
+        user.activated,
+        user.deletable
+      )
+    }))
+  }
 
   /**
    * Saves a user.
@@ -42,7 +59,7 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
    */
   def save(user: User): Future[User] = userDAO.save(user)
 
-  def save(userSaveRequest: UserSaveRequest, userGroup: String): Future[User] = {
+  def save(userSaveRequest: UserSaveRequest, sessionInfo: SessionInfo): Future[User] = {
     val userId = userSaveRequest.userId.map(UUID.fromString).getOrElse(UUID.randomUUID())
     val encoder = new ShiroPasswordEncoder(new DefaultPasswordService)
     val password = userSaveRequest.userId
@@ -53,7 +70,7 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
       id = userId,
       username = userSaveRequest.email,
       password = password,
-      user_group = Option(userGroup),
+      user_group = Option(sessionInfo.user_group),
       role = Option(userSaveRequest.role),
       first_name = Option(userSaveRequest.firstName),
       last_name = Option(userSaveRequest.lastName),
@@ -65,8 +82,8 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
     ))
   }
 
-  def delete(userId: String, group: String): Unit = {
-    userDAO.delete(userId, group)
+  def delete(userId: String, sessionInfo: SessionInfo): Unit = {
+    userDAO.delete(userId, sessionInfo.user_group)
   }
 
   /**
