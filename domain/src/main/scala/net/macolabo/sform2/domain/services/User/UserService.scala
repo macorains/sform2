@@ -1,5 +1,6 @@
 package net.macolabo.sform2.domain.services.User
 
+import net.macolabo.sform2.domain.models.SessionInfo
 import net.macolabo.sform2.domain.models.entity.user.User
 
 import java.util.UUID
@@ -19,8 +20,8 @@ trait UserService {
    */
   def retrieve(id: UUID): Future[Option[User]]
   def retrieve(username: String): Future[Option[User]]
-
   def retrieveByEmail(email: String): Future[Option[User]]
+  def getList(sessionInfo: SessionInfo): UserListResponse
 
   /**
    * Saves a user.
@@ -30,7 +31,7 @@ trait UserService {
    */
   def save(user: User): Future[User]
 
-  def save(userSaveRequest: UserSaveRequest, userGroup: String): Future[User]
+  def save(userSaveRequest: UserSaveRequest, sessionInfo: SessionInfo): Future[User]
   /**
    * Saves the social profile for a user.
    *
@@ -41,7 +42,7 @@ trait UserService {
    */
   //def save(profile: CommonSocialProfile): Future[User]
 
-  def delete(userId: String, group: String): Unit
+  def delete(userId: String, sessionInfo: SessionInfo): Unit
 
   /**
    * Adminグループのユーザー存在チェック
