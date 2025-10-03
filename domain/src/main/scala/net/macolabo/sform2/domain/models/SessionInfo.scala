@@ -13,6 +13,6 @@ object SessionInfo {
     require(session.get("user_id").nonEmpty, "Could not get user_id.")
     require(session.get("user_group").nonEmpty, "Could not get user_group.")
     require(session.get("user_role").nonEmpty, "Could not get user_role")
-    SessionInfo(session.get("user_id").get, session.get("user_group").get, session.get("uesr_role").get)
+    SessionInfo(session.get("user_id").get, session.get("user_group").get, session.get("user_role").get)
   }
 }
