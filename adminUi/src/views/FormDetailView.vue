@@ -1,6 +1,10 @@
 <template>
   <main>
     <HeaderMenu />
+    <BBreadcrumb>
+      <BBreadcrumbItem href="/form">フォーム</BBreadcrumbItem>
+      <BBreadcrumbItem active>{{ form.name }}</BBreadcrumbItem>
+    </BBreadcrumb>
     <BFormGroup
         id="formStatusGroup"
         label-for="formStatus"
@@ -120,6 +124,13 @@
     <BButton
         class="mt-3"
         block
+        @click="cancel"
+    >
+      <i class="bi bi-ban me-1"></i>キャンセル
+    </BButton>
+    <BButton
+        class="mt-3 ms-3"
+        block
         @click="saveForm"
     >
       <i class="bi bi-cloud-arrow-down me-1"></i>保存
@@ -168,6 +179,10 @@ const saveForm = () =>  {
   requestPost('/form', form.value, response => {
     router.push('/form')
   })
+}
+
+const cancel = () => {
+  router.push('/form')
 }
 
 const updateColumn = (columnList) => {

@@ -12,12 +12,19 @@ const fields = ref([
     { key: 'title', sortable: true, label: 'フォームタイトル'},
     { key: 'status_name', sortable: true, label: 'ステータス'},
 ])
+const isAdmin = ref(false)
 const router = useRouter()
 const { requestGet, loading } = useHttpRequest()
 
 
 // ライフサイクルフック
 onMounted(() => {
+  requestGet(
+      '/user/isadmin',
+      response => {
+        isAdmin.value = response.data.is_admin
+      }
+  )
   requestGet(
       '/form/list',
       response => {
@@ -34,7 +41,6 @@ function convert(data) {
 }
 
 function detail(data) {
-  console.log(data)
   router.push({ name: 'form_detail', params: { form_id: data.hashed_id } })
 }
 
@@ -42,7 +48,7 @@ function detail(data) {
 
 <template>
   <main>
-    <HeaderMenu :hasMenu="true"/>
+    <HeaderMenu :hasMenu="true" :isAdmin="isAdmin"/>
     <div class="container">
       <h1 class="mt-5 mb-5">
         フォーム

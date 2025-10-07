@@ -1,5 +1,5 @@
 <template>
-    <HeaderMenu />
+    <HeaderMenu :hasMenu="true" :isAdmin="true"/>
       <div class="container">
         <h1 class="mt-5 mb-5">
           管理
