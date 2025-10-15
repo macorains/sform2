@@ -11,7 +11,7 @@
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" href="/form">フォーム</a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" v-if="isAdmin">
               <a class="nav-link" href="/admin">管理</a>
             </li>
             <li class="nav-item">
@@ -25,6 +25,7 @@
 </template>
 <script setup>
 defineProps({
-  hasMenu: Boolean
+  hasMenu: Boolean,
+  isAdmin: Boolean
 })
 </script>

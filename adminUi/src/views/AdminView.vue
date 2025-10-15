@@ -1,12 +1,11 @@
 <template>
-    <HeaderMenu />
+    <HeaderMenu :hasMenu="true" :isAdmin="true"/>
       <div class="container">
         <h1 class="mt-5 mb-5">
           管理
         </h1>
         <BCard no-body>
           <BTabs
-              pills
               card
               class="custom-tabs"
               :aria-selected="null"
@@ -57,7 +56,11 @@
   background-color: #007bff !important; /* 任意の背景色 */
   color: white; /* 任意の文字色 */
 }
+button[id].nav-link.active {
+  color: #ffffff;
+}
 </style>
+
 
 <script setup>
 import {ref} from "vue"
@@ -71,3 +74,5 @@ const loadToken = () => {
   apiTokenRef.value.load()
 }
 </script>
+
+

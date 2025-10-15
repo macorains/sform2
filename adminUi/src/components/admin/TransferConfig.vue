@@ -5,25 +5,23 @@
   <div class="container">
     <BTable striped hover :items="configList" :fields="fields">
       <template #cell(actions)="row">
-        <BButton size="sm" @click="edit(row)" class="mr-1">
+        <BButton variant="primary" size="sm" @click="edit(row)" class="me-1">
+          <i class="bi bi-pencil"></i>
           編集
         </BButton>
-        <BButton size="sm" @click="delete(row.config_index)">
+        <BButton variant="danger" size="sm" @click="delete(row.config_index)">
+          <i class="bi bi-trash"></i>
           削除
         </BButton>
       </template>
     </BTable>
     <BRow>
-      <BCol>
+      <BCol class="text-end">
         <BButton
-            class="mt-4"
+            class="mt-4 right-aligned"
             @click="add"
         >
-            <span
-                class="oi oi-plus"
-                title="plus"
-                aria-hidden="true"
-            />
+          <i class="bi bi-file-earmark-plus"></i>
           転送設定の追加
         </BButton>
       </BCol>
