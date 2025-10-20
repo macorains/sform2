@@ -1,5 +1,6 @@
 <template>
   <ErrorModal ref="errorModal" />
+  <ConfirmModal ref="confirmModal" />
   <RouterView />
 </template>
 
@@ -69,13 +70,32 @@ nav a:first-of-type {
 
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
-import {provide, ref} from "vue";
-import ErrorModal from '@/components/ErrorModal.vue';
+import {provide, ref } from 'vue'
+import ErrorModal from '@/components/ErrorModal.vue'
+import ConfirmModal from '@/components/ConfirmModal.vue'
 
-const errorModal = ref(null);
+const errorModal = ref(null)
+const confirmModal = ref(null)
 
 const showError = (message) => {
-  errorModal.value?.openModal(message);
+  errorModal.value?.openModal(message)
 };
-provide("showError", showError);
+const showConfirm = (message, callback) => {
+  if (!confirmModal.value) {
+    callback(false)
+    return
+  }
+  return confirmModal.value.openModal(message)
+      .then(result => {
+        callback(result)
+      })
+      .catch(() => {
+        // エラー時はキャンセル扱い
+        callback(false)
+      })
+};
+
+provide("showError", showError)
+provide("showConfirm", showConfirm)
+
 </script>
