@@ -52,6 +52,28 @@ export function useHttpRequest() {
         )
     }
 
+    const requestDelete = (url, callback, errorCallback) => {
+        loading.value = true
+        checkSession(
+            () => {
+                $http.delete(url).then(response => callback(response))
+                    .catch(error => {
+                        if(errorCallback){errorCallback(error) }
+                    })
+                    .finally(() => loading.value = false)
+            },
+            (sessionError) => {
+                // セッション無効時の処理
+                if (errorCallback) {
+                    errorCallback(sessionError)
+                } else {
+                    router.push({path: '/login'})
+                }
+                loading.value = false;
+            }
+        )
+    }
+
     const checkSession = (onSuccess, onFailure) => {
         $http
             .get('/checkSession')
@@ -72,6 +94,7 @@ export function useHttpRequest() {
     return {
         requestGet,
         requestPost,
+        requestDelete,
         loading
     }
 }

@@ -37,8 +37,8 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
   def getList(sessionInfo: SessionInfo): UserListResponse = {
     UserListResponse(userDAO.getList(sessionInfo.user_group).map(user => {
       UserResponse(
+        user.id.toString,
         user.username,
-        user.password,
         user.user_group,
         user.role,
         user.first_name,

@@ -3,8 +3,8 @@ package net.macolabo.sform2.domain.services.User
 import play.api.libs.json.{Json, OFormat}
 
 case class UserResponse (
+  id: String,
   username: String,
-  password: Option[String],
   user_group: Option[String],
   role: Option[String],
   first_name: Option[String],
