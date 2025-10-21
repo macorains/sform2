@@ -12,6 +12,11 @@ import scalikejdbc.{DB, DBSession}
 import java.time.ZonedDateTime
 import scala.concurrent.ExecutionContext
 
+/**
+ * @deprecated このクラスはTransferConfigServiceに集約する
+ *
+ */
+
 class TransferService @Inject()(
   transferConfigMailDAO: TransferConfigMailDAO,
   transferConfigMailAddressDAO: TransferConfigMailAddressDAO,

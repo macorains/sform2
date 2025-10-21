@@ -122,6 +122,16 @@ class TransferController @Inject() (
     }
   }
 
+  def deleteTransferConfig(transferConfigId: Int): Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+    Try(SessionInfo(request.session)) match {
+      case Success(sessionInfo) =>
+        transferConfigService.deleteTransferConfig(transferConfigId, sessionInfo)
+        Ok("")
+      case Failure(e) =>
+        BadRequest(s"Session invalid. ${e.getMessage}")
+    }
+  }
+
   /**
    * Salesforce疎通チェック
    * @return Result
