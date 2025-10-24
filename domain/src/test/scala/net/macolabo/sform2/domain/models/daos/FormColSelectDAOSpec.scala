@@ -83,8 +83,8 @@ class FormColSelectDAOSpec extends FixtureAnyFlatSpec with AutoRollback with Sfo
     val formColSelectList = mockFormColSelectDAO.getList(1, 1)
     assert(formColSelectList.size.equals(1))
     val formColSelect = formColSelectList.last
-    assert(formColSelect.form_col_id.equals(1))
-    assert(formColSelect.form_id.equals(1))
+    assert(formColSelect.form_col_id == 1)
+    assert(formColSelect.form_id == 1)
     assert(formColSelect.select_index.equals(1))
     assert(formColSelect.select_name.equals("col1"))
     assert(formColSelect.select_value.equals("col1"))

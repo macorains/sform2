@@ -56,13 +56,18 @@ case class FormColSelectGetReponse(
  * フォーム取得API・FormTransferTask
  * @param id FormTransferTask ID
  * @param transfer_config_id TransferConfig ID
+ * @param transfer_config_name TransferConfig name
  * @param form_id フォームID
  * @param task_index 順番
+ * @param name  name
  * @param form_transfer_task_conditions FormTransferTaskConditionのリスト
+ * @param mail mail
+ * @param salesforce salesforce
  */
 case class FormTransferTaskGetResponse(
                              id: BigInt,
                              transfer_config_id: BigInt,
+                             transfer_config_name: String,
                              form_id: BigInt,
                              task_index: Int,
                              name: String,
@@ -256,6 +261,7 @@ trait FormGetResponseJson {
   implicit val FormTransferTaskWrites: Writes[FormTransferTaskGetResponse] = (formTransferTask: FormTransferTaskGetResponse) => Json.obj(
     "id" -> formTransferTask.id,
     "transfer_config_id" -> formTransferTask.transfer_config_id,
+    "transfer_config_name" -> formTransferTask.transfer_config_name,
     "form_id" -> formTransferTask.form_id,
     "task_index" -> formTransferTask.task_index,
     "name" -> formTransferTask.name,
@@ -267,6 +273,7 @@ trait FormGetResponseJson {
   implicit val FormTransferTaskReads: Reads[FormTransferTaskGetResponse] = (
     (JsPath \ "id").read[BigInt] ~
       (JsPath \ "transfer_config_id").read[BigInt] ~
+      (JsPath \ "transfer_config_name").read[String] ~
       (JsPath \ "form_id").read[BigInt] ~
       (JsPath \ "task_index").read[Int] ~
       (JsPath \ "name").read[String] ~
@@ -312,14 +319,14 @@ trait FormGetResponseJson {
   implicit val FormTransferTaskSalesforceFieldWrites: Writes[FormTransferTaskSalesforceFieldGetReponse]
   = (formTransferTaskSalesforceField:FormTransferTaskSalesforceFieldGetReponse) => Json.obj(
     "id" -> formTransferTaskSalesforceField.id,
-    "form_ransfer_task_salesforce_id" -> formTransferTaskSalesforceField.form_transfer_task_salesforce_id,
+    "form_transfer_task_salesforce_id" -> formTransferTaskSalesforceField.form_transfer_task_salesforce_id,
     "form_column_id" -> formTransferTaskSalesforceField.form_column_id,
     "field_name" -> formTransferTaskSalesforceField.field_name
   )
 
   implicit val FormTransferTaskSalesforceFieldReads: Reads[FormTransferTaskSalesforceFieldGetReponse] = (
     (JsPath \ "id").read[BigInt] ~
-      (JsPath \ "transfer_task_salesforce_id").read[BigInt] ~
+      (JsPath \ "form_transfer_task_salesforce_id").read[BigInt] ~
       (JsPath \ "form_column_id").read[String] ~
       (JsPath \ "field_name").read[String]
     )(FormTransferTaskSalesforceFieldGetReponse.apply _)

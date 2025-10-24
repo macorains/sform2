@@ -26,7 +26,6 @@ play.http.session.maxAge = 1h
 # The application DI modules
 # ~~~~~
 play.modules.enabled += "net.macolabo.sform2.modules.BaseModule"
-play.modules.enabled += "net.macolabo.sform2.modules.JobModule"
 play.modules.enabled += "net.macolabo.sform2.modules.SecurityModule"
 play.modules.enabled += "play.api.libs.mailer.MailerModule"
 play.modules.enabled += "net.macolabo.sform2.modules.DBInitializerModule"
@@ -83,7 +82,29 @@ play.filters {
     # Chrome拡張のAPI Testerの類を使う場合はallowedOriginsに追加が必要
     allowedOrigins = ["http://localhost:8080","http://localhost:8081", "chrome-extension://aejoelaoggembcahagimdiliamlcdmfm"]
     allowedHttpMethods = ["GET", "POST", "OPTIONS", "DELETE"]
-    allowedHttpHeaders = ["Accept", "Content-Type", "Access-Control-Allow-Origin", "Origin", "X-Requested-With", "X-Auth-Token", "Timeout"]
+    allowedHttpHeaders = [
+        "Accept",
+        "Accept-Encoding",
+        "Accept-Language",
+        "Access-Control-Allow-Credentials",
+        "Access-Control-Allow-Headers",
+        "Access-Control-Allow-Methods",
+        "Access-Control-Allow-Origin",
+        "Access-Control-Request-Headers",
+        "Authorization"
+        "Connection",
+        "Content-Type",
+        "Host",
+        "Origin",
+        "Referer",
+        "Sec-Fetch-Dest",
+        "Sec-Fetch-Mode",
+        "Sec-Fetch-Site",
+        "Timeout"
+        "User-Agent",
+        "X-Requested-With",
+        "X-Auth-Token",
+    ]
     preflightMaxAge = 3 days
   }
   csrf {

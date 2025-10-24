@@ -57,3 +57,5 @@ database.dispatcher {
     fixed-pool-size = ${fixedConnectionPool}
   }
 }
+
+include "sform.conf"

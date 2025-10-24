@@ -1,7 +1,7 @@
 package net.macolabo.sform2.domain.services.Transfer
 
-import akka.actor.ActorSystem
-import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.testkit.{ImplicitSender, TestActorRef, TestKit}
 import net.macolabo.sform2.domain.models.daos.TransferConfigSalesforceDAOImpl
 import net.macolabo.sform2.domain.models.entity.transfer.salesforce.{SalesforceSObjectsDescribeResponse, SalesforceSObjectsDescribeResponseJson}
 import net.macolabo.sform2.domain.models.helper.SformTestHelper

@@ -108,6 +108,7 @@ class TransferConfigMailAddressDAOImpl extends TransferConfigMailAddressDAO {
         c.modified-> transferConfigMailAddress.modified
       ).where.eq(c.id, transferConfigMailAddress.id)
     }.update().apply()
+    transferConfigMailAddress.id
   }
 
   /**
@@ -117,9 +118,9 @@ class TransferConfigMailAddressDAOImpl extends TransferConfigMailAddressDAO {
    * @param session DB Session
    * @return Result
    */
-  def erase(userGroup: String, transferConfigMailAddressId: BigInt)(implicit session: DBSession = autoSession): BigInt = {
+  def delete(userGroup: String, transferConfigMailAddressId: BigInt)(implicit session: DBSession = autoSession): Int = {
     withSQL {
-      delete.from(TransferConfigMailAddress)
+      deleteFrom(TransferConfigMailAddress)
         .where
         .eq(TransferConfigMailAddress.column.id, transferConfigMailAddressId)
         .and

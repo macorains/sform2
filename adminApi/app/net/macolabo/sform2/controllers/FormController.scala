@@ -1,5 +1,6 @@
 package net.macolabo.sform2.controllers
 
+import net.macolabo.sform2.domain.models.SessionInfo
 import net.macolabo.sform2.domain.services.Form.delete.FormDeleteResponseJson
 import net.macolabo.sform2.domain.services.Form.get.FormGetResponseJson
 import net.macolabo.sform2.domain.services.Form.list.FormListResponseJson
@@ -13,9 +14,11 @@ import play.api.libs.json.Json._
 import play.api.mvc._
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
-import scala.jdk.CollectionConverters._
+import play.api.libs.json.JsError
 
+import scala.jdk.CollectionConverters._
 import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success, Try}
 
 class FormController @Inject() (
   val controllerComponents: SecurityComponents,
@@ -39,10 +42,13 @@ class FormController @Inject() (
    * @return フォームデータ
    */
   def get(hashed_form_id: String): Action[AnyContent] = Secure("HeaderClient")  { implicit request =>
-    val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = getAttributeValue(profiles, "user_group")
-    val res = formService.getForm(userGroup, hashed_form_id)
-    Ok(toJson(res))
+    Try(SessionInfo(request.session)) match {
+      case Success(sessionInfo) =>
+        val res = formService.getForm(hashed_form_id, sessionInfo)
+        Ok(toJson(res))
+      case Failure(e) =>
+        BadRequest(s"Session invalid. ${e.getMessage}")
+    }
   }
 
   /**
@@ -50,11 +56,15 @@ class FormController @Inject() (
    * GET /form/list
    * @return フォームデータのリスト
    */
-  def getList: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
-    val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = getAttributeValue(profiles, "user_group")
-    val res = formService.getList(userGroup)
-    Ok(toJson(res))
+  def getList: Action[AnyContent] = Secure(clients = "HeaderClient") { implicit request =>
+    Try(SessionInfo(request.session)) match {
+      case Success(sessionInfo) =>
+        val res = formService.getList(sessionInfo)
+        Ok(toJson(res))
+      case Failure(e) =>
+        BadRequest(s"Session invalid. ${e.getMessage}")
+    }
+
   }
 
   /**
@@ -62,22 +72,21 @@ class FormController @Inject() (
    * @return
    */
   def save(): Action[AnyContent] = Secure("HeaderClient")  { implicit request =>
-    val profiles = getProfiles(controllerComponents)(request)
-    val userId = profiles.asScala.headOption.map(_.getId)
-    val userGroup = getAttributeValue(profiles, "user_group")
-
-    println(request.body.asJson.get.validate[FormUpdateRequest].toString)
-
-    val res = userId.flatMap(id => {
-      request.body.asJson.flatMap(r =>
-        r.validate[FormUpdateRequest].map(f => {
-          formService.update(id, userGroup, f)
-        }).asOpt)
-    })
-
-    res match {
-      case Some(s :FormUpdateResponse) => Ok(toJson(s))
-      case None => BadRequest
+    Try(SessionInfo(request.session)) match {
+      case Success(sessionInfo) =>
+        request.body.asJson match {
+          case Some(jsBody) =>
+            jsBody.validate[FormUpdateRequest].fold(
+              errors => BadRequest(JsError.toJson(errors)),
+              value => {
+                val result = formService.update(value, sessionInfo)
+                Ok(toJson(result))
+              }
+            )
+          case None => BadRequest("Missing JSON")
+        }
+      case Failure(e) =>
+        BadRequest(s"Session invalid. ${e.getMessage}")
     }
   }
 
@@ -86,20 +95,21 @@ class FormController @Inject() (
    * @return
    */
   def create(): Action[AnyContent] = Secure("HeaderClient")  { implicit request =>
-    val profiles = getProfiles(controllerComponents)(request)
-    val userId = profiles.asScala.headOption.map(_.getId)
-    val userGroup = getAttributeValue(profiles, "user_group")
-
-    val res = userId.flatMap(id => {
-      request.body.asJson.flatMap(r =>
-        r.validate[FormUpdateRequest].map(f => {
-          formService.insert(id, userGroup, f)
-        }).asOpt)
-    })
-
-    res match {
-      case Some(s :FormUpdateResponse) => Ok(toJson(s))
-      case None => BadRequest
+    Try(SessionInfo(request.session)) match {
+      case Success(sessionInfo) =>
+        request.body.asJson match {
+          case Some(jsBody) =>
+            jsBody.validate[FormUpdateRequest].fold(
+              errors => BadRequest(JsError.toJson(errors)),
+              value => {
+                val result = formService.insert(value, sessionInfo)
+                Ok(toJson(result))
+              }
+            )
+          case None => BadRequest("Missing JSON")
+        }
+      case Failure(e) =>
+        BadRequest(s"Session invalid. ${e.getMessage}")
     }
   }
 
@@ -110,9 +120,12 @@ class FormController @Inject() (
    * @return
    */
   def delete(hashed_form_id: String): Action[AnyContent] = Secure("HeaderClient")  { implicit request =>
-  val profiles = getProfiles(controllerComponents)(request)
-  val userGroup = getAttributeValue(profiles, "user_group")
-    val res = formService.deleteForm(userGroup, hashed_form_id)
-    Ok(toJson(res))
+    Try(SessionInfo(request.session)) match {
+      case Success(sessionInfo) =>
+        val result = formService.deleteForm(hashed_form_id, sessionInfo)
+        Ok(toJson(result))
+      case Failure(e) =>
+        BadRequest(s"Session invalid. ${e.getMessage}")
+    }
   }
 }

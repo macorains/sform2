@@ -1,26 +1,29 @@
 package net.macolabo.sform2.controllers
 
+import net.macolabo.sform2.domain.models.SessionInfo
 import net.macolabo.sform2.domain.models.entity.CryptoConfig
 
 import javax.inject._
-import net.macolabo.sform2.domain.services.External.Salesforce.{SalesforceCheckConnectionRequest, SalesforceCheckConnectionRequestJson, SalesforceCheckConnectionResponse, SalesforceCheckConnectionResponseJson, SalesforceConnectionService, SalesforceGetFieldResponse, SalesforceGetFieldResponseJson, SalesforceGetObjectResponse, SalesforceGetObjectResponseJson}
-import net.macolabo.sform2.domain.services.Transfer.{TransferGetTransferConfigListJson, TransferGetTransferConfigResponse, TransferGetTransferConfigResponseJson, TransferGetTransferConfigSelectListJson, TransferGetTransferResponseSalesforceTransferConfig, TransferService, TransferUpdateTransferConfigRequest, TransferUpdateTransferConfigRequestJson, TransferUpdateTransferConfigResponse, TransferUpdateTransferConfigResponseJson}
+import net.macolabo.sform2.domain.services.External.Salesforce.{SalesforceCheckConnectionRequest, SalesforceCheckConnectionRequestJson, SalesforceCheckConnectionResponseJson, SalesforceConnectionService, SalesforceGetFieldResponseJson, SalesforceGetObjectResponse, SalesforceGetObjectResponseJson}
+import net.macolabo.sform2.domain.services.Transfer.{TransferGetTransferConfigListJson, TransferGetTransferConfigResponseJson, TransferGetTransferConfigSelectListJson, TransferService, TransferUpdateTransferConfigRequestJson, TransferUpdateTransferConfigResponseJson}
+import net.macolabo.sform2.domain.services.TransferConfig.TransferConfigService
+import net.macolabo.sform2.domain.services.TransferConfig.save.{TransferConfigSaveRequest, TransferConfigSaveRequestJson}
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json._
 import play.api.mvc._
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
-import play.api.Configuration
-import play.api.libs.json.{JsResult, JsSuccess, JsValue, Json}
+import play.api.{Configuration, Logger}
+import play.api.libs.json.JsError
 
-import scala.concurrent.duration.Duration
-import scala.jdk.CollectionConverters._
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 class TransferController @Inject() (
   val controllerComponents: SecurityComponents,
   transferService: TransferService,
+  transferConfigService: TransferConfigService,
   salesforceConnectionService: SalesforceConnectionService,
   configuration: Configuration
 )(
@@ -29,6 +32,7 @@ class TransferController @Inject() (
   ex: ExecutionContext
 ) extends Security[UserProfile]
   with I18nSupport
+  with TransferConfigSaveRequestJson
   with TransferGetTransferConfigSelectListJson
   with TransferGetTransferConfigListJson
   with TransferGetTransferConfigResponseJson
@@ -40,6 +44,8 @@ class TransferController @Inject() (
   with SalesforceGetFieldResponseJson
   with Pac4jUtil
 {
+
+  private val logger = Logger(this.getClass).logger
 
   private val cryptoConfig: CryptoConfig = CryptoConfig(
     configuration.get[String]("sform.crypto.algorithm.key"),
@@ -54,10 +60,13 @@ class TransferController @Inject() (
    * @return TransferConfigのid,nameのリスト
    */
   def getSelectList: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
-    val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = getAttributeValue(profiles, "user_group")
-    val res = transferService.getTransferConfigSelectList(userGroup)
-    Ok(toJson(res))
+    Try(SessionInfo(request.session)) match {
+      case Success(sessionInfo) =>
+        val res = transferService.getTransferConfigSelectList(sessionInfo)
+        Ok(toJson(res))
+      case Failure(e) =>
+        BadRequest(s"Session invalid. ${e.getMessage}")
+    }
   }
 
   /**
@@ -66,10 +75,13 @@ class TransferController @Inject() (
    * @return TransferConfigのリスト
    */
   def getTransferConfigList: Action[AnyContent] =  Secure("HeaderClient") { implicit request =>
-    val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = getAttributeValue(profiles, "user_group")
-    val res = transferService.getTransferConfigList(userGroup)
-    Ok(toJson(res))
+    Try(SessionInfo(request.session)) match {
+      case Success(sessionInfo) =>
+        val res = transferService.getTransferConfigList(sessionInfo)
+        Ok(toJson(res))
+      case Failure(e) =>
+        BadRequest(s"Session invalid. ${e.getMessage}")
+    }
   }
 
   /**
@@ -78,10 +90,13 @@ class TransferController @Inject() (
    * @return TransferConfig
    */
   def getTransferConfig(transferConfigId: Int): Action[AnyContent] = Secure("HeaderClient") { implicit request =>
-    val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = getAttributeValue(profiles, "user_group")
-    val res = transferService.getTransferConfig(userGroup, transferConfigId, cryptoConfig)
-    Ok(toJson(res))
+    Try(SessionInfo(request.session)) match {
+      case Success(sessionInfo) =>
+        val res = transferService.getTransferConfig(transferConfigId, cryptoConfig, sessionInfo)
+        Ok(toJson(res))
+      case Failure(e) =>
+        BadRequest(s"Session invalid. ${e.getMessage}")
+    }
   }
 
   /**
@@ -89,26 +104,31 @@ class TransferController @Inject() (
    * @return Result
    */
   def saveTransferConfig: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
-    val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = getAttributeValue(profiles, "user_group")
-    val userId = profiles.asScala.headOption.map(_.getId)
-
-    val res = userId.flatMap(id => {request.body.asJson.map(r =>
-      r.validate[TransferUpdateTransferConfigRequest].map(f => {
-        transferService.updateTransferConfig(id, userGroup, f, cryptoConfig)
-      }))
-    })
-    res match {
-      case Some(j: JsResult[TransferUpdateTransferConfigResponse]) =>
-        j match {
-          case s:JsSuccess[TransferUpdateTransferConfigResponse] => Ok(toJson(s.value))
-          case _ =>
-            println(j)
-            BadRequest
+    Try(SessionInfo(request.session)) match {
+      case Success(sessionInfo) =>
+        request.body.asJson match {
+          case Some(jsBody) =>
+            jsBody.validate[TransferConfigSaveRequest].fold(
+              errors => BadRequest(JsError.toJson(errors)),
+              value => {
+                transferConfigService.saveTransferConfig(value, cryptoConfig, sessionInfo)
+                Ok("")
+              }
+            )
+          case None => BadRequest("Missing JSON")
         }
-      case None =>
-        println(res)
-        BadRequest
+      case Failure(e) =>
+        BadRequest(s"Session invalid. ${e.getMessage}")
+    }
+  }
+
+  def deleteTransferConfig(transferConfigId: Int): Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+    Try(SessionInfo(request.session)) match {
+      case Success(sessionInfo) =>
+        transferConfigService.deleteTransferConfig(transferConfigId, sessionInfo)
+        Ok("")
+      case Failure(e) =>
+        BadRequest(s"Session invalid. ${e.getMessage}")
     }
   }
 
@@ -116,17 +136,28 @@ class TransferController @Inject() (
    * Salesforce疎通チェック
    * @return Result
    */
-  def checkTransferSalesforce: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
-    Await.result(request.body.asJson match {
-      case Some(j: JsValue) =>
-        j.validate[SalesforceCheckConnectionRequest].map(r => {
-          salesforceConnectionService.checkConnection(r).map {
-            case Some(token: String) => Ok(token)
-            case None => BadRequest
-          }
-        }).getOrElse(Future.successful(BadRequest))
-      case _ => Future.successful(BadRequest)
-    }, Duration.Inf)
+  def checkTransferSalesforce: Action[AnyContent] = Secure("HeaderClient").async { implicit request =>
+    Try(SessionInfo(request.session)) match {
+      case Success(_) =>
+        request.body.asJson match {
+          case Some(jsBody) =>
+            jsBody.validate[SalesforceCheckConnectionRequest].fold(
+              errors => Future.successful(BadRequest(JsError.toJson(errors))),
+              value =>
+                salesforceConnectionService.checkConnection(value).map {
+                  case Right(res) =>
+                    Ok(res)
+                  case Left(error) =>
+                    logger.error(error)
+                    Unauthorized(error)
+                }
+            )
+          case None => Future.successful(BadRequest("Missing JSON"))
+        }
+      case Failure(e) =>
+        Future.successful(BadRequest(s"Session invalid. ${e.getMessage}"))
+
+    }
   }
 
   /**
@@ -134,23 +165,26 @@ class TransferController @Inject() (
    * @param transferConfigId TransferConfig ID
    * @return SalesforceのObject情報リスト
    */
-  def getTransferSalesforceObject(transferConfigId: Int): Action[AnyContent] =  Secure("HeaderClient") { implicit request =>
-    val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = getAttributeValue(profiles, "user_group")
-
-    val result = transferService.getTransferConfig(userGroup, transferConfigId, cryptoConfig) match {
-      case Some(t: TransferGetTransferConfigResponse) =>
-        t.detail.salesforce match {
-          case Some(sf: TransferGetTransferResponseSalesforceTransferConfig) =>
-            salesforceConnectionService.getObject(sf).map {
-              case Some(sr: List[SalesforceGetObjectResponse]) => Ok(toJson(sr))
-              case None => BadRequest
+  def getTransferSalesforceObject(transferConfigId: Int): Action[AnyContent] =  Secure("HeaderClient").async { implicit request =>
+    Try(SessionInfo(request.session)) match {
+      case Success(sessionInfo) =>
+        transferService.getTransferConfig(transferConfigId, cryptoConfig, sessionInfo) match {
+          case Some(transferConfig) =>
+            transferConfig.detail.salesforce match {
+              case Some(salesforceTransferConfig) =>
+                salesforceConnectionService.getObject(salesforceTransferConfig).map {
+                  case Left(e: String) => BadRequest(e)
+                  case Right(objectList: List[SalesforceGetObjectResponse]) => Ok(toJson(objectList))
+                }
+              case None =>
+                Future.successful(BadRequest)
             }
-          case _ => Future.successful(BadRequest)
+          case None =>
+            Future.successful(NotFound)
         }
-      case _ => Future.successful(BadRequest)
+      case Failure(e) =>
+        Future.successful(BadRequest("Session invalid." + e.getMessage))
     }
-    Await.result(result, Duration.Inf)
   }
 
   /**
@@ -159,21 +193,28 @@ class TransferController @Inject() (
    * @param objectName オブジェクト名
    * @return SalesforceのField情報リスト
    */
-  def getTransferSalesforceField(transferConfigId: Int, objectName: String): Action[AnyContent] =  Secure("HeaderClient") { implicit request =>
-    val profiles = getProfiles(controllerComponents)(request)
-    val userGroup = getAttributeValue(profiles, "user_group")
-
-    Await.result(transferService.getTransferConfig(userGroup, transferConfigId, cryptoConfig) match {
-      case Some(transferConfig: TransferGetTransferConfigResponse) =>
-        transferConfig.detail.salesforce match {
-          case Some(s: TransferGetTransferResponseSalesforceTransferConfig) =>
-            salesforceConnectionService.getField(s, objectName).map {
-              case Some(response: List[SalesforceGetFieldResponse]) => Ok(toJson(response))
-              case _ => BadRequest
+  def getTransferSalesforceField(transferConfigId: Int, objectName: String): Action[AnyContent] =  Secure("HeaderClient").async { implicit request =>
+    Try(SessionInfo(request.session)) match {
+      case Success(sessionInfo) =>
+        transferService.getTransferConfig(transferConfigId, cryptoConfig, sessionInfo) match {
+          case Some(transferConfig) =>
+            transferConfig.detail.salesforce match {
+              case Some(salesforceTransferConfig) =>
+                salesforceConnectionService.getField(salesforceTransferConfig, objectName).map {
+                  case Left(e: String) =>
+                    logger.error(e)
+                    Unauthorized(e)
+                  case Right(fields) =>
+                    Ok(toJson(fields))
+                }
+              case None =>
+                Future.successful(BadRequest)
             }
-          case _ => Future.successful(BadRequest)
+          case None =>
+            Future.successful(BadRequest)
         }
-      case _ => Future.successful(BadRequest)
-    }, Duration.Inf)
+      case Failure(e) =>
+        Future.successful(BadRequest(s"Session invalid. ${e.getMessage}"))
+    }
   }
 }

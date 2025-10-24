@@ -5,7 +5,7 @@ import net.codingwell.scalaguice.ScalaModule
 import net.macolabo.sform2.domain.models.daos.{ApiTokenDAO, ApiTokenDAOImpl, AuthTokenDAO, AuthTokenDAOImpl, FormDAO, FormDAOImpl, PostdataDAO, PostdataDAOImpl, TransferConfigDAO, TransferConfigDAOImpl, TransferConfigMailAddressDAO, TransferConfigMailAddressDAOImpl, TransferConfigMailDAO, TransferConfigMailDAOImpl, TransferConfigSalesforceDAO, TransferConfigSalesforceDAOImpl, TransferConfigSalesforceObjectDAO, TransferConfigSalesforceObjectDAOImpl, TransferConfigSalesforceObjectFieldDAO, TransferConfigSalesforceObjectFieldDAOImpl, TransferDetailLogDAO, TransferDetailLogDAOImpl, TransferLogDAO, TransferLogDAOImpl, UserDAO, UserDAOImpl}
 import net.macolabo.sform2.domain.services.ApiToken.{ApiTokenService, ApiTokenServiceImpl}
 import net.macolabo.sform2.domain.services.AuthToken.{AuthTokenService, AuthTokenServiceImpl}
-import net.macolabo.sform2.domain.services.GoogleAuth.{GoogleAuthService, GoogleAuthServiceImpl}
+import net.macolabo.sform2.domain.services.TransferConfig.{TransferConfigService, TransferConfigServiceImpl}
 import net.macolabo.sform2.domain.services.User.{UserService, UserServiceImpl}
 
 /**
@@ -17,22 +17,24 @@ class BaseModule extends AbstractModule with ScalaModule {
    * Configures the module.
    */
   override def configure(): Unit = {
+    // DAOs
+    bind[ApiTokenDAO].to[ApiTokenDAOImpl]
     bind[AuthTokenDAO].to[AuthTokenDAOImpl]
     bind[FormDAO].to[FormDAOImpl]
     bind[PostdataDAO].to[PostdataDAOImpl]
-    bind[TransferLogDAO].to[TransferLogDAOImpl]
-    bind[TransferDetailLogDAO].to[TransferDetailLogDAOImpl]
-    bind[ApiTokenDAO].to[ApiTokenDAOImpl]
-    bind[AuthTokenService].to[AuthTokenServiceImpl]
-    bind[UserService].to[UserServiceImpl]
-    bind[ApiTokenService].to[ApiTokenServiceImpl]
-    bind[UserDAO].to[UserDAOImpl]
-    bind[GoogleAuthService].to[GoogleAuthServiceImpl]
+    bind[TransferConfigDAO].to[TransferConfigDAOImpl]
     bind[TransferConfigMailDAO].to[TransferConfigMailDAOImpl]
     bind[TransferConfigMailAddressDAO].to[TransferConfigMailAddressDAOImpl]
     bind[TransferConfigSalesforceDAO].to[TransferConfigSalesforceDAOImpl]
     bind[TransferConfigSalesforceObjectDAO].to[TransferConfigSalesforceObjectDAOImpl]
     bind[TransferConfigSalesforceObjectFieldDAO].to[TransferConfigSalesforceObjectFieldDAOImpl]
-    bind[TransferConfigDAO].to[TransferConfigDAOImpl]
+    bind[TransferDetailLogDAO].to[TransferDetailLogDAOImpl]
+    bind[TransferLogDAO].to[TransferLogDAOImpl]
+    bind[UserDAO].to[UserDAOImpl]
+    // Services
+    bind[ApiTokenService].to[ApiTokenServiceImpl]
+    bind[AuthTokenService].to[AuthTokenServiceImpl]
+    bind[TransferConfigService].to[TransferConfigServiceImpl]
+    bind[UserService].to[UserServiceImpl]
   }
 }

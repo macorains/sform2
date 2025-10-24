@@ -2,9 +2,13 @@ package net.macolabo.sform2.domain.utils
 
 import java.util.Base64
 import org.apache.commons.lang3.RandomStringUtils
+import org.apache.commons.text.RandomStringGenerator
 
+import java.lang.Character.isLetterOrDigit
+import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.spec.{IvParameterSpec, SecretKeySpec}
+import scala.::
 
 case class Crypto (
   secretKeyString: String,
@@ -31,6 +35,8 @@ case class Crypto (
   def generateIV: String = {
     // encryptCipher.getIVを使うとbyte[] -> String -> byte[]の変換が
     // できないので、単純にランダム文字列を返す形に変更
-    RandomStringUtils.randomAlphanumeric(16)
+    val random = new SecureRandom()
+    val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+    (1 to 16).map(_ => chars(random.nextInt(chars.length))).mkString
   }
 }

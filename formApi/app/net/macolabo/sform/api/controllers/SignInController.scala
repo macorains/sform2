@@ -1,6 +1,7 @@
 package net.macolabo.sform.api.controllers
 
 import net.macolabo.sform2.domain.services.AuthToken.AuthTokenService
+import org.apache.pekko.http.scaladsl.model.StatusCodes.ClientError
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.jwt.config.signature.SecretSignatureConfiguration
 import org.pac4j.jwt.profile.JwtGenerator
@@ -34,13 +35,25 @@ class SignInController @Inject() (
   with Pac4jUtil
 {
 
+  // フォームで認証→JWT発行の流れでの認証処理
+  // ApiTokenDAOを通じてd_apitokenの内容を参照している
   def auth: Action[AnyContent] = Secure("DirectFormClient") { implicit request: Request[AnyContent] =>
     val profiles = getProfiles(controllerComponents)(request)
-    val token = if(profiles.asScala.nonEmpty) {
-      val profile = profiles.get(0)
-      val generator = new JwtGenerator(new SecretSignatureConfiguration("12345678901234567890123456789012"))
-      Some(generator.generate(profile))
-    } else None
-    Ok(Json.toJson(token)).withHeaders("X-Auth-Token" -> token.getOrElse(""))
+    profiles.asScala.toList.headOption.map(profile => {
+      configuration.getOptional[String]("sform.jwt.secret").map(jwtSecret => {
+        val generator = new JwtGenerator(new SecretSignatureConfiguration(jwtSecret))
+        val token = generator.generate(profile)
+        Ok(Json.toJson(token)).withHeaders("X-Auth-Token" -> token)
+      }).getOrElse(InternalServerError("sfrom.jwt.secret not found."))
+    }).getOrElse(Forbidden(""))
+
+//    val token = if(profiles.asScala.nonEmpty) {
+//      val profile = profiles.get(0)
+//      configuration.getOptional[String]("sform.jwt.secret").map(jwtSecret => {
+//        val generator = new JwtGenerator(new SecretSignatureConfiguration(jwtSecret))
+//        Some(generator.generate(profile))
+//      }).getOrElse(InternalServerError("sfrom.jwt.secret not found."))
+//    } else None
+//    Ok(Json.toJson(token)).withHeaders("X-Auth-Token" -> token.getOrElse(""))
   }
 }

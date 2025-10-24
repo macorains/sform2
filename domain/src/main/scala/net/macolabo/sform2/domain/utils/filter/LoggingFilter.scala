@@ -1,6 +1,6 @@
 package net.macolabo.sform2.domain.utils.filter
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import com.google.inject.Inject
 import play.api.Logger
 import play.api.mvc.{Filter, RequestHeader, Result}

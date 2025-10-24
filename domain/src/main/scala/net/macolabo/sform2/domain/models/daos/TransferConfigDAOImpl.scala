@@ -74,7 +74,7 @@ class TransferConfigDAOImpl extends TransferConfigDAO {
       val c = TransferConfig.column
       insert.into(TransferConfig).namedValues(
         c.type_code -> transferConfig.type_code,
-        c.config_index -> transferConfig.config_index,
+        c.config_index -> (getMaxIndex(transferConfig.user_group) + 1),
         c.name -> transferConfig.name,
         c.status -> transferConfig.status,
         c.user_group -> transferConfig.user_group,
@@ -107,4 +107,31 @@ class TransferConfigDAOImpl extends TransferConfigDAO {
     }.update().apply()
   }
 
+  /**
+   * TransferConfig削除
+   *
+   * @param transferConfigId TransferConfig ID
+   * @param session          DB Session
+   * @return TransferConfig
+   */
+  def delete(userGroup: String, transferConfigId: BigInt)(implicit session: DBSession = autoSession): Int = {
+    withSQL {
+      val c = TransferConfig.column
+      deleteFrom(TransferConfig)
+        .where
+        .eq(c.id, transferConfigId)
+        .and
+        .eq(c.user_group, userGroup)
+    }.update().apply()
+  }
+
+  private def getMaxIndex(userGroup: String)(implicit session: DBSession = autoSession) = {
+    val s = TransferConfig.syntax("s")
+    withSQL(
+      select(sqls.max(s.config_index))
+        .from(TransferConfig as s)
+        .where
+        .eq(s.user_group, userGroup)
+    ).map(_.intOpt(1)).single().apply().flatten.getOrElse(0)
+  }
 }

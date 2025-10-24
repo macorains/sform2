@@ -13,27 +13,29 @@ class TransferConfigSalesforceObjectDAOImpl extends TransferConfigSalesforceObje
    * @param session DB Session
    * @return TransferConfigSalesforceObjectのリスト
    */
-  def getList(userGroup: String, transferConfigSalesforceId: BigInt)(implicit session: DBSession = autoSession): List[TransferConfigSalesforceObject] = {
-    val f = TransferConfigSalesforceObject.syntax("f")
-    withSQL(
-      select(
-        f.id,
-        f.transfer_config_salesforce_id,
-        f.name,
-        f.label,
-        f.active,
-        f.user_group,
-        f.created_user,
-        f.modified_user,
-        f.created,
-        f.modified
-      )
-        .from(TransferConfigSalesforceObject as f)
-        .where
-        .eq(f.transfer_config_salesforce_id, transferConfigSalesforceId)
-        .and
-        .eq(f.user_group, userGroup)
-    ).map(rs=>TransferConfigSalesforceObject(rs)).list().apply()
+  def getList(userGroup: String, transferConfigSalesforceId: Option[BigInt])(implicit session: DBSession = autoSession): List[TransferConfigSalesforceObject] = {
+    transferConfigSalesforceId.map(id => {
+      val f = TransferConfigSalesforceObject.syntax("f")
+      withSQL(
+        select(
+          f.id,
+          f.transfer_config_salesforce_id,
+          f.name,
+          f.label,
+          f.active,
+          f.user_group,
+          f.created_user,
+          f.modified_user,
+          f.created,
+          f.modified
+        )
+          .from(TransferConfigSalesforceObject as f)
+          .where
+          .eq(f.transfer_config_salesforce_id, id)
+          .and
+          .eq(f.user_group, userGroup)
+      ).map(rs => TransferConfigSalesforceObject(rs)).list().apply()
+    }).getOrElse(List.empty)
   }
 
   /**
@@ -78,6 +80,7 @@ class TransferConfigSalesforceObjectDAOImpl extends TransferConfigSalesforceObje
         c.modified -> transferConfigSalesforceObject.modified
       ).where.eq(c.id, transferConfigSalesforceObject.id)
     }.update().apply()
+    transferConfigSalesforceObject.id
   }
 
   /**
@@ -87,10 +90,14 @@ class TransferConfigSalesforceObjectDAOImpl extends TransferConfigSalesforceObje
    * @param session DB Session
    * @return Result
    */
-  def erase(userGroup: String, transferConfigSalesforceObjectId: BigInt)(implicit session: DBSession = autoSession): BigInt = {
+  def delete(userGroup: String, transferConfigSalesforceObjectId: BigInt)(implicit session: DBSession = autoSession): Int = {
     withSQL {
       val c = TransferConfigSalesforceObject.column
-      delete.from(TransferConfigSalesforceObject).where.eq(c.id, transferConfigSalesforceObjectId).and.eq(c.user_group, userGroup)
+      deleteFrom(TransferConfigSalesforceObject)
+        .where
+        .eq(c.id, transferConfigSalesforceObjectId)
+        .and
+        .eq(c.user_group, userGroup)
     }.update().apply()
   }
 }

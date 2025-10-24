@@ -80,5 +80,23 @@ class TransferConfigMailDAOImpl extends TransferConfigMailDAO {
         c.modified -> transferConfigMail.modified
       ).where.eq(c.id, transferConfigMail.id)
     }.update().apply()
+    transferConfigMail.id
+  }
+
+  /**
+   * TransferConfigMail削除
+   *
+   * @param userGroup        ユーザーグループ
+   * @param transferConfigId TransferConfig ID
+   * @param session          DB Session
+   * @return TransferConfigMail
+   */
+  def delete(userGroup: String, transferConfigId: BigInt)(implicit session: DBSession = autoSession): Int = {
+    withSQL {
+      val c = TransferConfigMail.column
+      deleteFrom(TransferConfigMail)
+        .where
+        .eq(c.id, transferConfigId)
+    }.update().apply()
   }
 }

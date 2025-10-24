@@ -69,8 +69,8 @@ class UserDAOImplSpec extends FixtureAnyFlatSpec  with GuiceOneServerPerSuite wi
     assert(newuser("username").equals(datamap("username")))
     assert(newuser("password").equals(datamap("password")))
     assert(newuser("user_group").equals(datamap("user_group")))
-    assert((newuser("activated") == 1).equals(datamap("activated").asInstanceOf[Boolean]))
-    assert((newuser("deletable") == 1).equals(datamap("deletable").asInstanceOf[Boolean]))
+    assert((newuser("activated") == 1) == datamap("activated").asInstanceOf[Boolean])
+    assert((newuser("deletable") == 1) == datamap("deletable").asInstanceOf[Boolean])
   }
 
   // update
@@ -107,8 +107,8 @@ class UserDAOImplSpec extends FixtureAnyFlatSpec  with GuiceOneServerPerSuite wi
     assert(newuser("username").equals(datamap("username")))
     assert(newuser("password").equals("fuga")) // 変更対象ではない項目が変更されていないことを確認
     assert(newuser("user_group").equals(datamap("user_group")))
-    assert((newuser("activated") == 1).equals(datamap("activated").asInstanceOf[Boolean]))
-    assert((newuser("deletable") == 1).equals(datamap("deletable").asInstanceOf[Boolean]))
+    assert((newuser("activated") == 1) == datamap("activated").asInstanceOf[Boolean])
+    assert((newuser("deletable") == 1) == datamap("deletable").asInstanceOf[Boolean])
   }
 
 

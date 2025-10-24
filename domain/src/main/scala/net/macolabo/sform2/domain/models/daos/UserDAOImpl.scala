@@ -112,6 +112,33 @@ class UserDAOImpl extends UserDAO {
     StringSQLRunner(s"""SELECT $fields FROM m_userinfo as c WHERE $key = '$value'""").run()
   }
 
+  def findByEmail(email: String): Future[Option[User]] = {
+    Future.successful(
+      DB localTx { implicit l =>
+        val u = User.syntax("u")
+        withSQL(
+          select(
+            u.id,
+            u.username,
+            u.password,
+            u.user_group,
+            u.role,
+            u.first_name,
+            u.last_name,
+            u.full_name,
+            u.email,
+            u.avatar_url,
+            u.activated,
+            u.deletable
+          )
+            .from(User as u)
+            .where
+            .eq(u.email, email)
+        ).map(rs => User(rs)).single().apply()
+      }
+    )
+  }
+
   /**
    * ユーザー作成(pac4j)
    * @param attributes 属性リスト
@@ -198,21 +225,42 @@ class UserDAOImpl extends UserDAO {
 
   private def update(user: User): Future[User] = {
     DB localTx { implicit l =>
-      withSQL {
-        val u = User.column
-        QueryDSL.update(User).set(
-          u.username -> user.username,
-          u.password -> user.password,
-          u.first_name -> user.first_name,
-          u.last_name -> user.last_name,
-          u.email -> user.email,
-          u.avatar_url -> user.avatar_url,
-          u.activated -> user.activated,
-          u.deletable -> user.deletable
-        )
-          .where
-          .eq(u.id, user.id.toString)
-      }.update().apply()
+      user.password.map(password => {
+        withSQL {
+          val u = User.column
+          QueryDSL.update(User).set(
+            u.username -> user.username,
+            u.user_group -> user.user_group,
+            u.password -> password,
+            u.first_name -> user.first_name,
+            u.last_name -> user.last_name,
+            u.email -> user.email,
+            u.avatar_url -> user.avatar_url,
+            u.activated -> user.activated,
+            u.deletable -> user.deletable,
+            u.role -> user.role
+          )
+            .where
+            .eq(u.id, user.id.toString)
+        }.update().apply()
+      }).getOrElse({
+        withSQL {
+          val u = User.column
+          QueryDSL.update(User).set(
+            u.username -> user.username,
+            u.user_group -> user.user_group,
+            u.first_name -> user.first_name,
+            u.last_name -> user.last_name,
+            u.email -> user.email,
+            u.avatar_url -> user.avatar_url,
+            u.activated -> user.activated,
+            u.deletable -> user.deletable,
+            u.role -> user.role
+          )
+            .where
+            .eq(u.id, user.id.toString)
+        }.update().apply()
+      })
       Future.successful(user)
     }
   }
@@ -239,10 +287,10 @@ class UserDAOImpl extends UserDAO {
     }
   }
 
-  def getList(userGroup: String): JsValue = {
+  def getList(userGroup: String): List[User] = {
     DB localTx { implicit l =>
       val u = User.syntax("u")
-      val userList = withSQL(
+      withSQL(
         select(
           u.id,
           u.username,
@@ -260,27 +308,8 @@ class UserDAOImpl extends UserDAO {
           .from(User as u)
           .where
           .eq(u.user_group, userGroup)
+          .orderBy(u.id)
       ).map(rs => User(rs)).list().apply()
-
-      val userListJson = userList.map(
-        u => {
-          UserJson(
-            u.id.toString,
-            u.username,
-            u.password,
-            u.user_group.getOrElse(""),
-            u.role.getOrElse(""),
-            u.first_name.getOrElse(""),
-            u.last_name.getOrElse(""),
-            u.full_name.getOrElse(""),
-            u.email.getOrElse(""),
-            u.avatar_url.getOrElse(""),
-            u.activated,
-            u.deletable
-          )
-        }
-      )
-      Json.toJson(userListJson)
     }
   }
 

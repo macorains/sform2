@@ -2,8 +2,7 @@ package net.macolabo.sform2.domain.services.User
 
 import com.google.inject.Inject
 import net.macolabo.sform2.domain.models.daos.ApiTokenDAO
-import org.pac4j.core.context.WebContext
-import org.pac4j.core.context.session.SessionStore
+import org.pac4j.core.context.CallContext
 import org.pac4j.core.credentials.password.PasswordEncoder
 import org.pac4j.core.credentials.{Credentials, UsernamePasswordCredentials}
 import org.pac4j.core.exception.{AccountNotFoundException, BadCredentialsException, MultipleAccountsFoundException, TechnicalException}
@@ -16,6 +15,7 @@ import org.pac4j.sql.profile.DbProfile
 import scalikejdbc.DB
 
 import java.util
+import java.util.Optional
 import scala.concurrent.ExecutionContext
 import scala.jdk.CollectionConverters._
 
@@ -30,11 +30,11 @@ class ApiUserProfileService @Inject()(
   setAttributes(attributes)
   setPasswordEncoder(passwordEncoder)
 
-  override protected def internalInit(): Unit = {
+  override protected def internalInit(forceReinit: Boolean): Unit = {
     assertNotNull("passwordEncoder", getPasswordEncoder)
-    defaultProfileDefinition(new CommonProfileDefinition(_ => new DbProfile()))
+    setProfileDefinition(new CommonProfileDefinition(_ => new DbProfile()))
     setSerializer(new JsonSerializer(classOf[DbProfile]))
-    super.internalInit()
+    super.internalInit(forceReinit)
   }
 
   override protected def read(names: java.util.List[String], key: String, value: String): util.List[util.Map[String, AnyRef]] = {
@@ -48,7 +48,7 @@ class ApiUserProfileService @Inject()(
     })
   }
 
-  override def validate(cred: Credentials, context: WebContext, sessionStore: SessionStore): Unit = {
+  override def validate(context: CallContext, cred: Credentials): Optional[Credentials]= {
     init()
     assertNotNull("credentials", cred)
     val credentials = cred.asInstanceOf[UsernamePasswordCredentials]
@@ -76,6 +76,7 @@ class ApiUserProfileService @Inject()(
         } else {
           val profile = convertAttributesToProfile(listAttributes, null)
           credentials.setUserProfile(profile)
+          Optional.of(credentials)
           // 401エラーの時のhogeはDemoHttpActionAdapterに定義されている
         }
       }

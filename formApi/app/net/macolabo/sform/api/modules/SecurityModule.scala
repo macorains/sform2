@@ -1,6 +1,6 @@
 package net.macolabo.sform.api.modules
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import com.google.inject.{AbstractModule, Provides}
 import net.codingwell.scalaguice.ScalaModule
 import net.macolabo.sform2.domain.models.daos.ApiTokenDAOImpl
@@ -8,7 +8,8 @@ import net.macolabo.sform.api.security.{DatabaseExecutionContext, DemoHttpAction
 import org.pac4j.core.client.Clients
 import org.pac4j.core.client.direct.AnonymousClient
 import org.pac4j.core.config.Config
-import org.pac4j.core.context.session.SessionStore
+import org.pac4j.core.context.FrameworkParameters
+import org.pac4j.core.context.session.{SessionStore, SessionStoreFactory}
 import org.pac4j.core.profile.CommonProfile
 import org.pac4j.http.client.direct.{DirectFormClient, HeaderClient}
 import org.pac4j.http.client.indirect.FormClient
@@ -53,26 +54,41 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
   }
 
   @Provides
-  def provideFormClient: FormClient = new FormClient(baseUrl + "/loginForm", new SimpleTestUsernamePasswordAuthenticator())
+  def provideFormClient: FormClient = {
+    val client = new FormClient()
+    client.setLoginUrl(baseUrl + "/loginForm")
+    client.setAuthenticator(new SimpleTestUsernamePasswordAuthenticator())
+    client
+  }
 
   @Provides
   def provideDirectFormClient: DirectFormClient = {
     val apiTokenDAO = new ApiTokenDAOImpl()
-    new DirectFormClient(new SqlAuthencator(apiTokenDAO))
+    val client = new DirectFormClient()
+    client.setAuthenticator(new SqlAuthencator(apiTokenDAO))
+    client
   }
 
   @Provides
   def provideHeaderClient: HeaderClient = {
     val jwtAuthenticator = new JwtAuthenticator()
     jwtAuthenticator.addSignatureConfiguration(new SecretSignatureConfiguration("12345678901234567890123456789012"))
-    val headerClient = new HeaderClient("X-Auth-Token", jwtAuthenticator)
-    headerClient
+    val client = new HeaderClient()
+    client.setHeaderName("X-Auth-Token")
+    client.setAuthenticator(jwtAuthenticator)
+    client
   }
 
   @Provides
-  def provideConfig(formClient: FormClient, directFormClient: DirectFormClient, headerClient: HeaderClient): Config = {
-    val clients = new Clients(baseUrl + "/callback", formClient, directFormClient, headerClient, new AnonymousClient())
+  def provideConfig(formClient: FormClient, directFormClient: DirectFormClient, headerClient: HeaderClient, sessionStore: SessionStore): Config = {
+    val clients = new Clients(configuration.get[String]("baseUrl") + "/callback", formClient, directFormClient, headerClient, new AnonymousClient())
     val config = new Config(clients)
+
+    // セッションストアの設定
+    config.setSessionStoreFactory(new SessionStoreFactory {
+      override def newSessionStore(parameters: FrameworkParameters): SessionStore = sessionStore
+    })
+
     config.setHttpActionAdapter(new DemoHttpActionAdapter())
     config
   }

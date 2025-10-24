@@ -4,6 +4,7 @@ import net.macolabo.sform2.domain.models.entity.api_token.ApiToken
 import scalikejdbc._
 
 import java.time.LocalDateTime
+import java.util.UUID
 
 class ApiTokenDAOImpl extends ApiTokenDAO {
   def save(apiToken: ApiToken)(implicit session: DBSession): Int = {
@@ -36,6 +37,18 @@ class ApiTokenDAOImpl extends ApiTokenDAO {
     ).map(rs => rs.localDateTime("expiry")).list().apply().headOption
   }
 
+  def clearToken(userGroup: String, newTokenId:UUID)(implicit session: DBSession): Unit = {
+    withSQL {
+      val c = ApiToken.column
+      update(ApiToken).set(
+        c.expiry -> LocalDateTime.now()
+      ).where
+        .eq(c.user_group, userGroup)
+        .and
+        .ne(c.id, newTokenId.toString)
+    }.update().apply()
+  }
+
   /**
    * ユーザー検索(pac4j専用)
    *
@@ -46,7 +59,7 @@ class ApiTokenDAOImpl extends ApiTokenDAO {
    * @return
    */
   def find(fields: String, key: String, value: String)(implicit session: DBSession): List[Map[String, Any]] = {
-    StringSQLRunner(s"""SELECT $fields FROM d_apitoken as c WHERE $key = '$value'""").run()
+    StringSQLRunner(s"""SELECT $fields FROM d_apitoken as c WHERE $key = '$value' AND expiry > NOW()""").run()
   }
 
 }
