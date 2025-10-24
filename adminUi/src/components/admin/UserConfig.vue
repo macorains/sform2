@@ -15,6 +15,17 @@
         </BButton>
       </template>
     </BTable>
+    <BRow>
+      <BCol class="text-end">
+        <BButton
+            class="mt-4 right-aligned"
+            @click="add"
+        >
+          <i class="bi bi-file-earmark-plus"></i>
+          ユーザーの追加
+        </BButton>
+      </BCol>
+    </BRow>
   </div>
   <BModal v-model="editModalVisible" size="lg" title="ユーザー編集" @ok="save" @hidden="close" scrollable>
     <UserConfigEdit ref="userEditRef" @load="reload" />
@@ -93,5 +104,18 @@ const close = () => {
 
 const reload = () => {
   load()
+}
+
+const add = () => {
+  const data = {
+    first_name: '',
+    last_name: '',
+    full_name: '',
+    email: '',
+    role: 'operator',
+    avatar_url: ''
+  }
+  userEditRef.value.loadUser(data)
+  editModalVisible.value = true
 }
 </script>

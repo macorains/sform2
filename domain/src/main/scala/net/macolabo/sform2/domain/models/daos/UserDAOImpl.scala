@@ -308,6 +308,7 @@ class UserDAOImpl extends UserDAO {
           .from(User as u)
           .where
           .eq(u.user_group, userGroup)
+          .orderBy(u.id)
       ).map(rs => User(rs)).list().apply()
     }
   }
