@@ -3,10 +3,12 @@ package net.macolabo.sform2.domain.models.daos
 import net.macolabo.sform2.domain.models.entity.user.AuthToken
 import scalikejdbc._
 
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, ZonedDateTime}
 import java.util.UUID
 import scala.concurrent.Future
 /**
+ * 認証トークン用DAO
+ * 主にFormAPI側で使用
  * Give access to the AuthToken object.
  */
 class AuthTokenDAOImpl extends AuthTokenDAO {
@@ -63,7 +65,9 @@ class AuthTokenDAOImpl extends AuthTokenDAO {
         .namedValues(
           c.id -> token.id.toString,
           c.user_id -> token.user_id.toString,
-          c.expiry -> token.expiry
+          c.expiry -> token.expiry,
+          c.created -> ZonedDateTime.now(),
+          c.modified -> ZonedDateTime.now()
         )
     }.update().apply()
     token

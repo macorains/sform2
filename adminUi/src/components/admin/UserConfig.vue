@@ -47,7 +47,7 @@ const userEditRef = ref(null)
 
 const fields = ref([
   { key: 'full_name', sortable: true, label: '名前'},
-  { key: 'username', sortable: true, label: 'ユーザー名'},
+  { key: 'username', sortable: true, label: 'メールアドレス'},
   { key: 'role', sortable: true, label: '役割'},
   { key: 'actions', label: '操作' },
 ])

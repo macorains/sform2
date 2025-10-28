@@ -4,7 +4,7 @@ import net.macolabo.sform2.domain.models.daos.AuthTokenDAO
 import net.macolabo.sform2.domain.models.entity.user.AuthToken
 import scalikejdbc.DB
 
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, ZonedDateTime}
 import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.duration._
@@ -12,6 +12,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
 /**
+ * 認証トークン用サービス
+ * 主にFormAPI側で使用
  * Handles actions to auth tokens.
  *
  * @param authTokenDAO The auth token DAO implementation.
@@ -33,7 +35,7 @@ class AuthTokenServiceImpl @Inject() (
     def create(userID: UUID, expiry: FiniteDuration = 5 minutes): Future[AuthToken] = {
       DB.localTx(implicit session => {
         val expiryDateTime = LocalDateTime.now.plusSeconds(expiry.toSeconds)
-        val token = AuthToken(UUID.randomUUID(), userID, expiryDateTime)
+        val token = AuthToken(UUID.randomUUID(), userID, expiryDateTime, ZonedDateTime.now(), ZonedDateTime.now())
         authTokenDAO.save(token)
       })
     }
