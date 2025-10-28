@@ -58,6 +58,7 @@ class UserController @Inject() (
             jsBody.validate[UserSaveRequest].fold(
               errors => BadRequest(JsError.toJson(errors)),
               value => {
+                userService.retrieveByEmail()
                 userService.save(value, sessionInfo)
                 Ok
               }
