@@ -31,8 +31,8 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
     userDAO.find(username)
   }
 
-  def retrieveByEmail(email: String): Future[Option[User]] = {
-    userDAO.findByEmail(email)
+  def retrieveByEmail(email: String, sessionInfo: SessionInfo): Future[Option[User]] = {
+    userDAO.findByEmail(email, sessionInfo.user_group)
   }
 
   def getList(sessionInfo: SessionInfo): UserListResponse = {

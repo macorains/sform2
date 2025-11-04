@@ -27,14 +27,14 @@
       </BCol>
     </BRow>
   </div>
-  <BModal v-model="editModalVisible" size="lg" title="ユーザー編集" @ok="save" @hidden="close" scrollable>
-    <UserConfigEdit ref="userEditRef" @load="reload" />
+  <BModal v-model="editModalVisible" size="lg" title="ユーザー編集" @ok="save" @hidden="close" :ok-disabled="isOkDisabled" scrollable>
+    <UserConfigEdit ref="userEditRef" @load="reload" @checkExists="checkExists" :email-check-result="emailCheckResult" />
   </BModal>
 </template>
 <script setup>
 
 import {BButton, BModal, BSpinner, BTable} from "bootstrap-vue-3";
-import {getCurrentInstance, inject, onMounted, ref} from "vue";
+import {computed, getCurrentInstance, inject, onMounted, ref} from "vue";
 import { useHttpRequest } from "@/composables/useHttpRequest.js"
 import UserConfigEdit from "@/components/admin/UserConfigEdit.vue";
 
@@ -44,6 +44,7 @@ const { requestGet, requestDelete, loading } = useHttpRequest()
 
 const editModalVisible = ref(false)
 const userEditRef = ref(null)
+const emailCheckResult = ref(false)
 
 const fields = ref([
   { key: 'full_name', sortable: true, label: '名前'},
@@ -66,6 +67,10 @@ const load = () => {
         userList.value = response.data.user_list.map(d => convert(d))
       }
   )
+}
+
+const checkExists = (data) => {
+  emailCheckResult.value = userList.value.some((user) => user.email === data.email && user.id !== data.user_id)
 }
 
 const convert = (source) => {
@@ -92,6 +97,8 @@ const userDelete = (data) => {
     }
   })
 }
+
+const isOkDisabled = computed(() => !userEditRef.value?.okButtonEnabled())
 
 const save = () => {
   userEditRef.value.saveUser()
