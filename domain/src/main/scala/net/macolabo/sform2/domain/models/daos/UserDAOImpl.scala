@@ -117,7 +117,7 @@ class UserDAOImpl extends UserDAO {
     StringSQLRunner(s"""SELECT $fields FROM m_userinfo as c WHERE $key = '$value'""").run()
   }
 
-  def findByEmail(email: String): Future[Option[User]] = {
+  def findByEmail(email: String, group: String): Future[Option[User]] = {
     Future.successful(
       DB localTx { implicit l =>
         val u = User.syntax("u")
@@ -141,6 +141,8 @@ class UserDAOImpl extends UserDAO {
             .from(User as u)
             .where
             .eq(u.email, email)
+            .and
+            .eq(u.user_group, group)
         ).map(rs => User(rs)).single().apply()
       }
     )

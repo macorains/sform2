@@ -49,7 +49,7 @@
               @input="validateUserDataEmailState"
           />
           <BFormInvalidFeedback>
-            メールアドレスを入力してください
+            {{ errorMessage.email }}
           </BFormInvalidFeedback>
         </BFormGroup>
       </BCol>
@@ -75,18 +75,29 @@
 </template>
 <script setup>
 import {BSpinner} from "bootstrap-vue-3";
-import {computed, getCurrentInstance, reactive, ref, defineEmits} from "vue";
+import {computed, getCurrentInstance, reactive, ref, defineEmits, inject} from "vue";
+import {useHttpRequest} from "@/composables/useHttpRequest.js";
 
 const instance = getCurrentInstance()
 const $http = instance.appContext.config.globalProperties.$http
 
-const emit = defineEmits(['load']);
+const { requestGet, requestPost, loading } = useHttpRequest()
+const showError = inject("showError")
+
+const emit = defineEmits(['load', 'checkExists']);
+const props = defineProps({
+  emailCheckResult: Boolean
+})
 
 const userData = reactive({
   last_name: '',
   first_name: '',
   email: '',
   role: ''
+})
+
+const errorMessage = reactive({
+  email: ''
 })
 
 const roleOptions = ref([
@@ -98,7 +109,7 @@ const isLoading = ref(false)
 
 const userDataLastNameState = computed(() => userData.last_name.trim() !== '')
 const userDataFirstNameState = computed(() => userData.first_name.trim() !== '')
-const userDataEmailState = computed(() => userData.email.trim() !== '')
+const userDataEmailState = computed(() => checkEmail(userData))
 const userDataRoleState = computed(() => userData.role.trim() !== '')
 
 const validateUserDataLastNameState = () => {
@@ -114,8 +125,27 @@ const validateUserDataRoleState = () => {
   return userDataRoleState.value
 }
 
+const okButtonEnabled = () => {
+  return userDataLastNameState.value && userDataFirstNameState.value && userDataEmailState.value && userDataRoleState.value
+}
+
+const checkEmail = (data) => {
+  if(data.email === '') {
+    errorMessage.email = 'メールアドレスを入力してください'
+    return false
+  }
+  emit('checkExists', data)
+  if(props.emailCheckResult) {
+    errorMessage.email = '既に登録されているメールアドレスです'
+    return false
+  } else {
+    errorMessage.email = ''
+    return true
+  }
+}
+
 const loadUser = (data) => {
-  userData.user_id = data.user_id
+  userData.user_id = data.id
   userData.user_group = data.user_group
   userData.first_name = data.first_name
   userData.last_name = data.last_name
@@ -123,14 +153,13 @@ const loadUser = (data) => {
   userData.email = data.email
   userData.role = data.role
   userData.avatar_url = data.avatar_url
-  console.log(userData)
 }
 const saveUser = () => {
-  $http.post('/user', userData)
-      .then(response => {
-        console.log(response)
-        emit('load')
-      })
+  requestPost('/user', userData, response => {
+    emit('load')
+  }, error => {
+    showError(error.response.data.message)
+  })
 }
 
 const clearModal = () => {
@@ -148,5 +177,6 @@ defineExpose({
   loadUser,
   saveUser,
   clearModal,
+  okButtonEnabled,
 })
 </script>
