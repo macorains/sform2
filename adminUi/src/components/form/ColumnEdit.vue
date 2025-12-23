@@ -26,11 +26,11 @@
           id="formColId"
           v-model="formCol.col_id"
           type="text"
-          :state="formColColIdState"
+          :state="errorState.col_id?.status"
           required
-          @input="validateFormColColIdState"
+          @input="validate"
       />
-      <BFormInvalidFeedback>{{ errorMessage.col_id }}</BFormInvalidFeedback>
+      <BFormInvalidFeedback>{{ errorState.col_id?.message }}</BFormInvalidFeedback>
     </BFormGroup>
     <BFormGroup
         id="formColColTypeGroup"
@@ -43,12 +43,10 @@
           v-model="formCol.col_type"
           :options="optionFormColType"
           class="mb-3"
-          :state="formColColTypeState"
           required
-          @input="validateFormColColTypeState"
-          @change="validateFormColColTypeState"
+          @input="validate"
+          @change="validate"
       />
-      <BFormInvalidFeedback>入力してください。</BFormInvalidFeedback>
     </BFormGroup>
 
     <BRow
@@ -73,10 +71,10 @@
           id="formColDefault"
           v-model="formCol.default_value"
           type="text"
-          :state="formColDefaultValueState"
-          @input="validateFormColDefaultValueState"
+          :state="errorState.default_value?.status"
+          @input="validate"
       />
-      <BFormInvalidFeedback>{{ errorMessage.default_value }}</BFormInvalidFeedback>
+      <BFormInvalidFeedback>{{ errorState.default_value?.message }}</BFormInvalidFeedback>
     </BFormGroup>
 
     <BFormGroup
@@ -91,9 +89,9 @@
           v-model="formCol.validations.input_type"
           :options="optionFormColValidation"
           class="mb-3"
-          @change="fuga()"
+          @change="validate"
       />
-      <BFormInvalidFeedback>入力してください。</BFormInvalidFeedback>
+      <BFormInvalidFeedback>{{ errorState.input_type?.message }}</BFormInvalidFeedback>
     </BFormGroup>
 
     <BRow class="mb-2" v-if="formCol.validations.input_type==1">
@@ -105,9 +103,9 @@
             id="formColValidationMinValue"
             v-model="formCol.validations.min_value"
             type="number"
-            :state="formColValidateValueState"
+            :state="errorState.validations.value?.status"
             required
-            @input="validateFormColValidateValueState"
+            @input="validate"
         />
       </BCol>
       <BCol cols="1">
@@ -118,16 +116,16 @@
             id="formColValidationMaxValue"
             v-model="formCol.validations.max_value"
             type="number"
-            :state="formColValidateValueState"
+            :state="errorState.validations?.value?.status"
             required
-            @input="validateFormColValidateValueState"
+            @input="validate"
         />
       </BCol>
       <BCol cols="3" />
     </BRow>
     <BRow align-h="end" class="mt-0 mb-3">
       <BCol align-self="end" cols="8">
-        <div v-if="errorMessage.validations.value" class="invalid-feedback d-block">{{ errorMessage.validations.value }}</div>
+        <div v-if="!errorState.validations?.value?.status" class="invalid-feedback d-block">{{ errorState.validations?.value?.message }}</div>
       </BCol>
     </BRow>
     <BRow class="mb-0" v-if="[1,5].includes(formCol.col_type) && ![1,6].includes(formCol.validations.input_type)">
@@ -139,9 +137,9 @@
             id="formColValidationMinLength"
             v-model="formCol.validations.min_length"
             type="number"
-            :state="formColValidateLengthState"
+            :state="errorState.validations?.length?.status"
             required
-            @input="validateFormColValidateLengthState"
+            @input="validate"
         />
       </BCol>
       <BCol cols="1">
@@ -152,16 +150,16 @@
             id="formColValidationMaxLength"
             v-model="formCol.validations.max_length"
             type="number"
-            :state="formColValidateLengthState"
+            :state="errorState.validations?.length?.status"
             required
-            @input="validateFormColValidateLengthState"
+            @input="validate"
         />
       </BCol>
       <BCol cols="3" />
     </BRow>
     <BRow v-if="[1,5].includes(formCol.col_type)" align-h="end" class="mt-0 mb-3">
       <BCol align-self="end" cols="8">
-        <div v-if="errorMessage.validations.length" class="invalid-feedback d-block">{{ errorMessage.validations.length }}</div>
+        <div v-if="!errorState.validations?.length?.status" class="invalid-feedback d-block">{{ errorState.validations?.length?.message }}</div>
       </BCol>
     </BRow>
     <BRow class="mb-3">
@@ -173,6 +171,7 @@
             id="formColRequired"
             v-model="formCol.validations.required"
             unchecked-value="false"
+            @change="validate"
         />
       </BCol>
     </BRow>
@@ -183,17 +182,16 @@
 import validator from 'validator'
 import { isNil } from 'es-toolkit'
 import ColumnSelectList from "@/components/form/ColumnSelectList.vue"
-import {computed, defineEmits, inject, onMounted, provide, reactive, ref, triggerRef} from "vue"
+import {defineEmits, inject, onMounted, provide, reactive, ref} from "vue"
 import {BFormGroup} from "bootstrap-vue-3"
-import isPostalCode from "validator/es/lib/isPostalCode.js";
 
 const isSelectable = () => {
   return [2,3,4].includes(formCol.col_type) // TODO 正しい形に直す
 }
 const formCol = reactive({ validations: {}})
 const errorMessage = reactive({validations: {}})
-const errorState = reactive({})
-const emit = defineEmits(['checkColumnIdExists', 'checkColumnNameExists']);
+const errorState = reactive({ validations: {}})
+const emit = defineEmits(['checkColumnIdExists', 'checkColumnNameExists', 'updateButtonState']);
 const props = defineProps({
   columnIdCheckResult: Boolean,
   columnNameCheckResult: Boolean
@@ -218,68 +216,6 @@ const optionFormColValidation = ref([
       { value: 6, text: '郵便番号' }
 ])
 
-const formColNameState = computed(() => errorState.name?.status)
-const formColColIdState = computed(() => checkFormColId(formCol))
-const formColColTypeState = computed(() => checkFormColType(formCol))
-const formColDefaultValueState = computed(() => checkFormColDefaultValue(formCol))
-const formColInputTypeState = computed(() => formCol.validations.input_type?.trim() !== '')
-const formColValidateValueState = computed(() => checkFormColValidateValue(formCol))
-const formColValidateLengthState = computed(() => checkFormColValidateLength(formCol))
-const formColValidateRequiredState = computed(() => checkFormColValidateRequired(formCol))
-
-const okButtonDisabled = () => {
-  return !(formColNameState.value
-      && formColColIdState.value
-      && formColColTypeState.value
-      && formColDefaultValueState.value
-      && formColInputTypeState.value
-      && formColValidateValueState.value
-      && formColValidateLengthState.value
-      && formColValidateRequiredState.value
-  )
-}
-
-const validateFormColNameState = () => {
-  return formColNameState.value
-}
-const validateFormColColIdState = () => {
-  return formColColIdState.value
-}
-const validateFormColColTypeState = () => {
-  return formColColTypeState.value
-}
-
-const validateFormColDefaultValueState = () => {
-  return formColDefaultValueState.value
-}
-const validateFormColInputTypeState = () => {
-  return formColInputTypeState.value
-}
-const validateFormColValidateValueState = () => {
-  return formColValidateValueState.value
-}
-const validateFormColValidateLengthState = () => {
-  return formColValidateLengthState.value
-}
-
-const validateFormColValidateRequiredState = () => {
-  return formColValidateRequiredState.value
-}
-
-const checkFormColId = (formCol) => {
-  if(formCol.col_id === '') {
-    errorMessage.col_id = 'カラムIDを入力してください'
-    return false
-  }
-  emit('checkColumnIdExists', formCol)
-  if(props.columnIdCheckResult) {
-    errorMessage.col_id = '他の項目で使用されています'
-    return false
-  } else {
-    errorMessage.col_id = ''
-    return true
-  }
-}
 
 const colDefaultLabel = () => {
   if(formCol.col_type === 6) {
@@ -294,33 +230,70 @@ const colDefaultLabel = () => {
 const validate = () => {
   // カラム名
   if(isEmpty(formCol.name)) {
-    errorState.name = { status: false, message: 'カラム名を入力してください'}
+    errorState.name = { status: false, message: 'カラム名を入力してください' }
   } else {
     emit('checkColumnNameExists', formCol)
     if (props.columnNameCheckResult) {
-      errorState.name = {status: false, message: '他の項目で使用されています'}
+      errorState.name = {status: false, message: '他の項目で使用されています' }
     } else {
       errorState.name = {status: true, message: ''}
     }
   }
-}
-
-const checkFormColName = () => {
-  if(formCol.name === '') {
-    errorMessage.name = 'カラム名を入力してください'
-    return false
-  }
-  emit('checkColumnNameExists', formCol)
-  if(props.columnNameCheckResult) {
-    errorMessage.name = '他の項目で使用されています'
-    return false
+  // カラムID
+  if(formCol.col_id === '') {
+    errorState.col_id = { status: false, message: 'カラムIDを入力してください' }
   } else {
-    errorMessage.name = ''
-    return true
+    emit('checkColumnIdExists', formCol)
+    if (props.columnIdCheckResult) {
+      errorState.col_id = {status: false, message: '他の項目で使用されています'}
+    } else {
+      errorState.col_id = {status: true, message: ''}
+    }
   }
-}
-
-const checkFormColType = (formCol) => {
+  // 初期値
+  if(formCol.validations.input_type === 1) {
+    if(isEmpty(formCol.default_value) || /^[0-9]+$/.test(formCol.default_value)) {
+      errorState.default_value = {status: true, message: ''}
+    } else {
+      errorState.default_value = {status: false, message: '数値を入力してください'}
+    }
+  }
+  if(formCol.validations.input_type === 2) {
+    if(isEmpty(formCol.default_value) || /^[A-Za-z0-9]+$/.test(formCol.default_value)) {
+      errorState.default_value = {status: true, message: ''}
+    } else {
+      errorState.default_value = {status: false, message: '英数字を入力してください'}
+    }
+  }
+  if(formCol.validations.input_type === 3) {
+    if(isEmpty(formCol.default_value) || /^[\u3040-\u309F]+$/.test(formCol.default_value)) {
+      errorState.default_value = {status: true, message: ''}
+    } else {
+      errorState.default_value = {status: false, message: 'ひらがなを入力してください'}
+    }
+  }
+  if(formCol.validations.input_type === 4) {
+    if (isEmpty(formCol.default_value) || /^[\u30A0-\u30FF]+$/.test(formCol.default_value)) {
+      errorState.default_value = {status: true, message: ''}
+    } else {
+      errorState.default_value = {status: false, message: 'カタカナを入力してください'}
+    }
+  }
+  if(formCol.validations.input_type === 5) {
+    if(isEmpty(formCol.default_value) || validator.isEmail(formCol.default_value)) {
+      errorState.default_value = {status: true, message: ''}
+    } else {
+      errorState.default_value = {status: false, message: 'メールアドレスを入力してください'}
+    }
+  }
+  if(formCol.validations.input_type === 6) {
+    if(isEmpty(formCol.default_value) || validator.isPostalCode(formCol.default_value, 'JP')){
+      errorState.default_value = {status: true, message: ''}
+    } else {
+      errorState.default_value = {status: false, message: '郵便番号を入力してください'}
+    }
+  }
+  // col_type
   if(![1,5].includes(formCol.col_type)){
     formCol.validations.min_value = ''
     formCol.validations.max_value = ''
@@ -331,101 +304,42 @@ const checkFormColType = (formCol) => {
   if([1,5].includes(formCol.col_type) && formCol.validations.input_type === ''){
     formCol.validations.input_type = '0'
   }
-  return typeof formCol.col_type === 'number' && Number.isFinite(formCol.col_type)
-}
+  const col_type_status = typeof formCol.col_type === 'number' && Number.isFinite(formCol.col_type)
+  if(!col_type_status) {
+    errorState.col_type = {status: false, message: 'カラムタイプを選択してください'}
+  } else {
+    errorState.col_type = {status: true, message: ''}
+  }
 
-const checkFormColDefaultValue = (formCol)=> {
-  if(formCol.validations.input_type === 1) {
-    if(/^[0-9]+$/.test(formCol.default_value)) {
-      return true
-    }
-    errorMessage.default_value = '数値を入力してください'
-    return false
-  }
-  if(formCol.validations.input_type === 2) {
-    if(/^[A-Za-z0-9]+$/.test(formCol.default_value)) {
-      return true
-    }
-    errorMessage.default_value = '英数字を入力してください'
-    return false
-  }
-  if(formCol.validations.input_type === 3) {
-    if(/^[\u3040-\u309F]+$/.test(formCol.default_value)) {
-      return true
-    }
-    errorMessage.default_value = 'ひらがなを入力してください'
-    return false
-  }
-  if(formCol.validations.input_type === 4) {
-    if (isEmpty(formCol.default_value) || validator.isEmail(formCol.default_value)) {
-      if (/^[\u30A0-\u30FF]+$/.test(formCol.default_value)) {
-        return true
-      }
-      errorMessage.default_value = 'カタカナを入力してください'
-      return false
-    }
-  }
-  if(formCol.validations.input_type === 5) {
-    if(isEmpty(formCol.default_value) || validator.isEmail(formCol.default_value)) {
-      return true
-    }
-    errorMessage.default_value = 'メールアドレスを入力してください'
-    return false
-  }
-  if(formCol.validations.input_type === 6) {
-    if(isEmpty(formCol.default_value) || validator.isPostalCode(formCol.default_value, 'JP')){
-      return true
-    }
-    errorMessage.default_value = '郵便番号を入力してください'
-    return false
-  }
-  return true
-}
-
-const checkFormColValidateValue = (formCol) => {
+  // 数値範囲
   if(!formCol.validations.min_value || !formCol.validations.max_value){
-    errorMessage.validations.value = ''
-    return true
+    errorState.validations.value = {status: true, message: ''}
+  } else if(Number(formCol.validations.min_value) >= Number(formCol.validations.max_value)) {
+    errorState.validations.value = {status: false, message: '最大値は最小値より大きくしてください'}
+  } else {
+    errorState.validations.value = {status: true, message: ''}
   }
-  if(Number(formCol.validations.min_value) >= Number(formCol.validations.max_value)) {
-    errorMessage.validations.value = '最大値は最小値より大きくしてください'
-    return false
-  }
-  errorMessage.validations.value = ''
-  return true
-}
-const checkFormColValidateLength = (formCol) => {
+
+  // 文字列長
   if(formCol.validations.required === true && (!formCol.validations.min_length || formCol.validations.min_length <= 0)) {
-    errorMessage.validations.length = '最小値は1以上にしてください'
-    return false
+    errorState.validations.length = {status: false, message: '最小値は1以上にしてください'}
+  } else if(formCol.validations.required === "false" && Number(formCol.validations.min_length) < 0) {
+    errorState.validations.length = {status: false, message: '最小値は0以上にしてください'}
+  } else if(formCol.validations.required === "false" && !isEmpty(formCol.validations.max_length) && Number(formCol.validations.max_length) < 1) {
+    errorState.validations.length = {status: false, message: '最大値は1以上にしてください'}
+  } else if(!formCol.validations.min_length || !formCol.validations.max_length){
+    errorState.validations.length = {status: true, message: ''}
+  } else if(Number(formCol.validations.min_length) >= Number(formCol.validations.max_length)) {
+    errorState.validations.length = {status: false, message: '最大値は最小値より大きくしてください'}
+  } else {
+    errorState.validations.length = {status: true, message: ''}
   }
-  if(formCol.validations.required === "false" && Number(formCol.validations.min_length) < 0) {
-    errorMessage.validations.length = '最小値は0以上にしてください'
-    return false
-  }
-  if(formCol.validations.required === "false" && !isEmpty(formCol.validations.max_length) && Number(formCol.validations.max_length) < 1) {
-    errorMessage.validations.length = '最大値は1以上にしてください'
-    return false
-  }
-  if(!formCol.validations.min_length || !formCol.validations.max_length){
-    errorMessage.validations.length = ''
-    return true
-  }
-  if(Number(formCol.validations.min_length) >= Number(formCol.validations.max_length)) {
-    errorMessage.validations.length = '最大値は最小値より大きくしてください'
-    return false
-  }
-  errorMessage.validations.length = ''
-  return true
+  emit('updateButtonState', okButtonDisabled())
 }
 
-const checkFormColValidateRequired = (formCol) => {
-  if(formCol.validations.required && (!formCol.validations.min_length || formCol.validations.min_length <= 0)) {
-    errorMessage.validations.length = '最小値は1以上にしてください'
-    return true
-  }
-  errorMessage.validations.length = ''
-  return true
+const okButtonDisabled = () => {
+  const errorCount = Object.values(errorState).filter(item => item.status === false).length + Object.values(errorState.validations).filter(item => item.status === false).length
+  return errorCount > 0
 }
 
 const setFormCol = (item) => {
@@ -439,8 +353,8 @@ const setFormCol = (item) => {
   formCol.form_id = item.form_id
   formCol.select_list = item.select_list
   formCol.validations = item.validations
+  validate()
 }
-
 
 const getFormCol = () => {
   return formCol
@@ -450,19 +364,10 @@ const isEmpty = (str) => {
   return isNil(str) || str === ''
 }
 
-const fuga = () => {
-  console.log('***** fuga *****')
-}
-
 provide('formCol', formCol)
-
-onMounted(() => {
-  // data.value = props.form.form_cols
-})
 
 defineExpose({
   setFormCol,
   getFormCol,
-  okButtonDisabled
 })
 </script>

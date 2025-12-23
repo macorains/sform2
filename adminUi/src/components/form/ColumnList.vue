@@ -13,8 +13,8 @@
       </BButton>
     </template>
   </BTable>
-  <BModal v-model="editModalVisible" size="xl" title="フォーム項目編集" @ok="updateColumn" @changeOkButtonStatus="" :ok-disabled="getOkButtonDisabled">
-    <ColumnEdit ref="columnEditRef" @checkColumnIdExists="checkColumnIdExists" @checkColumnNameExists="checkColumnNameExists" :column-id-check-result="columnIdCheckResult" :column-name-check-result="columnNameCheckResult" :formColId="selectedFormColId"/>
+  <BModal v-model="editModalVisible" size="xl" title="フォーム項目編集" @ok="updateColumn" @changeOkButtonStatus="" :ok-disabled="okButtonDisabled">
+    <ColumnEdit ref="columnEditRef" @checkColumnIdExists="checkColumnIdExists" @checkColumnNameExists="checkColumnNameExists" @update-button-state="updateButtonState" :column-id-check-result="columnIdCheckResult" :column-name-check-result="columnNameCheckResult" :formColId="selectedFormColId"/>
   </BModal>
 </template>
 
@@ -39,12 +39,8 @@ const form_cols = reactive([])
 
 const columnIdCheckResult = ref(false)
 const columnNameCheckResult = ref(false)
+const okButtonDisabled = ref(true)
 
-onMounted(() => {
-  // data.value = props.form.form_cols
-  //console.log(form.form_cols)
-  //form.form_cols.forEach(fc => form_cols.push(fc))
-})
 const load = (col_list) => {
   col_list.forEach(col => form_cols.push(col))
 }
@@ -104,6 +100,10 @@ const checkColumnIdExists = (data) => {
 
 const checkColumnNameExists = (data) => {
   columnNameCheckResult.value = form_cols.some((col) => col.name === data.name && col.id !== data.id)
+}
+
+const updateButtonState = (state) => {
+  okButtonDisabled.value = state
 }
 
 defineExpose({
