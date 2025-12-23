@@ -10,6 +10,7 @@
 <script setup>
 import {BTable} from "bootstrap-vue-3";
 import {inject, onMounted, ref} from "vue";
+import ColumnSelectList from "@/components/form/ColumnSelectList.vue";
 
 const formCol = inject('formCol')
 const fields = ref([
@@ -18,6 +19,8 @@ const fields = ref([
   { key: 'select_value', sortable: true, label: '値'},
   { key: 'actions', label: '操作' },
 ])
+
+const props = defineProps(['formColSelectList'])
 
 </script>
 <!--

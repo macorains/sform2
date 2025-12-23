@@ -13,14 +13,14 @@
       </BButton>
     </template>
   </BTable>
-  <BModal v-model="editModalVisible" size="xl" title="フォーム項目編集" @ok="updateColumn">
-    <ColumnEdit ref="columnEditRef" :formColId="selectedFormColId"/>
+  <BModal v-model="editModalVisible" size="xl" title="フォーム項目編集" @ok="updateColumn" @changeOkButtonStatus="" :ok-disabled="okButtonDisabled">
+    <ColumnEdit ref="columnEditRef" @checkColumnIdExists="checkColumnIdExists" @checkColumnNameExists="checkColumnNameExists" @update-button-state="updateButtonState" :column-id-check-result="columnIdCheckResult" :column-name-check-result="columnNameCheckResult" :formColId="selectedFormColId"/>
   </BModal>
 </template>
 
 <script setup>
 import ColumnEdit from "@/components/form/ColumnEdit.vue"
-import {onMounted, ref, inject, reactive} from "vue"
+import {onMounted, ref, inject, reactive, computed} from "vue"
 import { BButton, BTable, BModal } from 'bootstrap-vue-3'
 const emit = defineEmits(['update-column'])
 
@@ -37,12 +37,10 @@ const selectedFormColId = ref(null)
 const columnEditRef = ref(null)
 const form_cols = reactive([])
 
+const columnIdCheckResult = ref(false)
+const columnNameCheckResult = ref(false)
+const okButtonDisabled = ref(true)
 
-onMounted(() => {
-  // data.value = props.form.form_cols
-  //console.log(form.form_cols)
-  //form.form_cols.forEach(fc => form_cols.push(fc))
-})
 const load = (col_list) => {
   col_list.forEach(col => form_cols.push(col))
 }
@@ -95,6 +93,19 @@ const edit = (item, index, target) => {
   selectedFormColId.value = item.id
   editModalVisible.value = true
 }
+
+const checkColumnIdExists = (data) => {
+  columnIdCheckResult.value = form_cols.some((col) => col.col_id === data.col_id && col.id !== data.id)
+}
+
+const checkColumnNameExists = (data) => {
+  columnNameCheckResult.value = form_cols.some((col) => col.name === data.name && col.id !== data.id)
+}
+
+const updateButtonState = (state) => {
+  okButtonDisabled.value = state
+}
+
 defineExpose({
   load
 });
