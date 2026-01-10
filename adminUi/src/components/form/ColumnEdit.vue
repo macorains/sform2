@@ -50,14 +50,15 @@
     </BFormGroup>
 
     <BRow
-        v-if="isSelectable()"
+        v-show="isSelectable()"
         class="mb-3"
     >
       <BCol cols="4">
         選択肢
       </BCol>
       <BCol>
-        <ColumnSelectList />
+        <ColumnSelectList v-model:selectList="formCol.select_list" @validate="validate" ref="columnSelectListRef" />
+        <div v-if="!errorState.is_default?.status" class="invalid-feedback d-block">{{ errorState.is_default?.message }}</div>
       </BCol>
     </BRow>
 
@@ -182,16 +183,16 @@
 import validator from 'validator'
 import { isNil } from 'es-toolkit'
 import ColumnSelectList from "@/components/form/ColumnSelectList.vue"
-import {defineEmits, inject, onMounted, provide, reactive, ref} from "vue"
+import {defineEmits, inject, onMounted, provide, reactive, ref, toRef} from "vue"
 import {BFormGroup} from "bootstrap-vue-3"
 
 const isSelectable = () => {
   return [2,3,4].includes(formCol.col_type) // TODO 正しい形に直す
 }
-const formCol = reactive({ validations: {}})
-const errorMessage = reactive({validations: {}})
+const formCol = reactive({ select_list:[], validations: {}})
 const errorState = reactive({ validations: {}})
 const emit = defineEmits(['checkColumnIdExists', 'checkColumnNameExists', 'updateButtonState']);
+const columnSelectListRef = ref(null)
 const props = defineProps({
   columnIdCheckResult: Boolean,
   columnNameCheckResult: Boolean
@@ -311,26 +312,52 @@ const validate = () => {
     errorState.col_type = {status: true, message: ''}
   }
 
+  if([2,3,4].includes(formCol.col_type)) {
+    if(formCol.select_list.length === 0) {
+      columnSelectListRef.value.addColSelectList()
+    }
+    if([2,4].includes(formCol.col_type)) {
+      const isDefaultCount = formCol.select_list.filter(item => item.is_default === true).length
+      if(isDefaultCount > 1) {
+        errorState.is_default = {status: false, message: 'デフォルト値に設定できるのは1つだけです'}
+      } else {
+        errorState.is_default = {status: true, message:''}
+      }
+    } else {
+      errorState.is_default = {status: true, message:''}
+    }
+  } else {
+    formCol.select_list = []
+  }
+
   // 数値範囲
-  if(!formCol.validations.min_value || !formCol.validations.max_value){
-    errorState.validations.value = {status: true, message: ''}
-  } else if(Number(formCol.validations.min_value) >= Number(formCol.validations.max_value)) {
-    errorState.validations.value = {status: false, message: '最大値は最小値より大きくしてください'}
+  if(formCol.col_type === 1) {
+    if (!formCol.validations.min_value || !formCol.validations.max_value) {
+      errorState.validations.value = {status: true, message: ''}
+    } else if (Number(formCol.validations.min_value) >= Number(formCol.validations.max_value)) {
+      errorState.validations.value = {status: false, message: '最大値は最小値より大きくしてください'}
+    } else {
+      errorState.validations.value = {status: true, message: ''}
+    }
   } else {
     errorState.validations.value = {status: true, message: ''}
   }
 
   // 文字列長
-  if(formCol.validations.required === true && (!formCol.validations.min_length || formCol.validations.min_length <= 0)) {
-    errorState.validations.length = {status: false, message: '最小値は1以上にしてください'}
-  } else if(formCol.validations.required === "false" && Number(formCol.validations.min_length) < 0) {
-    errorState.validations.length = {status: false, message: '最小値は0以上にしてください'}
-  } else if(formCol.validations.required === "false" && !isEmpty(formCol.validations.max_length) && Number(formCol.validations.max_length) < 1) {
-    errorState.validations.length = {status: false, message: '最大値は1以上にしてください'}
-  } else if(!formCol.validations.min_length || !formCol.validations.max_length){
-    errorState.validations.length = {status: true, message: ''}
-  } else if(Number(formCol.validations.min_length) >= Number(formCol.validations.max_length)) {
-    errorState.validations.length = {status: false, message: '最大値は最小値より大きくしてください'}
+  if([1,5].includes(formCol.col_type)) {
+    if (formCol.validations.required === true && (!formCol.validations.min_length || formCol.validations.min_length <= 0)) {
+      errorState.validations.length = {status: false, message: '最小値は1以上にしてください'}
+    } else if (formCol.validations.required === "false" && Number(formCol.validations.min_length) < 0) {
+      errorState.validations.length = {status: false, message: '最小値は0以上にしてください'}
+    } else if (formCol.validations.required === "false" && !isEmpty(formCol.validations.max_length) && Number(formCol.validations.max_length) < 1) {
+      errorState.validations.length = {status: false, message: '最大値は1以上にしてください'}
+    } else if (!formCol.validations.min_length || !formCol.validations.max_length) {
+      errorState.validations.length = {status: true, message: ''}
+    } else if (Number(formCol.validations.min_length) >= Number(formCol.validations.max_length)) {
+      errorState.validations.length = {status: false, message: '最大値は最小値より大きくしてください'}
+    } else {
+      errorState.validations.length = {status: true, message: ''}
+    }
   } else {
     errorState.validations.length = {status: true, message: ''}
   }
@@ -343,6 +370,7 @@ const okButtonDisabled = () => {
 }
 
 const setFormCol = (item) => {
+  console.log(item)
   formCol.id = item.id
   formCol.name = item.name
   formCol.col_id = item.col_id
@@ -356,6 +384,7 @@ const setFormCol = (item) => {
   validate()
 }
 
+
 const getFormCol = () => {
   return formCol
 }
@@ -364,7 +393,6 @@ const isEmpty = (str) => {
   return isNil(str) || str === ''
 }
 
-provide('formCol', formCol)
 
 defineExpose({
   setFormCol,
