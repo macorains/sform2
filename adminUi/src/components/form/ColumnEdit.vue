@@ -67,6 +67,7 @@
         label-for="formColDefault"
         :label="colDefaultLabel()"
         label-cols="4"
+        v-if="![2,3,4].includes(formCol.col_type)"
     >
       <BFormInput
           id="formColDefault"
@@ -163,7 +164,7 @@
         <div v-if="!errorState.validations?.length?.status" class="invalid-feedback d-block">{{ errorState.validations?.length?.message }}</div>
       </BCol>
     </BRow>
-    <BRow class="mb-3">
+    <BRow class="mb-3" v-if="![6,7].includes(formCol.col_type)">
       <BCol cols="4">
         必須項目
       </BCol>
@@ -312,6 +313,7 @@ const validate = () => {
     errorState.col_type = {status: true, message: ''}
   }
 
+  // 選択肢のデフォルト値？
   if([2,3,4].includes(formCol.col_type)) {
     if(formCol.select_list.length === 0) {
       columnSelectListRef.value.addColSelectList()
@@ -328,6 +330,13 @@ const validate = () => {
     }
   } else {
     formCol.select_list = []
+  }
+
+  // 初期値
+  if([6,7].includes(formCol.col_type) && isEmpty(formCol.default_value)){
+    errorState.default_value = {status: false, message: '入力してください'}
+  } else {
+    errorState.default_value = {status: true, message: ''}
   }
 
   // 数値範囲
