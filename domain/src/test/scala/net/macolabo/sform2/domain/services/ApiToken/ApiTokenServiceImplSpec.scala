@@ -1,5 +1,6 @@
 package net.macolabo.sform2.domain.services.ApiToken
 
+import net.macolabo.sform2.domain.models.SessionInfo
 import net.macolabo.sform2.domain.models.daos.ApiTokenDAO
 import net.macolabo.sform2.domain.models.entity.api_token.ApiToken
 import net.macolabo.sform2.domain.models.helper.SformTestHelper
@@ -31,7 +32,7 @@ class ApiTokenServiceImplSpec extends PlaySpec
 
       val service = app.injector.instanceOf(classOf[ApiTokenServiceImpl])
 
-      val response = service.insert(ApiTokenInsertRequest(90L), "hoge", "fuga")
+      val response = service.insert(ApiTokenInsertRequest(90L), SessionInfo("hoge", "fuga", "admin"))
       val decodedBytes = Base64.getUrlDecoder.decode(response.token)
       decodedBytes.length mustBe 16
     }
