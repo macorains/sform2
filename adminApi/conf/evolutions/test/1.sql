@@ -73,6 +73,9 @@ create table d_form_col
 )
     collate = utf8mb4_bin;
 
+create unique index idx_d_form_col_id
+    on d_form_col (id);
+
 create index idx_user_group
     on d_form_col (user_group);
 
