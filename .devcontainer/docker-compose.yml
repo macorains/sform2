@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        TZ: ${TZ:-Asia/Tokyo}
+        CLAUDE_CODE_VERSION: latest
+        GIT_DELTA_VERSION: 0.18.2
+        ZSH_IN_DOCKER_VERSION: 1.2.0
+    volumes:
+      - ..:/workspace:cached
+      - claude-code-bashhistory:/commandhistory
+      - claude-code-config:/home/node/.claude
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=4096
+      - CLAUDE_CONFIG_DIR=/home/node/.claude
+      - POWERLEVEL9K_DISABLE_GITSTATUS=true
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - sform-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: sform-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: sform
+      MYSQL_PASSWORD: sform
+      TZ: ${TZ:-Asia/Tokyo}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init-db:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-usform", "-psform"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sform-network
+
+volumes:
+  claude-code-bashhistory:
+  claude-code-config:
+  mysql-data:
+
+networks:
+  sform-network:
+    driver: bridge

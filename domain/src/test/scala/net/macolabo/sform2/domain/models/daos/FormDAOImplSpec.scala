@@ -13,7 +13,7 @@ import scalikejdbc._
 import scalikejdbc.interpolation.SQLSyntax.count
 import scalikejdbc.scalatest.AutoRollback
 
-import java.time.ZonedDateTime
+import java.time.{ZoneId, ZonedDateTime}
 import java.util.UUID
 import scala.collection.compat.Factory
 
@@ -21,7 +21,22 @@ import scala.collection.compat.Factory
 class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite with SformTestHelper with AutoRollback {
 
   private val userId = UUID.randomUUID()
-  private val user = User(userId, "hoge", Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge@hoge.com"), None, activated = true, deletable = false)
+  private val user = User(
+    userId,
+    username = "hoge",
+    password = Some("hoge"),
+    user_group = Some("hoge"),
+    role = Some("hoge"),
+    first_name = Some("hoge"),
+    last_name = Some("hoge"),
+    full_name = Some("hoge"),
+    email = Some("hoge@hoge.com"),
+    avatar_url = None,
+    activated = true,
+    deletable = false,
+    created = ZonedDateTime.of(2026, 1, 1, 0, 0, 0, 0, ZoneId.of("Asia/Tokyo")),
+    modified = ZonedDateTime.of(2026, 1, 1, 0, 0, 0, 0, ZoneId.of("Asia/Tokyo"))
+  )
   val formId: BigInt = BigInt(100)
   val transferConfigId: BigInt = BigInt(100)
 
