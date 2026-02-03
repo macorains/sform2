@@ -34,7 +34,8 @@
   "containerEnv": {
     "NODE_OPTIONS": "--max-old-space-size=4096",
     "CLAUDE_CONFIG_DIR": "/home/node/.claude",
-    "POWERLEVEL9K_DISABLE_GITSTATUS": "true"
+    "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
+    "JAVA_HOME": "/usr/lib/jvm/temurin-17-jdk-amd64"
   },
   "postStartCommand": "sudo /usr/local/bin/init-firewall.sh",
   "waitFor": "postStartCommand"

@@ -25,7 +25,30 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   jq \
   nano \
   vim \
+  wget \
+  apt-transport-https \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Eclipse Temurin JDK 17 and 21
+RUN wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor -o /usr/share/keyrings/adoptium-archive-keyring.gpg && \
+  echo "deb [signed-by=/usr/share/keyrings/adoptium-archive-keyring.gpg] https://packages.adoptium.net/artifactory/deb $(. /etc/os-release && echo $VERSION_CODENAME) main" > /etc/apt/sources.list.d/adoptium.list && \
+  apt-get update && apt-get install -y --no-install-recommends \
+  temurin-17-jdk \
+  temurin-21-jdk \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Set Temurin 17 as default Java
+RUN update-alternatives --set java /usr/lib/jvm/temurin-17-jdk-$(dpkg --print-architecture)/bin/java && \
+  update-alternatives --set javac /usr/lib/jvm/temurin-17-jdk-$(dpkg --print-architecture)/bin/javac
+
+# Set JAVA_HOME environment variable dynamically based on architecture
+RUN ARCH=$(dpkg --print-architecture) && \
+  echo "export JAVA_HOME=/usr/lib/jvm/temurin-17-jdk-${ARCH}" >> /etc/profile.d/java.sh && \
+  echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> /etc/profile.d/java.sh && \
+  chmod +x /etc/profile.d/java.sh
+
+ENV JAVA_HOME=/usr/lib/jvm/temurin-17-jdk-amd64
+ENV PATH=$JAVA_HOME/bin:$PATH
 
 # Ensure default node user has access to /usr/local/share
 RUN mkdir -p /usr/local/share/npm-global && \
