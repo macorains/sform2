@@ -21,6 +21,9 @@ services:
       - NODE_OPTIONS=--max-old-space-size=4096
       - CLAUDE_CONFIG_DIR=/home/node/.claude
       - POWERLEVEL9K_DISABLE_GITSTATUS=true
+    ports:
+      - "5173:5173"
+      - "9001:9001"
     depends_on:
       mysql:
         condition: service_healthy
