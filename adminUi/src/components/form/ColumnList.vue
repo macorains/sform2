@@ -43,6 +43,7 @@ const okButtonDisabled = ref(true)
 
 const load = (col_list) => {
   col_list.forEach(col => form_cols.push(col))
+  emit('update-column', form_cols)
 }
 
 const updateColumn = () => {
@@ -51,6 +52,7 @@ const updateColumn = () => {
   if (target_index !== -1) {
     Object.assign(form_cols[target_index], formCol)
   }
+  emit('update-column', form_cols)
 }
 
 const addColumn = () => {
@@ -62,17 +64,17 @@ const addColumn = () => {
     col_id: 'col' + colNum,
     col_type: 1,
     default_value: '',
-    form_id: 'hoge',
+    form_id: null,
     id: null,
     validations: {
       id: null,
       input_type: 0,
-      min_value: '',
-      max_value: '',
-      min_length: '',
-      max_length: '',
+      min_value: null,
+      max_value: null,
+      min_length: null,
+      max_length: null,
       form_col_id: null,
-      form_id: 'hoge',
+      form_id: null,
       required: false
     },
     select_list: []

@@ -1,8 +1,6 @@
 package net.macolabo.sform2.domain.services.Form.get
 
-import play.api.libs.json._
-import play.api.libs.json.Reads._
-import play.api.libs.functional.syntax._
+import play.api.libs.json.{Format, Json}
 
 /**
  * フォーム取得API・フォーム項目・バリデーション
@@ -28,6 +26,10 @@ case class FormColValidationGetReponse(
                                                  required: Boolean
                                                )
 
+object FormColValidationGetReponse {
+  implicit val format: Format[FormColValidationGetReponse] = Json.format[FormColValidationGetReponse]
+}
+
 /**
  * フォーム取得API・フォーム項目・選択リスト
  * @param id ID
@@ -35,7 +37,7 @@ case class FormColValidationGetReponse(
  * @param form_id フォームID
  * @param select_index 順番
  * @param select_name 表示テキスト
- * @param select_value 値　
+ * @param select_value 値
  * @param is_default デフォルト値とするか
  * @param edit_style 編集時CSSスタイル
  * @param view_style 参照時CSSスタイル
@@ -51,6 +53,10 @@ case class FormColSelectGetReponse(
                                              edit_style: String,
                                              view_style: String
                                            )
+
+object FormColSelectGetReponse {
+  implicit val format: Format[FormColSelectGetReponse] = Json.format[FormColSelectGetReponse]
+}
 
 /**
  * フォーム取得API・FormTransferTask
@@ -76,6 +82,10 @@ case class FormTransferTaskGetResponse(
                              salesforce: Option[FormTransferTaskSalesforceGetReponse]
                                               )
 
+object FormTransferTaskGetResponse {
+  implicit val format: Format[FormTransferTaskGetResponse] = Json.format[FormTransferTaskGetResponse]
+}
+
 /**
  * フォーム取得API・FormTransferTask・FormTransferTaskCondition
  * @param id FormTransferTaskCondition ID
@@ -83,7 +93,7 @@ case class FormTransferTaskGetResponse(
  * @param form_id フォームID
  * @param form_col_id フォーム項目ID
  * @param operator 演算子
- * @param cond_value 値　
+ * @param cond_value 値
  */
 case class FormTransferTaskConditionGetReponse(
                                                          id: BigInt,
@@ -93,6 +103,10 @@ case class FormTransferTaskConditionGetReponse(
                                                          operator: String,
                                                          cond_value: String
                                                        )
+
+object FormTransferTaskConditionGetReponse {
+  implicit val format: Format[FormTransferTaskConditionGetReponse] = Json.format[FormTransferTaskConditionGetReponse]
+}
 
 /**
  * フォーム取得API・FormTransferTask・FormTransferTaskMail
@@ -122,6 +136,10 @@ case class FormTransferTaskMailGetReponse(
   body: String
 )
 
+object FormTransferTaskMailGetReponse {
+  implicit val format: Format[FormTransferTaskMailGetReponse] = Json.format[FormTransferTaskMailGetReponse]
+}
+
 /**
  * フォーム取得API・FormTransferTask・FormTransferTaskSalesforce
  * @param id FormTransferTaskSalesforce ID
@@ -136,6 +154,10 @@ case class FormTransferTaskSalesforceGetReponse(
                                                           fields: List[FormTransferTaskSalesforceFieldGetReponse]
                                                         )
 
+object FormTransferTaskSalesforceGetReponse {
+  implicit val format: Format[FormTransferTaskSalesforceGetReponse] = Json.format[FormTransferTaskSalesforceGetReponse]
+}
+
 /**
  * フォーム取得API・FormTransferTask・FormTransferTaskSalesforceField
  * @param id FormTransferTaskSalesforceField ID
@@ -149,6 +171,10 @@ case class FormTransferTaskSalesforceFieldGetReponse(
                                                                form_column_id: String,
                                                                field_name: String
                                                              )
+
+object FormTransferTaskSalesforceFieldGetReponse {
+  implicit val format: Format[FormTransferTaskSalesforceFieldGetReponse] = Json.format[FormTransferTaskSalesforceFieldGetReponse]
+}
 
 /**
  * フォーム取得API・フォーム項目
@@ -173,6 +199,10 @@ case class FormColGetReponse(
                               select_list: List[FormColSelectGetReponse],
                               validations: Option[FormColValidationGetReponse]
                                      )
+
+object FormColGetReponse {
+  implicit val format: Format[FormColGetReponse] = Json.format[FormColGetReponse]
+}
 
 /**
  * フォーム取得API・フォームデータ
@@ -205,201 +235,8 @@ case class FormGetResponse(
                             confirm_header: String,
                             form_cols: List[FormColGetReponse],
                             form_transfer_tasks: List[FormTransferTaskGetResponse]
-                              ) {
+                              )
 
-}
-
-trait FormGetResponseJson {
-  implicit val FormGetResponseFormColValidationWrites: Writes[FormColValidationGetReponse] = (formColValidation: FormColValidationGetReponse) => Json.obj(
-    "id" -> formColValidation.id,
-    "form_col_id" -> formColValidation.form_col_id,
-    "form_id" -> formColValidation.form_id,
-    "max_value" -> JsString(formColValidation.max_value.map(v=>v.toString).getOrElse("")),
-    "min_value" -> JsString(formColValidation.min_value.map(v=>v.toString).getOrElse("")),
-    "max_length" -> JsString(formColValidation.max_length.map(v=>v.toString).getOrElse("")),
-    "min_length" -> JsString(formColValidation.min_length.map(v=>v.toString).getOrElse("")),
-    "input_type" -> formColValidation.input_type,
-    "required" -> formColValidation.required
-  )
-
-  implicit val FormColValidationReads: Reads[FormColValidationGetReponse] = (
-    (JsPath \ "id").read[BigInt] ~
-      (JsPath \ "form_col_id").read[BigInt] ~
-      (JsPath \ "form_id").read[BigInt] ~
-      (JsPath \ "max_value").readNullable[Int] ~
-      (JsPath \ "min_value").readNullable[Int] ~
-      (JsPath \ "max_length").readNullable[Int] ~
-      (JsPath \ "min_length").readNullable[Int] ~
-      (JsPath \ "input_type").read[Int] ~
-      (JsPath \ "required").read[Boolean]
-    )(FormColValidationGetReponse.apply _)
-
-  implicit val FormColSelectListWrites: Writes[FormColSelectGetReponse] = (formColSelectList: FormColSelectGetReponse) => Json.obj(
-    "id" -> formColSelectList.id,
-    "form_col_id" -> formColSelectList.form_col_id,
-    "form_id" -> formColSelectList.form_id,
-    "select_index" -> formColSelectList.select_index,
-    "select_name" -> formColSelectList.select_name,
-    "select_value" -> formColSelectList.select_value,
-    "is_default" -> formColSelectList.is_default,
-    "edit_style" -> formColSelectList.edit_style,
-    "view_style" -> formColSelectList.view_style
-  )
-
-  implicit val FormColSelectListReads: Reads[FormColSelectGetReponse] = (
-    (JsPath \ "id").read[BigInt] ~
-      (JsPath \ "form_col_id").read[BigInt] ~
-      (JsPath \ "form_id").read[BigInt] ~
-      (JsPath \ "select_index").read[Int] ~
-      (JsPath \ "select_name").read[String] ~
-      (JsPath \ "select_value").read[String] ~
-      (JsPath \ "is_default").read[Boolean] ~
-      (JsPath \ "edit_style").read[String] ~
-      (JsPath \ "view_style").read[String]
-    )(FormColSelectGetReponse.apply _)
-
-  implicit val FormTransferTaskWrites: Writes[FormTransferTaskGetResponse] = (formTransferTask: FormTransferTaskGetResponse) => Json.obj(
-    "id" -> formTransferTask.id,
-    "transfer_config_id" -> formTransferTask.transfer_config_id,
-    "transfer_config_name" -> formTransferTask.transfer_config_name,
-    "form_id" -> formTransferTask.form_id,
-    "task_index" -> formTransferTask.task_index,
-    "name" -> formTransferTask.name,
-    "form_transfer_task_conditions" -> formTransferTask.form_transfer_task_conditions,
-    "mail" -> formTransferTask.mail,
-    "salesforce" -> formTransferTask.salesforce
-  )
-
-  implicit val FormTransferTaskReads: Reads[FormTransferTaskGetResponse] = (
-    (JsPath \ "id").read[BigInt] ~
-      (JsPath \ "transfer_config_id").read[BigInt] ~
-      (JsPath \ "transfer_config_name").read[String] ~
-      (JsPath \ "form_id").read[BigInt] ~
-      (JsPath \ "task_index").read[Int] ~
-      (JsPath \ "name").read[String] ~
-      (JsPath \ "form_transfer_task_condition").read[List[FormTransferTaskConditionGetReponse]] ~
-      (JsPath \ "mail").readNullable[FormTransferTaskMailGetReponse] ~
-      (JsPath \ "salesforce").readNullable[FormTransferTaskSalesforceGetReponse]
-    )(FormTransferTaskGetResponse.apply _)
-
-  implicit val FormTransferTaskConditionWrites: Writes[FormTransferTaskConditionGetReponse] = (formTransferTaskCondition: FormTransferTaskConditionGetReponse) => Json.obj(
-    "id" -> formTransferTaskCondition.id,
-    "form_transfer_task_id" -> formTransferTaskCondition.form_transfer_task_id,
-    "form_id" -> formTransferTaskCondition.form_id,
-    "form_col_id" -> formTransferTaskCondition.form_col_id,
-    "operator" -> formTransferTaskCondition.operator,
-    "cond_value" -> formTransferTaskCondition.cond_value
-  )
-
-  implicit val FormTransferTaskConditionReads: Reads[FormTransferTaskConditionGetReponse] = (
-    (JsPath \ "id").read[BigInt] ~
-      (JsPath \ "form_transfer_task_id").read[BigInt] ~
-      (JsPath \ "form_id").read[BigInt] ~
-      (JsPath \ "form_col_id").read[BigInt] ~
-      (JsPath \ "operator").read[String] ~
-      (JsPath \ "cond_value").read[String]
-    )(FormTransferTaskConditionGetReponse.apply _)
-
-  implicit val FormTransferTaskMailFormat: Format[FormTransferTaskMailGetReponse] = (
-    (JsPath \ "id").format[BigInt] ~
-      (JsPath \ "form_transfer_task_id").format[BigInt] ~
-      (JsPath \ "from_address_id").format[BigInt] ~
-      (JsPath \ "to_address").formatNullable[String] ~
-      (JsPath \ "to_address_id").formatNullable[BigInt] ~
-      (JsPath \ "to_address_field").formatNullable[String] ~
-      (JsPath \ "cc_address").formatNullable[String] ~
-      (JsPath \ "cc_address_id").formatNullable[BigInt] ~
-      (JsPath \ "cc_address_field").formatNullable[String] ~
-      (JsPath \ "bcc_address_id").formatNullable[BigInt] ~
-      (JsPath \ "replyto_address_id").formatNullable[BigInt] ~
-      (JsPath \ "subject").format[String] ~
-      (JsPath \ "body").format[String]
-    )(FormTransferTaskMailGetReponse.apply, unlift(FormTransferTaskMailGetReponse.unapply))
-
-  implicit val FormTransferTaskSalesforceFieldWrites: Writes[FormTransferTaskSalesforceFieldGetReponse]
-  = (formTransferTaskSalesforceField:FormTransferTaskSalesforceFieldGetReponse) => Json.obj(
-    "id" -> formTransferTaskSalesforceField.id,
-    "form_transfer_task_salesforce_id" -> formTransferTaskSalesforceField.form_transfer_task_salesforce_id,
-    "form_column_id" -> formTransferTaskSalesforceField.form_column_id,
-    "field_name" -> formTransferTaskSalesforceField.field_name
-  )
-
-  implicit val FormTransferTaskSalesforceFieldReads: Reads[FormTransferTaskSalesforceFieldGetReponse] = (
-    (JsPath \ "id").read[BigInt] ~
-      (JsPath \ "form_transfer_task_salesforce_id").read[BigInt] ~
-      (JsPath \ "form_column_id").read[String] ~
-      (JsPath \ "field_name").read[String]
-    )(FormTransferTaskSalesforceFieldGetReponse.apply _)
-
-  implicit val FormTransferTaskSalesforceWrites: Writes[FormTransferTaskSalesforceGetReponse] = (formTransferTaskSalesforce:FormTransferTaskSalesforceGetReponse) => Json.obj(
-    "id" -> formTransferTaskSalesforce.id,
-    "form_transfer_task_id" -> formTransferTaskSalesforce.form_transfer_task_id,
-    "object_name" -> formTransferTaskSalesforce.object_name,
-    "fields" -> formTransferTaskSalesforce.fields
-  )
-
-  implicit val FormTransferTaskSalesforceReads: Reads[FormTransferTaskSalesforceGetReponse] = (
-    (JsPath \ "id").read[BigInt] ~
-      (JsPath \ "form_transfer_task_id").read[BigInt] ~
-      (JsPath \ "object_name").read[String] ~
-      (JsPath \ "fields").read[List[FormTransferTaskSalesforceFieldGetReponse]]
-    )(FormTransferTaskSalesforceGetReponse.apply _)
-
-  implicit val FormColWrites: Writes[FormColGetReponse] = (formCol: FormColGetReponse) => Json.obj(
-    "id" -> formCol.id,
-    "form_id" -> formCol.form_id,
-    "name" -> formCol.name,
-    "col_id" -> formCol.col_id,
-    "col_index" -> formCol.col_index,
-    "col_type" -> formCol.col_type,
-    "default_value" -> formCol.default_value,
-    "select_list" -> formCol.select_list,
-    "validations" -> formCol.validations
-  )
-
-  implicit val FormColReads: Reads[FormColGetReponse] = (
-    (JsPath \ "id").read[BigInt] ~
-      (JsPath \ "form_id").read[BigInt] ~
-      (JsPath \ "name").read[String] ~
-      (JsPath \ "col_id").read[String] ~
-      (JsPath \ "col_index").read[Int] ~
-      (JsPath \ "col_type").read[Int] ~
-      (JsPath \ "default_value").read[String] ~
-      (JsPath \ "select_list").read[List[FormColSelectGetReponse]] ~
-      (JsPath \ "validations").readNullable[FormColValidationGetReponse]
-    )(FormColGetReponse.apply _)
-
-  implicit val FormGetResponseWrites: Writes[FormGetResponse] = (formGetFormResponse: FormGetResponse) => Json.obj(
-    "id" -> formGetFormResponse.id,
-    "name" -> formGetFormResponse.name,
-    "form_index" -> formGetFormResponse.form_index,
-    "title" -> formGetFormResponse.title,
-    "status" -> formGetFormResponse.status,
-    "cancel_url" -> formGetFormResponse.cancel_url,
-    "close_text" -> formGetFormResponse.close_text,
-    "hashed_id" -> formGetFormResponse.hashed_id,
-    "complete_url" -> formGetFormResponse.complete_url,
-    "input_header" -> formGetFormResponse.input_header,
-    "complete_text" -> formGetFormResponse.complete_text,
-    "confirm_header" -> formGetFormResponse.confirm_header,
-    "form_cols" -> formGetFormResponse.form_cols,
-    "form_transfer_tasks" -> formGetFormResponse.form_transfer_tasks
-  )
-
-  implicit val FormGetResponseReads: Reads[FormGetResponse] = (
-    (JsPath \ "id").read[BigInt] ~
-      (JsPath \ "name").read[String] ~
-      (JsPath \ "form_index").read[Int] ~
-      (JsPath \ "title").read[String] ~
-      (JsPath \ "status").read[Int] ~
-      (JsPath \ "cancel_url").read[String] ~
-      (JsPath \ "close_text").read[String] ~
-      (JsPath \ "hashed_id").read[String] ~
-      (JsPath \ "complete_url").read[String] ~
-      (JsPath \ "input_header").read[String] ~
-      (JsPath \ "complete_text").read[String] ~
-      (JsPath \ "confirm_header").read[String] ~
-      (JsPath \ "form_cols").read[List[FormColGetReponse]] ~
-      (JsPath \ "form_transfer_tasks").read[List[FormTransferTaskGetResponse]]
-    )(FormGetResponse.apply _)
+object FormGetResponse {
+  implicit val format: Format[FormGetResponse] = Json.format[FormGetResponse]
 }

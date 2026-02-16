@@ -4,11 +4,10 @@ import com.google.inject.Inject
 import net.macolabo.sform2.domain.models.daos.TransferConfigSalesforceDAO
 import net.macolabo.sform2.domain.models.entity.CryptoConfig
 import net.macolabo.sform2.domain.models.entity.transfer.TransferConfigSalesforce
-import net.macolabo.sform2.domain.models.entity.transfer.salesforce.{SalesforceSObjectsDescribeResponse, SalesforceSObjectsDescribeResponseJson}
+import net.macolabo.sform2.domain.models.entity.transfer.salesforce.SalesforceSObjectsDescribeResponse
 import net.macolabo.sform2.domain.services.Transfer.SalesforceTransfer.TransferTaskRequest
 import net.macolabo.sform2.domain.utils.{Crypto, Logger}
-import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-import play.api.libs.json.{Format, JsError, JsPath, JsSuccess, JsValue, Json}
+import play.api.libs.json.{JsSuccess, JsValue, Json}
 import play.api.libs.ws.WSClient
 import scalikejdbc.DB
 
@@ -23,8 +22,6 @@ class SalesforceTransfer @Inject()(
   ws:WSClient,
   transferConfigSalesforceDAO: TransferConfigSalesforceDAO
 ) extends BaseTransfer
-  with SalesforceSObjectsDescribeResponseJson
-  with SalesforceLoginResponseJson
   with Logger
 {
   override def receive: Receive = {

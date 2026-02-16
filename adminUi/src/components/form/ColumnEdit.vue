@@ -103,7 +103,7 @@
       <BCol cols="3">
         <BFormInput
             id="formColValidationMinValue"
-            v-model="formCol.validations.min_value"
+            v-model.number="formCol.validations.min_value"
             type="number"
             :state="errorState.validations.value?.status"
             required
@@ -116,7 +116,7 @@
       <BCol cols="3">
         <BFormInput
             id="formColValidationMaxValue"
-            v-model="formCol.validations.max_value"
+            v-model.number="formCol.validations.max_value"
             type="number"
             :state="errorState.validations?.value?.status"
             required
@@ -137,7 +137,7 @@
       <BCol cols="3">
         <BFormInput
             id="formColValidationMinLength"
-            v-model="formCol.validations.min_length"
+            v-model.number="formCol.validations.min_length"
             type="number"
             :state="errorState.validations?.length?.status"
             required
@@ -150,7 +150,7 @@
       <BCol cols="3">
         <BFormInput
             id="formColValidationMaxLength"
-            v-model="formCol.validations.max_length"
+            v-model.number="formCol.validations.max_length"
             type="number"
             :state="errorState.validations?.length?.status"
             required
@@ -297,14 +297,14 @@ const validate = () => {
   }
   // col_type
   if(![1,5].includes(formCol.col_type)){
-    formCol.validations.min_value = ''
-    formCol.validations.max_value = ''
-    formCol.validations.min_length = ''
-    formCol.validations.max_length = ''
-    formCol.validations.input_type = ''
+    formCol.validations.min_value = null
+    formCol.validations.max_value = null
+    formCol.validations.min_length = null
+    formCol.validations.max_length = null
+    formCol.validations.input_type = null
   }
-  if([1,5].includes(formCol.col_type) && formCol.validations.input_type === ''){
-    formCol.validations.input_type = '0'
+  if([1,5].includes(formCol.col_type) && (formCol.validations.input_type === null || formCol.validations.input_type === '')){
+    formCol.validations.input_type = 0
   }
   const col_type_status = typeof formCol.col_type === 'number' && Number.isFinite(formCol.col_type)
   if(!col_type_status) {

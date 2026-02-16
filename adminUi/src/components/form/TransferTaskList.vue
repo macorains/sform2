@@ -27,6 +27,7 @@ import TransferTaskEditMail from "@/components/form/TransferTaskEditMail.vue";
 import TransferTaskEditSalesforce from "@/components/form/TransferTaskEditSalesforce.vue";
 import TransferTaskEditSelectConfig from "@/components/form/TransferTaskEditSelectConfig.vue";
 defineProps(['formId'])
+const emit = defineEmits(['update-transfer-tasks'])
 
 const instance = getCurrentInstance()
 const $http = instance.appContext.config.globalProperties.$http
@@ -106,6 +107,7 @@ const load = (data) => {
   form.id = data.id
   form.form_transfer_tasks = data.form_transfer_tasks
   form.form_cols = data.form_cols
+  emit('update-transfer-tasks', form.form_transfer_tasks)
 }
 const selectTransferConfig = () => {
   configSelectModalVisible.value = true
@@ -124,6 +126,7 @@ const addNewTask = () => {
   }
 
   form.form_transfer_tasks.push(newItem)
+  emit('update-transfer-tasks', form.form_transfer_tasks)
   edit(newItem)
 }
 

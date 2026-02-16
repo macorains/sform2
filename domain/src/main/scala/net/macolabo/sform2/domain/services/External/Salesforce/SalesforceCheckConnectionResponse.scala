@@ -1,15 +1,12 @@
 package net.macolabo.sform2.domain.services.External.Salesforce
 
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.{Format, Json}
 
 case class SalesforceCheckConnectionResponse(
                                           result: String,
                                           message: String
                                           )
 
-trait SalesforceCheckConnectionResponseJson {
-  implicit val SalesforceCheckConnectionResponseWrites: Writes[SalesforceCheckConnectionResponse] = (salesforceCheckConnectionResponse:SalesforceCheckConnectionResponse) => Json.obj(
-    "result" -> salesforceCheckConnectionResponse.result,
-    "message" -> salesforceCheckConnectionResponse.message
-  )
+object SalesforceCheckConnectionResponse {
+  implicit val format: Format[SalesforceCheckConnectionResponse] = Json.format[SalesforceCheckConnectionResponse]
 }

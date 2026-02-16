@@ -3,7 +3,7 @@ package net.macolabo.sform2.domain.services.Transfer
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.testkit.{ImplicitSender, TestActorRef, TestKit}
 import net.macolabo.sform2.domain.models.daos.TransferConfigSalesforceDAOImpl
-import net.macolabo.sform2.domain.models.entity.transfer.salesforce.{SalesforceSObjectsDescribeResponse, SalesforceSObjectsDescribeResponseJson}
+import net.macolabo.sform2.domain.models.entity.transfer.salesforce.SalesforceSObjectsDescribeResponse
 import net.macolabo.sform2.domain.models.helper.SformTestHelper
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.ScalaFutures.whenReady
@@ -28,8 +28,6 @@ class SalesforceTransferSpec extends TestKit(ActorSystem("test"))
   with GuiceOneAppPerTest
   with Injecting
   with SformTestHelper
-  with SalesforceSObjectsDescribeResponseJson
-  //with BeforeAndAfterAll
 {
   "SalesforceTransfer" must {
     // TODO SFからのレスポンスを使ってmock作ってテストとして実装し直す
