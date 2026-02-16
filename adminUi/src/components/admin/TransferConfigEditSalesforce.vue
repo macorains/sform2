@@ -117,7 +117,6 @@
   <TransferConfigEditSalesforceObject ref="configEditSalesforceObjectRef"/>
 </template>
 <script setup>
-import {BTable} from "bootstrap-vue-3"
 import TransferConfigEditSalesforceObject from "@/components/admin/TransferConfigEditSalesforceObject.vue"
 import {computed, getCurrentInstance, reactive, ref} from "vue";
 
