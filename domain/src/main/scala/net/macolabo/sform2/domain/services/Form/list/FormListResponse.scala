@@ -1,7 +1,6 @@
 package net.macolabo.sform2.domain.services.Form.list
 
-import play.api.libs.json.{JsPath, Json, Reads, Writes}
-import play.api.libs.functional.syntax._
+import play.api.libs.json.{Format, Json}
 
 case class FormResponse(
                             id: BigInt,
@@ -12,34 +11,15 @@ case class FormResponse(
                             hashed_id: String,
                           )
 
+object FormResponse {
+  implicit val format: Format[FormResponse] = Json.format[FormResponse]
+}
+
 case class FormListResponse(
                              forms: List[FormResponse],
                              data_count: Int
                            )
 
-trait FormListResponseJson {
-  implicit val FormResponseWrites: Writes[FormResponse] = (formResponse: FormResponse) => Json.obj(
-    "id" -> formResponse.id,
-    "name" -> formResponse.name,
-    "form_index" -> formResponse.form_index,
-    "title" -> formResponse.title,
-    "status" -> formResponse.status,
-    "hashed_id" -> formResponse.hashed_id
-  )
-  implicit val FormResponseReads: Reads[FormResponse] = (
-    (JsPath \ "id").read[BigInt] ~
-      (JsPath \ "name").read[String] ~
-      (JsPath \ "form_index").read[Int] ~
-      (JsPath \ "title").read[String] ~
-      (JsPath \ "status").read[Int] ~
-      (JsPath \ "hashed_id").read[String]
-    ) (FormResponse.apply _)
-  implicit val FormListResponseWrites: Writes[FormListResponse] = (formListResponse: FormListResponse) => Json.obj(
-    "forms" -> formListResponse.forms,
-    "data_count" -> formListResponse.data_count
-  )
-  implicit val FormListResponseReads: Reads[FormListResponse] = (
-    (JsPath \ "forms").read[List[FormResponse]] ~
-      (JsPath \ "data_count").read[Int]
-    ) (FormListResponse.apply _)
+object FormListResponse {
+  implicit val format: Format[FormListResponse] = Json.format[FormListResponse]
 }

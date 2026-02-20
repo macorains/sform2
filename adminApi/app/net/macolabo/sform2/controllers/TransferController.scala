@@ -4,10 +4,10 @@ import net.macolabo.sform2.domain.models.SessionInfo
 import net.macolabo.sform2.domain.models.entity.CryptoConfig
 
 import javax.inject._
-import net.macolabo.sform2.domain.services.External.Salesforce.{SalesforceCheckConnectionRequest, SalesforceCheckConnectionRequestJson, SalesforceCheckConnectionResponseJson, SalesforceConnectionService, SalesforceGetFieldResponseJson, SalesforceGetObjectResponse, SalesforceGetObjectResponseJson}
-import net.macolabo.sform2.domain.services.Transfer.{TransferGetTransferConfigListJson, TransferGetTransferConfigResponseJson, TransferGetTransferConfigSelectListJson, TransferService, TransferUpdateTransferConfigRequestJson, TransferUpdateTransferConfigResponseJson}
+import net.macolabo.sform2.domain.services.External.Salesforce.{SalesforceCheckConnectionRequest, SalesforceConnectionService, SalesforceGetObjectResponse}
+import net.macolabo.sform2.domain.services.Transfer.TransferService
 import net.macolabo.sform2.domain.services.TransferConfig.TransferConfigService
-import net.macolabo.sform2.domain.services.TransferConfig.save.{TransferConfigSaveRequest, TransferConfigSaveRequestJson}
+import net.macolabo.sform2.domain.services.TransferConfig.save.TransferConfigSaveRequest
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json._
@@ -32,16 +32,6 @@ class TransferController @Inject() (
   ex: ExecutionContext
 ) extends Security[UserProfile]
   with I18nSupport
-  with TransferConfigSaveRequestJson
-  with TransferGetTransferConfigSelectListJson
-  with TransferGetTransferConfigListJson
-  with TransferGetTransferConfigResponseJson
-  with TransferUpdateTransferConfigRequestJson
-  with TransferUpdateTransferConfigResponseJson
-  with SalesforceCheckConnectionRequestJson
-  with SalesforceCheckConnectionResponseJson
-  with SalesforceGetObjectResponseJson
-  with SalesforceGetFieldResponseJson
   with Pac4jUtil
 {
 

@@ -25,9 +25,6 @@ class TransferService @Inject()(
   transferConfigSalesforceObjectFieldDAO: TransferConfigSalesforceObjectFieldDAO,
   transferConfigDAO: TransferConfigDAO
 ) (implicit ex: ExecutionContext)
-  extends TransferGetTransferConfigSelectListJson
-    with TransferGetTransferConfigListJson
-    with TransferGetTransferConfigResponseJson
 {
 
   /**

@@ -3,7 +3,7 @@ package net.macolabo.sform2.domain.models.daos
 import net.macolabo.sform2.domain.services.Form.delete.FormDeleteResponse
 import net.macolabo.sform2.domain.services.Form.get.FormGetResponse
 import net.macolabo.sform2.domain.services.Form.list.FormListResponse
-import net.macolabo.sform2.domain.services.Form.update.{FormUpdateRequest, FormUpdateResponse}
+import net.macolabo.sform2.domain.services.Form.update.FormUpdateRequest
 import net.macolabo.sform2.domain.models.entity.form.Form
 import scalikejdbc.DBSession
 
@@ -25,7 +25,7 @@ trait FormDAO {
   def getList(userGroup: String)(implicit session: DBSession): FormListResponse
 
   /** フォーム作成更新 */
-  def update(userId: String, userGroup: String, request: FormUpdateRequest)(implicit session: DBSession): FormUpdateResponse
+  def update(userId: String, userGroup: String, request: FormUpdateRequest)(implicit session: DBSession): (BigInt, String)
 
   /** フォーム削除 */
   def delete(userGroup: String, id: BigInt)(implicit session: DBSession): FormDeleteResponse

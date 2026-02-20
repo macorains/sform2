@@ -3,8 +3,8 @@ package net.macolabo.sform2.domain.services.External.Salesforce
 import com.google.inject.Inject
 import com.sforce.soap.partner._
 import com.sforce.soap.partner.sobject._
-import net.macolabo.sform2.domain.models.entity.transfer.salesforce.{SalesforceSObjectsDescribeResponse, SalesforceSObjectsDescribeResponseJson, SalesforceSObjectsListResponse, SalesforceSObjectsListResponseJson}
-import net.macolabo.sform2.domain.services.Transfer.{SalesforceLoginResponse, SalesforceLoginResponseJson, TransferGetTransferResponseSalesforceTransferConfig}
+import net.macolabo.sform2.domain.models.entity.transfer.salesforce.{SalesforceSObjectsDescribeResponse, SalesforceSObjectsListResponse}
+import net.macolabo.sform2.domain.services.Transfer.{SalesforceLoginResponse, TransferGetTransferResponseSalesforceTransferConfig}
 import net.macolabo.sform2.domain.utils.Logger
 import play.api.libs.json.{JsError, JsResult, JsSuccess, Json}
 import play.api.libs.ws.WSClient
@@ -16,9 +16,6 @@ import scala.concurrent.{Await, Future}
 class SalesforceConnectionService @Inject()(
   ws:WSClient
 ) extends Logger
-  with SalesforceLoginResponseJson
-  with SalesforceSObjectsListResponseJson
-  with SalesforceSObjectsDescribeResponseJson
 {
 
   /**

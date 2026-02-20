@@ -152,7 +152,7 @@
       <BFormInvalidFeedback>入力してください。</BFormInvalidFeedback>
     </BFormGroup>
     <ColumnList ref="columnListRef" @update-column="updateColumn" v-if="form"/>
-    <TransferTaskList ref="transferTaskListRef" />
+    <TransferTaskList ref="transferTaskListRef" @update-transfer-tasks="updateTransferTasks" />
     <BButton
         class="mt-3"
         block
@@ -173,7 +173,7 @@
 </template>
 
 <script setup>
-import {onMounted, onBeforeMount, getCurrentInstance, ref, provide, computed, reactive} from "vue"
+import {onBeforeMount, getCurrentInstance, ref, computed, reactive} from "vue"
 import {useRoute, useRouter} from "vue-router"
 import { BButton, BFormGroup, BFormRadioGroup, BFormRadio, BFormInput, BFormTextarea } from 'bootstrap-vue-3'
 import { useHttpRequest } from "@/composables/useHttpRequest.js"
@@ -203,6 +203,9 @@ onBeforeMount(async () => {
       response => {
         const data = response.data
         Object.assign(form, {
+          id: data.id,
+          hashed_id: data.hashed_id,
+          form_index: data.form_index,
           status: data.status,
           name: data.name,
           title: data.title,
@@ -211,7 +214,9 @@ onBeforeMount(async () => {
           input_header: data.input_header,
           confirm_header: data.confirm_header,
           complete_text: data.complete_text,
-          close_text: data.close_text
+          close_text: data.close_text,
+          form_transfer_tasks: data.form_transfer_tasks ?? [],
+          form_cols: data.form_cols ?? []
         })
 
         columnListRef.value.load(response.data.form_cols)
@@ -301,7 +306,7 @@ const checkCompleteUrl = (data) => {
 }
 
 const saveForm = () =>  {
-  requestPost('/form', form.value, response => {
+  requestPost('/form', form, response => {
     router.push('/form')
   })
 }
@@ -313,6 +318,12 @@ const cancel = () => {
 const updateColumn = (columnList) => {
   if (columnList) {
     form.form_cols = columnList
+  }
+}
+
+const updateTransferTasks = (transferTasks) => {
+  if (transferTasks) {
+    form.form_transfer_tasks = transferTasks
   }
 }
 </script>

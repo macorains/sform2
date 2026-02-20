@@ -2,7 +2,7 @@ package net.macolabo.sform2.controllers
 
 import javax.inject._
 import net.macolabo.sform2.domain.models.SessionInfo
-import net.macolabo.sform2.domain.services.User.{UserSaveRequest, UserSaveRequestJson, UserService}
+import net.macolabo.sform2.domain.services.User.{UserSaveRequest, UserService}
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.libs.json._
@@ -22,7 +22,6 @@ class UserController @Inject() (
   ex: ExecutionContext
 ) extends Security[UserProfile]
   with I18nSupport
-  with UserSaveRequestJson
   with Pac4jUtil
 {
 

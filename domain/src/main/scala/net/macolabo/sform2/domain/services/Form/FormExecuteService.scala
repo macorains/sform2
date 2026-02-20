@@ -4,8 +4,8 @@ import org.apache.pekko.actor.ActorRef
 import com.google.inject.Inject
 import net.macolabo.sform2.domain.models.daos.{FormColDAO, FormColSelectDAO, FormColValidationDAO, FormDAO, PostdataDAO}
 import net.macolabo.sform2.domain.models.entity.form.{Form, FormCol, FormColSelect}
-import net.macolabo.sform2.domain.services.Form.load.{FormLoadRequest, FormLoadRequestJson}
-import net.macolabo.sform2.domain.services.Form.post.{FormPostRequest, FormPostRequestJson}
+import net.macolabo.sform2.domain.services.Form.load.FormLoadRequest
+import net.macolabo.sform2.domain.services.Form.post.FormPostRequest
 import net.macolabo.sform2.domain.services.Form.validate.FormValidateResultResponse
 import net.macolabo.sform2.domain.services.Transfer.TransferReceiver.NewTaskRequest
 import net.macolabo.sform2.domain.utils.forms.{FormColType_Checkbox, FormColType_Combo, FormColType_DisplayText, FormColType_Hidden, FormColType_Radio, FormColType_Text, FormColType_TextArea}
@@ -24,7 +24,6 @@ class FormExecuteService @Inject()(
   postdataDAO: PostdataDAO,
   @Named("actor_transfer_receiver") transferReceiver: ActorRef
 )
-extends FormLoadRequestJson with FormPostRequestJson
 {
   /**
    * load：以下のようなHTMLを生成して返す

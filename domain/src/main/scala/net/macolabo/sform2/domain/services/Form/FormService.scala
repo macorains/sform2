@@ -6,6 +6,7 @@ import net.macolabo.sform2.domain.models.daos.FormDAO
 import net.macolabo.sform2.domain.services.Form.delete.FormDeleteResponse
 import net.macolabo.sform2.domain.services.Form.get.FormGetResponse
 import net.macolabo.sform2.domain.services.Form.list.FormListResponse
+import net.macolabo.sform2.domain.services.Form.insert.FormInsertResponse
 import net.macolabo.sform2.domain.services.Form.update.{FormUpdateRequest, FormUpdateResponse}
 import play.api.mvc.Session
 import scalikejdbc.DB
@@ -48,9 +49,10 @@ class FormService @Inject()(
    * @param sessionInfo セッションデータ
    * @return フォーム作成結果レスポンス
    */
-  def insert(formUpdateRequest: FormUpdateRequest, sessionInfo: SessionInfo): FormUpdateResponse = {
+  def insert(formUpdateRequest: FormUpdateRequest, sessionInfo: SessionInfo): FormInsertResponse = {
     DB.localTx(implicit session => {
-      formDAO.update(sessionInfo.user_id, sessionInfo.user_group, formUpdateRequest)
+      val (id, hashedId) = formDAO.update(sessionInfo.user_id, sessionInfo.user_group, formUpdateRequest)
+      FormInsertResponse(id, hashedId)
     })
   }
 
@@ -63,7 +65,8 @@ class FormService @Inject()(
    */
   def update(formUpdateRequest: FormUpdateRequest, sessionInfo: SessionInfo): FormUpdateResponse = {
     DB.localTx(implicit session => {
-      formDAO.update(sessionInfo.user_id, sessionInfo.user_group, formUpdateRequest)
+      val (id, _) = formDAO.update(sessionInfo.user_id, sessionInfo.user_group, formUpdateRequest)
+      FormUpdateResponse(id)
     })
   }
 

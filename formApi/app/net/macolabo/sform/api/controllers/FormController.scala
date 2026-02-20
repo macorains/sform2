@@ -4,7 +4,6 @@ import java.net.InetAddress
 
 import javax.inject.Inject
 import net.macolabo.sform2.domain.services.Form.FormExecuteService
-import net.macolabo.sform2.domain.services.Form.validate.FormValidationResultJson
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
 import org.webjars.play.WebJarsUtil
@@ -22,7 +21,6 @@ class FormController @Inject()(
                                 ex: ExecutionContext
                               ) extends Security[UserProfile]
   with I18nSupport
-  with FormValidationResultJson
 {
   val hostname :String = InetAddress.getLocalHost.getHostName
 

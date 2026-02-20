@@ -1,10 +1,7 @@
 package net.macolabo.sform2.controllers
 
 import net.macolabo.sform2.domain.models.SessionInfo
-import net.macolabo.sform2.domain.services.Form.delete.FormDeleteResponseJson
-import net.macolabo.sform2.domain.services.Form.get.FormGetResponseJson
-import net.macolabo.sform2.domain.services.Form.list.FormListResponseJson
-import net.macolabo.sform2.domain.services.Form.update.{FormUpdateRequest, FormUpdateRequestJson, FormUpdateResponse, FormUpdateResponseJson}
+import net.macolabo.sform2.domain.services.Form.update.FormUpdateRequest
 
 import javax.inject._
 import net.macolabo.sform2.domain.services.Form.FormService
@@ -29,11 +26,6 @@ class FormController @Inject() (
   ex: ExecutionContext
 ) extends Security[UserProfile]
   with I18nSupport
-  with FormGetResponseJson
-  with FormListResponseJson
-  with FormUpdateRequestJson
-  with FormUpdateResponseJson
-  with FormDeleteResponseJson
   with Pac4jUtil
 {
 

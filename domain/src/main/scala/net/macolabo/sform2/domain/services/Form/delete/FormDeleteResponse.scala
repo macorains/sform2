@@ -1,13 +1,11 @@
 package net.macolabo.sform2.domain.services.Form.delete
 
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.{Format, Json}
 
 case class FormDeleteResponse(
                                result: Int
                              )
 
-trait FormDeleteResponseJson {
-  implicit val FormDeleteResponseWrites: Writes[FormDeleteResponse] = (formDeleteResponse: FormDeleteResponse) => Json.obj(
-    "result" -> formDeleteResponse.result
-  )
+object FormDeleteResponse {
+  implicit val format: Format[FormDeleteResponse] = Json.format[FormDeleteResponse]
 }
