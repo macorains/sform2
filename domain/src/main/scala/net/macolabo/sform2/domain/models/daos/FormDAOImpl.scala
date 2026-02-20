@@ -6,7 +6,7 @@ import net.macolabo.sform2.domain.models.entity.transfer.TransferConfig
 import net.macolabo.sform2.domain.services.Form.delete.FormDeleteResponse
 import net.macolabo.sform2.domain.services.Form.get.{FormColGetReponse, FormColSelectGetReponse, FormColValidationGetReponse, FormGetResponse, FormTransferTaskConditionGetReponse, FormTransferTaskGetResponse, FormTransferTaskMailGetReponse, FormTransferTaskSalesforceFieldGetReponse, FormTransferTaskSalesforceGetReponse}
 import net.macolabo.sform2.domain.services.Form.list.{FormListResponse, FormResponse}
-import net.macolabo.sform2.domain.services.Form.update.{FormColSelectUpdateRequest, FormColUpdateRequest, FormColValidationUpdateRequest, FormTransferTaskConditionUpdateRequest, FormTransferTaskMailUpdateRequest, FormTransferTaskSalesforceFieldUpdateRequest, FormTransferTaskSalesforceUpdateRequest, FormTransferTaskUpdateRequest, FormUpdateRequest, FormUpdateResponse}
+import net.macolabo.sform2.domain.services.Form.update.{FormColSelectUpdateRequest, FormColUpdateRequest, FormColValidationUpdateRequest, FormTransferTaskConditionUpdateRequest, FormTransferTaskMailUpdateRequest, FormTransferTaskSalesforceFieldUpdateRequest, FormTransferTaskSalesforceUpdateRequest, FormTransferTaskUpdateRequest, FormUpdateRequest}
 import scalikejdbc._
 
 import java.time.ZonedDateTime
@@ -76,9 +76,9 @@ class FormDAOImpl extends FormDAO {
   }
 
   /** フォーム作成・更新 */
-  def update(userId: String, userGroup: String, request: FormUpdateRequest)(implicit session: DBSession): FormUpdateResponse = {
-    val formId = request.id
-      .map(_ => updateForm(userId, request))
+  def update(userId: String, userGroup: String, request: FormUpdateRequest)(implicit session: DBSession): (BigInt, String) = {
+    val (formId, hashedId) = request.id
+      .map(id => (updateForm(userId, request), ""))
       .getOrElse(insertForm(userGroup, userId, request))
 
     // FormColの処理
@@ -131,7 +131,7 @@ class FormDAOImpl extends FormDAO {
     })
     bulkDeleteFormTransferTask(formId, formTransferTaskIds, userGroup)
 
-    FormUpdateResponse(formId)
+    (formId, hashedId)
   }
 
   /** フォーム削除 */
@@ -608,9 +608,9 @@ class FormDAOImpl extends FormDAO {
   // ----------------------------------------------
   // insertクエリ実行
   // ----------------------------------------------
-  def insertForm(userGroup: String, user: String, form: FormUpdateRequest)(implicit session: DBSession): BigInt = {
+  def insertForm(userGroup: String, user: String, form: FormUpdateRequest)(implicit session: DBSession): (BigInt, String) = {
     val formHashedId = UUID.randomUUID().toString
-    withSQL {
+    val id = withSQL {
       val c = Form.column
       insertInto(Form).namedValues(
         c.hashed_id -> formHashedId,
@@ -632,6 +632,7 @@ class FormDAOImpl extends FormDAO {
         c.modified -> ZonedDateTime.now()
       )
     }.updateAndReturnGeneratedKey().apply().toInt
+    (id, formHashedId)
   }
 
   private def insertFormCol(userGroup: String, user: String, formCol: FormColUpdateRequest, formId: BigInt)(implicit session: DBSession): BigInt = {
