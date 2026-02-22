@@ -1,15 +1,28 @@
 <template>
   <h4>転送タスク設定<BButton class="ms-2" size="sm" @click="selectTransferConfig()">追加</BButton></h4>
-  <b-table striped hover :items="form.form_transfer_tasks" :fields="fields">
-    <template #cell(actions)="row">
-      <BButton size="sm" @click="edit(row.item, row.index, $event.target)" class="mr-1">
-        編集
-      </BButton>
-      <BButton class="ms-2" size="sm" @click="delete(row.item)">
-        削除
-      </BButton>
-    </template>
-  </b-table>
+  <table class="table table-striped table-hover">
+    <thead>
+      <tr>
+        <th>順序</th>
+        <th>転送タスク名</th>
+        <th>転送設定名</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <draggable :list="form.form_transfer_tasks" tag="tbody" item-key="task_index" @end="onDragEnd">
+      <template #item="{ element }">
+        <tr>
+          <td>{{ element.task_index }}</td>
+          <td>{{ element.name }}</td>
+          <td>{{ element.transfer_config_name }}</td>
+          <td>
+            <BButton size="sm" @click="edit(element)" class="mr-1">編集</BButton>
+            <BButton class="ms-2" size="sm" @click="deleteTask(element)">削除</BButton>
+          </td>
+        </tr>
+      </template>
+    </draggable>
+  </table>
   <b-modal v-model="editModalMailVisible" size="xl" title="転送タスク編集">
     <TransferTaskEditMail ref="editModalMailRef"/>
   </b-modal>
@@ -23,6 +36,7 @@
 <script setup>
 import {onMounted, ref, inject, getCurrentInstance, reactive} from "vue";
 import { BButton, BModal } from 'bootstrap-vue-3'
+import draggable from 'vuedraggable'
 import TransferTaskEditMail from "@/components/form/TransferTaskEditMail.vue";
 import TransferTaskEditSalesforce from "@/components/form/TransferTaskEditSalesforce.vue";
 import TransferTaskEditSelectConfig from "@/components/form/TransferTaskEditSelectConfig.vue";
@@ -32,12 +46,13 @@ const emit = defineEmits(['update-transfer-tasks'])
 const instance = getCurrentInstance()
 const $http = instance.appContext.config.globalProperties.$http
 
-const fields = ref([
-  { key: 'task_index', sortable: true, label: '順序'},
-  { key: 'name', sortable: true, label: '転送タスク名'},
-  { key: 'transfer_config_name', sortable: true, label: '転送設定名'},
-  { key: 'actions', label: '操作' },
-])
+const form = reactive({})
+const editModalMailVisible = ref(false)
+const editModalSalesforceVisible = ref(false)
+const configSelectModalVisible = ref(false)
+const configSelectModalRef = ref(null)
+const editModalSalesforceRef = ref(null)
+const editModalMailRef = ref(null)
 
 const salesforceTransferTaskDefault = (taskCount, configName) => {
   return {
@@ -80,19 +95,19 @@ const mailTransferTaskDefault = (taskCount, configName) => {
     }
   }
 }
-const form = reactive({})
-const editModalMailVisible = ref(false)
-const editModalSalesforceVisible = ref(false)
-const configSelectModalVisible = ref(false)
-const configSelectModalRef = ref(null)
-const editModalSalesforceRef = ref(null)
-const editModalMailRef = ref(null)
 
 onMounted(() => {
 
 })
 
-const edit = (item, index, target) => {
+const onDragEnd = () => {
+  form.form_transfer_tasks.forEach((task, i) => {
+    task.task_index = i + 1
+  })
+  emit('update-transfer-tasks', form.form_transfer_tasks)
+}
+
+const edit = (item) => {
   if (item.mail) {
     editModalMailRef.value.load(item)
     editModalMailVisible.value = true
@@ -100,6 +115,17 @@ const edit = (item, index, target) => {
   if (item.salesforce) {
     editModalSalesforceRef.value.load(item, form.form_cols)
     editModalSalesforceVisible.value = true
+  }
+}
+
+const deleteTask = (item) => {
+  const index = form.form_transfer_tasks.findIndex(t => t.task_index === item.task_index)
+  if (index !== -1) {
+    form.form_transfer_tasks.splice(index, 1)
+    form.form_transfer_tasks.forEach((task, i) => {
+      task.task_index = i + 1
+    })
+    emit('update-transfer-tasks', form.form_transfer_tasks)
   }
 }
 
