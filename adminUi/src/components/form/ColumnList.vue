@@ -1,18 +1,30 @@
 <template>
   <h4>フォーム項目<BButton class="ms-2" size="sm" @click="addColumn">追加</BButton></h4>
-  <BTable striped hover :items="form_cols" :fields="fields">
-    <template #cell(col_index)="row">
-      {{ row.item.col_index + 1 }}
-    </template>
-    <template #cell(actions)="row">
-      <BButton size="sm" @click="edit(row.item, row.index, $event.target)" class="mr-1">
-        編集
-      </BButton>
-      <BButton class="ms-2" size="sm" @click="deleteColumn(row.item)">
-        削除
-      </BButton>
-    </template>
-  </BTable>
+  <table class="table table-striped table-hover">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>名前</th>
+        <th>項目ID</th>
+        <th>ステータス</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <draggable :list="form_cols" tag="tbody" item-key="col_id" @end="onDragEnd">
+      <template #item="{ element }">
+        <tr>
+          <td>{{ element.col_index + 1 }}</td>
+          <td>{{ element.name }}</td>
+          <td>{{ element.col_id }}</td>
+          <td>{{ element.col_type }}</td>
+          <td>
+            <BButton size="sm" @click="edit(element)" class="mr-1">編集</BButton>
+            <BButton class="ms-2" size="sm" @click="deleteColumn(element)">削除</BButton>
+          </td>
+        </tr>
+      </template>
+    </draggable>
+  </table>
   <BModal v-model="editModalVisible" size="xl" title="フォーム項目編集" @ok="updateColumn" @changeOkButtonStatus="" :ok-disabled="okButtonDisabled">
     <ColumnEdit ref="columnEditRef" @checkColumnIdExists="checkColumnIdExists" @checkColumnNameExists="checkColumnNameExists" @update-button-state="updateButtonState" :column-id-check-result="columnIdCheckResult" :column-name-check-result="columnNameCheckResult" :formColId="selectedFormColId"/>
   </BModal>
@@ -21,17 +33,10 @@
 <script setup>
 import ColumnEdit from "@/components/form/ColumnEdit.vue"
 import {onMounted, ref, inject, reactive, computed} from "vue"
-import { BButton, BTable, BModal } from 'bootstrap-vue-3'
+import { BButton, BModal } from 'bootstrap-vue-3'
+import draggable from 'vuedraggable'
 const emit = defineEmits(['update-column'])
 
-//const form = inject('form')
-const fields = ref([
-  { key: 'col_index', sortable: true, label: 'No'},
-  { key: 'name', sortable: true, label: '名前'},
-  { key: 'col_id', sortable: true, label: '項目ID'},
-  { key: 'col_type', sortable: true, label: 'ステータス'},
-  { key: 'actions', label: '操作' },
-])
 const editModalVisible = ref(false)
 const selectedFormColId = ref(null)
 const columnEditRef = ref(null)
@@ -43,6 +48,13 @@ const okButtonDisabled = ref(true)
 
 const load = (col_list) => {
   col_list.forEach(col => form_cols.push(col))
+  emit('update-column', form_cols)
+}
+
+const onDragEnd = () => {
+  form_cols.forEach((col, i) => {
+    col.col_index = i
+  })
   emit('update-column', form_cols)
 }
 
@@ -90,7 +102,7 @@ const deleteColumn = (item) => {
     form_cols[i].col_index = i
   }
 }
-const edit = (item, index, target) => {
+const edit = (item) => {
   columnEditRef.value.setFormCol(item)
   selectedFormColId.value = item.id
   editModalVisible.value = true
@@ -112,4 +124,3 @@ defineExpose({
   load
 });
 </script>
-
