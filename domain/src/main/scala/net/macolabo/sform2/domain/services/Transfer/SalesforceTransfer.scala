@@ -5,6 +5,7 @@ import net.macolabo.sform2.domain.models.daos.TransferConfigSalesforceDAO
 import net.macolabo.sform2.domain.models.entity.CryptoConfig
 import net.macolabo.sform2.domain.models.entity.transfer.TransferConfigSalesforce
 import net.macolabo.sform2.domain.models.entity.transfer.salesforce.SalesforceSObjectsDescribeResponse
+import net.macolabo.sform2.domain.services.External.Salesforce.SalesforceConnectionInfo
 import net.macolabo.sform2.domain.services.Transfer.SalesforceTransfer.TransferTaskRequest
 import net.macolabo.sform2.domain.utils.{Crypto, Logger}
 import play.api.libs.json.{JsSuccess, JsValue, Json}
@@ -31,8 +32,8 @@ class SalesforceTransfer @Inject()(
         getTransferConfigSalesforce(taskBean.transfer_config_id).map(tc => {
           val(sfUserName, sfPassword, sfClientId, sfClientSecret) = encodeSecrets(tc, cryptoConfig)
           loginToSalesforce(tc.sf_domain, sfClientId, sfClientSecret, sfUserName, sfPassword).map{
-            case Some(apiToken) =>
-              postSalesforceObject(ts, postdata, apiToken, tc.sf_domain)
+            case Some(connectionInfo) =>
+              postSalesforceObject(ts, postdata, connectionInfo.accessToken, connectionInfo.instanceUrl)
             case None =>
               logger.error("Salesforceへのログインが失敗しました。")
           }
@@ -50,7 +51,7 @@ class SalesforceTransfer @Inject()(
    * @param password パスワード
    * @return BearerToken
    */
-  def loginToSalesforce(apiUrl: String, clientId: String, clientSecret: String, username: String, password: String): Future[Option[String]] = {
+  def loginToSalesforce(apiUrl: String, clientId: String, clientSecret: String, username: String, password: String): Future[Option[SalesforceConnectionInfo]] = {
     val postdata = Map(
       "grant_type" -> "password",
       "client_id" -> clientId,
@@ -66,7 +67,7 @@ class SalesforceTransfer @Inject()(
         case 200 => Json.parse(res.body)
           .validate[SalesforceLoginResponse]
           .asOpt
-          .map(res => res.access_token)
+          .map(res => SalesforceConnectionInfo(res.access_token, res.instance_url))
         case _ =>
           logger.error(res.body)
           None

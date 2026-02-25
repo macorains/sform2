@@ -4,7 +4,7 @@ import net.macolabo.sform2.domain.models.SessionInfo
 import net.macolabo.sform2.domain.models.entity.CryptoConfig
 
 import javax.inject._
-import net.macolabo.sform2.domain.services.External.Salesforce.{SalesforceCheckConnectionRequest, SalesforceConnectionService, SalesforceGetObjectResponse}
+import net.macolabo.sform2.domain.services.External.Salesforce.{SalesforceCheckConnectionRequest, SalesforceConnectionInfo, SalesforceConnectionService, SalesforceGetObjectResponse}
 import net.macolabo.sform2.domain.services.Transfer.TransferService
 import net.macolabo.sform2.domain.services.TransferConfig.TransferConfigService
 import net.macolabo.sform2.domain.services.TransferConfig.save.TransferConfigSaveRequest
@@ -135,8 +135,8 @@ class TransferController @Inject() (
               errors => Future.successful(BadRequest(JsError.toJson(errors))),
               value =>
                 salesforceConnectionService.checkConnection(value).map {
-                  case Right(res) =>
-                    Ok(res)
+                  case Right(connectionInfo) =>
+                    Ok(connectionInfo.instanceUrl)
                   case Left(error) =>
                     logger.error(error)
                     BadRequest(error)
