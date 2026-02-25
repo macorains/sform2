@@ -58,6 +58,9 @@ class SignInController @Inject() (
       case Some(u) =>
         configuration.getOptional[String]("sform.jwt.secret").map(jwtSecret => {
           val generator = new JwtGenerator(new SecretSignatureConfiguration(jwtSecret))
+          generator.setExpirationTime(java.util.Date.from(
+            java.time.Instant.now().plus(java.time.Duration.ofHours(8))
+          ))
           val token = generator.generate(profile)
           Ok(net.macolabo.sform2.views.html.jwt(configuration.get[String]("sform.oauth.redirectUrl"), token))
             .addingToSession("user_id" -> u.id.toString)

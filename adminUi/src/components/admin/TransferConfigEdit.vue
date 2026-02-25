@@ -92,7 +92,8 @@ const transferConfig = reactive({
       sf_client_id: '',
       sf_client_secret: '',
       sf_domain: '',
-      api_version: ''
+      api_version: '',
+      objects: []
     }
   }
 })
@@ -119,7 +120,11 @@ const loadConfig = (id) => {
         transferConfig.name = response.data.name
         transferConfig.config_index = response.data.config_index
         transferConfig.type_code = response.data.type_code
-        transferConfig.detail = response.data.detail
+        const defaultDetail = {
+          mail: { use_cc: false, use_replyto: false, use_bcc: false, mail_address_list: [] },
+          salesforce: { sf_user_name: '', sf_password: '', sf_client_id: '', sf_client_secret: '', sf_domain: '', api_version: '', objects: [] }
+        }
+        transferConfig.detail = { ...defaultDetail, ...response.data.detail }
         setTypeOptions(transferConfig.type_code)
 
         await nextTick()
@@ -193,7 +198,8 @@ const clearModal = () => {
       sf_client_id: '',
       sf_client_secret: '',
       sf_domain: '',
-      api_version: ''
+      api_version: '',
+      objects: []
     }
   }
   typeOptions.value = [

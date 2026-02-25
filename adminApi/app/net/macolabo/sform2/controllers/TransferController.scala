@@ -139,7 +139,7 @@ class TransferController @Inject() (
                     Ok(res)
                   case Left(error) =>
                     logger.error(error)
-                    Unauthorized(error)
+                    BadRequest(error)
                 }
             )
           case None => Future.successful(BadRequest("Missing JSON"))

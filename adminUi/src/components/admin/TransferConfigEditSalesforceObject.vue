@@ -46,7 +46,9 @@ const $http = instance.appContext.config.globalProperties.$http
 
 
 const sfObjectFieldRef = ref([])
-const sfObjectList = reactive({})
+const sfObjectList = reactive({
+  objectList: []
+})
 
 const sfObjectFields = ref([
   { key: 'active', sortable: true, label: '有効'},
@@ -55,11 +57,11 @@ const sfObjectFields = ref([
 
 const loadData = (data, transferConfigId) => {
   sfObjectList.transferConfigId = transferConfigId
-  sfObjectList.objectList = data
+  sfObjectList.objectList = Array.isArray(data) ? data : []
 }
 
 const getData = () => {
-  return sfObjectList.objectList
+  return sfObjectList.objectList || []
 }
 
 const importObject = () => {
