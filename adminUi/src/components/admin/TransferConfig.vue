@@ -28,7 +28,7 @@
     </BRow>
   </div>
   <BModal v-model="editModalVisible" size="xl" title="転送設定編集" @ok="save" @hidden="close" scrollable>
-    <TransferConfigEdit ref="configEditRef"  />
+    <TransferConfigEdit ref="configEditRef" @saved="onSaved" />
   </BModal>
 </template>
 
@@ -56,6 +56,7 @@ const isLoading = ref(false)
 
 
 const edit = (row) => {
+  configEditRef.value.clearModal()
   configEditRef.value.loadConfig(row.item.id)
   editModalVisible.value = true
 }
@@ -87,6 +88,7 @@ const load = () => {
 }
 
 const add = () => {
+  configEditRef.value.clearModal()
   editModalVisible.value = true
 }
 
@@ -94,8 +96,15 @@ const save = () => {
   configEditRef.value.saveConfig()
 }
 
+const onSaved = () => {
+  editModalVisible.value = false
+  load()
+}
+
 const close = () => {
-  configEditRef.value.clearModal()
+  if (!editModalVisible.value) {
+    configEditRef.value.clearModal()
+  }
 }
 
 onMounted(() => {

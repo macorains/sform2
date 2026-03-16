@@ -69,7 +69,7 @@ class TransferConfigServiceImpl @Inject()(
       transferConfigMailDAO.save(
         TransferConfigMail(
           id,
-          request.transfer_config_id.get, // 上書き保存の時は必ず入る想定
+          transferConfigId,
           request.use_cc,
           request.use_bcc,
           request.use_replyto,

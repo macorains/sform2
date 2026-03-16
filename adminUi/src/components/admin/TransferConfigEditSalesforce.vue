@@ -118,7 +118,14 @@
 </template>
 <script setup>
 import TransferConfigEditSalesforceObject from "@/components/admin/TransferConfigEditSalesforceObject.vue"
-import {computed, getCurrentInstance, reactive, ref} from "vue";
+import {computed, getCurrentInstance, reactive, ref, watch} from "vue";
+
+const props = defineProps({
+  salesforceData: {
+    type: Object,
+    default: null
+  }
+})
 
 const instance = getCurrentInstance()
 const $http = instance.appContext.config.globalProperties.$http
@@ -178,6 +185,16 @@ const loadData = (data) => {
     transferConfigDetailSalesforce.api_version = data.api_version
     configEditSalesforceObjectRef.value.loadData(data.objects || [], data.transfer_config_id)
 }
+
+watch(
+  () => props.salesforceData,
+  (newData) => {
+    if (newData) {
+      loadData(newData)
+    }
+  },
+  { immediate: true }
+)
 
 const getData = () => {
   transferConfigDetailSalesforce.objects = configEditSalesforceObjectRef.value.getData() || []

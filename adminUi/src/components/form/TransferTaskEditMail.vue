@@ -46,17 +46,12 @@
               id="mail_to_type_group"
               v-model="transferTask.mail.to_address_type"
               name="mail_to_type_component"
-          >
-            <BFormRadio value="to_mail_address">
-              メールアドレス指定
-            </BFormRadio>
-            <BFormRadio value="to_mail_address_id">
-              登録済みメールアドレス選択
-            </BFormRadio>
-            <BFormRadio value="to_mail_address_field">
-              フォーム項目選択
-            </BFormRadio>
-          </BFormRadioGroup>
+              :options="[
+                { value: 'to_mail_address', text: 'メールアドレス指定' },
+                { value: 'to_mail_address_id', text: '登録済みメールアドレス選択' },
+                { value: 'to_mail_address_field', text: 'フォーム項目選択' },
+              ]"
+          />
           <BFormInput
               v-if="transferTask.mail.to_address_type === 'to_mail_address'"
               id="transferTask.mail.to_address"
@@ -90,17 +85,12 @@
               id="mail_cc_type_group"
               v-model="transferTask.mail.cc_address_type"
               name="mail_cc_type_component"
-          >
-            <BFormRadio value="cc_mail_address">
-              メールアドレス指定
-            </BFormRadio>
-            <BFormRadio value="cc_mail_address_id">
-              登録済みメールアドレス選択
-            </BFormRadio>
-            <BFormRadio value="cc_mail_address_field">
-              フォームフィールド選択
-            </BFormRadio>
-          </BFormRadioGroup>
+              :options="[
+                { value: 'cc_mail_address', text: 'メールアドレス指定' },
+                { value: 'cc_mail_address_id', text: '登録済みメールアドレス選択' },
+                { value: 'cc_mail_address_field', text: 'フォーム項目選択' },
+              ]"
+          />
           <BFormInput
               v-if="transferTask.mail.cc_address_type === 'cc_mail_address'"
               id="transferTask.mail.cc_address"
@@ -180,16 +170,69 @@
 </template>
 
 <script setup>
-import {onBeforeMount, ref} from "vue";
+import { ref, reactive } from "vue"
+import { useHttpRequest } from "@/composables/useHttpRequest.js"
 
-const transferTask = ref({ mail: {}})
-const transferConfig = ref({ detail: { mail: { use_cc: true }}})
+const { requestGet } = useHttpRequest()
+
+const transferTask = reactive({
+  id: null,
+  transfer_config_id: null,
+  name: '',
+  mail: {
+    subject: '',
+    from_address_id: null,
+    to_address_type: 'to_mail_address',
+    to_address: '',
+    to_address_id: null,
+    to_address_field: null,
+    cc_address_type: 'cc_mail_address',
+    cc_address: '',
+    cc_address_id: null,
+    cc_address_field: null,
+    bcc_address_id: null,
+    replyto_address_id: null,
+    body: '',
+  }
+})
+const transferConfig = reactive({ detail: { mail: { use_cc: false, use_bcc: false, use_replyto: false } } })
 const fieldList = ref([])
 const mailAddressList = ref([])
+const body = ref(null)
 
-onBeforeMount(() => {
-  // TODO 本実装する
+const load = (data, form_cols) => {
+  transferTask.id = data.id
+  transferTask.transfer_config_id = data.transfer_config_id
+  transferTask.name = data.name
+  Object.assign(transferTask.mail, data.mail)
 
-})
+  fieldList.value = form_cols.map(fc => ({ value: fc.id, text: fc.name }))
 
+  requestGet(
+    `/transfer/config/${data.transfer_config_id}`,
+    response => {
+      const mail = response.data.detail.mail
+      mailAddressList.value = mail.mail_address_list.map(item => ({ value: item.id, text: item.name }))
+      transferConfig.detail.mail.use_cc = mail.use_cc
+      transferConfig.detail.mail.use_bcc = mail.use_bcc
+      transferConfig.detail.mail.use_replyto = mail.use_replyto
+    },
+    error => {
+      console.log(error)
+    }
+  )
+}
+
+const insertTag = (fieldId) => {
+  const el = body.value.$el.querySelector('textarea')
+  const start = el.selectionStart
+  const end = el.selectionEnd
+  const tag = `{${fieldId}}`
+  transferTask.mail.body = transferTask.mail.body.slice(0, start) + tag + transferTask.mail.body.slice(end)
+  const newPos = start + tag.length
+  el.focus()
+  el.setSelectionRange(newPos, newPos)
+}
+
+defineExpose({ load })
 </script>
