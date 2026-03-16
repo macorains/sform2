@@ -78,7 +78,7 @@ class SalesforceTransferSpec extends TestKit(ActorSystem("test"))
       val jsonData = transfer.createSalesforcePostdata(transferTaskBeanSalesforce, postdata, salesforceSObjectsDescribeResponse)
       println(jsonData)
 
-      val res = Await.result(transfer.postSalesforceObject(transferTaskBeanSalesforce, postdata, token, apiUrl), Duration.Inf)
+      val res = Await.result(transfer.postSalesforceObject(transferTaskBeanSalesforce, postdata, token.accessToken, token.instanceUrl), Duration.Inf)
       println(res)
 
     }

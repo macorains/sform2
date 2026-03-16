@@ -29,8 +29,8 @@
   <b-modal v-model="editModalSalesforceVisible" size="xl" title="転送タスク編集">
     <TransferTaskEditSalesforce ref="editModalSalesforceRef"/>
   </b-modal>
-  <BModal v-model="configSelectModalVisible" @ok="addNewTask" size="lg" title="転送設定の選択">
-    <TransferTaskEditSelectConfig ref="configSelectModalRef" />
+  <BModal v-model="configSelectModalVisible" @ok="addNewTask" @show="onConfigModalShow" :ok-disabled="configOkDisabled" size="lg" title="転送設定の選択">
+    <TransferTaskEditSelectConfig ref="configSelectModalRef" @selection-change="v => configOkDisabled = (v === null)" />
   </BModal>
 </template>
 <script setup>
@@ -53,6 +53,7 @@ const configSelectModalVisible = ref(false)
 const configSelectModalRef = ref(null)
 const editModalSalesforceRef = ref(null)
 const editModalMailRef = ref(null)
+const configOkDisabled = ref(true)
 
 const salesforceTransferTaskDefault = (taskCount, configName) => {
   return {
@@ -72,12 +73,12 @@ const salesforceTransferTaskDefault = (taskCount, configName) => {
   }
 }
 
-const mailTransferTaskDefault = (taskCount, configName) => {
+const mailTransferTaskDefault = (taskCount, configName, configId) => {
   return {
     id: null,
     name: configName + '-' + (taskCount + 1),
     form_id: form.id,
-    transfer_config_id: null,
+    transfer_config_id: configId,
     transfer_config_name: null,
     task_index: taskCount + 1,
     form_transfer_task_conditions: [],
@@ -109,7 +110,7 @@ const onDragEnd = () => {
 
 const edit = (item) => {
   if (item.mail) {
-    editModalMailRef.value.load(item)
+    editModalMailRef.value.load(item, form.form_cols)
     editModalMailVisible.value = true
   }
   if (item.salesforce) {
@@ -139,6 +140,11 @@ const selectTransferConfig = () => {
   configSelectModalVisible.value = true
 }
 
+const onConfigModalShow = () => {
+  configOkDisabled.value = true
+  configSelectModalRef.value?.reset()
+}
+
 const addNewTask = () => {
   configSelectModalVisible.value = false
   const config = configSelectModalRef.value.getConfig()
@@ -148,7 +154,7 @@ const addNewTask = () => {
   if (config.type_code === 'salesforce') {
     newItem = salesforceTransferTaskDefault(taskCount, config.name)
   } else if (config.type_code === 'mail') {
-    newItem = mailTransferTaskDefault(taskCount, config.name)
+    newItem = mailTransferTaskDefault(taskCount, config.name, config.id)
   }
 
   form.form_transfer_tasks.push(newItem)

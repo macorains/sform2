@@ -23,7 +23,7 @@ class SalesforceConnectionService @Inject()(
    * @param request SalesforceCheckConnectionRequest
    * @return SalesforceCheckConnectionResponse
    */
-  def checkConnection(request: SalesforceCheckConnectionRequest): Future[Either[String,String]] = {
+  def checkConnection(request: SalesforceCheckConnectionRequest): Future[Either[String, SalesforceConnectionInfo]] = {
     getConnection(request.username, request.password, request.client_id, request.client_secret, request.domain, request.api_version)
   }
 
@@ -37,7 +37,7 @@ class SalesforceConnectionService @Inject()(
    * @param version APIバージョン v57.0
    * @return JWTトークン
    */
-  def getConnection(username: String, password: String, clientId: String, clientSecret: String, domain: String, version: String): Future[Either[String, String]]= {
+  def getConnection(username: String, password: String, clientId: String, clientSecret: String, domain: String, version: String): Future[Either[String, SalesforceConnectionInfo]]= {
     val postdata = Map(
       "grant_type" -> "password",
       "client_id" -> clientId,
@@ -53,7 +53,7 @@ class SalesforceConnectionService @Inject()(
     result.map(res => res.status match {
       case 200 =>
         Json.parse(res.body).validate[SalesforceLoginResponse] match {
-          case JsSuccess(s,_) => Right(s.access_token)
+          case JsSuccess(s,_) => Right(SalesforceConnectionInfo(s.access_token, s.instance_url))
           case JsError(e) => Left("Json parse error.")
         }
       case _ =>
@@ -77,10 +77,10 @@ class SalesforceConnectionService @Inject()(
       config.api_version)
       .flatMap {
         case Left(error: String) => Future.successful(Left(error))
-        case Right(token: String) =>
+        case Right(connectionInfo: SalesforceConnectionInfo) =>
           ws
-            .url(config.sf_domain + s"/services/data/v${config.api_version}/sobjects")
-            .addHttpHeaders("Authorization" -> s"Bearer $token")
+            .url(connectionInfo.instanceUrl + s"/services/data/v${config.api_version}/sobjects")
+            .addHttpHeaders("Authorization" -> s"Bearer ${connectionInfo.accessToken}")
             .addHttpHeaders("Content-Type" -> "application/json")
             .get()
             .map(res => res.status match {
@@ -116,10 +116,10 @@ class SalesforceConnectionService @Inject()(
       config.api_version)
       .flatMap {
         case Left(error: String) => Future.successful(Left(error))
-        case Right(token: String) =>
+        case Right(connectionInfo: SalesforceConnectionInfo) =>
           ws
-            .url(config.sf_domain + s"/services/data/v${config.api_version}/sobjects/$objectName/describe")
-            .addHttpHeaders("Authorization" -> s"Bearer $token")
+            .url(connectionInfo.instanceUrl + s"/services/data/v${config.api_version}/sobjects/$objectName/describe")
+            .addHttpHeaders("Authorization" -> s"Bearer ${connectionInfo.accessToken}")
             .addHttpHeaders("Content-Type" -> "application/json")
             .get()
             .map(res => res.status match {

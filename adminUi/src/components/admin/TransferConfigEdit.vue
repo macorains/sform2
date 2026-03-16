@@ -54,15 +54,15 @@
         </BCol>
       </BRow>
       <div>
-        <TransferConfigEditSalesforce ref="configEditSalesforceRef" v-if="transferConfig.type_code === 'salesforce'" />
-        <TransferConfigEditMail ref="configEditMailRef" v-if="transferConfig.type_code === 'mail'" />
+        <TransferConfigEditSalesforce ref="configEditSalesforceRef" v-if="transferConfig.type_code === 'salesforce'" :salesforceData="transferConfig.detail.salesforce" />
+        <TransferConfigEditMail ref="configEditMailRef" v-if="transferConfig.type_code === 'mail'" :mailData="transferConfig.detail.mail" />
       </div>
     </BForm>
   </BContainer>
 </template>
 
 <script setup>
-import {getCurrentInstance, onMounted, ref, computed, reactive, nextTick} from "vue"
+import {getCurrentInstance, ref, computed, reactive} from "vue"
 import {BSpinner} from "bootstrap-vue-3"
 import TransferConfigEditMail from "@/components/admin/TransferConfigEditMail.vue";
 import TransferConfigEditSalesforce from "@/components/admin/TransferConfigEditSalesforce.vue";
@@ -70,8 +70,10 @@ import TransferConfigEditSalesforce from "@/components/admin/TransferConfigEditS
 const instance = getCurrentInstance()
 const $http = instance.appContext.config.globalProperties.$http
 
-const configEditMailRef = ref({ loadData: () => {} })
-const configEditSalesforceRef = ref({ loadData: () => {} })
+const emit = defineEmits(['saved'])
+
+const configEditMailRef = ref(null)
+const configEditSalesforceRef = ref(null)
 
 const isLoading = ref(false)
 const transferConfig = reactive({
@@ -92,7 +94,8 @@ const transferConfig = reactive({
       sf_client_id: '',
       sf_client_secret: '',
       sf_domain: '',
-      api_version: ''
+      api_version: '',
+      objects: []
     }
   }
 })
@@ -114,25 +117,22 @@ const mailAddressFields = ref([
 
 const loadConfig = (id) => {
   $http.get('/transfer/config/' + id)
-      .then(async (response) => {
+      .then((response) => {
+        console.log(response)
         transferConfig.id = response.data.id
         transferConfig.name = response.data.name
         transferConfig.config_index = response.data.config_index
         transferConfig.type_code = response.data.type_code
-        transferConfig.detail = response.data.detail
-        setTypeOptions(transferConfig.type_code)
-
-        await nextTick()
-        if (transferConfig.type_code === 'mail' && configEditMailRef.value) {
-          configEditMailRef.value.loadData(transferConfig.detail.mail);
-        } else if (transferConfig.type_code === 'salesforce' && configEditSalesforceRef.value) {
-          configEditSalesforceRef.value.loadData(transferConfig.detail.salesforce);
+        const defaultDetail = {
+          mail: { use_cc: false, use_replyto: false, use_bcc: false, mail_address_list: [] },
+          salesforce: { sf_user_name: '', sf_password: '', sf_client_id: '', sf_client_secret: '', sf_domain: '', api_version: '', objects: [] }
         }
+        transferConfig.detail = { ...defaultDetail, ...response.data.detail }
+        setTypeOptions(transferConfig.type_code)
       })
 }
 
 const saveConfig = () => {
-  console.log(configEditSalesforceRef)
   isLoading.value = true
   if (transferConfig.type_code === 'mail') {
     transferConfig.detail.mail = configEditMailRef.value.getData()
@@ -154,8 +154,8 @@ const saveConfig = () => {
 
   $http.post('/transfer/config', saveData)
       .then(response => {
-        alert('ok')
         isLoading.value = false
+        emit('saved')
       })
 
 
@@ -193,7 +193,8 @@ const clearModal = () => {
       sf_client_id: '',
       sf_client_secret: '',
       sf_domain: '',
-      api_version: ''
+      api_version: '',
+      objects: []
     }
   }
   typeOptions.value = [

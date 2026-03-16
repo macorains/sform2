@@ -164,8 +164,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     val formDAO = new FormDAOImpl()
 
     // フォームを作成する（作成時にはFormTransferTaskは存在しない）
-    val response = formDAO.update(user.id.toString, user.user_group.get, formUpdateRequest)
-    val newFormId = response.id
+    val (newFormId, _) = formDAO.update(user.id.toString, user.user_group.get, formUpdateRequest)
     assert(newFormId.isValidLong)
 
     // 作成したフォームを取得
@@ -248,8 +247,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     val formUpdateRequest = createFormUpdateRequest(Some(form.id), formColUpdateRequest, formTransferTaskUpdateRequest)
 
     // フォームを更新する
-    val response = formDAO.update(user.id.toString, user.user_group.get, formUpdateRequest)
-    val newFormId = response.id
+    val (newFormId, _) = formDAO.update(user.id.toString, user.user_group.get, formUpdateRequest)
     assert(newFormId.equals(formId))
 
     // 作成したフォームを取得
