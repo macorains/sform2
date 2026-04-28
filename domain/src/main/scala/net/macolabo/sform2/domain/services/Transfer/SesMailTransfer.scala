@@ -5,7 +5,7 @@ import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder
 import com.amazonaws.services.simpleemail.model.{Body, Content, Destination, Message, SendEmailRequest, SendEmailResult}
 import com.google.inject.Inject
 import net.macolabo.sform2.domain.models.daos.TransferConfigMailAddressDAOImpl
-import net.macolabo.sform2.domain.services.Transfer.MailTransfer.TransferTaskRequest
+import net.macolabo.sform2.domain.services.Transfer.SesMailTransfer.TransferTaskRequest
 import play.api.Logging
 import play.api.libs.json.JsValue
 import scalikejdbc.DB
@@ -14,7 +14,7 @@ import java.math.BigInteger
 import scala.annotation.tailrec
 import scala.jdk.CollectionConverters._
 
-class MailTransfer @Inject()(
+class SesMailTransfer @Inject()(
   transferConfigMailAddressDAO: TransferConfigMailAddressDAOImpl
 ) extends BaseTransfer with Logging {
 
@@ -27,14 +27,10 @@ class MailTransfer @Inject()(
           getToAddress(postdata,tm).map(toAddress => {
             val sesClient = AmazonSimpleEmailServiceClientBuilder.standard().withRegion(Regions.AP_NORTHEAST_1).build()
             val mailTextBody = replaceTag(tm.body, postdata)
-            // TODO とりあえずテキスト形式のみ実装。後でHTMLも追加。
-            // val mailHtmlBody = Messages("sform.mail.body.html.verification", verificationCode)
             val sesRequest = new SendEmailRequest()
               .withDestination(new Destination().withToAddresses(toAddress))
               .withMessage(new Message()
                 .withBody(new Body()
-                  // TODO とりあえずテキスト形式のみ実装。後でHTMLも追加。
-                  // .withHtml(new Content().withCharset("UTF-8").withData(mailHtmlBody))
                   .withText(new Content().withCharset("UTF-8").withData(mailTextBody)))
                 .withSubject(new Content().withCharset("UTF-8").withData(tm.subject)))
               .withSource(mailFrom)
@@ -45,11 +41,11 @@ class MailTransfer @Inject()(
           })
         })
         createLog(result)
-      }).getOrElse("MailTransfer Skipped.")
+      }).getOrElse("SesMailTransfer Skipped.")
       endTask(taskList, postdata, logText)
   }
 
-  def getToAddress(postdata: JsValue, tm: TransferTaskBeanMail): Option[String] = {
+  def getToAddress(postdata: JsValue, tm: TransferTaskBeanSesMail): Option[String] = {
     tm.to_address match {
       case Some(toAddress) if toAddress.nonEmpty => Some(toAddress)
       case _ =>
@@ -64,7 +60,7 @@ class MailTransfer @Inject()(
     }
   }
 
-  def getCcAddress(postdata: JsValue, tm: TransferTaskBeanMail): Option[String] = {
+  def getCcAddress(postdata: JsValue, tm: TransferTaskBeanSesMail): Option[String] = {
     tm.cc_address match {
       case Some(ccAddress) if ccAddress.nonEmpty => Some(ccAddress)
       case _ =>
@@ -113,6 +109,6 @@ class MailTransfer @Inject()(
   }
 }
 
-object MailTransfer {
+object SesMailTransfer {
   case class TransferTaskRequest(taskList: List[TransferTaskBean], postdata: JsValue)
 }

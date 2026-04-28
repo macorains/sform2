@@ -141,7 +141,7 @@ case class FormTransferTaskUpdateRequest(
                                           task_index: Int,
                                           name: String,
                                           form_transfer_task_conditions: List[FormTransferTaskConditionUpdateRequest],
-                                          mail: Option[FormTransferTaskMailUpdateRequest],
+                                          sesmail: Option[FormTransferTaskSesMailUpdateRequest],
                                           salesforce: Option[FormTransferTaskSalesforceUpdateRequest]
                                                 )
 
@@ -183,7 +183,7 @@ object FormTransferTaskConditionUpdateRequest {
  * @param subject 件名
  * @param body 本文
  */
-case class FormTransferTaskMailUpdateRequest(
+case class FormTransferTaskSesMailUpdateRequest(
   id: Option[BigInt],
   form_transfer_task_id: Option[BigInt],
   from_address_id: BigInt,
@@ -199,8 +199,8 @@ case class FormTransferTaskMailUpdateRequest(
   body: String
 )
 
-object FormTransferTaskMailUpdateRequest {
-  implicit val format: Format[FormTransferTaskMailUpdateRequest] = Json.format[FormTransferTaskMailUpdateRequest]
+object FormTransferTaskSesMailUpdateRequest {
+  implicit val format: Format[FormTransferTaskSesMailUpdateRequest] = Json.format[FormTransferTaskSesMailUpdateRequest]
 }
 
 /**

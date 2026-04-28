@@ -5,7 +5,7 @@ import scalikejdbc._
 import java.math.BigInteger
 import java.time.ZonedDateTime
 
-case class FormTransferTaskMail(
+case class FormTransferTaskSesMail(
  id: BigInt,
  form_transfer_task_id: BigInt,
  from_address_id: BigInteger,
@@ -26,11 +26,11 @@ case class FormTransferTaskMail(
  modified: ZonedDateTime
 )
 
-object FormTransferTaskMail extends SQLSyntaxSupport[FormTransferTaskMail] {
-  override val tableName = "d_form_transfer_task_mail"
+object FormTransferTaskSesMail extends SQLSyntaxSupport[FormTransferTaskSesMail] {
+  override val tableName = "d_form_transfer_task_ses_mail"
 
-  def apply(rs: WrappedResultSet): FormTransferTaskMail = {
-    FormTransferTaskMail(
+  def apply(rs: WrappedResultSet): FormTransferTaskSesMail = {
+    FormTransferTaskSesMail(
       rs.bigInt("id"),
       rs.bigInt("form_transfer_task_id"),
       rs.bigInt("from_address_id"),

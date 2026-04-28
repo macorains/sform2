@@ -55,7 +55,7 @@
       </BRow>
       <div>
         <TransferConfigEditSalesforce ref="configEditSalesforceRef" v-if="transferConfig.type_code === 'salesforce'" :salesforceData="transferConfig.detail.salesforce" />
-        <TransferConfigEditMail ref="configEditMailRef" v-if="transferConfig.type_code === 'mail'" :mailData="transferConfig.detail.mail" />
+        <TransferConfigEditSesMail ref="configEditSesMailRef" v-if="transferConfig.type_code === 'mail'" :mailData="transferConfig.detail.mail" />
       </div>
     </BForm>
   </BContainer>
@@ -64,7 +64,7 @@
 <script setup>
 import {getCurrentInstance, ref, computed, reactive} from "vue"
 import {BSpinner} from "bootstrap-vue-3"
-import TransferConfigEditMail from "@/components/admin/TransferConfigEditMail.vue";
+import TransferConfigEditSesMail from "@/components/admin/TransferConfigEditSesMail.vue";
 import TransferConfigEditSalesforce from "@/components/admin/TransferConfigEditSalesforce.vue";
 
 const instance = getCurrentInstance()
@@ -72,7 +72,7 @@ const $http = instance.appContext.config.globalProperties.$http
 
 const emit = defineEmits(['saved'])
 
-const configEditMailRef = ref(null)
+const configEditSesMailRef = ref(null)
 const configEditSalesforceRef = ref(null)
 
 const isLoading = ref(false)
@@ -135,7 +135,7 @@ const loadConfig = (id) => {
 const saveConfig = () => {
   isLoading.value = true
   if (transferConfig.type_code === 'mail') {
-    transferConfig.detail.mail = configEditMailRef.value.getData()
+    transferConfig.detail.mail = configEditSesMailRef.value.getData()
   }
   if (transferConfig.type_code === 'salesforce') {
     transferConfig.detail.salesforce = configEditSalesforceRef.value.getData()

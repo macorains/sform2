@@ -2,7 +2,7 @@ package net.macolabo.sform2.domain.services.Transfer
 
 import play.api.libs.json.{Format, Json}
 
-case class TransferGetTransferResponseMailTransferConfigMailAddress(
+case class TransferGetTransferResponseSesMailTransferConfigMailAddress(
   id: BigInt,
   transfer_config_mail_id: BigInt,
   address_index: Int,
@@ -10,21 +10,21 @@ case class TransferGetTransferResponseMailTransferConfigMailAddress(
   address: String
 )
 
-object TransferGetTransferResponseMailTransferConfigMailAddress {
-  implicit val format: Format[TransferGetTransferResponseMailTransferConfigMailAddress] = Json.format[TransferGetTransferResponseMailTransferConfigMailAddress]
+object TransferGetTransferResponseSesMailTransferConfigMailAddress {
+  implicit val format: Format[TransferGetTransferResponseSesMailTransferConfigMailAddress] = Json.format[TransferGetTransferResponseSesMailTransferConfigMailAddress]
 }
 
-case class TransferGetTransferResponseMailTransferConfig(
+case class TransferGetTransferResponseSesMailTransferConfig(
   id: BigInt,
   transfer_config_id: BigInt,
   use_cc: Boolean,
   use_bcc: Boolean,
   use_replyto: Boolean,
-  mail_address_list: List[TransferGetTransferResponseMailTransferConfigMailAddress]
+  mail_address_list: List[TransferGetTransferResponseSesMailTransferConfigMailAddress]
 )
 
-object TransferGetTransferResponseMailTransferConfig {
-  implicit val format: Format[TransferGetTransferResponseMailTransferConfig] = Json.format[TransferGetTransferResponseMailTransferConfig]
+object TransferGetTransferResponseSesMailTransferConfig {
+  implicit val format: Format[TransferGetTransferResponseSesMailTransferConfig] = Json.format[TransferGetTransferResponseSesMailTransferConfig]
 }
 
 case class TransferGetTransferResponseSalesforceTransferConfigObjectField(
@@ -70,7 +70,7 @@ object TransferGetTransferResponseSalesforceTransferConfig {
 }
 
 case class TransferGetTransferResponseConfigDetail(
-  mail: Option[TransferGetTransferResponseMailTransferConfig],
+  mail: Option[TransferGetTransferResponseSesMailTransferConfig],
   salesforce: Option[TransferGetTransferResponseSalesforceTransferConfig],
 )
 

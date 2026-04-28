@@ -19,6 +19,7 @@ GET /form/:hashed_form_id @net.macolabo.sform2.controllers.FormController.get(ha
 POST /form/new @net.macolabo.sform2.controllers.FormController.create()
 POST /form @net.macolabo.sform2.controllers.FormController.save()
 DELETE /form/:hashed_form_id @net.macolabo.sform2.controllers.FormController.delete(hashed_form_id: String)
+POST /form/test/mail @net.macolabo.sform2.controllers.FormController.sendTestMail()
 
 # transfer
 GET /transfer/config/list @net.macolabo.sform2.controllers.TransferController.getTransferConfigList()

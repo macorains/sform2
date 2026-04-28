@@ -2,7 +2,7 @@ package net.macolabo.sform.api.modules
 
 import org.apache.pekko.actor.{ActorRef, ActorSelection, ActorSystem}
 import com.google.inject.{AbstractModule, Inject, Provides}
-import net.macolabo.sform2.domain.services.Transfer.{MailTransfer, SalesforceTransfer, TransferReceiver, TransferSupervisor}
+import net.macolabo.sform2.domain.services.Transfer.{SesMailTransfer, SalesforceTransfer, TransferReceiver, TransferSupervisor}
 import play.api.libs.concurrent.PekkoGuiceSupport
 
 import javax.inject.Named
@@ -16,7 +16,7 @@ class SformTransferModule extends AbstractModule with PekkoGuiceSupport
   override def configure() :Unit = {
     bindActor[TransferSupervisor]("sform_transfer_supervisor")
     bindActor[TransferReceiver]("actor_transfer_receiver")
-    bindActor[MailTransfer]("actor_mail_transfer")
+    bindActor[SesMailTransfer]("actor_ses_mail_transfer")
     bindActor[SalesforceTransfer]("actor_salesforce_transfer")
   }
 

@@ -2,10 +2,10 @@ package net.macolabo.sform2.domain.services.Transfer
 
 import org.apache.pekko.actor.{Actor, ActorRef}
 import com.google.inject.Inject
-import net.macolabo.sform2.domain.models.daos.{FormDAO, FormTransferTaskConditionDAO, FormTransferTaskDAO, FormTransferTaskMailDAO, FormTransferTaskSalesforceDAO, FormTransferTaskSalesforceFieldDAO}
+import net.macolabo.sform2.domain.models.daos.{FormDAO, FormTransferTaskConditionDAO, FormTransferTaskDAO, FormTransferTaskSesMailDAO, FormTransferTaskSalesforceDAO, FormTransferTaskSalesforceFieldDAO}
 import net.macolabo.sform2.domain.models.entity.CryptoConfig
-import net.macolabo.sform2.domain.models.entity.formtransfertask.{FormTransferTask, FormTransferTaskCondition, FormTransferTaskMail}
-import net.macolabo.sform2.domain.services.Transfer.MailTransfer.TransferTaskRequest
+import net.macolabo.sform2.domain.models.entity.formtransfertask.{FormTransferTask, FormTransferTaskCondition, FormTransferTaskSesMail}
+import net.macolabo.sform2.domain.services.Transfer.SesMailTransfer.TransferTaskRequest
 import net.macolabo.sform2.domain.services.Transfer.TransferReceiver.{ConsumeTaskRequest, NewTaskRequest}
 import play.api.Logging
 import play.api.libs.json.JsValue
@@ -17,7 +17,7 @@ class TransferReceiver @Inject()(
   formDAO: FormDAO,
   formTransferTaskDAO: FormTransferTaskDAO,
   formTransferTaskConditionDAO: FormTransferTaskConditionDAO,
-  formTransferTaskMailDAO: FormTransferTaskMailDAO,
+  formTransferTaskSesMailDAO: FormTransferTaskSesMailDAO,
   formTransferTaskSalesforceDAO: FormTransferTaskSalesforceDAO,
   formTransferTaskSalesforceFieldDAO: FormTransferTaskSalesforceFieldDAO,
   @Named("actor_mail_transfer") mailTransfer: ActorRef,
@@ -63,7 +63,7 @@ class TransferReceiver @Inject()(
         tt.name,
         tt.user_group,
         getFormTransferTaskCondition(tt.id),
-        getFormTransferTaskMail(tt.id),
+        getFormTransferTaskSesMail(tt.id),
         getFormTransferTaskSalesforce(tt.id)
       )
     })
@@ -83,9 +83,9 @@ class TransferReceiver @Inject()(
     })
   }
 
-  private def getFormTransferTaskMail(formTransferTaskId: BigInt)(implicit session:DBSession): Option[TransferTaskBeanMail] = {
-    formTransferTaskMailDAO.get(formTransferTaskId).map(tm => {
-      TransferTaskBeanMail(
+  private def getFormTransferTaskSesMail(formTransferTaskId: BigInt)(implicit session:DBSession): Option[TransferTaskBeanSesMail] = {
+    formTransferTaskSesMailDAO.get(formTransferTaskId).map(tm => {
+      TransferTaskBeanSesMail(
         tm.id,
         tm.form_transfer_task_id,
         tm.from_address_id,

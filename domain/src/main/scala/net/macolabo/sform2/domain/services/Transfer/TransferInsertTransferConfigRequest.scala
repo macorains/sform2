@@ -2,27 +2,27 @@ package net.macolabo.sform2.domain.services.Transfer
 
 import play.api.libs.json.{Format, Json}
 
-case class TransferInsertTransferRequestMailTransferConfigMailAddress(
+case class TransferInsertTransferRequestSesMailTransferConfigMailAddress(
                                                                      transfer_config_mail_id: BigInt,
                                                                      address_index: Int,
                                                                      name: String,
                                                                      address: String
                                                                    )
 
-object TransferInsertTransferRequestMailTransferConfigMailAddress {
-  implicit val format: Format[TransferInsertTransferRequestMailTransferConfigMailAddress] = Json.format[TransferInsertTransferRequestMailTransferConfigMailAddress]
+object TransferInsertTransferRequestSesMailTransferConfigMailAddress {
+  implicit val format: Format[TransferInsertTransferRequestSesMailTransferConfigMailAddress] = Json.format[TransferInsertTransferRequestSesMailTransferConfigMailAddress]
 }
 
-case class TransferInsertTransferRequestMailTransferConfig(
+case class TransferInsertTransferRequestSesMailTransferConfig(
                                                           transfer_config_id: BigInt,
                                                           use_cc: Boolean,
                                                           use_bcc: Boolean,
                                                           use_replyto: Boolean,
-                                                          mail_address_list: List[TransferInsertTransferRequestMailTransferConfigMailAddress]
+                                                          mail_address_list: List[TransferInsertTransferRequestSesMailTransferConfigMailAddress]
                                                         )
 
-object TransferInsertTransferRequestMailTransferConfig {
-  implicit val format: Format[TransferInsertTransferRequestMailTransferConfig] = Json.format[TransferInsertTransferRequestMailTransferConfig]
+object TransferInsertTransferRequestSesMailTransferConfig {
+  implicit val format: Format[TransferInsertTransferRequestSesMailTransferConfig] = Json.format[TransferInsertTransferRequestSesMailTransferConfig]
 }
 
 case class TransferInsertTransferRequestSalesforceTransferConfigObject(
@@ -62,7 +62,7 @@ object TransferInsertTransferRequestSalesforceTransferConfig {
 }
 
 case class TransferInsertTransferRequestConfigDetail(
-                                                    mail: Option[TransferInsertTransferRequestMailTransferConfig],
+                                                    mail: Option[TransferInsertTransferRequestSesMailTransferConfig],
                                                     salesforce: Option[TransferInsertTransferRequestSalesforceTransferConfig],
                                                   )
 
