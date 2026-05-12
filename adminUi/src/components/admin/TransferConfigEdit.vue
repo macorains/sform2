@@ -135,19 +135,19 @@ const loadConfig = (id) => {
 
 const saveConfig = () => {
   isLoading.value = true
-  if (transferConfig.type_code === 'mail') {
-    transferConfig.detail.mail = configEditSesMailRef.value.getData()
+  if (transferConfig.type_code === 'sesmail') {
+    transferConfig.detail.sesmail = configEditSesMailRef.value.getData()
   }
   if (transferConfig.type_code === 'salesforce') {
     transferConfig.detail.salesforce = configEditSalesforceRef.value.getData()
   }
 
   const saveData = JSON.parse(JSON.stringify(transferConfig))
-  if (transferConfig.type_code === 'mail') {
+  if (transferConfig.type_code === 'sesmail') {
     delete saveData.detail.salesforce
   }
   if (transferConfig.type_code === 'salesforce') {
-    delete saveData.detail.mail
+    delete saveData.detail.sesmail
   }
   console.log(saveData)
   // データの確認のため一旦コメントアウト後で戻す
@@ -200,7 +200,7 @@ const clearModal = () => {
   }
   typeOptions.value = [
     { value: 'salesforce', text: 'Salesforce' },
-    { value: 'mail', text: 'Mail(SMTP)' },
+    { value: 'smtpmail', text: 'Mail(SMTP)' },
     { value: 'sesmail', text: 'Mail(SES)' },
   ]
 }
@@ -224,7 +224,7 @@ const setTypeOptions = (type) => {
     typeOptions.value = [{ value: 'salesforce', text: 'Salesforce' }]
   }
   if (type === 'smtpmail') {
-    typeOptions.value = [{ value: 'smtpmail', text: 'Mail' }]
+    typeOptions.value = [{ value: 'smtpmail', text: 'Mail(SMTP)' }]
   }
   if (type === 'sesmail') {
     typeOptions.value = [{ value: 'sesmail', text: 'Mail(SES)' }]
