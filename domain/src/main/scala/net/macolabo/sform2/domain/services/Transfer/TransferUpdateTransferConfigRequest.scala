@@ -4,7 +4,7 @@ import play.api.libs.json.{Format, Json}
 
 case class TransferUpdateTransferRequestSesMailTransferConfigMailAddress(
                                                                      id: Option[BigInt],
-                                                                     transfer_config_mail_id: BigInt,
+                                                                     transfer_config_id: BigInt,
                                                                      address_index: Int,
                                                                      name: String,
                                                                      address: String

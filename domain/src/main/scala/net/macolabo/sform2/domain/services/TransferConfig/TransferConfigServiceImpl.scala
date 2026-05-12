@@ -98,10 +98,10 @@ class TransferConfigServiceImpl @Inject()(
     })
 
     val mailAddressIdList = request.mail_address_list
-      .map(mailAddress => saveSesMailTransferConfigMailAddress(mailAddress, transferConfigSesMailId, sessionInfo))
+      .map(mailAddress => saveSesMailTransferConfigMailAddress(mailAddress, transferConfigId, sessionInfo))
 
     // 更新or作成リクエストに含まれていないメールアドレスは削除対象なので削除する
-    transferConfigMailAddressDAO.getList(sessionInfo.user_group, transferConfigSesMailId)
+    transferConfigMailAddressDAO.getList(sessionInfo.user_group, transferConfigId)
       .filterNot(address => mailAddressIdList.contains(address.id))
       .map(address => address.id)
       .foreach(address => transferConfigMailAddressDAO.delete(sessionInfo.user_group, address))
@@ -109,11 +109,11 @@ class TransferConfigServiceImpl @Inject()(
     transferConfigSesMailId
   }
 
-  def saveSesMailTransferConfigMailAddress(request: SesMailTransferConfigMailAddressSaveRequest, transferConfigSesMailId: BigInt, sessionInfo: SessionInfo): BigInt = {
+  def saveSesMailTransferConfigMailAddress(request: SesMailTransferConfigMailAddressSaveRequest, transferConfigId: BigInt, sessionInfo: SessionInfo): BigInt = {
     request.id.map(id => {
       transferConfigMailAddressDAO.save(TransferConfigMailAddress(
         id,
-        request.transfer_config_mail_id.get, // 上書き保存の時は必ず入る想定（フィールド名はtransfer_config_mail_idのまま）
+        request.transfer_config_id.get, // 上書き保存の時は必ず入る想定
         request.address_index,
         request.name,
         request.address,
@@ -126,7 +126,7 @@ class TransferConfigServiceImpl @Inject()(
     }).getOrElse({
       transferConfigMailAddressDAO.create(TransferConfigMailAddress(
         null, // 新規作成時は使わない
-        transferConfigSesMailId,
+        transferConfigId,
         request.address_index,
         request.name,
         request.address,
@@ -293,14 +293,14 @@ class TransferConfigServiceImpl @Inject()(
   // Delete
   def deleteTransferConfig(id: BigInt, sessionInfo: SessionInfo): Int = {
     DB.localTx(implicit session => {
-      transferConfigSesMailDAO.get(sessionInfo.user_group, id).map(tc => deleteSesMailTransferConfig(tc, sessionInfo))
+      transferConfigSesMailDAO.get(sessionInfo.user_group, id).map(tc => deleteSesMailTransferConfig(tc, id, sessionInfo))
       transferConfigSalesforceDAO.get(id).map(tc => deleteSalesforceTransferConfig(tc.id, sessionInfo))
       transferConfigDAO.delete(sessionInfo.user_group, id)
     })
   }
 
-  def deleteSesMailTransferConfig(config: TransferConfigSesMail, sessionInfo: SessionInfo): Int = {
-    transferConfigMailAddressDAO.getList(sessionInfo.user_group, config.id).map(address => deleteSesMailTransferConfigMailAddress(address.id, sessionInfo))
+  def deleteSesMailTransferConfig(config: TransferConfigSesMail, transferConfigId: BigInt, sessionInfo: SessionInfo): Int = {
+    transferConfigMailAddressDAO.getList(sessionInfo.user_group, transferConfigId).map(address => deleteSesMailTransferConfigMailAddress(address.id, sessionInfo))
     transferConfigSesMailDAO.delete(sessionInfo.user_group, config.id)
 
   }

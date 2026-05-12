@@ -19,7 +19,7 @@ trait TransferConfigService {
 
   // Delete
   def deleteTransferConfig(id: BigInt, sessionInfo: SessionInfo): Int
-  def deleteSesMailTransferConfig(config: TransferConfigSesMail, sessionInfo: SessionInfo): Int
+  def deleteSesMailTransferConfig(config: TransferConfigSesMail, transferConfigId: BigInt, sessionInfo: SessionInfo): Int
   def deleteSesMailTransferConfigMailAddress(id: BigInt, sessionInfo: SessionInfo): Int
   def deleteSalesforceTransferConfig(id: BigInt, sessionInfo: SessionInfo): Int
   def deleteSalesforceTransferConfigObject(id: BigInt, sessionInfo: SessionInfo): Int

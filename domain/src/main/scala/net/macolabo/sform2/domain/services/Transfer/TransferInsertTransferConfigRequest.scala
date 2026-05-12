@@ -3,7 +3,7 @@ package net.macolabo.sform2.domain.services.Transfer
 import play.api.libs.json.{Format, Json}
 
 case class TransferInsertTransferRequestSesMailTransferConfigMailAddress(
-                                                                     transfer_config_mail_id: BigInt,
+                                                                     transfer_config_id: BigInt,
                                                                      address_index: Int,
                                                                      name: String,
                                                                      address: String

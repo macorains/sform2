@@ -2,16 +2,16 @@ package net.macolabo.sform2.domain.services.Transfer
 
 import play.api.libs.json.{Format, Json}
 
-case class TransferGetTransferResponseSesMailTransferConfigMailAddress(
+case class TransferGetTransferResponseMailAddress(
   id: BigInt,
-  transfer_config_mail_id: BigInt,
+  transfer_config_id: BigInt,
   address_index: Int,
   name: String,
   address: String
 )
 
-object TransferGetTransferResponseSesMailTransferConfigMailAddress {
-  implicit val format: Format[TransferGetTransferResponseSesMailTransferConfigMailAddress] = Json.format[TransferGetTransferResponseSesMailTransferConfigMailAddress]
+object TransferGetTransferResponseMailAddress {
+  implicit val format: Format[TransferGetTransferResponseMailAddress] = Json.format[TransferGetTransferResponseMailAddress]
 }
 
 case class TransferGetTransferResponseSesMailTransferConfig(
@@ -20,7 +20,7 @@ case class TransferGetTransferResponseSesMailTransferConfig(
   use_cc: Boolean,
   use_bcc: Boolean,
   use_replyto: Boolean,
-  mail_address_list: List[TransferGetTransferResponseSesMailTransferConfigMailAddress]
+  mail_address_list: List[TransferGetTransferResponseMailAddress]
 )
 
 object TransferGetTransferResponseSesMailTransferConfig {
@@ -70,7 +70,7 @@ object TransferGetTransferResponseSalesforceTransferConfig {
 }
 
 case class TransferGetTransferResponseConfigDetail(
-  mail: Option[TransferGetTransferResponseSesMailTransferConfig],
+  sesmail: Option[TransferGetTransferResponseSesMailTransferConfig],
   salesforce: Option[TransferGetTransferResponseSalesforceTransferConfig],
 )
 

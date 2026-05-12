@@ -55,7 +55,7 @@
       </BRow>
       <div>
         <TransferConfigEditSalesforce ref="configEditSalesforceRef" v-if="transferConfig.type_code === 'salesforce'" :salesforceData="transferConfig.detail.salesforce" />
-        <TransferConfigEditSesMail ref="configEditSesMailRef" v-if="transferConfig.type_code === 'mail'" :mailData="transferConfig.detail.mail" />
+        <TransferConfigEditSesMail ref="configEditSesMailRef" v-if="transferConfig.type_code === 'sesmail'" :mailData="transferConfig.detail.sesmail" />
       </div>
     </BForm>
   </BContainer>
@@ -102,7 +102,8 @@ const transferConfig = reactive({
 
 const typeOptions = ref([
   { value: 'salesforce', text: 'Salesforce' },
-  { value: 'mail', text: 'Mail' },
+  { value: 'smtpmail', text: 'Mail(SMTP)' },
+  { value: 'sesmail', text: 'Mail(SES)' },
 ])
 
 const statusOptions = ref([
@@ -199,7 +200,8 @@ const clearModal = () => {
   }
   typeOptions.value = [
     { value: 'salesforce', text: 'Salesforce' },
-    { value: 'mail', text: 'Mail' },
+    { value: 'mail', text: 'Mail(SMTP)' },
+    { value: 'sesmail', text: 'Mail(SES)' },
   ]
 }
 
@@ -221,8 +223,11 @@ const setTypeOptions = (type) => {
   if (type === 'salesforce') {
     typeOptions.value = [{ value: 'salesforce', text: 'Salesforce' }]
   }
-  if (type === 'mail') {
-    typeOptions.value = [{ value: 'mail', text: 'Mail' }]
+  if (type === 'smtpmail') {
+    typeOptions.value = [{ value: 'smtpmail', text: 'Mail' }]
+  }
+  if (type === 'sesmail') {
+    typeOptions.value = [{ value: 'sesmail', text: 'Mail(SES)' }]
   }
 }
 

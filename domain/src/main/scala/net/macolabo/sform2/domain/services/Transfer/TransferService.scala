@@ -153,7 +153,7 @@ class TransferService @Inject()(
           case _ => insertTransferConfigMailAddress(userGroup, userId, m)
         }
       })
-      transferConfigMailAddressDAO.getList(userGroup, transferUpdateTransferRequestMailTransferConfig.id)
+      transferConfigMailAddressDAO.getList(userGroup, transferUpdateTransferRequestMailTransferConfig.transfer_config_id)
         .filterNot(c => updateMailAddressList.contains(c.id))
         .map(c => c.id)
         .foreach(c => transferConfigMailAddressDAO.delete(userGroup, c))
@@ -174,7 +174,7 @@ class TransferService @Inject()(
 
       TransferConfigMailAddress(
         id,
-        transferUpdateTransferRequestMailTransferConfigMailAddress.transfer_config_mail_id,
+        transferUpdateTransferRequestMailTransferConfigMailAddress.transfer_config_id,
         transferUpdateTransferRequestMailTransferConfigMailAddress.address_index,
         transferUpdateTransferRequestMailTransferConfigMailAddress.name,
         transferUpdateTransferRequestMailTransferConfigMailAddress.address,
@@ -200,7 +200,7 @@ class TransferService @Inject()(
       transferConfigMailAddressDAO.create(
         TransferConfigMailAddress(
           transferUpdateTransferRequestMailTransferConfigMailAddress.id.getOrElse(0),
-          transferUpdateTransferRequestMailTransferConfigMailAddress.transfer_config_mail_id,
+          transferUpdateTransferRequestMailTransferConfigMailAddress.transfer_config_id,
           transferUpdateTransferRequestMailTransferConfigMailAddress.address_index,
           transferUpdateTransferRequestMailTransferConfigMailAddress.name,
           transferUpdateTransferRequestMailTransferConfigMailAddress.address,
@@ -413,11 +413,11 @@ class TransferService @Inject()(
    * @param transferConfigMailId TransferConfigMail ID
    * @return MailTransferConfigに付随するメールアドレスリスト
    */
-  private def getTransferConfigMailAddress(userGroup: String, transferConfigMailId: BigInt): List[TransferGetTransferResponseSesMailTransferConfigMailAddress] = {
-    transferConfigMailAddressDAO.getList(userGroup, transferConfigMailId).map(f => {
-      TransferGetTransferResponseSesMailTransferConfigMailAddress(
+  private def getTransferConfigMailAddress(userGroup: String, transferConfigId: BigInt): List[TransferGetTransferResponseMailAddress] = {
+    transferConfigMailAddressDAO.getList(userGroup, transferConfigId).map(f => {
+      TransferGetTransferResponseMailAddress(
         f.id,
-        f.transfer_config_mail_id,
+        f.transfer_config_id,
         f.address_index,
         f.name,
         f.address

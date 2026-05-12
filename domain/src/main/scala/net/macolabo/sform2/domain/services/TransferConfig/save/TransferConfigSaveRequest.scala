@@ -39,7 +39,7 @@ object SesMailTransferConfigSaveRequest {
 
 case class SesMailTransferConfigMailAddressSaveRequest(
   id: Option[BigInt],
-  transfer_config_mail_id: Option[BigInt],
+  transfer_config_id: Option[BigInt],
   address_index: Int,
   name: String,
   address: String
