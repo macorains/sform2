@@ -70,6 +70,21 @@ object FormColSelectGetReponse {
  * @param mail mail
  * @param salesforce salesforce
  */
+case class FormTransferTaskSmtpMailGetResponse(
+  id: BigInt,
+  form_transfer_task_id: BigInt,
+  subject: String,
+  body: String,
+  to_address: Option[String],
+  to_address_field: Option[String],
+  cc_address: Option[String],
+  bcc_address: Option[String],
+)
+
+object FormTransferTaskSmtpMailGetResponse {
+  implicit val format: Format[FormTransferTaskSmtpMailGetResponse] = Json.format[FormTransferTaskSmtpMailGetResponse]
+}
+
 case class FormTransferTaskGetResponse(
                              id: BigInt,
                              transfer_config_id: BigInt,
@@ -79,7 +94,8 @@ case class FormTransferTaskGetResponse(
                              name: String,
                              form_transfer_task_conditions: List[FormTransferTaskConditionGetReponse],
                              sesmail: Option[FormTransferTaskSesMailGetReponse],
-                             salesforce: Option[FormTransferTaskSalesforceGetReponse]
+                             salesforce: Option[FormTransferTaskSalesforceGetReponse],
+                             smtpmail: Option[FormTransferTaskSmtpMailGetResponse]
                                               )
 
 object FormTransferTaskGetResponse {

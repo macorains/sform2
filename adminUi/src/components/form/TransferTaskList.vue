@@ -41,6 +41,15 @@
   <b-modal v-model="editModalSalesforceVisible" size="xl" title="転送タスク編集">
     <TransferTaskEditSalesforce ref="editModalSalesforceRef"/>
   </b-modal>
+  <b-modal v-model="editModalSmtpMailVisible" size="xl" title="転送タスク編集">
+    <TransferTaskEditSmtpMail ref="editModalSmtpMailRef"/>
+    <template #footer>
+      <div class="ms-auto d-flex gap-2">
+        <BButton variant="primary" @click="editModalSmtpMailVisible = false">OK</BButton>
+        <BButton @click="editModalSmtpMailVisible = false">Cancel</BButton>
+      </div>
+    </template>
+  </b-modal>
   <BModal v-model="configSelectModalVisible" @ok="addNewTask" @show="onConfigModalShow" :ok-disabled="configOkDisabled" size="lg" title="転送設定の選択">
     <TransferTaskEditSelectConfig ref="configSelectModalRef" @selection-change="v => configOkDisabled = (v === null)" />
   </BModal>
@@ -52,6 +61,7 @@ import { BButton, BModal } from 'bootstrap-vue-3'
 import draggable from 'vuedraggable'
 import TransferTaskEditSesMail from "@/components/form/TransferTaskEditSesMail.vue";
 import TransferTaskEditSalesforce from "@/components/form/TransferTaskEditSalesforce.vue";
+import TransferTaskEditSmtpMail from "@/components/form/TransferTaskEditSmtpMail.vue";
 import TransferTaskEditSelectConfig from "@/components/form/TransferTaskEditSelectConfig.vue";
 defineProps(['formId'])
 const emit = defineEmits(['update-transfer-tasks'])
@@ -65,10 +75,12 @@ const form = reactive({})
 const editModalSesMailVisible = ref(false)
 const testMailStatus = ref(null)
 const editModalSalesforceVisible = ref(false)
+const editModalSmtpMailVisible = ref(false)
 const configSelectModalVisible = ref(false)
 const configSelectModalRef = ref(null)
 const editModalSalesforceRef = ref(null)
 const editModalSesMailRef = ref(null)
+const editModalSmtpMailRef = ref(null)
 const configOkDisabled = ref(true)
 
 const salesforceTransferTaskDefault = (taskCount, configName) => {
@@ -86,6 +98,30 @@ const salesforceTransferTaskDefault = (taskCount, configName) => {
       fields: []
     },
     sesmail: null,
+  }
+}
+
+const smtpMailTransferTaskDefault = (taskCount, configName, configId) => {
+  return {
+    id: null,
+    name: configName + '-' + (taskCount + 1),
+    form_id: form.id,
+    transfer_config_id: configId,
+    transfer_config_name: null,
+    task_index: taskCount + 1,
+    form_transfer_task_conditions: [],
+    salesforce: null,
+    sesmail: null,
+    smtpmail: {
+      id: null,
+      form_transfer_task_id: null,
+      subject: '',
+      body: '',
+      to_address: '',
+      to_address_field: null,
+      cc_address: '',
+      bcc_address: '',
+    }
   }
 }
 
@@ -133,6 +169,10 @@ const edit = (item) => {
     editModalSalesforceRef.value.load(item, form.form_cols)
     editModalSalesforceVisible.value = true
   }
+  if (item.smtpmail) {
+    editModalSmtpMailRef.value.load(item, form.form_cols)
+    editModalSmtpMailVisible.value = true
+  }
 }
 
 const deleteTask = (item) => {
@@ -169,8 +209,10 @@ const addNewTask = () => {
 
   if (config.type_code === 'salesforce') {
     newItem = salesforceTransferTaskDefault(taskCount, config.name)
-  } else if (config.type_code === 'mail') {
+  } else if (config.type_code === 'sesmail') {
     newItem = sesMailTransferTaskDefault(taskCount, config.name, config.id)
+  } else if (config.type_code === 'smtpmail') {
+    newItem = smtpMailTransferTaskDefault(taskCount, config.name, config.id)
   }
 
   form.form_transfer_tasks.push(newItem)

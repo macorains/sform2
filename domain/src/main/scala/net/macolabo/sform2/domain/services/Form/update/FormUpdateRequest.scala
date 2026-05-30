@@ -134,6 +134,21 @@ object FormColSelectUpdateRequest {
  * @param mail MailTransfer設定
  * @param salesforce SalesforceTransfer設定
  */
+case class FormTransferTaskSmtpMailUpdateRequest(
+  id: Option[BigInt],
+  form_transfer_task_id: Option[BigInt],
+  subject: String,
+  body: String,
+  to_address: Option[String],
+  to_address_field: Option[String],
+  cc_address: Option[String],
+  bcc_address: Option[String],
+)
+
+object FormTransferTaskSmtpMailUpdateRequest {
+  implicit val format: Format[FormTransferTaskSmtpMailUpdateRequest] = Json.format[FormTransferTaskSmtpMailUpdateRequest]
+}
+
 case class FormTransferTaskUpdateRequest(
                                           id: Option[BigInt],
                                           transfer_config_id: BigInt,
@@ -142,7 +157,8 @@ case class FormTransferTaskUpdateRequest(
                                           name: String,
                                           form_transfer_task_conditions: List[FormTransferTaskConditionUpdateRequest],
                                           sesmail: Option[FormTransferTaskSesMailUpdateRequest],
-                                          salesforce: Option[FormTransferTaskSalesforceUpdateRequest]
+                                          salesforce: Option[FormTransferTaskSalesforceUpdateRequest],
+                                          smtpmail: Option[FormTransferTaskSmtpMailUpdateRequest]
                                                 )
 
 object FormTransferTaskUpdateRequest {

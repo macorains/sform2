@@ -195,7 +195,7 @@ const transferTask = reactive({
     body: '',
   }
 })
-const transferConfig = reactive({ detail: { mail: { use_cc: false, use_bcc: false, use_replyto: false } } })
+const transferConfig = reactive({ detail: { sesmail: { use_cc: false, use_bcc: false, use_replyto: false } } })
 const fieldList = ref([])
 const mailAddressList = ref([])
 const body = ref(null)

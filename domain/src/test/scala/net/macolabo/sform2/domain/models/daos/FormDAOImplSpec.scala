@@ -634,7 +634,8 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
       name = "hoge2",
       form_transfer_task_conditions = conditionUpdateRequestList,
       sesmail = mailUpdateRequest,
-      salesforce = salesforceUpdateRequest
+      salesforce = salesforceUpdateRequest,
+      smtpmail = None
     )
   }
 

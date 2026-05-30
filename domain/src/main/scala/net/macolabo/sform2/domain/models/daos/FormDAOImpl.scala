@@ -1,12 +1,12 @@
 package net.macolabo.sform2.domain.models.daos
 
 import net.macolabo.sform2.domain.models.entity.form.{Form, FormCol, FormColSelect, FormColValidation}
-import net.macolabo.sform2.domain.models.entity.formtransfertask.{FormTransferTask, FormTransferTaskCondition, FormTransferTaskSesMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField}
+import net.macolabo.sform2.domain.models.entity.formtransfertask.{FormTransferTask, FormTransferTaskCondition, FormTransferTaskSesMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField, FormTransferTaskSmtpMail}
 import net.macolabo.sform2.domain.models.entity.transfer.TransferConfig
 import net.macolabo.sform2.domain.services.Form.delete.FormDeleteResponse
-import net.macolabo.sform2.domain.services.Form.get.{FormColGetReponse, FormColSelectGetReponse, FormColValidationGetReponse, FormGetResponse, FormTransferTaskConditionGetReponse, FormTransferTaskGetResponse, FormTransferTaskSesMailGetReponse, FormTransferTaskSalesforceFieldGetReponse, FormTransferTaskSalesforceGetReponse}
+import net.macolabo.sform2.domain.services.Form.get.{FormColGetReponse, FormColSelectGetReponse, FormColValidationGetReponse, FormGetResponse, FormTransferTaskConditionGetReponse, FormTransferTaskGetResponse, FormTransferTaskSesMailGetReponse, FormTransferTaskSalesforceFieldGetReponse, FormTransferTaskSalesforceGetReponse, FormTransferTaskSmtpMailGetResponse}
 import net.macolabo.sform2.domain.services.Form.list.{FormListResponse, FormResponse}
-import net.macolabo.sform2.domain.services.Form.update.{FormColSelectUpdateRequest, FormColUpdateRequest, FormColValidationUpdateRequest, FormTransferTaskConditionUpdateRequest, FormTransferTaskSesMailUpdateRequest, FormTransferTaskSalesforceFieldUpdateRequest, FormTransferTaskSalesforceUpdateRequest, FormTransferTaskUpdateRequest, FormUpdateRequest}
+import net.macolabo.sform2.domain.services.Form.update.{FormColSelectUpdateRequest, FormColUpdateRequest, FormColValidationUpdateRequest, FormTransferTaskConditionUpdateRequest, FormTransferTaskSesMailUpdateRequest, FormTransferTaskSalesforceFieldUpdateRequest, FormTransferTaskSalesforceUpdateRequest, FormTransferTaskSmtpMailUpdateRequest, FormTransferTaskUpdateRequest, FormUpdateRequest}
 import scalikejdbc._
 
 import java.time.ZonedDateTime
@@ -127,6 +127,13 @@ class FormDAOImpl extends FormDAO {
           .map(_ => updateFormTransferTaskSesMail(userId, sesmail))
           .getOrElse(insertFormTransferTaskSesMail(userGroup, userId, sesmail, formTransferTaskId))
       })
+
+      formTransferTask.smtpmail.map(smtpmail => {
+        smtpmail.id
+          .map(_ => updateFormTransferTaskSmtpMail(userId, smtpmail))
+          .getOrElse(insertFormTransferTaskSmtpMail(userGroup, userId, smtpmail, formTransferTaskId))
+      })
+
       formTransferTaskId
     })
     bulkDeleteFormTransferTask(formId, formTransferTaskIds, userGroup)
@@ -239,6 +246,19 @@ class FormDAOImpl extends FormDAO {
     )
   }
 
+  private def convertToFormTransferTaskSmtpMail(e: FormTransferTaskSmtpMail): FormTransferTaskSmtpMailGetResponse = {
+    FormTransferTaskSmtpMailGetResponse(
+      e.id,
+      e.form_transfer_task_id,
+      e.subject,
+      e.body,
+      e.to_address,
+      e.to_address_field,
+      e.cc_address,
+      e.bcc_address
+    )
+  }
+
   private def convertToFormTransferTaskCondition(formTransferTaskCondition: FormTransferTaskCondition)(implicit session: DBSession): FormTransferTaskConditionGetReponse = {
     FormTransferTaskConditionGetReponse(
       formTransferTaskCondition.id,
@@ -260,7 +280,8 @@ class FormDAOImpl extends FormDAO {
       formTransferTask.name,
       selectFormTransferTaskConditionList(userGroup, formTransferTask.form_id, formTransferTask.id).map(transferTaskCondition => convertToFormTransferTaskCondition(transferTaskCondition)),
       selectFormTransferTaskSesMail(userGroup, formTransferTask.id).map(transferTaskSesMail => convertToFormTransferTaskSesMail(transferTaskSesMail)),
-      selectFormTransferTaskSalesforce(userGroup, formTransferTask.id).map(formTransferTaskSalesforce => convertToFormTransferTaskSalesforce(userGroup, formTransferTaskSalesforce))
+      selectFormTransferTaskSalesforce(userGroup, formTransferTask.id).map(formTransferTaskSalesforce => convertToFormTransferTaskSalesforce(userGroup, formTransferTaskSalesforce)),
+      selectFormTransferTaskSmtpMail(userGroup, formTransferTask.id).map(convertToFormTransferTaskSmtpMail)
     )
   }
 
@@ -583,6 +604,32 @@ class FormDAOImpl extends FormDAO {
     ).map(rs=>FormTransferTaskSalesforce(rs)).single().apply()
   }
 
+  private def selectFormTransferTaskSmtpMail(userGroup: String, formTransferTaskId: BigInt)(implicit session: DBSession): Option[FormTransferTaskSmtpMail] = {
+    val f = FormTransferTaskSmtpMail.syntax("f")
+    withSQL(
+      select(
+        f.id,
+        f.form_transfer_task_id,
+        f.subject,
+        f.body,
+        f.to_address,
+        f.to_address_field,
+        f.cc_address,
+        f.bcc_address,
+        f.user_group,
+        f.created_user,
+        f.modified_user,
+        f.created,
+        f.modified
+      )
+        .from(FormTransferTaskSmtpMail as f)
+        .where
+        .eq(f.form_transfer_task_id, formTransferTaskId)
+        .and
+        .eq(f.user_group, userGroup)
+    ).map(rs => FormTransferTaskSmtpMail(rs)).single().apply()
+  }
+
   private def selectFormTransferTaskSalesforceFieldList(userGroup: String, formTransferTaskSalesforceId: BigInt)(implicit session: DBSession): List[FormTransferTaskSalesforceField] = {
     val f = FormTransferTaskSalesforceField.syntax("f")
     withSQL(
@@ -789,6 +836,26 @@ class FormDAOImpl extends FormDAO {
     }.updateAndReturnGeneratedKey().apply().toInt
   }
 
+  def insertFormTransferTaskSmtpMail(userGroup: String, user: String, req: FormTransferTaskSmtpMailUpdateRequest, formTransferTaskId: BigInt)(implicit session: DBSession): BigInt = {
+    withSQL {
+      val c = FormTransferTaskSmtpMail.column
+      insertInto(FormTransferTaskSmtpMail).namedValues(
+        c.form_transfer_task_id -> formTransferTaskId,
+        c.subject -> req.subject,
+        c.body -> req.body,
+        c.to_address -> req.to_address,
+        c.to_address_field -> req.to_address_field,
+        c.cc_address -> req.cc_address,
+        c.bcc_address -> req.bcc_address,
+        c.user_group -> userGroup,
+        c.created_user -> user,
+        c.modified_user -> user,
+        c.created -> ZonedDateTime.now(),
+        c.modified -> ZonedDateTime.now()
+      )
+    }.updateAndReturnGeneratedKey().apply()
+  }
+
   // ----------------------------------------------
   // updateクエリ実行
   // ----------------------------------------------
@@ -923,6 +990,24 @@ class FormDAOImpl extends FormDAO {
       ).where.eq(c.id, formTransferTaskSesMail.id)
     }.update().apply()
     formTransferTaskSesMail.id.get
+  }
+
+  def updateFormTransferTaskSmtpMail(user: String, req: FormTransferTaskSmtpMailUpdateRequest)(implicit session: DBSession): BigInt = {
+    withSQL {
+      val c = FormTransferTaskSmtpMail.column
+      QueryDSL.update(FormTransferTaskSmtpMail).set(
+        c.form_transfer_task_id -> req.form_transfer_task_id,
+        c.subject -> req.subject,
+        c.body -> req.body,
+        c.to_address -> req.to_address,
+        c.to_address_field -> req.to_address_field,
+        c.cc_address -> req.cc_address,
+        c.bcc_address -> req.bcc_address,
+        c.modified_user -> user,
+        c.modified -> ZonedDateTime.now()
+      ).where.eq(c.id, req.id)
+    }.update().apply()
+    req.id.get
   }
 
   def updateFormTransferTaskSalesforce(user: String, formTransferTaskSalesforce: FormTransferTaskSalesforceUpdateRequest)(implicit session: DBSession): BigInt = {
