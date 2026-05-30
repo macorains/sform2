@@ -16,12 +16,27 @@ object TransferConfigSaveRequest {
 }
 
 case class TransferConfigDetailSaveRequest(
-  mail: Option[SesMailTransferConfigSaveRequest],
+  sesmail: Option[SesMailTransferConfigSaveRequest],
   salesforce: Option[SalesforceTransferConfigSaveRequest],
+  smtpmail: Option[SmtpMailTransferConfigSaveRequest],
 )
 
 object TransferConfigDetailSaveRequest {
   implicit val format: Format[TransferConfigDetailSaveRequest] = Json.format[TransferConfigDetailSaveRequest]
+}
+
+case class SmtpMailTransferConfigSaveRequest(
+  id: Option[BigInt],
+  transfer_config_id: Option[BigInt],
+  smtp_host: String,
+  smtp_port: Int,
+  smtp_user: String,
+  from_address: String,
+  smtp_password: String,
+)
+
+object SmtpMailTransferConfigSaveRequest {
+  implicit val format: Format[SmtpMailTransferConfigSaveRequest] = Json.format[SmtpMailTransferConfigSaveRequest]
 }
 
 case class SesMailTransferConfigSaveRequest(

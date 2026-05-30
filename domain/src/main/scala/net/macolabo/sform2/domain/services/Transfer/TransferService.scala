@@ -2,11 +2,12 @@ package net.macolabo.sform2.domain.services.Transfer
 
 import com.google.inject.Inject
 import net.macolabo.sform2.domain.models.SessionInfo
-import net.macolabo.sform2.domain.models.daos.{TransferConfigDAO, TransferConfigMailAddressDAO, TransferConfigSesMailDAO, TransferConfigSalesforceDAO, TransferConfigSalesforceObjectDAO, TransferConfigSalesforceObjectFieldDAO}
+import net.macolabo.sform2.domain.models.daos.{TransferConfigDAO, TransferConfigMailAddressDAO, TransferConfigSalesforceDAO, TransferConfigSalesforceObjectDAO, TransferConfigSalesforceObjectFieldDAO, TransferConfigSesMailDAO, TransferConfigSmtpMailDAO}
 import net.macolabo.sform2.domain.models.entity.CryptoConfig
-import net.macolabo.sform2.domain.models.entity.transfer.{TransferConfig, TransferConfigSesMail, TransferConfigMailAddress, TransferConfigSalesforce, TransferConfigSalesforceObject, TransferConfigSalesforceObjectField}
+import net.macolabo.sform2.domain.models.entity.transfer.{TransferConfig, TransferConfigMailAddress, TransferConfigSalesforce, TransferConfigSalesforceObject, TransferConfigSalesforceObjectField, TransferConfigSesMail}
 import net.macolabo.sform2.domain.models.entity.transfer.TransferConfigSalesforceObjectField
 import net.macolabo.sform2.domain.utils.Crypto
+import play.api.Logger
 import scalikejdbc.{DB, DBSession}
 
 import java.time.ZonedDateTime
@@ -23,9 +24,11 @@ class TransferService @Inject()(
   transferConfigSalesforceDAO: TransferConfigSalesforceDAO,
   transferConfigSalesforceObjectDAO: TransferConfigSalesforceObjectDAO,
   transferConfigSalesforceObjectFieldDAO: TransferConfigSalesforceObjectFieldDAO,
-  transferConfigDAO: TransferConfigDAO
+  transferConfigDAO: TransferConfigDAO,
+  transferConfigSmtpMailDAO: TransferConfigSmtpMailDAO
 ) (implicit ex: ExecutionContext)
 {
+  val logger: Logger = Logger(this.getClass)
 
   /**
    * フォーム編集画面のTransferConfig選択リスト用データ取得
@@ -80,8 +83,9 @@ class TransferService @Inject()(
           f.name,
           f.status,
           TransferGetTransferResponseConfigDetail(
-            getTransferConfigMail(sessionInfo.user_group, transferConfigId),
-            getTransferConfigSalesforce(sessionInfo.user_group, transferConfigId, cryptoConfig)
+            getTransferConfigSesMail(sessionInfo.user_group, transferConfigId),
+            getTransferConfigSalesforce(sessionInfo.user_group, transferConfigId, cryptoConfig),
+            getTransferConfigSmtpMail(sessionInfo.user_group, transferConfigId, cryptoConfig)
           )
         )
       })
@@ -112,7 +116,7 @@ class TransferService @Inject()(
         )
       )
 
-      transferUpdateTransferConfigRequest.detail.mail.map(d => {
+      transferUpdateTransferConfigRequest.detail.sesmail.map(d => {
         updateTransferConfigMail(sessionInfo.user_group, sessionInfo.user_id, d)
       })
 
@@ -394,7 +398,22 @@ class TransferService @Inject()(
    * @param transferConfigId TransferConfig ID
    * @return MailTransfer用のconfig
    */
-  private def getTransferConfigMail(userGroup: String, transferConfigId: BigInt): Option[TransferGetTransferResponseSesMailTransferConfig] = {
+  private def getTransferConfigSmtpMail(userGroup: String, transferConfigId: BigInt, cryptoConfig: CryptoConfig)(implicit session: DBSession): Option[TransferGetTransferResponseSmtpMailTransferConfig] = {
+    val crypto = Crypto(cryptoConfig.secret_key_string, cryptoConfig.cipher_algorithm, cryptoConfig.secret_key_algorithm, cryptoConfig.charset)
+    transferConfigSmtpMailDAO.get(userGroup, transferConfigId).map(f => {
+      TransferGetTransferResponseSmtpMailTransferConfig(
+        f.id,
+        f.transfer_config_id,
+        f.smtp_host,
+        f.smtp_port,
+        f.smtp_user,
+        f.from_address,
+        crypto.decrypt(f.smtp_password, f.iv_smtp_password)
+      )
+    })
+  }
+
+  private def getTransferConfigSesMail(userGroup: String, transferConfigId: BigInt): Option[TransferGetTransferResponseSesMailTransferConfig] = {
     transferConfigSesMailDAO.get(userGroup, transferConfigId).map(f => {
       TransferGetTransferResponseSesMailTransferConfig(
         f.id,

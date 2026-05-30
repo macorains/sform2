@@ -74,7 +74,7 @@
         </BCol>
       </BRow>
       <BRow
-          v-if="transferConfig.detail.mail.use_cc"
+          v-if="transferConfig.detail.sesmail.use_cc"
           class="mb-2"
       >
         <BCol cols="2">
@@ -113,7 +113,7 @@
         </BCol>
       </BRow>
       <BRow
-          v-if="transferConfig.detail.mail.use_bcc"
+          v-if="transferConfig.detail.sesmail.use_bcc"
           class="mb-2"
       >
         <BCol cols="2">
@@ -128,7 +128,7 @@
         </BCol>
       </BRow>
       <BRow
-          v-if="transferConfig.detail.mail.use_replyto"
+          v-if="transferConfig.detail.sesmail.use_replyto"
           class="mb-2"
       >
         <BCol cols="2">
@@ -211,11 +211,11 @@ const load = (data, form_cols) => {
   requestGet(
     `/transfer/config/${data.transfer_config_id}`,
     response => {
-      const mail = response.data.detail.mail
+      const mail = response.data.detail.sesmail
       mailAddressList.value = mail.mail_address_list.map(item => ({ value: item.id, text: item.name }))
-      transferConfig.detail.mail.use_cc = mail.use_cc
-      transferConfig.detail.mail.use_bcc = mail.use_bcc
-      transferConfig.detail.mail.use_replyto = mail.use_replyto
+      transferConfig.detail.sesmail.use_cc = mail.use_cc
+      transferConfig.detail.sesmail.use_bcc = mail.use_bcc
+      transferConfig.detail.sesmail.use_replyto = mail.use_replyto
     },
     error => {
       console.log(error)

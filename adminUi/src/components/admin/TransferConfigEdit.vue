@@ -56,6 +56,7 @@
       <div>
         <TransferConfigEditSalesforce ref="configEditSalesforceRef" v-if="transferConfig.type_code === 'salesforce'" :salesforceData="transferConfig.detail.salesforce" />
         <TransferConfigEditSesMail ref="configEditSesMailRef" v-if="transferConfig.type_code === 'sesmail'" :mailData="transferConfig.detail.sesmail" />
+        <TransferConfigEditSmtpMail ref="configEditSmtpMailRef" v-if="transferConfig.type_code === 'smtpmail'" :smtpMailData="transferConfig.detail.smtpmail" />
       </div>
     </BForm>
   </BContainer>
@@ -66,6 +67,7 @@ import {getCurrentInstance, ref, computed, reactive} from "vue"
 import {BSpinner} from "bootstrap-vue-3"
 import TransferConfigEditSesMail from "@/components/admin/TransferConfigEditSesMail.vue";
 import TransferConfigEditSalesforce from "@/components/admin/TransferConfigEditSalesforce.vue";
+import TransferConfigEditSmtpMail from "@/components/admin/TransferConfigEditSmtpMail.vue";
 
 const instance = getCurrentInstance()
 const $http = instance.appContext.config.globalProperties.$http
@@ -74,6 +76,7 @@ const emit = defineEmits(['saved'])
 
 const configEditSesMailRef = ref(null)
 const configEditSalesforceRef = ref(null)
+const configEditSmtpMailRef = ref(null)
 
 const isLoading = ref(false)
 const transferConfig = reactive({
@@ -82,7 +85,7 @@ const transferConfig = reactive({
   name: '',
   status: 1,
   detail: {
-    mail: {
+    sesmail: {
       use_cc: false,
       use_replyto: false,
       use_bcc: false,
@@ -96,6 +99,13 @@ const transferConfig = reactive({
       sf_domain: '',
       api_version: '',
       objects: []
+    },
+    smtpmail: {
+      smtp_host: '',
+      smtp_port: 587,
+      smtp_user: '',
+      from_address: '',
+      smtp_password: '',
     }
   }
 })
@@ -125,8 +135,9 @@ const loadConfig = (id) => {
         transferConfig.config_index = response.data.config_index
         transferConfig.type_code = response.data.type_code
         const defaultDetail = {
-          mail: { use_cc: false, use_replyto: false, use_bcc: false, mail_address_list: [] },
-          salesforce: { sf_user_name: '', sf_password: '', sf_client_id: '', sf_client_secret: '', sf_domain: '', api_version: '', objects: [] }
+          sesmail: { use_cc: false, use_replyto: false, use_bcc: false, mail_address_list: [] },
+          salesforce: { sf_user_name: '', sf_password: '', sf_client_id: '', sf_client_secret: '', sf_domain: '', api_version: '', objects: [] },
+          smtpmail: { smtp_host: '', smtp_port: 587, smtp_user: '', from_address: '', smtp_password: '' }
         }
         transferConfig.detail = { ...defaultDetail, ...response.data.detail }
         setTypeOptions(transferConfig.type_code)
@@ -135,44 +146,43 @@ const loadConfig = (id) => {
 
 const saveConfig = () => {
   isLoading.value = true
-  if (transferConfig.type_code === 'sesmail') {
-    transferConfig.detail.sesmail = configEditSesMailRef.value.getData()
-  }
-  if (transferConfig.type_code === 'salesforce') {
-    transferConfig.detail.salesforce = configEditSalesforceRef.value.getData()
-  }
 
   const saveData = JSON.parse(JSON.stringify(transferConfig))
+
   if (transferConfig.type_code === 'sesmail') {
+    saveData.detail.sesmail = configEditSesMailRef.value.getData()
     delete saveData.detail.salesforce
+    delete saveData.detail.smtpmail
   }
   if (transferConfig.type_code === 'salesforce') {
+    saveData.detail.salesforce = configEditSalesforceRef.value.getData()
     delete saveData.detail.sesmail
+    delete saveData.detail.smtpmail
   }
-  console.log(saveData)
-  // データの確認のため一旦コメントアウト後で戻す
-
+  if (transferConfig.type_code === 'smtpmail') {
+    saveData.detail.smtpmail = configEditSmtpMailRef.value.getData()
+    delete saveData.detail.sesmail
+    delete saveData.detail.salesforce
+  }
 
   $http.post('/transfer/config', saveData)
       .then(response => {
         isLoading.value = false
         emit('saved')
       })
-
-
 }
 
 const addMailAddress = () => {
-  if (!Array.isArray(transferConfig.detail.mail.mail_address_list)) {
-    transferConfig.detail.mail.mail_address_list = [];
+  if (!Array.isArray(transferConfig.detail.sesmail.mail_address_list)) {
+    transferConfig.detail.sesmail.mail_address_list = [];
   }
-  transferConfig.detail.mail.mail_address_list.push({ transferconfig_mail_id: transferConfig.detail.mail.id, name:'', address:'', address_index: transferConfig.detail.mail.mail_address_list.length + 1 })
+  transferConfig.detail.sesmail.mail_address_list.push({ transferconfig_mail_id: transferConfig.detail.sesmail.id, name:'', address:'', address_index: transferConfig.detail.sesmail.mail_address_list.length + 1 })
 }
 
 const updateMailAddress = (index, key, value) => {
-  transferConfig.detail.mail.mail_address_list[index][key] = value;
+  transferConfig.detail.sesmail.mail_address_list[index][key] = value;
   // Vueのリアクティブシステムに変更を通知
-  transferConfig.detail.mail.mail_address_list = [...transferConfig.detail.mail.mail_address_list];
+  transferConfig.detail.sesmail.mail_address_list = [...transferConfig.detail.sesmail.mail_address_list];
 };
 
 const clearModal = () => {
@@ -182,7 +192,7 @@ const clearModal = () => {
   transferConfig.status = 1
   transferConfig.type_code = ''
   transferConfig.detail = {
-    mail: {
+    sesmail: {
       use_cc: false,
       use_replyto: false,
       use_bcc: false,
@@ -196,6 +206,13 @@ const clearModal = () => {
       sf_domain: '',
       api_version: '',
       objects: []
+    },
+    smtpmail: {
+      smtp_host: '',
+      smtp_port: 587,
+      smtp_user: '',
+      from_address: '',
+      smtp_password: '',
     }
   }
   typeOptions.value = [

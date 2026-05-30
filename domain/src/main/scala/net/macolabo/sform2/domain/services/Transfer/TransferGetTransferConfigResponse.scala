@@ -69,9 +69,24 @@ object TransferGetTransferResponseSalesforceTransferConfig {
   implicit val format: Format[TransferGetTransferResponseSalesforceTransferConfig] = Json.format[TransferGetTransferResponseSalesforceTransferConfig]
 }
 
+case class TransferGetTransferResponseSmtpMailTransferConfig(
+  id: BigInt,
+  transfer_config_id: BigInt,
+  smtp_host: String,
+  smtp_port: Int,
+  smtp_user: String,
+  from_address: String,
+  smtp_password: String,
+)
+
+object TransferGetTransferResponseSmtpMailTransferConfig {
+  implicit val format: Format[TransferGetTransferResponseSmtpMailTransferConfig] = Json.format[TransferGetTransferResponseSmtpMailTransferConfig]
+}
+
 case class TransferGetTransferResponseConfigDetail(
   sesmail: Option[TransferGetTransferResponseSesMailTransferConfig],
   salesforce: Option[TransferGetTransferResponseSalesforceTransferConfig],
+  smtpmail: Option[TransferGetTransferResponseSmtpMailTransferConfig],
 )
 
 object TransferGetTransferResponseConfigDetail {

@@ -70,7 +70,7 @@ object TransferUpdateTransferRequestSalesforceTransferConfig {
 }
 
 case class TransferUpdateTransferRequestConfigDetail(
-                                                    mail: Option[TransferUpdateTransferRequestSesMailTransferConfig],
+                                                    sesmail: Option[TransferUpdateTransferRequestSesMailTransferConfig],
                                                     salesforce: Option[TransferUpdateTransferRequestSalesforceTransferConfig],
                                                   )
 
