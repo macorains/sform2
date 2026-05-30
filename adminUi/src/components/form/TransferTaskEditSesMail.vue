@@ -224,7 +224,7 @@ const load = (data, form_cols) => {
 }
 
 const insertTag = (fieldId) => {
-  const el = body.value.$el.querySelector('textarea')
+  const el = body.value.$el
   const start = el.selectionStart
   const end = el.selectionEnd
   const tag = `{${fieldId}}`
