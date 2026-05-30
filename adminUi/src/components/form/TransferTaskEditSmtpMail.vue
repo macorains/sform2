@@ -143,14 +143,14 @@ const load = (data, form_cols) => {
   transferTask.smtpmail.bcc_address = smtpmail.bcc_address ?? ''
   transferTask.smtpmail.to_address_type = smtpmail.to_address_field ? 'to_mail_address_field' : 'to_mail_address'
 
-  fieldList.value = form_cols.map(fc => ({ value: fc.id, text: fc.name }))
+  fieldList.value = form_cols.map(fc => ({ value: fc.col_id, text: fc.name }))
 }
 
 const insertTag = (fieldId) => {
   const el = body.value.$el
   const start = el.selectionStart
   const end = el.selectionEnd
-  const tag = `{${fieldId}}`
+  const tag = `{%${fieldId}%}`
   transferTask.smtpmail.body = transferTask.smtpmail.body.slice(0, start) + tag + transferTask.smtpmail.body.slice(end)
   const newPos = start + tag.length
   el.focus()

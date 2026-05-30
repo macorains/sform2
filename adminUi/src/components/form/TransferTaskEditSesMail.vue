@@ -206,7 +206,7 @@ const load = (data, form_cols) => {
   transferTask.name = data.name
   Object.assign(transferTask.sesmail, data.sesmail)
 
-  fieldList.value = form_cols.map(fc => ({ value: fc.id, text: fc.name }))
+  fieldList.value = form_cols.map(fc => ({ value: fc.col_id, text: fc.name }))
 
   requestGet(
     `/transfer/config/${data.transfer_config_id}`,
@@ -227,7 +227,7 @@ const insertTag = (fieldId) => {
   const el = body.value.$el
   const start = el.selectionStart
   const end = el.selectionEnd
-  const tag = `{${fieldId}}`
+  const tag = `{%${fieldId}%}`
   transferTask.sesmail.body = transferTask.sesmail.body.slice(0, start) + tag + transferTask.sesmail.body.slice(end)
   const newPos = start + tag.length
   el.focus()
