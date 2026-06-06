@@ -18,9 +18,9 @@
         </BCol>
         <BCol cols="10">
           <BFormInput
-              id="transferTask.mail.subject"
+              id="transferTask.sesmail.subject"
               ref="subject"
-              v-model="transferTask.mail.subject"
+              v-model="transferTask.sesmail.subject"
               type="text"
           />
         </BCol>
@@ -31,8 +31,8 @@
         </BCol>
         <BCol cols="10">
           <BFormSelect
-              id="transferTask.mail.from_address_id"
-              v-model="transferTask.mail.from_address_id"
+              id="transferTask.sesmail.from_address_id"
+              v-model="transferTask.sesmail.from_address_id"
               :options="mailAddressList"
           />
         </BCol>
@@ -44,7 +44,7 @@
         <BCol cols="10">
           <BFormRadioGroup
               id="mail_to_type_group"
-              v-model="transferTask.mail.to_address_type"
+              v-model="transferTask.sesmail.to_address_type"
               name="mail_to_type_component"
               :options="[
                 { value: 'to_mail_address', text: 'メールアドレス指定' },
@@ -53,28 +53,28 @@
               ]"
           />
           <BFormInput
-              v-if="transferTask.mail.to_address_type === 'to_mail_address'"
-              id="transferTask.mail.to_address"
+              v-if="transferTask.sesmail.to_address_type === 'to_mail_address'"
+              id="transferTask.sesmail.to_address"
               ref="to_address"
-              v-model="transferTask.mail.to_address"
+              v-model="transferTask.sesmail.to_address"
               type="text"
           />
           <BFormSelect
-              v-if="transferTask.mail.to_address_type === 'to_mail_address_id'"
-              id="transferTask.mail.to_address_id"
-              v-model="transferTask.mail.to_address_id"
+              v-if="transferTask.sesmail.to_address_type === 'to_mail_address_id'"
+              id="transferTask.sesmail.to_address_id"
+              v-model="transferTask.sesmail.to_address_id"
               :options="mailAddressList"
           />
           <BFormSelect
-              v-if="transferTask.mail.to_address_type === 'to_mail_address_field'"
-              id="transferTask.mail.to_address_field"
-              v-model="transferTask.mail.to_address_field"
+              v-if="transferTask.sesmail.to_address_type === 'to_mail_address_field'"
+              id="transferTask.sesmail.to_address_field"
+              v-model="transferTask.sesmail.to_address_field"
               :options="fieldList"
           />
         </BCol>
       </BRow>
       <BRow
-          v-if="transferConfig.detail.mail.use_cc"
+          v-if="transferConfig.detail.sesmail.use_cc"
           class="mb-2"
       >
         <BCol cols="2">
@@ -83,7 +83,7 @@
         <BCol cols="10">
           <BFormRadioGroup
               id="mail_cc_type_group"
-              v-model="transferTask.mail.cc_address_type"
+              v-model="transferTask.sesmail.cc_address_type"
               name="mail_cc_type_component"
               :options="[
                 { value: 'cc_mail_address', text: 'メールアドレス指定' },
@@ -92,28 +92,28 @@
               ]"
           />
           <BFormInput
-              v-if="transferTask.mail.cc_address_type === 'cc_mail_address'"
-              id="transferTask.mail.cc_address"
+              v-if="transferTask.sesmail.cc_address_type === 'cc_mail_address'"
+              id="transferTask.sesmail.cc_address"
               ref="cc_address"
-              v-model="transferTask.mail.cc_address"
+              v-model="transferTask.sesmail.cc_address"
               type="text"
           />
           <BFormSelect
-              v-if="transferTask.mail.cc_address_type === 'cc_mail_address_id'"
-              id="transferTask.mail.cc_address_id"
-              v-model="transferTask.mail.cc_address_id"
+              v-if="transferTask.sesmail.cc_address_type === 'cc_mail_address_id'"
+              id="transferTask.sesmail.cc_address_id"
+              v-model="transferTask.sesmail.cc_address_id"
               :options="mailAddressList"
           />
           <BFormSelect
-              v-if="transferTask.mail.cc_address_type === 'cc_mail_address_field'"
-              id="transferTask.mail.cc_address_field"
-              v-model="transferTask.mail.cc_address_field"
+              v-if="transferTask.sesmail.cc_address_type === 'cc_mail_address_field'"
+              id="transferTask.sesmail.cc_address_field"
+              v-model="transferTask.sesmail.cc_address_field"
               :options="fieldList"
           />
         </BCol>
       </BRow>
       <BRow
-          v-if="transferConfig.detail.mail.use_bcc"
+          v-if="transferConfig.detail.sesmail.use_bcc"
           class="mb-2"
       >
         <BCol cols="2">
@@ -121,14 +121,14 @@
         </BCol>
         <BCol cols="10">
           <BFormSelect
-              id="transferTask.mail.bcc_address_id"
-              v-model="transferTask.mail.bcc_address_id"
+              id="transferTask.sesmail.bcc_address_id"
+              v-model="transferTask.sesmail.bcc_address_id"
               :options="mailAddressList"
           />
         </BCol>
       </BRow>
       <BRow
-          v-if="transferConfig.detail.mail.use_replyto"
+          v-if="transferConfig.detail.sesmail.use_replyto"
           class="mb-2"
       >
         <BCol cols="2">
@@ -136,8 +136,8 @@
         </BCol>
         <BCol cols="10">
           <BFormSelect
-              id="transferTask.mail.replyto_address_id"
-              v-model="transferTask.mail.replyto_address_id"
+              id="transferTask.sesmail.replyto_address_id"
+              v-model="transferTask.sesmail.replyto_address_id"
               :options="mailAddressList"
           />
         </BCol>
@@ -148,9 +148,9 @@
         </BCol>
         <BCol cols="10">
           <BFormTextarea
-              id="transferTask.mail.body"
+              id="transferTask.sesmail.body"
               ref="body"
-              v-model="transferTask.mail.body"
+              v-model="transferTask.sesmail.body"
               :rows="10"
           />
           <span
@@ -179,7 +179,7 @@ const transferTask = reactive({
   id: null,
   transfer_config_id: null,
   name: '',
-  mail: {
+  sesmail: {
     subject: '',
     from_address_id: null,
     to_address_type: 'to_mail_address',
@@ -195,7 +195,7 @@ const transferTask = reactive({
     body: '',
   }
 })
-const transferConfig = reactive({ detail: { mail: { use_cc: false, use_bcc: false, use_replyto: false } } })
+const transferConfig = reactive({ detail: { sesmail: { use_cc: false, use_bcc: false, use_replyto: false } } })
 const fieldList = ref([])
 const mailAddressList = ref([])
 const body = ref(null)
@@ -204,18 +204,18 @@ const load = (data, form_cols) => {
   transferTask.id = data.id
   transferTask.transfer_config_id = data.transfer_config_id
   transferTask.name = data.name
-  Object.assign(transferTask.mail, data.mail)
+  Object.assign(transferTask.sesmail, data.sesmail)
 
-  fieldList.value = form_cols.map(fc => ({ value: fc.id, text: fc.name }))
+  fieldList.value = form_cols.map(fc => ({ value: fc.col_id, text: fc.name }))
 
   requestGet(
     `/transfer/config/${data.transfer_config_id}`,
     response => {
-      const mail = response.data.detail.mail
+      const mail = response.data.detail.sesmail
       mailAddressList.value = mail.mail_address_list.map(item => ({ value: item.id, text: item.name }))
-      transferConfig.detail.mail.use_cc = mail.use_cc
-      transferConfig.detail.mail.use_bcc = mail.use_bcc
-      transferConfig.detail.mail.use_replyto = mail.use_replyto
+      transferConfig.detail.sesmail.use_cc = mail.use_cc
+      transferConfig.detail.sesmail.use_bcc = mail.use_bcc
+      transferConfig.detail.sesmail.use_replyto = mail.use_replyto
     },
     error => {
       console.log(error)
@@ -224,15 +224,29 @@ const load = (data, form_cols) => {
 }
 
 const insertTag = (fieldId) => {
-  const el = body.value.$el.querySelector('textarea')
+  const el = body.value.$el
   const start = el.selectionStart
   const end = el.selectionEnd
-  const tag = `{${fieldId}}`
-  transferTask.mail.body = transferTask.mail.body.slice(0, start) + tag + transferTask.mail.body.slice(end)
+  const tag = `{%${fieldId}%}`
+  transferTask.sesmail.body = transferTask.sesmail.body.slice(0, start) + tag + transferTask.sesmail.body.slice(end)
   const newPos = start + tag.length
   el.focus()
   el.setSelectionRange(newPos, newPos)
 }
 
-defineExpose({ load })
+const getMailData = () => {
+  return {
+    from_address_id: transferTask.sesmail.from_address_id,
+    to_address: transferTask.sesmail.to_address_type === 'to_mail_address' ? transferTask.sesmail.to_address : null,
+    to_address_id: transferTask.sesmail.to_address_type === 'to_mail_address_id' ? transferTask.sesmail.to_address_id : null,
+    subject: transferTask.sesmail.subject,
+    body: transferTask.sesmail.body,
+    cc_address: transferTask.sesmail.cc_address_type === 'cc_mail_address' ? transferTask.sesmail.cc_address : null,
+    cc_address_id: transferTask.sesmail.cc_address_type === 'cc_mail_address_id' ? transferTask.sesmail.cc_address_id : null,
+    bcc_address_id: transferTask.sesmail.bcc_address_id,
+    replyto_address_id: transferTask.sesmail.replyto_address_id,
+  }
+}
+
+defineExpose({ load, getMailData })
 </script>

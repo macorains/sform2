@@ -4,21 +4,23 @@ import com.google.inject.Inject
 import net.macolabo.sform2.domain.models.SessionInfo
 import net.macolabo.sform2.domain.models.daos._
 import net.macolabo.sform2.domain.models.entity.CryptoConfig
-import net.macolabo.sform2.domain.models.entity.transfer.{TransferConfig, TransferConfigMail, TransferConfigMailAddress, TransferConfigSalesforce, TransferConfigSalesforceObject, TransferConfigSalesforceObjectField}
+import net.macolabo.sform2.domain.models.entity.transfer.{TransferConfig, TransferConfigSesMail, TransferConfigMailAddress, TransferConfigSalesforce, TransferConfigSalesforceObject, TransferConfigSalesforceObjectField, TransferConfigSmtpMail}
 import net.macolabo.sform2.domain.services.TransferConfig.save._
 import net.macolabo.sform2.domain.utils.Crypto
-import scalikejdbc.DB
+
+import scalikejdbc._
 
 import java.time.ZonedDateTime
 import scala.concurrent.ExecutionContext
 
 class TransferConfigServiceImpl @Inject()(
-  transferConfigMailDAO: TransferConfigMailDAO,
+  transferConfigSesMailDAO: TransferConfigSesMailDAO,
   transferConfigMailAddressDAO: TransferConfigMailAddressDAO,
   transferConfigSalesforceDAO: TransferConfigSalesforceDAO,
   transferConfigSalesforceObjectDAO: TransferConfigSalesforceObjectDAO,
   transferConfigSalesforceObjectFieldDAO: TransferConfigSalesforceObjectFieldDAO,
-  transferConfigDAO: TransferConfigDAO
+  transferConfigDAO: TransferConfigDAO,
+  transferConfigSmtpMailDAO: TransferConfigSmtpMailDAO
 ) (implicit ex: ExecutionContext) extends TransferConfigService {
 
   // Insert or Update
@@ -52,22 +54,26 @@ class TransferConfigServiceImpl @Inject()(
         ))
       })
 
-      request.detail.mail.map(detail => {
-        saveMailTransferConfig(detail, transferConfigId, sessionInfo)
+      request.detail.sesmail.map(detail => {
+        saveSesMailTransferConfig(detail, transferConfigId, sessionInfo)
       })
 
       request.detail.salesforce.map(detail => {
         saveSalesforceTransferConfig(detail, cryptoConfig, transferConfigId, sessionInfo)
       })
 
+      request.detail.smtpmail.map(detail => {
+        saveSmtpMailTransferConfig(detail, cryptoConfig, transferConfigId, sessionInfo)
+      })
+
       transferConfigId
     })
   }
 
-  def saveMailTransferConfig(request: MailTransferConfigSaveRequest, transferConfigId: BigInt, sessionInfo: SessionInfo): BigInt = {
-    val transferConfigMailId = request.id.map(id => {
-      transferConfigMailDAO.save(
-        TransferConfigMail(
+  def saveSesMailTransferConfig(request: SesMailTransferConfigSaveRequest, transferConfigId: BigInt, sessionInfo: SessionInfo): BigInt = {
+    val transferConfigSesMailId = request.id.map(id => {
+      transferConfigSesMailDAO.save(
+        TransferConfigSesMail(
           id,
           transferConfigId,
           request.use_cc,
@@ -81,8 +87,8 @@ class TransferConfigServiceImpl @Inject()(
         )
       )
     }).getOrElse({
-      transferConfigMailDAO.create(
-        TransferConfigMail(
+      transferConfigSesMailDAO.create(
+        TransferConfigSesMail(
           null, // 新規作成時は使用しない
           transferConfigId,
           request.use_cc,
@@ -98,22 +104,22 @@ class TransferConfigServiceImpl @Inject()(
     })
 
     val mailAddressIdList = request.mail_address_list
-      .map(mailAddress => saveMailTransferConfigMailAddress(mailAddress, transferConfigMailId, sessionInfo))
+      .map(mailAddress => saveSesMailTransferConfigMailAddress(mailAddress, transferConfigId, sessionInfo))
 
     // 更新or作成リクエストに含まれていないメールアドレスは削除対象なので削除する
-    transferConfigMailAddressDAO.getList(sessionInfo.user_group, transferConfigMailId)
+    transferConfigMailAddressDAO.getList(sessionInfo.user_group, transferConfigId)
       .filterNot(address => mailAddressIdList.contains(address.id))
       .map(address => address.id)
       .foreach(address => transferConfigMailAddressDAO.delete(sessionInfo.user_group, address))
 
-    transferConfigMailId
+    transferConfigSesMailId
   }
 
-  def saveMailTransferConfigMailAddress(request: MailTransferConfigMailAddressSaveRequest, transferConfigMailId: BigInt, sessionInfo: SessionInfo): BigInt = {
+  def saveSesMailTransferConfigMailAddress(request: SesMailTransferConfigMailAddressSaveRequest, transferConfigId: BigInt, sessionInfo: SessionInfo): BigInt = {
     request.id.map(id => {
       transferConfigMailAddressDAO.save(TransferConfigMailAddress(
         id,
-        request.transfer_config_mail_id.get, // 上書き保存の時は必ず入る想定
+        request.transfer_config_id.get, // 上書き保存の時は必ず入る想定
         request.address_index,
         request.name,
         request.address,
@@ -126,7 +132,7 @@ class TransferConfigServiceImpl @Inject()(
     }).getOrElse({
       transferConfigMailAddressDAO.create(TransferConfigMailAddress(
         null, // 新規作成時は使わない
-        transferConfigMailId,
+        transferConfigId,
         request.address_index,
         request.name,
         request.address,
@@ -290,22 +296,67 @@ class TransferConfigServiceImpl @Inject()(
     })
   }
 
+  def saveSmtpMailTransferConfig(request: SmtpMailTransferConfigSaveRequest, cryptoConfig: CryptoConfig, transferConfigId: BigInt, sessionInfo: SessionInfo)(implicit session: DBSession = AutoSession): BigInt = {
+    val crypto = Crypto(cryptoConfig.secret_key_string, cryptoConfig.cipher_algorithm, cryptoConfig.secret_key_algorithm, cryptoConfig.charset)
+    val ivPassword = crypto.generateIV
+    val encryptedPassword = crypto.encrypt(request.smtp_password, ivPassword)
+
+    val existingRows = transferConfigSmtpMailDAO.getList(sessionInfo.user_group, transferConfigId)
+    existingRows.drop(1).foreach(r => transferConfigSmtpMailDAO.delete(sessionInfo.user_group, r.id))
+
+    val existingId = request.id.orElse(existingRows.headOption.map(_.id))
+    existingId.map(id => {
+      transferConfigSmtpMailDAO.save(TransferConfigSmtpMail(
+        id,
+        transferConfigId,
+        request.smtp_host,
+        request.smtp_port,
+        request.smtp_user,
+        request.from_address,
+        encryptedPassword,
+        ivPassword,
+        sessionInfo.user_group,
+        sessionInfo.user_id,
+        sessionInfo.user_id,
+        ZonedDateTime.now(),
+        ZonedDateTime.now()
+      ))
+    }).getOrElse({
+      transferConfigSmtpMailDAO.create(TransferConfigSmtpMail(
+        null,
+        transferConfigId,
+        request.smtp_host,
+        request.smtp_port,
+        request.smtp_user,
+        request.from_address,
+        encryptedPassword,
+        ivPassword,
+        sessionInfo.user_group,
+        sessionInfo.user_id,
+        sessionInfo.user_id,
+        ZonedDateTime.now(),
+        ZonedDateTime.now()
+      ))
+    })
+  }
+
   // Delete
   def deleteTransferConfig(id: BigInt, sessionInfo: SessionInfo): Int = {
     DB.localTx(implicit session => {
-      transferConfigMailDAO.get(sessionInfo.user_group, id).map(tc => deleteMailTransferConfig(tc, sessionInfo))
+      transferConfigSesMailDAO.get(sessionInfo.user_group, id).map(tc => deleteSesMailTransferConfig(tc, id, sessionInfo))
       transferConfigSalesforceDAO.get(id).map(tc => deleteSalesforceTransferConfig(tc.id, sessionInfo))
+      transferConfigSmtpMailDAO.get(sessionInfo.user_group, id).map(tc => transferConfigSmtpMailDAO.delete(sessionInfo.user_group, tc.id))
       transferConfigDAO.delete(sessionInfo.user_group, id)
     })
   }
 
-  def deleteMailTransferConfig(config: TransferConfigMail, sessionInfo: SessionInfo): Int = {
-    transferConfigMailAddressDAO.getList(sessionInfo.user_group, config.id).map(address => deleteMailTransferConfigMailAddress(address.id, sessionInfo))
-    transferConfigMailDAO.delete(sessionInfo.user_group, config.id)
+  def deleteSesMailTransferConfig(config: TransferConfigSesMail, transferConfigId: BigInt, sessionInfo: SessionInfo): Int = {
+    transferConfigMailAddressDAO.getList(sessionInfo.user_group, transferConfigId).map(address => deleteSesMailTransferConfigMailAddress(address.id, sessionInfo))
+    transferConfigSesMailDAO.delete(sessionInfo.user_group, config.id)
 
   }
 
-  def deleteMailTransferConfigMailAddress(id: BigInt, sessionInfo: SessionInfo): Int = {
+  def deleteSesMailTransferConfigMailAddress(id: BigInt, sessionInfo: SessionInfo): Int = {
     transferConfigMailAddressDAO.delete(sessionInfo.user_group, id)
   }
 

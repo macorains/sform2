@@ -2,29 +2,29 @@ package net.macolabo.sform2.domain.services.Transfer
 
 import play.api.libs.json.{Format, Json}
 
-case class TransferGetTransferResponseMailTransferConfigMailAddress(
+case class TransferGetTransferResponseMailAddress(
   id: BigInt,
-  transfer_config_mail_id: BigInt,
+  transfer_config_id: BigInt,
   address_index: Int,
   name: String,
   address: String
 )
 
-object TransferGetTransferResponseMailTransferConfigMailAddress {
-  implicit val format: Format[TransferGetTransferResponseMailTransferConfigMailAddress] = Json.format[TransferGetTransferResponseMailTransferConfigMailAddress]
+object TransferGetTransferResponseMailAddress {
+  implicit val format: Format[TransferGetTransferResponseMailAddress] = Json.format[TransferGetTransferResponseMailAddress]
 }
 
-case class TransferGetTransferResponseMailTransferConfig(
+case class TransferGetTransferResponseSesMailTransferConfig(
   id: BigInt,
   transfer_config_id: BigInt,
   use_cc: Boolean,
   use_bcc: Boolean,
   use_replyto: Boolean,
-  mail_address_list: List[TransferGetTransferResponseMailTransferConfigMailAddress]
+  mail_address_list: List[TransferGetTransferResponseMailAddress]
 )
 
-object TransferGetTransferResponseMailTransferConfig {
-  implicit val format: Format[TransferGetTransferResponseMailTransferConfig] = Json.format[TransferGetTransferResponseMailTransferConfig]
+object TransferGetTransferResponseSesMailTransferConfig {
+  implicit val format: Format[TransferGetTransferResponseSesMailTransferConfig] = Json.format[TransferGetTransferResponseSesMailTransferConfig]
 }
 
 case class TransferGetTransferResponseSalesforceTransferConfigObjectField(
@@ -69,9 +69,24 @@ object TransferGetTransferResponseSalesforceTransferConfig {
   implicit val format: Format[TransferGetTransferResponseSalesforceTransferConfig] = Json.format[TransferGetTransferResponseSalesforceTransferConfig]
 }
 
+case class TransferGetTransferResponseSmtpMailTransferConfig(
+  id: BigInt,
+  transfer_config_id: BigInt,
+  smtp_host: String,
+  smtp_port: Int,
+  smtp_user: String,
+  from_address: String,
+  smtp_password: String,
+)
+
+object TransferGetTransferResponseSmtpMailTransferConfig {
+  implicit val format: Format[TransferGetTransferResponseSmtpMailTransferConfig] = Json.format[TransferGetTransferResponseSmtpMailTransferConfig]
+}
+
 case class TransferGetTransferResponseConfigDetail(
-  mail: Option[TransferGetTransferResponseMailTransferConfig],
+  sesmail: Option[TransferGetTransferResponseSesMailTransferConfig],
   salesforce: Option[TransferGetTransferResponseSalesforceTransferConfig],
+  smtpmail: Option[TransferGetTransferResponseSmtpMailTransferConfig],
 )
 
 object TransferGetTransferResponseConfigDetail {

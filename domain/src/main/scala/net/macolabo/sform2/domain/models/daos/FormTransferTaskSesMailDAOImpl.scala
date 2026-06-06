@@ -1,11 +1,11 @@
 package net.macolabo.sform2.domain.models.daos
 
-import net.macolabo.sform2.domain.models.entity.formtransfertask.FormTransferTaskMail
+import net.macolabo.sform2.domain.models.entity.formtransfertask.FormTransferTaskSesMail
 import scalikejdbc._
 
-class FormTransferTaskMailDAOImpl extends FormTransferTaskMailDAO {
-  def get(formTransferTaskId: BigInt)(implicit session: DBSession): Option[FormTransferTaskMail] = {
-    val f = FormTransferTaskMail.syntax("f")
+class FormTransferTaskSesMailDAOImpl extends FormTransferTaskSesMailDAO {
+  def get(formTransferTaskId: BigInt)(implicit session: DBSession): Option[FormTransferTaskSesMail] = {
+    val f = FormTransferTaskSesMail.syntax("f")
     withSQL (
       select(
         f.id,
@@ -27,9 +27,9 @@ class FormTransferTaskMailDAOImpl extends FormTransferTaskMailDAO {
         f.created,
         f.modified
       )
-        .from(FormTransferTaskMail as f)
+        .from(FormTransferTaskSesMail as f)
         .where
         .eq(f.form_transfer_task_id, formTransferTaskId)
-    ).map(rs=>FormTransferTaskMail(rs)).list().apply().headOption
+    ).map(rs=>FormTransferTaskSesMail(rs)).list().apply().headOption
   }
 }

@@ -1,6 +1,7 @@
 package net.macolabo.sform2.controllers
 
 import net.macolabo.sform2.domain.models.SessionInfo
+import net.macolabo.sform2.domain.services.Form.sendtestmail.FormSendTestMailRequest
 import net.macolabo.sform2.domain.services.Form.update.FormUpdateRequest
 
 import javax.inject._
@@ -116,6 +117,27 @@ class FormController @Inject() (
       case Success(sessionInfo) =>
         val result = formService.deleteForm(hashed_form_id, sessionInfo)
         Ok(toJson(result))
+      case Failure(e) =>
+        BadRequest(s"Session invalid. ${e.getMessage}")
+    }
+  }
+
+  /**
+   * メール送信テスト
+   * POST /form/test/mail
+   * @return
+   */
+  def sendTestMail(): Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+    Try(SessionInfo(request.session)) match {
+      case Success(_) =>
+        request.body.asJson match {
+          case Some(jsBody) =>
+            jsBody.validate[FormSendTestMailRequest].fold(
+              errors => BadRequest(JsError.toJson(errors)),
+              value => Ok(toJson(formService.sendTestMail(value)))
+            )
+          case None => BadRequest("Missing JSON")
+        }
       case Failure(e) =>
         BadRequest(s"Session invalid. ${e.getMessage}")
     }

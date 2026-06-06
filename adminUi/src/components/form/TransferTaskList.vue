@@ -23,22 +23,45 @@
       </template>
     </draggable>
   </table>
-  <b-modal v-model="editModalMailVisible" size="xl" title="転送タスク編集">
-    <TransferTaskEditMail ref="editModalMailRef"/>
+  <b-modal v-model="editModalSesMailVisible" size="xl" title="転送タスク編集" @hide="testMailStatus = null">
+    <TransferTaskEditSesMail ref="editModalSesMailRef"/>
+    <template #footer>
+      <div class="d-flex align-items-center w-100">
+        <span v-if="testMailStatus" :class="testMailStatus.success ? 'text-success' : 'text-danger'">
+          {{ testMailStatus.message }}
+        </span>
+        <div class="ms-auto d-flex gap-2">
+          <BButton variant="outline-primary" @click="sendTestMail">メール送信テスト</BButton>
+          <BButton variant="primary" @click="editModalSesMailVisible = false">OK</BButton>
+          <BButton @click="editModalSesMailVisible = false">Cancel</BButton>
+        </div>
+      </div>
+    </template>
   </b-modal>
   <b-modal v-model="editModalSalesforceVisible" size="xl" title="転送タスク編集">
     <TransferTaskEditSalesforce ref="editModalSalesforceRef"/>
+  </b-modal>
+  <b-modal v-model="editModalSmtpMailVisible" size="xl" title="転送タスク編集">
+    <TransferTaskEditSmtpMail ref="editModalSmtpMailRef"/>
+    <template #footer>
+      <div class="ms-auto d-flex gap-2">
+        <BButton variant="primary" @click="editModalSmtpMailVisible = false">OK</BButton>
+        <BButton @click="editModalSmtpMailVisible = false">Cancel</BButton>
+      </div>
+    </template>
   </b-modal>
   <BModal v-model="configSelectModalVisible" @ok="addNewTask" @show="onConfigModalShow" :ok-disabled="configOkDisabled" size="lg" title="転送設定の選択">
     <TransferTaskEditSelectConfig ref="configSelectModalRef" @selection-change="v => configOkDisabled = (v === null)" />
   </BModal>
 </template>
 <script setup>
-import {onMounted, ref, inject, getCurrentInstance, reactive} from "vue";
+import {onMounted, ref, inject, getCurrentInstance, reactive} from "vue"
+import { useHttpRequest } from "@/composables/useHttpRequest.js"
 import { BButton, BModal } from 'bootstrap-vue-3'
 import draggable from 'vuedraggable'
-import TransferTaskEditMail from "@/components/form/TransferTaskEditMail.vue";
+import TransferTaskEditSesMail from "@/components/form/TransferTaskEditSesMail.vue";
 import TransferTaskEditSalesforce from "@/components/form/TransferTaskEditSalesforce.vue";
+import TransferTaskEditSmtpMail from "@/components/form/TransferTaskEditSmtpMail.vue";
 import TransferTaskEditSelectConfig from "@/components/form/TransferTaskEditSelectConfig.vue";
 defineProps(['formId'])
 const emit = defineEmits(['update-transfer-tasks'])
@@ -46,13 +69,18 @@ const emit = defineEmits(['update-transfer-tasks'])
 const instance = getCurrentInstance()
 const $http = instance.appContext.config.globalProperties.$http
 
+const { requestPost } = useHttpRequest()
+
 const form = reactive({})
-const editModalMailVisible = ref(false)
+const editModalSesMailVisible = ref(false)
+const testMailStatus = ref(null)
 const editModalSalesforceVisible = ref(false)
+const editModalSmtpMailVisible = ref(false)
 const configSelectModalVisible = ref(false)
 const configSelectModalRef = ref(null)
 const editModalSalesforceRef = ref(null)
-const editModalMailRef = ref(null)
+const editModalSesMailRef = ref(null)
+const editModalSmtpMailRef = ref(null)
 const configOkDisabled = ref(true)
 
 const salesforceTransferTaskDefault = (taskCount, configName) => {
@@ -69,11 +97,11 @@ const salesforceTransferTaskDefault = (taskCount, configName) => {
       object_name: null,
       fields: []
     },
-    mail: null,
+    sesmail: null,
   }
 }
 
-const mailTransferTaskDefault = (taskCount, configName, configId) => {
+const smtpMailTransferTaskDefault = (taskCount, configName, configId) => {
   return {
     id: null,
     name: configName + '-' + (taskCount + 1),
@@ -83,7 +111,31 @@ const mailTransferTaskDefault = (taskCount, configName, configId) => {
     task_index: taskCount + 1,
     form_transfer_task_conditions: [],
     salesforce: null,
-    mail: {
+    sesmail: null,
+    smtpmail: {
+      id: null,
+      form_transfer_task_id: null,
+      subject: '',
+      body: '',
+      to_address: '',
+      to_address_field: null,
+      cc_address: '',
+      bcc_address: '',
+    }
+  }
+}
+
+const sesMailTransferTaskDefault = (taskCount, configName, configId) => {
+  return {
+    id: null,
+    name: configName + '-' + (taskCount + 1),
+    form_id: form.id,
+    transfer_config_id: configId,
+    transfer_config_name: null,
+    task_index: taskCount + 1,
+    form_transfer_task_conditions: [],
+    salesforce: null,
+    sesmail: {
       bcc_address_id: null,
       body: '',
       cc_address: '',
@@ -109,13 +161,17 @@ const onDragEnd = () => {
 }
 
 const edit = (item) => {
-  if (item.mail) {
-    editModalMailRef.value.load(item, form.form_cols)
-    editModalMailVisible.value = true
+  if (item.sesmail) {
+    editModalSesMailRef.value.load(item, form.form_cols)
+    editModalSesMailVisible.value = true
   }
   if (item.salesforce) {
     editModalSalesforceRef.value.load(item, form.form_cols)
     editModalSalesforceVisible.value = true
+  }
+  if (item.smtpmail) {
+    editModalSmtpMailRef.value.load(item, form.form_cols)
+    editModalSmtpMailVisible.value = true
   }
 }
 
@@ -153,13 +209,30 @@ const addNewTask = () => {
 
   if (config.type_code === 'salesforce') {
     newItem = salesforceTransferTaskDefault(taskCount, config.name)
-  } else if (config.type_code === 'mail') {
-    newItem = mailTransferTaskDefault(taskCount, config.name, config.id)
+  } else if (config.type_code === 'sesmail') {
+    newItem = sesMailTransferTaskDefault(taskCount, config.name, config.id)
+  } else if (config.type_code === 'smtpmail') {
+    newItem = smtpMailTransferTaskDefault(taskCount, config.name, config.id)
   }
 
   form.form_transfer_tasks.push(newItem)
   emit('update-transfer-tasks', form.form_transfer_tasks)
   edit(newItem)
+}
+
+const sendTestMail = () => {
+  const mailData = editModalSesMailRef.value.getMailData()
+  testMailStatus.value = null
+  requestPost(
+    '/form/test/mail',
+    mailData,
+    (response) => {
+      testMailStatus.value = { success: response.data.result, message: response.data.message }
+    },
+    () => {
+      testMailStatus.value = { success: false, message: 'エラーが発生しました' }
+    }
+  )
 }
 
 defineExpose({

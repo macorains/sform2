@@ -4,7 +4,7 @@ import scalikejdbc._
 
 import java.time.ZonedDateTime
 
-case class TransferConfigMail(
+case class TransferConfigSesMail(
   id: BigInt,
   transfer_config_id: BigInt,
   use_cc: Boolean,
@@ -17,10 +17,10 @@ case class TransferConfigMail(
   modified: ZonedDateTime
 )
 
-object TransferConfigMail extends SQLSyntaxSupport[TransferConfigMail] {
-  override val tableName = "d_transfer_config_mail"
-  def apply(rs:WrappedResultSet): TransferConfigMail = {
-    TransferConfigMail(
+object TransferConfigSesMail extends SQLSyntaxSupport[TransferConfigSesMail] {
+  override val tableName = "d_transfer_config_ses_mail"
+  def apply(rs:WrappedResultSet): TransferConfigSesMail = {
+    TransferConfigSesMail(
       rs.bigInt("id"),
       rs.bigInt("transfer_config_id"),
       rs.boolean("use_cc"),

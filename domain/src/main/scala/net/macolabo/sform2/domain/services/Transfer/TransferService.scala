@@ -2,11 +2,12 @@ package net.macolabo.sform2.domain.services.Transfer
 
 import com.google.inject.Inject
 import net.macolabo.sform2.domain.models.SessionInfo
-import net.macolabo.sform2.domain.models.daos.{TransferConfigDAO, TransferConfigMailAddressDAO, TransferConfigMailDAO, TransferConfigSalesforceDAO, TransferConfigSalesforceObjectDAO, TransferConfigSalesforceObjectFieldDAO}
+import net.macolabo.sform2.domain.models.daos.{TransferConfigDAO, TransferConfigMailAddressDAO, TransferConfigSalesforceDAO, TransferConfigSalesforceObjectDAO, TransferConfigSalesforceObjectFieldDAO, TransferConfigSesMailDAO, TransferConfigSmtpMailDAO}
 import net.macolabo.sform2.domain.models.entity.CryptoConfig
-import net.macolabo.sform2.domain.models.entity.transfer.{TransferConfig, TransferConfigMail, TransferConfigMailAddress, TransferConfigSalesforce, TransferConfigSalesforceObject, TransferConfigSalesforceObjectField}
+import net.macolabo.sform2.domain.models.entity.transfer.{TransferConfig, TransferConfigMailAddress, TransferConfigSalesforce, TransferConfigSalesforceObject, TransferConfigSalesforceObjectField, TransferConfigSesMail}
 import net.macolabo.sform2.domain.models.entity.transfer.TransferConfigSalesforceObjectField
 import net.macolabo.sform2.domain.utils.Crypto
+import play.api.Logger
 import scalikejdbc.{DB, DBSession}
 
 import java.time.ZonedDateTime
@@ -18,14 +19,16 @@ import scala.concurrent.ExecutionContext
  */
 
 class TransferService @Inject()(
-  transferConfigMailDAO: TransferConfigMailDAO,
+  transferConfigSesMailDAO: TransferConfigSesMailDAO,
   transferConfigMailAddressDAO: TransferConfigMailAddressDAO,
   transferConfigSalesforceDAO: TransferConfigSalesforceDAO,
   transferConfigSalesforceObjectDAO: TransferConfigSalesforceObjectDAO,
   transferConfigSalesforceObjectFieldDAO: TransferConfigSalesforceObjectFieldDAO,
-  transferConfigDAO: TransferConfigDAO
+  transferConfigDAO: TransferConfigDAO,
+  transferConfigSmtpMailDAO: TransferConfigSmtpMailDAO
 ) (implicit ex: ExecutionContext)
 {
+  val logger: Logger = Logger(this.getClass)
 
   /**
    * フォーム編集画面のTransferConfig選択リスト用データ取得
@@ -80,8 +83,9 @@ class TransferService @Inject()(
           f.name,
           f.status,
           TransferGetTransferResponseConfigDetail(
-            getTransferConfigMail(sessionInfo.user_group, transferConfigId),
-            getTransferConfigSalesforce(sessionInfo.user_group, transferConfigId, cryptoConfig)
+            getTransferConfigSesMail(sessionInfo.user_group, transferConfigId),
+            getTransferConfigSalesforce(sessionInfo.user_group, transferConfigId, cryptoConfig),
+            getTransferConfigSmtpMail(sessionInfo.user_group, transferConfigId, cryptoConfig)
           )
         )
       })
@@ -112,7 +116,7 @@ class TransferService @Inject()(
         )
       )
 
-      transferUpdateTransferConfigRequest.detail.mail.map(d => {
+      transferUpdateTransferConfigRequest.detail.sesmail.map(d => {
         updateTransferConfigMail(sessionInfo.user_group, sessionInfo.user_id, d)
       })
 
@@ -131,10 +135,10 @@ class TransferService @Inject()(
    * @param transferUpdateTransferRequestMailTransferConfig TransferConfigMail更新リクエスト
    * @return Result
    */
-  private def updateTransferConfigMail(userGroup: String, userId: String, transferUpdateTransferRequestMailTransferConfig: TransferUpdateTransferRequestMailTransferConfig): BigInt = {
+  private def updateTransferConfigMail(userGroup: String, userId: String, transferUpdateTransferRequestMailTransferConfig: TransferUpdateTransferRequestSesMailTransferConfig): BigInt = {
     DB.localTx(implicit session => {
-      transferConfigMailDAO.save(
-        TransferConfigMail(
+      transferConfigSesMailDAO.save(
+        TransferConfigSesMail(
           transferUpdateTransferRequestMailTransferConfig.id,
           transferUpdateTransferRequestMailTransferConfig.transfer_config_id,
           transferUpdateTransferRequestMailTransferConfig.use_cc,
@@ -153,7 +157,7 @@ class TransferService @Inject()(
           case _ => insertTransferConfigMailAddress(userGroup, userId, m)
         }
       })
-      transferConfigMailAddressDAO.getList(userGroup, transferUpdateTransferRequestMailTransferConfig.id)
+      transferConfigMailAddressDAO.getList(userGroup, transferUpdateTransferRequestMailTransferConfig.transfer_config_id)
         .filterNot(c => updateMailAddressList.contains(c.id))
         .map(c => c.id)
         .foreach(c => transferConfigMailAddressDAO.delete(userGroup, c))
@@ -168,13 +172,13 @@ class TransferService @Inject()(
    * @param transferUpdateTransferRequestMailTransferConfigMailAddress TransferConfigMailAddress更新リクエスト
    * @return Result
    */
-  private def updateTransferConfigMailAddress(userGroup: String, userId: String, transferUpdateTransferRequestMailTransferConfigMailAddress: TransferUpdateTransferRequestMailTransferConfigMailAddress): BigInt = {
+  private def updateTransferConfigMailAddress(userGroup: String, userId: String, transferUpdateTransferRequestMailTransferConfigMailAddress: TransferUpdateTransferRequestSesMailTransferConfigMailAddress): BigInt = {
     DB.localTx(implicit session => {
       val id = transferUpdateTransferRequestMailTransferConfigMailAddress.id.getOrElse(BigInt(0))
 
       TransferConfigMailAddress(
         id,
-        transferUpdateTransferRequestMailTransferConfigMailAddress.transfer_config_mail_id,
+        transferUpdateTransferRequestMailTransferConfigMailAddress.transfer_config_id,
         transferUpdateTransferRequestMailTransferConfigMailAddress.address_index,
         transferUpdateTransferRequestMailTransferConfigMailAddress.name,
         transferUpdateTransferRequestMailTransferConfigMailAddress.address,
@@ -195,12 +199,12 @@ class TransferService @Inject()(
    * @param transferUpdateTransferRequestMailTransferConfigMailAddress TransferConfigMailAddress更新リクエスト
    * @return
    */
-  private def insertTransferConfigMailAddress(userGroup: String, userId: String, transferUpdateTransferRequestMailTransferConfigMailAddress: TransferUpdateTransferRequestMailTransferConfigMailAddress): BigInt = {
+  private def insertTransferConfigMailAddress(userGroup: String, userId: String, transferUpdateTransferRequestMailTransferConfigMailAddress: TransferUpdateTransferRequestSesMailTransferConfigMailAddress): BigInt = {
     DB.localTx(implicit session => {
       transferConfigMailAddressDAO.create(
         TransferConfigMailAddress(
           transferUpdateTransferRequestMailTransferConfigMailAddress.id.getOrElse(0),
-          transferUpdateTransferRequestMailTransferConfigMailAddress.transfer_config_mail_id,
+          transferUpdateTransferRequestMailTransferConfigMailAddress.transfer_config_id,
           transferUpdateTransferRequestMailTransferConfigMailAddress.address_index,
           transferUpdateTransferRequestMailTransferConfigMailAddress.name,
           transferUpdateTransferRequestMailTransferConfigMailAddress.address,
@@ -394,9 +398,24 @@ class TransferService @Inject()(
    * @param transferConfigId TransferConfig ID
    * @return MailTransfer用のconfig
    */
-  private def getTransferConfigMail(userGroup: String, transferConfigId: BigInt): Option[TransferGetTransferResponseMailTransferConfig] = {
-    transferConfigMailDAO.get(userGroup, transferConfigId).map(f => {
-      TransferGetTransferResponseMailTransferConfig(
+  private def getTransferConfigSmtpMail(userGroup: String, transferConfigId: BigInt, cryptoConfig: CryptoConfig)(implicit session: DBSession): Option[TransferGetTransferResponseSmtpMailTransferConfig] = {
+    val crypto = Crypto(cryptoConfig.secret_key_string, cryptoConfig.cipher_algorithm, cryptoConfig.secret_key_algorithm, cryptoConfig.charset)
+    transferConfigSmtpMailDAO.get(userGroup, transferConfigId).map(f => {
+      TransferGetTransferResponseSmtpMailTransferConfig(
+        f.id,
+        f.transfer_config_id,
+        f.smtp_host,
+        f.smtp_port,
+        f.smtp_user,
+        f.from_address,
+        crypto.decrypt(f.smtp_password, f.iv_smtp_password)
+      )
+    })
+  }
+
+  private def getTransferConfigSesMail(userGroup: String, transferConfigId: BigInt): Option[TransferGetTransferResponseSesMailTransferConfig] = {
+    transferConfigSesMailDAO.get(userGroup, transferConfigId).map(f => {
+      TransferGetTransferResponseSesMailTransferConfig(
         f.id,
         f.transfer_config_id,
         f.use_cc,
@@ -413,11 +432,11 @@ class TransferService @Inject()(
    * @param transferConfigMailId TransferConfigMail ID
    * @return MailTransferConfigに付随するメールアドレスリスト
    */
-  private def getTransferConfigMailAddress(userGroup: String, transferConfigMailId: BigInt): List[TransferGetTransferResponseMailTransferConfigMailAddress] = {
-    transferConfigMailAddressDAO.getList(userGroup, transferConfigMailId).map(f => {
-      TransferGetTransferResponseMailTransferConfigMailAddress(
+  private def getTransferConfigMailAddress(userGroup: String, transferConfigId: BigInt): List[TransferGetTransferResponseMailAddress] = {
+    transferConfigMailAddressDAO.getList(userGroup, transferConfigId).map(f => {
+      TransferGetTransferResponseMailAddress(
         f.id,
-        f.transfer_config_mail_id,
+        f.transfer_config_id,
         f.address_index,
         f.name,
         f.address

@@ -70,6 +70,21 @@ object FormColSelectGetReponse {
  * @param mail mail
  * @param salesforce salesforce
  */
+case class FormTransferTaskSmtpMailGetResponse(
+  id: BigInt,
+  form_transfer_task_id: BigInt,
+  subject: String,
+  body: String,
+  to_address: Option[String],
+  to_address_field: Option[String],
+  cc_address: Option[String],
+  bcc_address: Option[String],
+)
+
+object FormTransferTaskSmtpMailGetResponse {
+  implicit val format: Format[FormTransferTaskSmtpMailGetResponse] = Json.format[FormTransferTaskSmtpMailGetResponse]
+}
+
 case class FormTransferTaskGetResponse(
                              id: BigInt,
                              transfer_config_id: BigInt,
@@ -78,8 +93,9 @@ case class FormTransferTaskGetResponse(
                              task_index: Int,
                              name: String,
                              form_transfer_task_conditions: List[FormTransferTaskConditionGetReponse],
-                             mail: Option[FormTransferTaskMailGetReponse],
-                             salesforce: Option[FormTransferTaskSalesforceGetReponse]
+                             sesmail: Option[FormTransferTaskSesMailGetReponse],
+                             salesforce: Option[FormTransferTaskSalesforceGetReponse],
+                             smtpmail: Option[FormTransferTaskSmtpMailGetResponse]
                                               )
 
 object FormTransferTaskGetResponse {
@@ -120,7 +136,7 @@ object FormTransferTaskConditionGetReponse {
  * @param subject 件名
  * @param body 本文
  */
-case class FormTransferTaskMailGetReponse(
+case class FormTransferTaskSesMailGetReponse(
   id: BigInt,
   form_transfer_task_id: BigInt,
   from_address_id: BigInt,
@@ -136,8 +152,8 @@ case class FormTransferTaskMailGetReponse(
   body: String
 )
 
-object FormTransferTaskMailGetReponse {
-  implicit val format: Format[FormTransferTaskMailGetReponse] = Json.format[FormTransferTaskMailGetReponse]
+object FormTransferTaskSesMailGetReponse {
+  implicit val format: Format[FormTransferTaskSesMailGetReponse] = Json.format[FormTransferTaskSesMailGetReponse]
 }
 
 /**

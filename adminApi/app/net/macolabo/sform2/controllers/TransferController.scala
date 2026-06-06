@@ -5,7 +5,7 @@ import net.macolabo.sform2.domain.models.entity.CryptoConfig
 
 import javax.inject._
 import net.macolabo.sform2.domain.services.External.Salesforce.{SalesforceCheckConnectionRequest, SalesforceConnectionInfo, SalesforceConnectionService, SalesforceGetObjectResponse}
-import net.macolabo.sform2.domain.services.Transfer.TransferService
+import net.macolabo.sform2.domain.services.Transfer.{SmtpMailTestRequest, SmtpMailTransfer, TransferService}
 import net.macolabo.sform2.domain.services.TransferConfig.TransferConfigService
 import net.macolabo.sform2.domain.services.TransferConfig.save.TransferConfigSaveRequest
 import org.webjars.play.WebJarsUtil
@@ -117,6 +117,43 @@ class TransferController @Inject() (
       case Success(sessionInfo) =>
         transferConfigService.deleteTransferConfig(transferConfigId, sessionInfo)
         Ok("")
+      case Failure(e) =>
+        BadRequest(s"Session invalid. ${e.getMessage}")
+    }
+  }
+
+  /**
+   * SMTP テストメール送信
+   * POST /transfer/smtp/test
+   * @return Result
+   */
+  def testSmtpMail: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+    Try(SessionInfo(request.session)) match {
+      case Success(_) =>
+        request.body.asJson match {
+          case Some(jsBody) =>
+            jsBody.validate[SmtpMailTestRequest].fold(
+              errors => BadRequest(JsError.toJson(errors)),
+              req => {
+                SmtpMailTransfer.sendSmtpMail(
+                  req.smtp_host,
+                  req.smtp_port,
+                  req.smtp_user,
+                  req.smtp_password,
+                  req.from_address,
+                  req.to_address,
+                  "SFORM2 SMTPテスト",
+                  "SMTPテストメールです。"
+                ) match {
+                  case scala.util.Success(_) => Ok("テストメールを送信しました。")
+                  case scala.util.Failure(e) =>
+                    logger.error(s"SMTP test mail failed: ${e.getMessage}")
+                    BadRequest(s"送信失敗: ${e.getMessage}")
+                }
+              }
+            )
+          case None => BadRequest("Missing JSON")
+        }
       case Failure(e) =>
         BadRequest(s"Session invalid. ${e.getMessage}")
     }

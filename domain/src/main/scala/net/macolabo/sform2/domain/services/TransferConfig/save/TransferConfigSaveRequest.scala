@@ -16,37 +16,52 @@ object TransferConfigSaveRequest {
 }
 
 case class TransferConfigDetailSaveRequest(
-  mail: Option[MailTransferConfigSaveRequest],
+  sesmail: Option[SesMailTransferConfigSaveRequest],
   salesforce: Option[SalesforceTransferConfigSaveRequest],
+  smtpmail: Option[SmtpMailTransferConfigSaveRequest],
 )
 
 object TransferConfigDetailSaveRequest {
   implicit val format: Format[TransferConfigDetailSaveRequest] = Json.format[TransferConfigDetailSaveRequest]
 }
 
-case class MailTransferConfigSaveRequest(
+case class SmtpMailTransferConfigSaveRequest(
+  id: Option[BigInt],
+  transfer_config_id: Option[BigInt],
+  smtp_host: String,
+  smtp_port: Int,
+  smtp_user: String,
+  from_address: String,
+  smtp_password: String,
+)
+
+object SmtpMailTransferConfigSaveRequest {
+  implicit val format: Format[SmtpMailTransferConfigSaveRequest] = Json.format[SmtpMailTransferConfigSaveRequest]
+}
+
+case class SesMailTransferConfigSaveRequest(
   id: Option[BigInt],
   transfer_config_id: Option[BigInt],
   use_cc: Boolean,
   use_bcc: Boolean,
   use_replyto: Boolean,
-  mail_address_list: List[MailTransferConfigMailAddressSaveRequest]
+  mail_address_list: List[SesMailTransferConfigMailAddressSaveRequest]
 )
 
-object MailTransferConfigSaveRequest {
-  implicit val format: Format[MailTransferConfigSaveRequest] = Json.format[MailTransferConfigSaveRequest]
+object SesMailTransferConfigSaveRequest {
+  implicit val format: Format[SesMailTransferConfigSaveRequest] = Json.format[SesMailTransferConfigSaveRequest]
 }
 
-case class MailTransferConfigMailAddressSaveRequest(
+case class SesMailTransferConfigMailAddressSaveRequest(
   id: Option[BigInt],
-  transfer_config_mail_id: Option[BigInt],
+  transfer_config_id: Option[BigInt],
   address_index: Int,
   name: String,
   address: String
 )
 
-object MailTransferConfigMailAddressSaveRequest {
-  implicit val format: Format[MailTransferConfigMailAddressSaveRequest] = Json.format[MailTransferConfigMailAddressSaveRequest]
+object SesMailTransferConfigMailAddressSaveRequest {
+  implicit val format: Format[SesMailTransferConfigMailAddressSaveRequest] = Json.format[SesMailTransferConfigMailAddressSaveRequest]
 }
 
 case class SalesforceTransferConfigSaveRequest(

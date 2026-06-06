@@ -43,5 +43,9 @@
     "JAVA_HOME": "/usr/lib/jvm/temurin-17-jdk-amd64"
   },
   "postStartCommand": "sudo /usr/local/bin/init-firewall.sh",
-  "waitFor": "postStartCommand"
+  "waitFor": "postStartCommand",
+  "mounts": [
+    "source=jetbrains-client-cache,target=/root/.cache/JetBrains,type=volume",
+    "source=jetbrains-server-cache,target=/root/.local/share/JetBrains,type=volume"
+  ]
 }

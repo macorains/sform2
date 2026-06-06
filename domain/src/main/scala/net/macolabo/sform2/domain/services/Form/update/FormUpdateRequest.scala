@@ -134,6 +134,21 @@ object FormColSelectUpdateRequest {
  * @param mail MailTransfer設定
  * @param salesforce SalesforceTransfer設定
  */
+case class FormTransferTaskSmtpMailUpdateRequest(
+  id: Option[BigInt],
+  form_transfer_task_id: Option[BigInt],
+  subject: String,
+  body: String,
+  to_address: Option[String],
+  to_address_field: Option[String],
+  cc_address: Option[String],
+  bcc_address: Option[String],
+)
+
+object FormTransferTaskSmtpMailUpdateRequest {
+  implicit val format: Format[FormTransferTaskSmtpMailUpdateRequest] = Json.format[FormTransferTaskSmtpMailUpdateRequest]
+}
+
 case class FormTransferTaskUpdateRequest(
                                           id: Option[BigInt],
                                           transfer_config_id: BigInt,
@@ -141,8 +156,9 @@ case class FormTransferTaskUpdateRequest(
                                           task_index: Int,
                                           name: String,
                                           form_transfer_task_conditions: List[FormTransferTaskConditionUpdateRequest],
-                                          mail: Option[FormTransferTaskMailUpdateRequest],
-                                          salesforce: Option[FormTransferTaskSalesforceUpdateRequest]
+                                          sesmail: Option[FormTransferTaskSesMailUpdateRequest],
+                                          salesforce: Option[FormTransferTaskSalesforceUpdateRequest],
+                                          smtpmail: Option[FormTransferTaskSmtpMailUpdateRequest]
                                                 )
 
 object FormTransferTaskUpdateRequest {
@@ -183,7 +199,7 @@ object FormTransferTaskConditionUpdateRequest {
  * @param subject 件名
  * @param body 本文
  */
-case class FormTransferTaskMailUpdateRequest(
+case class FormTransferTaskSesMailUpdateRequest(
   id: Option[BigInt],
   form_transfer_task_id: Option[BigInt],
   from_address_id: BigInt,
@@ -199,8 +215,8 @@ case class FormTransferTaskMailUpdateRequest(
   body: String
 )
 
-object FormTransferTaskMailUpdateRequest {
-  implicit val format: Format[FormTransferTaskMailUpdateRequest] = Json.format[FormTransferTaskMailUpdateRequest]
+object FormTransferTaskSesMailUpdateRequest {
+  implicit val format: Format[FormTransferTaskSesMailUpdateRequest] = Json.format[FormTransferTaskSesMailUpdateRequest]
 }
 
 /**
