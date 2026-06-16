@@ -24,6 +24,7 @@ services:
     ports:
       - "5173:5173"
       - "9001:9001"
+      - "8081:8081"
     depends_on:
       mysql:
         condition: service_healthy

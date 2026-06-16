@@ -27,6 +27,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   vim \
   wget \
   apt-transport-https \
+  php \
+  php-mysql \
+  php-json \
+  php-curl \
+  php-dom \
+  php-imagick  \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Eclipse Temurin JDK 17 and 21

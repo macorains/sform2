@@ -15,3 +15,5 @@ sform.conf
 null
 /docker/data/
 out/
+*.zip
+wordpress
