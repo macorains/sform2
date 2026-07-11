@@ -230,7 +230,7 @@ function msform_connection_check(){
   $data = $_POST['data'];
   $info = [
     'api_url' => $data['api_url'],
-    'user_id' => $data['user_id'],
+    //'user_id' => $data['user_id'],
     'password' => $data['password'],
     'group' => $data['group']
   ];

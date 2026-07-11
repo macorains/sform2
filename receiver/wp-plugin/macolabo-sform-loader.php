@@ -58,6 +58,7 @@ class MacolaboSformLoader {
             $form_param = $this->get_form_param($content);
 
             $form_id = $form_param['form_id'];
+            print('form_id = ' . $form_id);
             $data = [
                 'hashed_form_id' => (string)$form_id,
                 'receiver_path' => '',

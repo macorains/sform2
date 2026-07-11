@@ -19,8 +19,8 @@ class TransferSupervisor @Inject()(
 
 
   // 各Transfer用のActor
-  private val mailTransfer = context.actorOf(Props(classOf[SesMailTransfer], transferConfigMailAddressDAO), "actor_mail_transfer")
-  context.watch(mailTransfer)
+  private val sesMailTransfer = context.actorOf(Props(classOf[SesMailTransfer], transferConfigMailAddressDAO), "actor_sesmail_transfer")
+  context.watch(sesMailTransfer)
   private val salesforceTransfer = context.actorOf(Props(classOf[SalesforceTransfer], ws, transferConfigSalesforceDAO), "actor_salesforce_transfer")
   context.watch(salesforceTransfer)
 
@@ -32,13 +32,13 @@ class TransferSupervisor @Inject()(
       formTransferTaskSesMailDAO,
       formTransferTaskSalesforceDAO,
       formTransferTaskSalesforceFieldDAO,
-      mailTransfer,
+      sesMailTransfer,
       salesforceTransfer
     ), "actor_transfer_receiver")
   context.watch(transferReceiver)
 
   def receive: Receive = {
-    case Terminated(`mailTransfer`) => self ! PoisonPill
+    case Terminated(`sesMailTransfer`) => self ! PoisonPill
     case Terminated(`salesforceTransfer`) => self ! PoisonPill
     case Terminated(`transferReceiver`) => self ! PoisonPill
   }

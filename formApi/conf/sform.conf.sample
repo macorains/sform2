@@ -2,7 +2,7 @@ sform {
   crypto {
     algorithm.cipher = "AES/CBC/PKCS5Padding"
     algorithm.key = "AES"
-    key = "ChangeMe"
+    key = "changemechangemechangemechangemechangemechangemechangemechangemechangeme"
     charset = "utf-8"
   }
   oauth {

@@ -217,7 +217,7 @@ class FormExecuteService @Inject()(
                |    <div class="sform-col">
                |      <div class="sform-col-name">${formCol.name}</div>
                |        <div class="sform-col-input">
-               |          <input type="text" name="${formCol.col_id}" value="$posted_value">
+               |          <input class="sform-col-form-text" type="text" id="${formCol.col_id}" name="${formCol.col_id}" value="$posted_value">
                |          <div class="sform-col-input-error">
                |            ${validate_result.getOrElse(formCol.col_id, "")}
                |          </div>
@@ -229,7 +229,7 @@ class FormExecuteService @Inject()(
                |    <div class="sform-col">
                |      <div class="sform-col-name">${formCol.name}</div>
                |        <div class="sform-col-input">
-               |          <select name="${formCol.col_id}">
+               |          <select name="${formCol.col_id}" id="${formCol.col_id}">
                |            $options
                |          </select>
                |          <div class="sform-col-input-error">
@@ -266,7 +266,7 @@ class FormExecuteService @Inject()(
                |    <div class="sform-col">
                |      <div class="sform-col-name">${formCol.name}</div>
                |        <div class="sform-col-input">
-               |          <textarea name="hoge">$posted_value</textarea>
+               |          <textarea name="${formCol.col_id}" id="${formCol.col_id}">$posted_value</textarea>
                |          <div class="sform-col-input-error">
                |            ${validate_result.getOrElse(formCol.col_id, "")}
                |          </div>
@@ -275,7 +275,7 @@ class FormExecuteService @Inject()(
           case t if t == FormColType_Hidden.col_type =>
             s"""
                |    <div class="sform-col-hidden">
-               |      <input type="hidden" name="hoge" value="${formCol.default_value}"
+               |      <input type="hidden" id="${formCol.col_id}" name="${formCol.col_id}" value="${formCol.default_value}"
                |    </div>""".stripMargin
           case t if t == FormColType_DisplayText.col_type =>
             s"""
