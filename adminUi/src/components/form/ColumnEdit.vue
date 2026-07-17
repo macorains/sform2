@@ -186,6 +186,7 @@ import { isNil } from 'es-toolkit'
 import ColumnSelectList from "@/components/form/ColumnSelectList.vue"
 import {reactive, ref} from "vue"
 import {BFormGroup} from "bootstrap-vue-3"
+import {optionFormColType as optionFormColTypeBase} from "@/composables/useFormColType"
 
 const isSelectable = () => {
   return [2,3,4].includes(formCol.col_type) // TODO 正しい形に直す
@@ -199,15 +200,7 @@ const props = defineProps({
   columnNameCheckResult: Boolean
 })
 
-const optionFormColType = ref( [
-  { value: 1, text: 'テキスト', select_list: false },
-  { value: 2, text: 'コンボボックス（単一選択）', select_list: true },
-  { value: 3, text: 'チェックボックス（複数選択）', select_list: true },
-  { value: 4, text: 'ラジオボタン（単一選択）', select_list: true },
-  { value: 5, text: 'テキストエリア', select_list: false },
-  { value: 6, text: '隠しテキスト', select_list: false },
-  { value: 7, text: '表示テキスト（非入力項目）', select_list: false }
-])
+const optionFormColType = ref(optionFormColTypeBase)
 const optionFormColValidation = ref([
       { value: 0, text: '無制限' },
       { value: 1, text: '数値のみ' },
@@ -301,7 +294,7 @@ const validate = () => {
     formCol.validations.max_value = null
     formCol.validations.min_length = null
     formCol.validations.max_length = null
-    formCol.validations.input_type = null
+    formCol.validations.input_type = 0
   }
   if([1,5].includes(formCol.col_type) && (formCol.validations.input_type === null || formCol.validations.input_type === '')){
     formCol.validations.input_type = 0

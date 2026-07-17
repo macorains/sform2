@@ -449,7 +449,7 @@ class FormDAOImpl extends FormDAO {
       select(
         f.id,
         f.transfer_config_id,
-        c.name,
+        sqls"${c.name} as transfer_config_name",
         f.form_id,
         f.task_index,
         f.name,
@@ -465,7 +465,9 @@ class FormDAOImpl extends FormDAO {
         .eq(f.form_id, formId)
         .and
         .eq(f.user_group, userGroup)
-    ).map(rs => (FormTransferTask(rs), rs.string(c.name))).list().apply()
+        .orderBy(f.task_index)
+        .asc
+    ).map(rs => (FormTransferTask(rs), rs.string("transfer_config_name"))).list().apply()
   }
 
   private def selectFormColSelectList(userGroup: String, formId: BigInt, formColId: BigInt)(implicit session: DBSession): List[FormColSelect] = {

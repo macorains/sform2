@@ -331,7 +331,7 @@ class FormExecuteService @Inject()(
                |      <div class="sform-col-form"><span id="${formColData.col_id}">$postValue</span></div>
                |    </div>""".stripMargin
           case t if t == FormColType_Combo.col_type || t == FormColType_Checkbox.col_type || t == FormColType_Radio.col_type =>
-            val values = postValue.split(",").map(v => formColSelectData.filter(d => d.select_value.equals(v)).map(d => d.select_name)).mkString(",")
+            val values = postValue.split(",").flatMap(v => formColSelectData.find(d => d.select_value.equals(v)).map(d => d.select_name)).mkString(",")
             s"""
                |    <div class="sform-col">
                |      <div class="sform-col-name">${formColData.name}</div>
