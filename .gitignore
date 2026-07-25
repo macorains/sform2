@@ -28,3 +28,4 @@ null
 out/
 *.zip
 wordpress
+/.chrome
