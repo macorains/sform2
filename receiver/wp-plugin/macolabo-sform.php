@@ -97,8 +97,7 @@ function msform_js_footer(){
                                 var response_data = JSON.parse(JSON.parse(response).data);
                                 console.log('*** confirm result***')
                                 console.log(response)
-                                jQuery("div.sform_wrapper").empty();
-                                jQuery("div.sform_wrapper").append(response_data);
+                                jQuery("div.sform_wrapper .sform-form-wrapper").replaceWith(response_data);
                                 // 「送信」クリック時
                                 jQuery('#sform_button_submit').on('click', function(){
                                     jQuery.ajax({
@@ -115,8 +114,7 @@ function msform_js_footer(){
                                             console.log('*** save result ***')
                                             console.log(response)
                                             var response_data = JSON.parse(JSON.parse(response).html);
-                                            jQuery("div.sform_wrapper").empty();
-                                            jQuery("div.sform_wrapper").append(response_data);
+                                            jQuery("div.sform_wrapper .sform-form-wrapper").replaceWith(response_data);
                                                 // 「完了」ボタンクリック時
                                                 jQuery('#sform_button_finish').on('click', function(){
                                                 location.href = jQuery("#complete_url").val();
@@ -140,8 +138,7 @@ function msform_js_footer(){
                                         },
                                         success: function(response) {
                                             console.log(response)
-                                            jQuery("div.sform_wrapper").empty();
-                                            jQuery("div.sform_wrapper").append(response);
+                                            jQuery("div.sform_wrapper .sform-form-wrapper").replaceWith(response);
                                             // 入力フォームの「次へ」ボタンクリック時
                                             jQuery('#sform_button_confirm').on('click', function(){
                                                 that.onClickConfirm(that);
@@ -239,6 +236,7 @@ function msform_connection_check(){
 }
 
 add_action('wp_ajax_msform_load_form', 'msform_load_form');
+add_action('wp_ajax_nopriv_msform_load_form', 'msform_load_form');
 add_action('wp_ajax_msform_validate_form', 'msform_validate_form');
 add_action('wp_ajax_nopriv_msform_validate_form', 'msform_validate_form');
 add_action('wp_ajax_msform_confirm_form', 'msform_confirm_form');
