@@ -62,6 +62,14 @@ RUN wget -qO - "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64
   apt-get update && apt-get install -y --no-install-recommends sbt && \
   apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Install Google Chrome (used by chrome-devtools MCP for browser-based verification).
+# The .deb installs to /opt/google/chrome/chrome and pulls in all runtime deps (libnss3,
+# libatk, libgbm, etc.) automatically via apt.
+RUN wget -qO - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome-keyring.gpg && \
+  echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
+  apt-get update && apt-get install -y --no-install-recommends google-chrome-stable && \
+  apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Ensure default node user has access to /usr/local/share
 RUN mkdir -p /usr/local/share/npm-global && \
   chown -R node:node /usr/local/share
