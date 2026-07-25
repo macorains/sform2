@@ -29,16 +29,18 @@ SForm2 は Web フォームの作成・ホスティングシステムです。�
 
 ### Scala/Play バックエンド（domain, adminApi, formApi）
 
-この環境には sbt が **インストールされていません** ため、Scala モジュールのコンパイル・テスト・実行
-はここでは行えません。`sbt compile`/`sbt test`/`sbt run` を試みず、コードを注意深く読んで正しさを
-判断し、sbt による検証が必要な場合はその旨をユーザーに伝えてください。sbt が利用可能な環境（フル
-機能の devcontainer など）では、通常以下のコマンドが使えます。
+この環境には sbt がインストールされており、Scala モジュールのコンパイル・テストを検証に使えます。
+コードを読んで判断するだけで済ませず、変更後は必ず該当モジュールの sbt コマンドを実行してください。
+
+**注意**: sbt のプロジェクト ID はディレクトリ名（`adminApi`/`formApi`）とは異なります。`build.sbt`
+上の ID は `domain`（一致）、`admin`（`adminApi/` に対応）、`form`（`formApi/` に対応）です。不明な
+場合は `sbt projects` で確認してください。
 
 ```
 sbt "domain/test"                 # domain モジュールの ScalaTest スイートを実行
-sbt "adminApi/run"                # 管理 API（Play の開発サーバー）を起動
-sbt "formApi/run"                 # フォーム API（Play の開発サーバー）を起動
-sbt "testOnly *ClassName*"        # 単一のテストクラスを実行
+sbt "admin/run"                   # 管理 API（Play の開発サーバー）を起動
+sbt "form/run"                    # フォーム API（Play の開発サーバー）を起動
+sbt "domain/testOnly *ClassName*" # 単一のテストクラスを実行（他モジュールも同様に <id>/testOnly）
 ```
 
 なお `formApi/build.gradle`（この モジュール向けの、Gradle/Play を使った別のビルド経路）も存在します
