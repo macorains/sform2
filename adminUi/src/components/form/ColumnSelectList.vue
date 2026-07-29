@@ -93,6 +93,8 @@ const addColSelectList = () => {
     select_value: 'answer' + newIndex,
     is_default: false,
     in_edit: true,
+    edit_style: '',
+    view_style: '',
   }
   localList.value = [...localList.value, newItem];
   syncToParent()

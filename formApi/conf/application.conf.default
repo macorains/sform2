@@ -6,7 +6,7 @@ baseUrl="http://localhost:9002"
 # ~~~~~
 # The secret key is used to secure cryptographics functions.
 # If you deploy your application to several instances be sure to use the same key!
-play.http.secret.key="changeme"
+play.http.secret.key="changemechangemechangemechangemechangemechangemechangemechangemechangeme"
 
 # The application languages
 # ~~~~~
@@ -29,6 +29,7 @@ play.modules.enabled += "net.macolabo.sform.api.modules.BaseModule"
 # play.modules.enabled += "play.api.libs.mailer.MailerModule"
 play.modules.enabled += "net.macolabo.sform.api.modules.DBInitializerModule"
 play.modules.enabled += "net.macolabo.sform.api.modules.SecurityModule"
+play.modules.enabled += "net.macolabo.sform.api.modules.SformTransferModule"
 
 db {
   # You can declare as many datasources as you want.

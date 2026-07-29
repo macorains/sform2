@@ -6,7 +6,7 @@
         <th>No</th>
         <th>名前</th>
         <th>項目ID</th>
-        <th>ステータス</th>
+        <th>型</th>
         <th>操作</th>
       </tr>
     </thead>
@@ -16,7 +16,7 @@
           <td>{{ element.col_index + 1 }}</td>
           <td>{{ element.name }}</td>
           <td>{{ element.col_id }}</td>
-          <td>{{ element.col_type }}</td>
+          <td>{{ formColTypeText(element.col_type) }}</td>
           <td>
             <BButton size="sm" @click="edit(element)" class="mr-1">編集</BButton>
             <BButton class="ms-2" size="sm" @click="deleteColumn(element)">削除</BButton>
@@ -35,6 +35,7 @@ import ColumnEdit from "@/components/form/ColumnEdit.vue"
 import {onMounted, ref, inject, reactive, computed} from "vue"
 import { BButton, BModal } from 'bootstrap-vue-3'
 import draggable from 'vuedraggable'
+import {formColTypeText} from "@/composables/useFormColType"
 const emit = defineEmits(['update-column'])
 
 const editModalVisible = ref(false)

@@ -40,6 +40,15 @@ lazy val domain = Project(
   commonScalacOptions,
   commonExcludeDependencies,
   commonDependencyOverrides,
+  Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
+  // mockito-scala's `*`/`any[T]` matchers return dummy values via a "sneaky throw" trick,
+  // which -Ywarn-dead-code misreads as unreachable code following them; combined with
+  // -Xfatal-warnings that turns into a compile error, so relax it for test sources only.
+  Test / scalacOptions -= "-Ywarn-dead-code",
+  // DAO specs run integration-style against a real, shared MySQL database with no
+  // per-test isolation/rollback, so running suites in parallel causes cross-suite
+  // data races (inserts/updates from one suite leaking into another's assertions).
+  Test / parallelExecution := false,
   libraryDependencies ++= commonDependencies ++ Seq(
     dependencies.playJson
   )
@@ -233,7 +242,13 @@ lazy val commonExcludeDependencies = excludeDependencies ++= Seq(
 
 lazy val commonDependencyOverrides = dependencyOverrides ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.3",
-  "com.google.inject" % "guice" % "6.0.0"
+  "com.google.inject" % "guice" % "6.0.0",
+  // mockito-scala 1.13.11 is compiled against mockito-core 3.3.3. Without this override,
+  // "latest wins" eviction picks up mockito-core 4.11.0 (pulled in transitively by
+  // scalatestplus-play's mockito-4-11 wrapper), which restructured
+  // org.mockito.internal.debugging.LocationImpl into Java8LocationImpl/Java9PlusLocationImpl,
+  // breaking mockito-scala at runtime with NoClassDefFoundError.
+  "org.mockito" % "mockito-core" % "3.3.3"
 )
 
 lazy val commonScalacOptions = scalacOptions ++= Seq(

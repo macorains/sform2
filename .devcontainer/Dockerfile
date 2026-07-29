@@ -27,6 +27,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   vim \
   wget \
   apt-transport-https \
+  php \
+  php-mysql \
+  php-json \
+  php-curl \
+  php-dom \
+  php-imagick  \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Eclipse Temurin JDK 17 and 21
@@ -50,6 +56,20 @@ RUN ARCH=$(dpkg --print-architecture) && \
 ENV JAVA_HOME=/usr/lib/jvm/temurin-17-jdk-amd64
 ENV PATH=$JAVA_HOME/bin:$PATH
 
+# Install sbt
+RUN wget -qO - "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | gpg --dearmor -o /usr/share/keyrings/sbt-archive-keyring.gpg && \
+  echo "deb [signed-by=/usr/share/keyrings/sbt-archive-keyring.gpg] https://repo.scala-sbt.org/scalasbt/debian all main" > /etc/apt/sources.list.d/sbt.list && \
+  apt-get update && apt-get install -y --no-install-recommends sbt && \
+  apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Google Chrome (used by chrome-devtools MCP for browser-based verification).
+# The .deb installs to /opt/google/chrome/chrome and pulls in all runtime deps (libnss3,
+# libatk, libgbm, etc.) automatically via apt.
+RUN wget -qO - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome-keyring.gpg && \
+  echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
+  apt-get update && apt-get install -y --no-install-recommends google-chrome-stable && \
+  apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Ensure default node user has access to /usr/local/share
 RUN mkdir -p /usr/local/share/npm-global && \
   chown -R node:node /usr/local/share
@@ -66,8 +86,8 @@ RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhisto
 ENV DEVCONTAINER=true
 
 # Create workspace and config directories and set permissions
-RUN mkdir -p /workspace /home/node/.claude && \
-  chown -R node:node /workspace /home/node/.claude
+RUN mkdir -p /workspace /home/node/.claude /home/node/.sbt /home/node/.ivy2 /home/node/.cache/coursier && \
+  chown -R node:node /workspace /home/node/.claude /home/node/.sbt /home/node/.ivy2 /home/node/.cache
 
 WORKDIR /workspace
 

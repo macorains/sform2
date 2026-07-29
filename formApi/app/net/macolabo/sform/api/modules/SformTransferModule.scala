@@ -16,7 +16,7 @@ class SformTransferModule extends AbstractModule with PekkoGuiceSupport
   override def configure() :Unit = {
     bindActor[TransferSupervisor]("sform_transfer_supervisor")
     bindActor[TransferReceiver]("actor_transfer_receiver")
-    bindActor[SesMailTransfer]("actor_ses_mail_transfer")
+    bindActor[SesMailTransfer]("actor_sesmail_transfer")
     bindActor[SalesforceTransfer]("actor_salesforce_transfer")
   }
 

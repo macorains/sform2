@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="sform2s.adminApi.main" options="-encoding utf8 -g" />
+      <module name="sform2s.adminApi.main~1" options="-encoding utf8 -g" />
+      <module name="sform2s.adminApi.test" options="-encoding utf8 -g" />
+      <module name="sform2s.adminApi.test~1" options="-encoding utf8 -g" />
+      <module name="sform2s.formApi.main" options="-encoding utf8 -g" />
+      <module name="sform2s.formApi.main~1" options="-encoding utf8 -g" />
+      <module name="sform2s.formApi.test" options="-encoding utf8 -g" />
+      <module name="sform2s.formApi.test~1" options="-encoding utf8 -g" />
+    </option>
+  </component>
+</project>

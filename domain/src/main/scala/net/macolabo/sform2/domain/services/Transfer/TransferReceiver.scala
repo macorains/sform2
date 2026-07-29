@@ -20,7 +20,7 @@ class TransferReceiver @Inject()(
   formTransferTaskSesMailDAO: FormTransferTaskSesMailDAO,
   formTransferTaskSalesforceDAO: FormTransferTaskSalesforceDAO,
   formTransferTaskSalesforceFieldDAO: FormTransferTaskSalesforceFieldDAO,
-  @Named("actor_mail_transfer") mailTransfer: ActorRef,
+  @Named("actor_sesmail_transfer") sesMailTransfer: ActorRef,
   @Named("actor_salesforce_transfer") salesforceTransfer: ActorRef
 ) extends Actor with Logging {
 
@@ -41,7 +41,7 @@ class TransferReceiver @Inject()(
     case ConsumeTaskRequest(taskList, postdata, cryptoConfig) =>
       // リストの先頭を取り出して、その内容で各Transferに振り分ける
       taskList.headOption.map(tl => {
-        tl.t_mail.foreach(_ => mailTransfer ! TransferTaskRequest(taskList, postdata))
+        tl.t_mail.foreach(_ => sesMailTransfer ! TransferTaskRequest(taskList, postdata))
         // SalesforceTransfer実装したらコメント外す
         // tl.t_salesforce.foreach(_ => SalesforceTransfer ! TransferTaskRequest(taskList, postdata))
       }).getOrElse(println("ほげー－－－－")) // TODO taskListが空 = 処理完了なので、何かしら完了処理を実装する
