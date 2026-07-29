@@ -6,7 +6,7 @@
         <entry key="admin">
           <value>
             <ProjectSettingsEntry>
-              <option name="sourceDir" value="C:\Users\macra\IdeaProjects\sform2\adminApi\app" />
+              <option name="sourceDir" value="$PROJECT_DIR$/adminApi/app" />
               <option name="confDir" value="$PROJECT_DIR$/adminApi/app" />
               <option name="templateImports">
                 <list>
@@ -37,7 +37,7 @@
         <entry key="form">
           <value>
             <ProjectSettingsEntry>
-              <option name="sourceDir" value="C:\Users\macra\IdeaProjects\sform2\formApi\app" />
+              <option name="sourceDir" value="$PROJECT_DIR$/formApi/app" />
               <option name="confDir" value="$PROJECT_DIR$/formApi/app" />
               <option name="templateImports">
                 <list>
