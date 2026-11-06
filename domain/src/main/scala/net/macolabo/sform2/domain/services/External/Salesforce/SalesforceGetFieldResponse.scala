@@ -1,6 +1,6 @@
 package net.macolabo.sform2.domain.services.External.Salesforce
 
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.{Format, Json}
 
 case class SalesforceGetFieldResponse(
                                       name: String,
@@ -8,10 +8,6 @@ case class SalesforceGetFieldResponse(
                                       field_type: String,
                                       )
 
-trait SalesforceGetFieldResponseJson {
-  implicit val SalesforceGetFieldResponseWrites: Writes[SalesforceGetFieldResponse] = (salesforceGetFieldResponse:SalesforceGetFieldResponse) => Json.obj(
-    "name" -> salesforceGetFieldResponse.name,
-    "label" -> salesforceGetFieldResponse.label,
-    "field_type" -> salesforceGetFieldResponse.field_type
-  )
+object SalesforceGetFieldResponse {
+  implicit val format: Format[SalesforceGetFieldResponse] = Json.format[SalesforceGetFieldResponse]
 }

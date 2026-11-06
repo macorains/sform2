@@ -23,7 +23,7 @@ trait TransferConfigMailAddressDAO {
    * @param session              DB Session
    * @return TransferCongirMailAddressのリスト
    */
-  def getList(userGroup: String, transferConfigMailId: BigInt)(implicit session: DBSession = autoSession): List[TransferConfigMailAddress]
+  def getList(userGroup: String, transferConfigId: BigInt)(implicit session: DBSession = autoSession): List[TransferConfigMailAddress]
 
 
   /**

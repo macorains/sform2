@@ -1,12 +1,15 @@
 package net.macolabo.sform2.domain.models.entity.transfer.salesforce
 
-import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-import play.api.libs.json.{Format, JsPath}
+import play.api.libs.json.{Format, Json}
 
 case class SalesforceSObjectsListResponse(
   encoding: String,
   sobjects: List[SalesforceSObjectsListResponseSObject]
 )
+
+object SalesforceSObjectsListResponse {
+  implicit val format: Format[SalesforceSObjectsListResponse] = Json.format[SalesforceSObjectsListResponse]
+}
 
 case class SalesforceSObjectsListResponseSObject(
   name: String,
@@ -18,19 +21,6 @@ case class SalesforceSObjectsListResponseSObject(
   searchable: Boolean
 )
 
-trait SalesforceSObjectsListResponseJson {
-  implicit val SalesforceSObjectsListResponseSObjectFormat: Format[SalesforceSObjectsListResponseSObject] = (
-    (JsPath \ "name").format[String] ~
-      (JsPath \ "label").format[String] ~
-      (JsPath \ "createable").format[Boolean] ~
-      (JsPath \ "updateable").format[Boolean] ~
-      (JsPath \ "deletable").format[Boolean] ~
-      (JsPath \ "queryable").format[Boolean] ~
-      (JsPath \ "searchable").format[Boolean]
-    )(SalesforceSObjectsListResponseSObject.apply, unlift(SalesforceSObjectsListResponseSObject.unapply))
-
-  implicit val SalesforceSObjectsListResponseFormat: Format[SalesforceSObjectsListResponse] = (
-    (JsPath \ "encoding").format[String] ~
-      (JsPath \ "sobjects").format[List[SalesforceSObjectsListResponseSObject]]
-    )(SalesforceSObjectsListResponse.apply, unlift(SalesforceSObjectsListResponse.unapply))
+object SalesforceSObjectsListResponseSObject {
+  implicit val format: Format[SalesforceSObjectsListResponseSObject] = Json.format[SalesforceSObjectsListResponseSObject]
 }

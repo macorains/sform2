@@ -8,6 +8,8 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 /**
+ * 認証トークン用サービス
+ * 主にFormAPI側で使用
  * Handles actions to auth tokens.
  */
 trait AuthTokenService {

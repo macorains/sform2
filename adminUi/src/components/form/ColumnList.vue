@@ -1,50 +1,62 @@
 <template>
   <h4>フォーム項目<BButton class="ms-2" size="sm" @click="addColumn">追加</BButton></h4>
-  <BTable striped hover :items="form_cols" :fields="fields">
-    <template #cell(col_index)="row">
-      {{ row.item.col_index + 1 }}
-    </template>
-    <template #cell(actions)="row">
-      <BButton size="sm" @click="edit(row.item, row.index, $event.target)" class="mr-1">
-        編集
-      </BButton>
-      <BButton class="ms-2" size="sm" @click="deleteColumn(row.item)">
-        削除
-      </BButton>
-    </template>
-  </BTable>
-  <BModal v-model="editModalVisible" size="xl" title="フォーム項目編集" @ok="updateColumn">
-    <ColumnEdit ref="columnEditRef" :formColId="selectedFormColId"/>
+  <table class="table table-striped table-hover">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>名前</th>
+        <th>項目ID</th>
+        <th>型</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <draggable :list="form_cols" tag="tbody" item-key="col_id" @end="onDragEnd">
+      <template #item="{ element }">
+        <tr>
+          <td>{{ element.col_index + 1 }}</td>
+          <td>{{ element.name }}</td>
+          <td>{{ element.col_id }}</td>
+          <td>{{ formColTypeText(element.col_type) }}</td>
+          <td>
+            <BButton size="sm" @click="edit(element)" class="mr-1">編集</BButton>
+            <BButton class="ms-2" size="sm" @click="deleteColumn(element)">削除</BButton>
+          </td>
+        </tr>
+      </template>
+    </draggable>
+  </table>
+  <BModal v-model="editModalVisible" size="xl" title="フォーム項目編集" @ok="updateColumn" @changeOkButtonStatus="" :ok-disabled="okButtonDisabled">
+    <ColumnEdit ref="columnEditRef" @checkColumnIdExists="checkColumnIdExists" @checkColumnNameExists="checkColumnNameExists" @update-button-state="updateButtonState" :column-id-check-result="columnIdCheckResult" :column-name-check-result="columnNameCheckResult" :formColId="selectedFormColId"/>
   </BModal>
 </template>
 
 <script setup>
 import ColumnEdit from "@/components/form/ColumnEdit.vue"
-import {onMounted, ref, inject, reactive} from "vue"
-import { BButton, BTable, BModal } from 'bootstrap-vue-3'
+import {onMounted, ref, inject, reactive, computed} from "vue"
+import { BButton, BModal } from 'bootstrap-vue-3'
+import draggable from 'vuedraggable'
+import {formColTypeText} from "@/composables/useFormColType"
 const emit = defineEmits(['update-column'])
 
-//const form = inject('form')
-const fields = ref([
-  { key: 'col_index', sortable: true, label: 'No'},
-  { key: 'name', sortable: true, label: '名前'},
-  { key: 'col_id', sortable: true, label: '項目ID'},
-  { key: 'col_type', sortable: true, label: 'ステータス'},
-  { key: 'actions', label: '操作' },
-])
 const editModalVisible = ref(false)
 const selectedFormColId = ref(null)
 const columnEditRef = ref(null)
 const form_cols = reactive([])
 
+const columnIdCheckResult = ref(false)
+const columnNameCheckResult = ref(false)
+const okButtonDisabled = ref(true)
 
-onMounted(() => {
-  // data.value = props.form.form_cols
-  //console.log(form.form_cols)
-  //form.form_cols.forEach(fc => form_cols.push(fc))
-})
 const load = (col_list) => {
   col_list.forEach(col => form_cols.push(col))
+  emit('update-column', form_cols)
+}
+
+const onDragEnd = () => {
+  form_cols.forEach((col, i) => {
+    col.col_index = i
+  })
+  emit('update-column', form_cols)
 }
 
 const updateColumn = () => {
@@ -53,6 +65,7 @@ const updateColumn = () => {
   if (target_index !== -1) {
     Object.assign(form_cols[target_index], formCol)
   }
+  emit('update-column', form_cols)
 }
 
 const addColumn = () => {
@@ -64,17 +77,17 @@ const addColumn = () => {
     col_id: 'col' + colNum,
     col_type: 1,
     default_value: '',
-    form_id: 'hoge',
+    form_id: null,
     id: null,
     validations: {
       id: null,
       input_type: 0,
-      min_value: '',
-      max_value: '',
-      min_length: '',
-      max_length: '',
+      min_value: null,
+      max_value: null,
+      min_length: null,
+      max_length: null,
       form_col_id: null,
-      form_id: 'hoge',
+      form_id: null,
       required: false
     },
     select_list: []
@@ -90,13 +103,25 @@ const deleteColumn = (item) => {
     form_cols[i].col_index = i
   }
 }
-const edit = (item, index, target) => {
+const edit = (item) => {
   columnEditRef.value.setFormCol(item)
   selectedFormColId.value = item.id
   editModalVisible.value = true
 }
+
+const checkColumnIdExists = (data) => {
+  columnIdCheckResult.value = form_cols.some((col) => col.col_id === data.col_id && col.id !== data.id)
+}
+
+const checkColumnNameExists = (data) => {
+  columnNameCheckResult.value = form_cols.some((col) => col.name === data.name && col.id !== data.id)
+}
+
+const updateButtonState = (state) => {
+  okButtonDisabled.value = state
+}
+
 defineExpose({
   load
 });
 </script>
-

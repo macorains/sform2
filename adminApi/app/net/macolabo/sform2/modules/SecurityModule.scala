@@ -89,10 +89,10 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
   }
 
   @Provides
-  def provideHeaderClient: HeaderClient = {
+  def provideHeaderClient(configuration: Configuration): HeaderClient = {
     val jwtAuthenticator = new JwtAuthenticator()
-    // TODO secretを環境変数からとるようにする
-    jwtAuthenticator.addSignatureConfiguration(new SecretSignatureConfiguration("12345678901234567890123456789012"))
+    val jwtSecret = configuration.get[String]("sform.jwt.secret")
+    jwtAuthenticator.addSignatureConfiguration(new SecretSignatureConfiguration(jwtSecret))
     val client = new HeaderClient()
     client.setHeaderName("X-Auth-Token")
     client.setAuthenticator(jwtAuthenticator)

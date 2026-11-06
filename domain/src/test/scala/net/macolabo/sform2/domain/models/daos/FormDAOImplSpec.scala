@@ -2,18 +2,18 @@ package net.macolabo.sform2.domain.models.daos
 
 import net.macolabo.sform2.domain.models.helper.SformTestHelper
 import net.macolabo.sform2.domain.models.entity.form.{Form, FormCol, FormColSelect, FormColValidation}
-import net.macolabo.sform2.domain.models.entity.formtransfertask.{FormTransferTask, FormTransferTaskCondition, FormTransferTaskMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField}
+import net.macolabo.sform2.domain.models.entity.formtransfertask.{FormTransferTask, FormTransferTaskCondition, FormTransferTaskSesMail, FormTransferTaskSalesforce, FormTransferTaskSalesforceField}
 import net.macolabo.sform2.domain.models.entity.transfer.TransferConfig
 import net.macolabo.sform2.domain.models.entity.user.User
-import net.macolabo.sform2.domain.services.Form.get.{FormColGetReponse, FormColSelectGetReponse, FormColValidationGetReponse, FormTransferTaskConditionGetReponse, FormTransferTaskGetResponse, FormTransferTaskMailGetReponse, FormTransferTaskSalesforceFieldGetReponse, FormTransferTaskSalesforceGetReponse}
-import net.macolabo.sform2.domain.services.Form.update.{FormColSelectUpdateRequest, FormColUpdateRequest, FormColValidationUpdateRequest, FormTransferTaskConditionUpdateRequest, FormTransferTaskMailUpdateRequest, FormTransferTaskSalesforceFieldUpdateRequest, FormTransferTaskSalesforceUpdateRequest, FormTransferTaskUpdateRequest, FormUpdateRequest}
+import net.macolabo.sform2.domain.services.Form.get.{FormColGetReponse, FormColSelectGetReponse, FormColValidationGetReponse, FormTransferTaskConditionGetReponse, FormTransferTaskGetResponse, FormTransferTaskSesMailGetReponse, FormTransferTaskSalesforceFieldGetReponse, FormTransferTaskSalesforceGetReponse}
+import net.macolabo.sform2.domain.services.Form.update.{FormColSelectUpdateRequest, FormColUpdateRequest, FormColValidationUpdateRequest, FormTransferTaskConditionUpdateRequest, FormTransferTaskSesMailUpdateRequest, FormTransferTaskSalesforceFieldUpdateRequest, FormTransferTaskSalesforceUpdateRequest, FormTransferTaskUpdateRequest, FormUpdateRequest}
 import org.scalatest.flatspec.FixtureAnyFlatSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import scalikejdbc._
 import scalikejdbc.interpolation.SQLSyntax.count
 import scalikejdbc.scalatest.AutoRollback
 
-import java.time.ZonedDateTime
+import java.time.{ZoneId, ZonedDateTime}
 import java.util.UUID
 import scala.collection.compat.Factory
 
@@ -21,7 +21,22 @@ import scala.collection.compat.Factory
 class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite with SformTestHelper with AutoRollback {
 
   private val userId = UUID.randomUUID()
-  private val user = User(userId, "hoge", Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge"), Some("hoge@hoge.com"), None, activated = true, deletable = false)
+  private val user = User(
+    userId,
+    username = "hoge",
+    password = Some("hoge"),
+    user_group = Some("hoge"),
+    role = Some("hoge"),
+    first_name = Some("hoge"),
+    last_name = Some("hoge"),
+    full_name = Some("hoge"),
+    email = Some("hoge@hoge.com"),
+    avatar_url = None,
+    activated = true,
+    deletable = false,
+    created = ZonedDateTime.of(2026, 1, 1, 0, 0, 0, 0, ZoneId.of("Asia/Tokyo")),
+    modified = ZonedDateTime.of(2026, 1, 1, 0, 0, 0, 0, ZoneId.of("Asia/Tokyo"))
+  )
   val formId: BigInt = BigInt(100)
   val transferConfigId: BigInt = BigInt(100)
 
@@ -87,7 +102,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
       assert(formTransferTask.task_index.isValidInt)
       assert(formTransferTask.name.nonEmpty)
       assert(formTransferTask.form_transfer_task_conditions.nonEmpty)
-      assert(formTransferTask.mail.nonEmpty)
+      assert(formTransferTask.sesmail.nonEmpty)
       assert(formTransferTask.salesforce.nonEmpty)
 
       val formTransferTaskCondition = formTransferTask.form_transfer_task_conditions.head
@@ -98,7 +113,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
       assert(formTransferTaskCondition.operator.nonEmpty)
       assert(formTransferTaskCondition.cond_value.nonEmpty)
 
-      val formTransferTaskMail = formTransferTask.mail.get
+      val formTransferTaskMail = formTransferTask.sesmail.get
       assert(formTransferTaskMail.id.isValidLong)
       assert(formTransferTaskMail.form_transfer_task_id.isValidLong)
       assert(formTransferTaskMail.from_address_id.isValidLong)
@@ -149,8 +164,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     val formDAO = new FormDAOImpl()
 
     // フォームを作成する（作成時にはFormTransferTaskは存在しない）
-    val response = formDAO.update(user.id.toString, user.user_group.get, formUpdateRequest)
-    val newFormId = response.id
+    val (newFormId, _) = formDAO.update(user.id.toString, user.user_group.get, formUpdateRequest)
     assert(newFormId.isValidLong)
 
     // 作成したフォームを取得
@@ -223,7 +237,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     val formTransferTaskSalesforceUpdateRequest =
       form.form_transfer_tasks.head.salesforce.map(sf => createFormTransferTaskSalesforceUpdateRequest(sf, formTransferTaskSalesforceFieldUpdateRequest))
     val formTransferTaskMailUpdateRequest =
-      form.form_transfer_tasks.head.mail.map(mail => createFormTransferTaskMailUpdateRequest(mail))
+      form.form_transfer_tasks.head.sesmail.map(mail => createFormTransferTaskMailUpdateRequest(mail))
     val formTransferTaskConditionUpdateRequest =
       form.form_transfer_tasks.head.form_transfer_task_conditions.map(condition => createFormTransferTaskConditionUpdateRequest(condition))
 
@@ -233,8 +247,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     val formUpdateRequest = createFormUpdateRequest(Some(form.id), formColUpdateRequest, formTransferTaskUpdateRequest)
 
     // フォームを更新する
-    val response = formDAO.update(user.id.toString, user.user_group.get, formUpdateRequest)
-    val newFormId = response.id
+    val (newFormId, _) = formDAO.update(user.id.toString, user.user_group.get, formUpdateRequest)
     assert(newFormId.equals(formId))
 
     // 作成したフォームを取得
@@ -289,7 +302,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     assert(newFormTransferTask.task_index.equals(2))
     assert(newFormTransferTask.name.equals("hoge2"))
     assert(newFormTransferTask.form_transfer_task_conditions.nonEmpty)
-    assert(newFormTransferTask.mail.nonEmpty)
+    assert(newFormTransferTask.sesmail.nonEmpty)
     assert(newFormTransferTask.salesforce.nonEmpty)
 
     // FormTransferTaskConditionのチェック
@@ -298,7 +311,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     assert(newFormTransferTaskCondition.cond_value.equals("x"))
 
     // FormTransferTaskMailのチェック
-    val newFormTransferTaskMail = newFormTransferTask.mail.get
+    val newFormTransferTaskMail = newFormTransferTask.sesmail.get
     println(newFormTransferTaskMail)
     assert(newFormTransferTaskMail.from_address_id == 2)
     assert(newFormTransferTaskMail.to_address.get.equals("hoge2@hoge.com"))
@@ -360,7 +373,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
 
     val transferTask = FormTransferTask.syntax("transferTask")
     val transferTaskCondition = FormTransferTaskCondition.syntax("transferTaskCondition")
-    val transferTaskMail = FormTransferTaskMail.syntax("transferTaskMail")
+    val transferTaskMail = FormTransferTaskSesMail.syntax("transferTaskMail")
     val transferTaskSalesforce = FormTransferTaskSalesforce.syntax("transferTaskSalesforce")
     val transferTaskSalesforceField = FormTransferTaskSalesforceField.syntax("transferTaskSalesforceField")
 
@@ -433,7 +446,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
       select(
         count
       )
-        .from(FormTransferTaskMail as transferTaskMail)
+        .from(FormTransferTaskSesMail as transferTaskMail)
         .where
         .eq(transferTaskMail.id, colId)
     }.map(_.int(1)).single().apply().get
@@ -576,8 +589,8 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     )
   }
 
-  private def createFormTransferTaskMailUpdateRequest(mail: FormTransferTaskMailGetReponse) = {
-    FormTransferTaskMailUpdateRequest(
+  private def createFormTransferTaskMailUpdateRequest(mail: FormTransferTaskSesMailGetReponse) = {
+    FormTransferTaskSesMailUpdateRequest(
       id = Some(mail.id),
       form_transfer_task_id = Some(mail.form_transfer_task_id),
       from_address_id = 2,
@@ -612,7 +625,7 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
     )
   }
 
-  private def createFormTransferTaskUpdateRequest(formTransferTask: FormTransferTaskGetResponse, conditionUpdateRequestList: List[FormTransferTaskConditionUpdateRequest], mailUpdateRequest: Option[FormTransferTaskMailUpdateRequest], salesforceUpdateRequest: Option[FormTransferTaskSalesforceUpdateRequest]) = {
+  private def createFormTransferTaskUpdateRequest(formTransferTask: FormTransferTaskGetResponse, conditionUpdateRequestList: List[FormTransferTaskConditionUpdateRequest], mailUpdateRequest: Option[FormTransferTaskSesMailUpdateRequest], salesforceUpdateRequest: Option[FormTransferTaskSalesforceUpdateRequest]) = {
     FormTransferTaskUpdateRequest(
       id = Some(formTransferTask.id),
       transfer_config_id = formTransferTask.transfer_config_id,
@@ -620,8 +633,9 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
       task_index = 2,
       name = "hoge2",
       form_transfer_task_conditions = conditionUpdateRequestList,
-      mail = mailUpdateRequest,
-      salesforce = salesforceUpdateRequest
+      sesmail = mailUpdateRequest,
+      salesforce = salesforceUpdateRequest,
+      smtpmail = None
     )
   }
 
@@ -788,8 +802,8 @@ class FormDAOImplSpec extends FixtureAnyFlatSpec with GuiceOneServerPerSuite wit
 
     // FormTransferTaskMail
     withSQL {
-      val c = FormTransferTaskMail.column
-      insertInto(FormTransferTaskMail).namedValues(
+      val c = FormTransferTaskSesMail.column
+      insertInto(FormTransferTaskSesMail).namedValues(
         c.form_transfer_task_id -> formTransferTaskId,
         c.from_address_id -> 1,
         c.to_address -> "hoge@hoge.com",

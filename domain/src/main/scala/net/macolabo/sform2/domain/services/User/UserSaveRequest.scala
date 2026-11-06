@@ -15,8 +15,9 @@ case class UserSaveRequest (
                              avatarUrl: Option[String]
                            )
 
-trait UserSaveRequestJson {
-  implicit val UesrSaveRequestReads: Reads[UserSaveRequest] = (
+object UserSaveRequest {
+  // Custom Reads required: JSON keys use snake_case but field names use camelCase
+  implicit val reads: Reads[UserSaveRequest] = (
     (JsPath \ "user_id").readNullable[String] ~
     (JsPath \ "password").readNullable[String] ~
       (JsPath \ "user_group").readNullable[String] ~

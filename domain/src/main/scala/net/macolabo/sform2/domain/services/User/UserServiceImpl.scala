@@ -6,6 +6,7 @@ import net.macolabo.sform2.domain.models.entity.user.User
 import org.apache.shiro.authc.credential.DefaultPasswordService
 import org.pac4j.core.credentials.password.ShiroPasswordEncoder
 
+import java.time.ZonedDateTime
 import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,8 +31,8 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
     userDAO.find(username)
   }
 
-  def retrieveByEmail(email: String): Future[Option[User]] = {
-    userDAO.findByEmail(email)
+  def retrieveByEmail(email: String, sessionInfo: SessionInfo): Future[Option[User]] = {
+    userDAO.findByEmail(email, sessionInfo.user_group)
   }
 
   def getList(sessionInfo: SessionInfo): UserListResponse = {
@@ -78,7 +79,9 @@ class UserServiceImpl @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext
       email = Option(userSaveRequest.email),
       avatar_url = userSaveRequest.avatarUrl,
       activated = userSaveRequest.userId.isDefined,
-      deletable = true
+      deletable = true,
+      created = ZonedDateTime.now(),
+      modified = ZonedDateTime.now()
     ))
   }
 

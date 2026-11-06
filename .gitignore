@@ -1,6 +1,17 @@
 logs
 target
-/.idea
+
+# IntelliJ IDEA - チームで共有したい設定(codeStyles, compiler.xml, misc.xml, vcs.xml,
+# sbt.xml, scala_compiler.xml, scala_settings.xml, play2_project_settings.xml, dataSources.xml 等)
+# のみをコミット対象にし、個人環境/機密情報に紐づくファイルは無視する
+/.idea/workspace.xml
+/.idea/dataSources.local.xml
+/.idea/dataSources/
+/.idea/db-forest-config.xml
+/.idea/forwardedPorts.xml
+/.idea/libraries
+/.idea/modules
+/.idea/modules.xml
 /.idea_modules
 /.classpath
 /.project
@@ -15,3 +26,6 @@ sform.conf
 null
 /docker/data/
 out/
+*.zip
+wordpress
+/.chrome

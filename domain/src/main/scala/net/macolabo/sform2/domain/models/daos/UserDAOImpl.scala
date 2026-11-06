@@ -5,6 +5,7 @@ import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import scalikejdbc._
 import scalikejdbc.interpolation.SQLSyntax.count
 
+import java.time.ZonedDateTime
 import java.util.UUID
 import scala.collection.mutable
 import scala.concurrent.duration.Duration
@@ -57,7 +58,9 @@ class UserDAOImpl extends UserDAO {
             u.email,
             u.avatar_url,
             u.activated,
-            u.deletable
+            u.deletable,
+            u.created,
+            u.modified
           )
             .from(User as u)
             .where
@@ -91,7 +94,9 @@ class UserDAOImpl extends UserDAO {
             u.email,
             u.avatar_url,
             u.activated,
-            u.deletable
+            u.deletable,
+            u.created,
+            u.modified
           )
             .from(User as u)
             .where
@@ -112,7 +117,7 @@ class UserDAOImpl extends UserDAO {
     StringSQLRunner(s"""SELECT $fields FROM m_userinfo as c WHERE $key = '$value'""").run()
   }
 
-  def findByEmail(email: String): Future[Option[User]] = {
+  def findByEmail(email: String, group: String): Future[Option[User]] = {
     Future.successful(
       DB localTx { implicit l =>
         val u = User.syntax("u")
@@ -129,11 +134,15 @@ class UserDAOImpl extends UserDAO {
             u.email,
             u.avatar_url,
             u.activated,
-            u.deletable
+            u.deletable,
+            u.created,
+            u.modified
           )
             .from(User as u)
             .where
             .eq(u.email, email)
+            .and
+            .eq(u.user_group, group)
         ).map(rs => User(rs)).single().apply()
       }
     )
@@ -238,7 +247,8 @@ class UserDAOImpl extends UserDAO {
             u.avatar_url -> user.avatar_url,
             u.activated -> user.activated,
             u.deletable -> user.deletable,
-            u.role -> user.role
+            u.role -> user.role,
+            u.modified -> ZonedDateTime.now()
           )
             .where
             .eq(u.id, user.id.toString)
@@ -255,7 +265,8 @@ class UserDAOImpl extends UserDAO {
             u.avatar_url -> user.avatar_url,
             u.activated -> user.activated,
             u.deletable -> user.deletable,
-            u.role -> user.role
+            u.role -> user.role,
+            u.modified -> ZonedDateTime.now()
           )
             .where
             .eq(u.id, user.id.toString)
@@ -280,7 +291,9 @@ class UserDAOImpl extends UserDAO {
           u.email -> user.email,
           u.avatar_url -> user.avatar_url,
           u.activated -> 0,
-          u.deletable -> 1
+          u.deletable -> 1,
+          u.created -> ZonedDateTime.now(),
+          u.modified -> ZonedDateTime.now()
         )
       }.update().apply()
       Future.successful(user)
@@ -303,12 +316,14 @@ class UserDAOImpl extends UserDAO {
           u.email,
           u.avatar_url,
           u.activated,
-          u.deletable
+          u.deletable,
+          u.created,
+          u.modified
         )
           .from(User as u)
           .where
           .eq(u.user_group, userGroup)
-          .orderBy(u.id)
+          .orderBy(u.created)
       ).map(rs => User(rs)).list().apply()
     }
   }

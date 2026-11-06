@@ -4,10 +4,10 @@ import net.macolabo.sform2.domain.models.SessionInfo
 import net.macolabo.sform2.domain.models.entity.CryptoConfig
 
 import javax.inject._
-import net.macolabo.sform2.domain.services.External.Salesforce.{SalesforceCheckConnectionRequest, SalesforceCheckConnectionRequestJson, SalesforceCheckConnectionResponseJson, SalesforceConnectionService, SalesforceGetFieldResponseJson, SalesforceGetObjectResponse, SalesforceGetObjectResponseJson}
-import net.macolabo.sform2.domain.services.Transfer.{TransferGetTransferConfigListJson, TransferGetTransferConfigResponseJson, TransferGetTransferConfigSelectListJson, TransferService, TransferUpdateTransferConfigRequestJson, TransferUpdateTransferConfigResponseJson}
+import net.macolabo.sform2.domain.services.External.Salesforce.{SalesforceCheckConnectionRequest, SalesforceConnectionInfo, SalesforceConnectionService, SalesforceGetObjectResponse}
+import net.macolabo.sform2.domain.services.Transfer.{SmtpMailTestRequest, SmtpMailTransfer, TransferService}
 import net.macolabo.sform2.domain.services.TransferConfig.TransferConfigService
-import net.macolabo.sform2.domain.services.TransferConfig.save.{TransferConfigSaveRequest, TransferConfigSaveRequestJson}
+import net.macolabo.sform2.domain.services.TransferConfig.save.TransferConfigSaveRequest
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json._
@@ -32,16 +32,6 @@ class TransferController @Inject() (
   ex: ExecutionContext
 ) extends Security[UserProfile]
   with I18nSupport
-  with TransferConfigSaveRequestJson
-  with TransferGetTransferConfigSelectListJson
-  with TransferGetTransferConfigListJson
-  with TransferGetTransferConfigResponseJson
-  with TransferUpdateTransferConfigRequestJson
-  with TransferUpdateTransferConfigResponseJson
-  with SalesforceCheckConnectionRequestJson
-  with SalesforceCheckConnectionResponseJson
-  with SalesforceGetObjectResponseJson
-  with SalesforceGetFieldResponseJson
   with Pac4jUtil
 {
 
@@ -133,6 +123,43 @@ class TransferController @Inject() (
   }
 
   /**
+   * SMTP テストメール送信
+   * POST /transfer/smtp/test
+   * @return Result
+   */
+  def testSmtpMail: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+    Try(SessionInfo(request.session)) match {
+      case Success(_) =>
+        request.body.asJson match {
+          case Some(jsBody) =>
+            jsBody.validate[SmtpMailTestRequest].fold(
+              errors => BadRequest(JsError.toJson(errors)),
+              req => {
+                SmtpMailTransfer.sendSmtpMail(
+                  req.smtp_host,
+                  req.smtp_port,
+                  req.smtp_user,
+                  req.smtp_password,
+                  req.from_address,
+                  req.to_address,
+                  "SFORM2 SMTPテスト",
+                  "SMTPテストメールです。"
+                ) match {
+                  case scala.util.Success(_) => Ok("テストメールを送信しました。")
+                  case scala.util.Failure(e) =>
+                    logger.error(s"SMTP test mail failed: ${e.getMessage}")
+                    BadRequest(s"送信失敗: ${e.getMessage}")
+                }
+              }
+            )
+          case None => BadRequest("Missing JSON")
+        }
+      case Failure(e) =>
+        BadRequest(s"Session invalid. ${e.getMessage}")
+    }
+  }
+
+  /**
    * Salesforce疎通チェック
    * @return Result
    */
@@ -145,11 +172,11 @@ class TransferController @Inject() (
               errors => Future.successful(BadRequest(JsError.toJson(errors))),
               value =>
                 salesforceConnectionService.checkConnection(value).map {
-                  case Right(res) =>
-                    Ok(res)
+                  case Right(connectionInfo) =>
+                    Ok(connectionInfo.instanceUrl)
                   case Left(error) =>
                     logger.error(error)
-                    Unauthorized(error)
+                    BadRequest(error)
                 }
             )
           case None => Future.successful(BadRequest("Missing JSON"))

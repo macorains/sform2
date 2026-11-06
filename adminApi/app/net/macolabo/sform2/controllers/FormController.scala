@@ -1,10 +1,8 @@
 package net.macolabo.sform2.controllers
 
 import net.macolabo.sform2.domain.models.SessionInfo
-import net.macolabo.sform2.domain.services.Form.delete.FormDeleteResponseJson
-import net.macolabo.sform2.domain.services.Form.get.FormGetResponseJson
-import net.macolabo.sform2.domain.services.Form.list.FormListResponseJson
-import net.macolabo.sform2.domain.services.Form.update.{FormUpdateRequest, FormUpdateRequestJson, FormUpdateResponse, FormUpdateResponseJson}
+import net.macolabo.sform2.domain.services.Form.sendtestmail.FormSendTestMailRequest
+import net.macolabo.sform2.domain.services.Form.update.FormUpdateRequest
 
 import javax.inject._
 import net.macolabo.sform2.domain.services.Form.FormService
@@ -29,11 +27,6 @@ class FormController @Inject() (
   ex: ExecutionContext
 ) extends Security[UserProfile]
   with I18nSupport
-  with FormGetResponseJson
-  with FormListResponseJson
-  with FormUpdateRequestJson
-  with FormUpdateResponseJson
-  with FormDeleteResponseJson
   with Pac4jUtil
 {
 
@@ -124,6 +117,27 @@ class FormController @Inject() (
       case Success(sessionInfo) =>
         val result = formService.deleteForm(hashed_form_id, sessionInfo)
         Ok(toJson(result))
+      case Failure(e) =>
+        BadRequest(s"Session invalid. ${e.getMessage}")
+    }
+  }
+
+  /**
+   * メール送信テスト
+   * POST /form/test/mail
+   * @return
+   */
+  def sendTestMail(): Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+    Try(SessionInfo(request.session)) match {
+      case Success(_) =>
+        request.body.asJson match {
+          case Some(jsBody) =>
+            jsBody.validate[FormSendTestMailRequest].fold(
+              errors => BadRequest(JsError.toJson(errors)),
+              value => Ok(toJson(formService.sendTestMail(value)))
+            )
+          case None => BadRequest("Missing JSON")
+        }
       case Failure(e) =>
         BadRequest(s"Session invalid. ${e.getMessage}")
     }
