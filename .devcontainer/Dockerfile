@@ -33,6 +33,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   php-curl \
   php-dom \
   php-imagick  \
+  php-mbstring \
+  php-zip \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Eclipse Temurin JDK 17 and 21
@@ -69,6 +71,10 @@ RUN wget -qO - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor
   echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
   apt-get update && apt-get install -y --no-install-recommends google-chrome-stable && \
   apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install WP-CLI (used to provision/run the WordPress test host for receiver/wp-plugin).
+RUN wget -qO /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+  chmod +x /usr/local/bin/wp
 
 # Ensure default node user has access to /usr/local/share
 RUN mkdir -p /usr/local/share/npm-global && \
