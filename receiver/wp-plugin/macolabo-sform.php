@@ -31,6 +31,10 @@ require(dirname(__FILE__) . "/macolabo-sform-setting.php");
 require(dirname(__FILE__) . "/macolabo-sform-loader.php");
 require(dirname(__FILE__) . "/macolabo-sform-ratelimit.php");
 
+MacolaboSformRateLimiter::init();
+register_activation_hook(__FILE__, array('MacolaboSformRateLimiter', 'maybe_install'));
+register_deactivation_hook(__FILE__, array('MacolaboSformRateLimiter', 'deactivate'));
+
 function msform_hello() {
     $loader = new MacolaboSformLoader();
     return $loader->hello();
@@ -51,9 +55,13 @@ function msform_js_footer(){
             var message = 'エラーが発生しました。時間をおいて再度お試しください。';
             if (xhr && xhr.status === 429) {
                 var retryAfter = xhr.responseJSON && xhr.responseJSON.data ? xhr.responseJSON.data.retry_after : null;
-                message = '短時間に連続して操作されたため、処理を受け付けられませんでした。'
-                    + (retryAfter ? '約' + retryAfter + '秒後に' : 'しばらく待ってから')
-                    + '再度お試しください。';
+                var wait = 'しばらく待ってから';
+                if (retryAfter >= 60) {
+                    wait = '約' + Math.ceil(retryAfter / 60) + '分後に';
+                } else if (retryAfter > 0) {
+                    wait = '約' + retryAfter + '秒後に';
+                }
+                message = '短時間に連続して操作されたため、処理を受け付けられませんでした。' + wait + '再度お試しください。';
             }
             var box = jQuery('div.sform_wrapper .sform-error-message');
             if (box.length === 0) {
@@ -64,6 +72,20 @@ function msform_js_footer(){
         }
         function msformClearError() {
             jQuery('div.sform_wrapper .sform-error-message').remove();
+        }
+        // エラー表示してボタンを再度押せるようにする
+        function msformFail(button, xhr) {
+            msformShowError(xhr);
+            button.prop('disabled', false);
+        }
+        // 二重エンコードされたレスポンスを解析する。失敗時は null を返す
+        function msformParse(response, key) {
+            try {
+                return JSON.parse(JSON.parse(response)[key]);
+            } catch (e) {
+                console.error(e);
+                return null;
+            }
         }
 
         // 入力フォームの「次へ」ボタンクリック時
@@ -105,9 +127,8 @@ function msform_js_footer(){
                     'form_id' : jQuery("#sform_form_id").val()
                 },
                 success: function( response ){
-                    var response_data;
-                    try { response_data = JSON.parse(JSON.parse(response).data); }
-                    catch (e) { console.error(e); msformShowError(); confirmButton.prop('disabled', false); return; }
+                    var response_data = msformParse(response, 'data');
+                    if (response_data === null) return msformFail(confirmButton);
                     console.log('*** validate result***')
                     console.log(response_data)
                     if(Object.keys(response_data.validate_result).length === 0) {
@@ -123,9 +144,8 @@ function msform_js_footer(){
                                 'cache_id' : response_data.cache_id
                             },
                             success: function( response ) {
-                                var response_data;
-                                try { response_data = JSON.parse(JSON.parse(response).data); }
-                                catch (e) { console.error(e); msformShowError(); confirmButton.prop('disabled', false); return; }
+                                var response_data = msformParse(response, 'data');
+                                if (response_data === null) return msformFail(confirmButton);
                                 console.log('*** confirm result***')
                                 console.log(response)
                                 jQuery("div.sform_wrapper .sform-form-wrapper").replaceWith(response_data);
@@ -148,9 +168,8 @@ function msform_js_footer(){
                                         success: function(response) {
                                             console.log('*** save result ***')
                                             console.log(response)
-                                            var response_data;
-                                            try { response_data = JSON.parse(JSON.parse(response).html); }
-                                            catch (e) { console.error(e); msformShowError(); submitButton.prop('disabled', false); return; }
+                                            var response_data = msformParse(response, 'html');
+                                            if (response_data === null) return msformFail(submitButton);
                                             jQuery("div.sform_wrapper .sform-form-wrapper").replaceWith(response_data);
                                                 // 「完了」ボタンクリック時
                                                 jQuery('#sform_button_finish').on('click', function(){
@@ -159,8 +178,7 @@ function msform_js_footer(){
 
                                         },
                                         error: function(xhr) {
-                                            msformShowError(xhr);
-                                            submitButton.prop('disabled', false);
+                                            msformFail(submitButton, xhr);
                                         }
                                     })
                                 });
@@ -195,29 +213,31 @@ function msform_js_footer(){
                                         },
                                         error: function(xhr) {
                                             console.error(xhr);
-                                            msformShowError(xhr);
-                                            backButton.prop('disabled', false);
+                                            msformFail(backButton, xhr);
                                         }
                                     })
                                 });
                             },
                             error: function(xhr){
                                 console.log(xhr);
-                                msformShowError(xhr);
-                                confirmButton.prop('disabled', false);
+                                msformFail(confirmButton, xhr);
                             }
                         });
                     } else {
                         // validate ng なら入力フォームにエラーメッセージを追加
-                        Object.keys(response_data.validate_result).forEach(function(k){
-                            jQuery('#sform-col-error-' + k)[0].textContent = response_data.validate_result[k];
-                        })
                         confirmButton.prop('disabled', false);
+                        Object.keys(response_data.validate_result).forEach(function(k){
+                            var errorElement = jQuery('#sform-col-error-' + k)[0];
+                            if (errorElement) {
+                                errorElement.textContent = response_data.validate_result[k];
+                            } else {
+                                console.error('error element not found: ' + k, response_data.validate_result[k]);
+                            }
+                        })
                     }
                 },
                 error: function(xhr){
-                    msformShowError(xhr);
-                    confirmButton.prop('disabled', false);
+                    msformFail(confirmButton, xhr);
                 }
             });
         }
