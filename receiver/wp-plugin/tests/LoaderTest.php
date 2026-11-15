@@ -158,6 +158,52 @@ class LoaderTest extends WP_UnitTestCase {
         $this->assertSame('<input type="hidden" id="sform_form_id" value="abc"/>', $this->loader->get_hidden_param('abc'));
     }
 
+    public function test_get_hidden_param_escapes_form_id() {
+        $this->assertSame(
+            '<input type="hidden" id="sform_form_id" value="&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;"/>',
+            $this->loader->get_hidden_param('"><script>alert(1)</script>')
+        );
+    }
+
+    public function test_form_load_escapes_posted_form_id() {
+        // msform_load_form では $_POST['form_id'] がそのまま渡される（反射型 XSS の経路）
+        $html = $this->loader->form_load('"><img src=x onerror=alert(1)>', 'cache-1');
+
+        $this->assertStringNotContainsString('<img', substr($html, strpos($html, '<input')));
+    }
+
+    public function test_form_initial_load_escapes_form_id_in_content() {
+        // 投稿本文は unfiltered_html 権限の無い投稿者も書けるため、格納型 XSS の経路になる
+        $html = $this->loader->form_initial_load('<msform><form_id>&quot;&gt;&lt;script&gt;x&lt;/script&gt;</form_id></msform>', null);
+
+        // モック API はフォーム HTML に form_id を含めて返すため、プラグインが出力する hidden 部分のみ検証する
+        $this->assertStringNotContainsString('<script>', substr($html, strpos($html, '<input')));
+    }
+
+    /**
+     * @dataProvider non_http_url_provider
+     */
+    public function test_api_call_refuses_non_http_protocols($api_url) {
+        $login = $this->loader->_login(['api_url' => $api_url, 'group' => 'g', 'password' => 'p']);
+
+        $this->assertSame('', $login['token']);
+        $this->assertSame('', $login['message'], 'http/https 以外の URL の内容を読み込まないこと');
+    }
+
+    public static function non_http_url_provider() {
+        // file:// は「<api_url>/signin」を読むため、その位置にファイルを置いて読めないことを確認する
+        $dir = __DIR__ . '/tmp/file-protocol';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+        file_put_contents($dir . '/signin', 'SECRET FILE CONTENT');
+        return [
+            'file'   => ['file://' . $dir],
+            'gopher' => ['gopher://127.0.0.1:' . (getenv('MSFORM_MOCK_API_PORT') ?: 18089)],
+            'dict'   => ['dict://127.0.0.1:' . (getenv('MSFORM_MOCK_API_PORT') ?: 18089)],
+        ];
+    }
+
     // ---- 既知の不具合（phpunit.xml.dist で除外。修正時に @group を外す） ----
 
     /**
@@ -183,17 +229,5 @@ class LoaderTest extends WP_UnitTestCase {
         $html = (new MacolaboSformLoader())->form_initial_load('<msform><form_id>form-1</form_id></msform>', null);
 
         $this->assertStringContainsString("Can't connect to SformAPI.", $html);
-    }
-
-    /**
-     * form_id がエスケープされずに HTML へ出力される。msform_load_form では $_POST['form_id'] がそのまま
-     * 入るため、nonce の無い admin-ajax への POST で反射型 XSS になりうる。
-     *
-     * @group known-bug
-     */
-    public function test_get_hidden_param_escapes_form_id() {
-        $html = $this->loader->get_hidden_param('"><script>alert(1)</script>');
-
-        $this->assertStringNotContainsString('<script>', $html);
     }
 }

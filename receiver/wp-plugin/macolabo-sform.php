@@ -296,14 +296,19 @@ function msform_save_form(){
  * 疎通確認（ログインできるか）
  */
 function msform_connection_check(){
+  // 指定された URL へサーバーからリクエストするため（SSRF になりうる）、設定を変更できる管理者に限定し、
+  // CSRF 対策として設定画面で発行した nonce を検証する
+  if (!current_user_can('manage_options')) {
+    wp_die('-1', 403);
+  }
+  check_ajax_referer('msform_connection_check');
+
   $loader = new MacolaboSformLoader();
-  $data = $_POST['data'];
-  $info = [
-    'api_url' => $data['api_url'],
-    //'user_id' => $data['user_id'],
-    'password' => $data['password'],
-    'group' => $data['group']
-  ];
+  $data = isset($_POST['data']) && is_array($_POST['data']) ? wp_unslash($_POST['data']) : [];
+  $info = [];
+  foreach (['api_url', 'password', 'group'] as $key) {
+    $info[$key] = isset($data[$key]) ? sanitize_text_field($data[$key]) : '';
+  }
   $response = json_encode($loader->_login($info));
   wp_die($response);
 }

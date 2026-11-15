@@ -72,29 +72,87 @@ class AjaxTest extends WP_Ajax_UnitTestCase {
         );
     }
 
-    public function test_connection_check_as_admin() {
-        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
+    // ---- 接続テスト（設定画面の「テスト」ボタン） ----
 
-        $response = json_decode($this->call_ajax('msform_connection_check', ['data' => [
+    /**
+     * 接続テストを実行する。$role のユーザーでログインし、$with_nonce なら正しい nonce を付ける
+     */
+    private function call_connection_check(array $data, $role = 'administrator', $with_nonce = true) {
+        wp_set_current_user(self::factory()->user->create(['role' => $role]));
+        $post = ['data' => $data];
+        if ($with_nonce) {
+            $post['_ajax_nonce'] = wp_create_nonce('msform_connection_check');
+        }
+        return $this->call_ajax('msform_connection_check', $post);
+    }
+
+    private function valid_connection_data() {
+        return [
             'api_url'  => MsformMockApi::url(),
             'group'    => 'test-group',
             'password' => 'test-password',
-        ]]), true);
+        ];
+    }
+
+    public function test_connection_check_as_admin() {
+        $response = json_decode($this->call_connection_check($this->valid_connection_data()), true);
 
         $this->assertSame('test-token', trim($response['token']));
     }
 
     public function test_connection_check_reports_login_failure() {
-        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
-
-        $response = json_decode($this->call_ajax('msform_connection_check', ['data' => [
-            'api_url'  => MsformMockApi::url(),
-            'group'    => 'test-group',
-            'password' => 'wrong',
-        ]]), true);
+        $data = array_merge($this->valid_connection_data(), ['password' => 'wrong']);
+        $response = json_decode($this->call_connection_check($data), true);
 
         $this->assertSame('', $response['token']);
         $this->assertSame('invalid credentials', $response['message']);
+    }
+
+    public function test_connection_check_unslashes_input() {
+        // WordPress は $_POST にスラッシュを付加するため、そのまま使うと引用符を含む値が変わってしまう
+        $data = array_merge($this->valid_connection_data(), ['password' => wp_slash("pa'ss")]);
+        $this->call_connection_check($data);
+
+        parse_str(MsformMockApi::requests_to('/signin')[0]['body'], $params);
+        $this->assertSame("pa'ss", $params['password']);
+    }
+
+    public function test_connection_check_handles_missing_fields() {
+        $response = json_decode($this->call_connection_check([]), true);
+
+        $this->assertSame('', $response['token']);
+    }
+
+    /**
+     * @dataProvider non_admin_role_provider
+     */
+    public function test_connection_check_rejects_non_admin($role) {
+        $response = $this->call_connection_check($this->valid_connection_data(), $role);
+
+        $this->assertSame('-1', $response);
+        $this->assertSame([], MsformMockApi::requests(), '権限の無いユーザーの指定 URL へリクエストしないこと');
+    }
+
+    public static function non_admin_role_provider() {
+        return [['subscriber'], ['contributor'], ['author'], ['editor']];
+    }
+
+    public function test_connection_check_rejects_missing_nonce() {
+        $response = $this->call_connection_check($this->valid_connection_data(), 'administrator', false);
+
+        $this->assertSame('-1', $response);
+        $this->assertSame([], MsformMockApi::requests(), 'CSRF で管理者に任意の URL へリクエストさせられないこと');
+    }
+
+    public function test_connection_check_rejects_invalid_nonce() {
+        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
+        $response = $this->call_ajax('msform_connection_check', [
+            'data'        => $this->valid_connection_data(),
+            '_ajax_nonce' => 'invalid',
+        ]);
+
+        $this->assertSame('-1', $response);
+        $this->assertSame([], MsformMockApi::requests());
     }
 
     // ---- 連続リクエスト制限 ----
@@ -135,25 +193,5 @@ class AjaxTest extends WP_Ajax_UnitTestCase {
             ['msform_confirm_form'],
             ['msform_save_form'],
         ];
-    }
-
-    // ---- 既知の不具合（phpunit.xml.dist で除外。修正時に @group を外す） ----
-
-    /**
-     * msform_connection_check に権限チェックが無く、ログイン済みなら購読者でも任意の URL へ
-     * POST させられる（SSRF）。
-     *
-     * @group known-bug
-     */
-    public function test_connection_check_requires_manage_options() {
-        wp_set_current_user(self::factory()->user->create(['role' => 'subscriber']));
-
-        $this->call_ajax('msform_connection_check', ['data' => [
-            'api_url'  => MsformMockApi::url(),
-            'group'    => 'test-group',
-            'password' => 'test-password',
-        ]]);
-
-        $this->assertSame([], MsformMockApi::requests(), '権限の無いユーザーの指定 URL へリクエストしないこと');
     }
 }
