@@ -14,6 +14,7 @@ FORM_API_URL="${FORM_API_URL:-http://localhost:9002}"
 
 DB_HOST="${DB_HOST:-mysql}"
 DB_NAME="${DB_NAME:-wp}"
+TEST_DB_NAME="${TEST_DB_NAME:-wp_test}"   # receiver/wp-plugin の PHPUnit 用（実行のたびに初期化される）
 DB_USER="${DB_USER:-sform}"
 DB_PASS="${DB_PASS:-sform}"
 DB_ROOT_PASS="${DB_ROOT_PASS:-root}"   # docker-compose.yml の MYSQL_ROOT_PASSWORD
@@ -28,17 +29,21 @@ fi
 # 0. DB スキーマの用意
 # init-db/02-create-wordpress-db.sql は mysql-data ボリュームが空の初回起動時にしか実行されないため、
 # 既存ボリュームを使い回している環境向けにここでも作成する（mysql クライアントは無いので PHP の mysqli を使う）。
-echo "Ensuring database '$DB_NAME' exists..."
-DB_HOST="$DB_HOST" DB_NAME="$DB_NAME" DB_USER="$DB_USER" DB_ROOT_PASS="$DB_ROOT_PASS" php -r '
+echo "Ensuring databases '$DB_NAME', '$TEST_DB_NAME' exist..."
+DB_HOST="$DB_HOST" DB_NAME="$DB_NAME" TEST_DB_NAME="$TEST_DB_NAME" DB_USER="$DB_USER" DB_ROOT_PASS="$DB_ROOT_PASS" php -r '
   mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-  $db = getenv("DB_NAME"); $user = getenv("DB_USER");
-  if (!preg_match("/^\w+$/", $db) || !preg_match("/^\w+$/", $user)) {
-    fwrite(STDERR, "ERROR: invalid DB_NAME/DB_USER\n"); exit(1);
+  $dbs = [getenv("DB_NAME"), getenv("TEST_DB_NAME")]; $user = getenv("DB_USER");
+  foreach (array_merge($dbs, [$user]) as $name) {
+    if (!preg_match("/^\w+$/", $name)) {
+      fwrite(STDERR, "ERROR: invalid DB_NAME/TEST_DB_NAME/DB_USER\n"); exit(1);
+    }
   }
   try {
     $m = new mysqli(getenv("DB_HOST"), "root", getenv("DB_ROOT_PASS"));
-    $m->query("CREATE DATABASE IF NOT EXISTS `$db` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-    $m->query("GRANT ALL PRIVILEGES ON `$db`.* TO \x27$user\x27@\x27%\x27");
+    foreach ($dbs as $db) {
+      $m->query("CREATE DATABASE IF NOT EXISTS `$db` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+      $m->query("GRANT ALL PRIVILEGES ON `$db`.* TO \x27$user\x27@\x27%\x27");
+    }
   } catch (mysqli_sql_exception $e) {
     fwrite(STDERR, "ERROR: failed to prepare database: " . $e->getMessage() . "\n"); exit(1);
   }

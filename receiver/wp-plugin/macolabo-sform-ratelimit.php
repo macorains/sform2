@@ -175,7 +175,9 @@ class MacolaboSformRateLimiter {
 
     private static function reject($action, $tier, $retry_after) {
         _log("msform rate limit exceeded: action={$action} tier={$tier}");
-        header('Retry-After: ' . $retry_after);
+        if (!headers_sent()) {
+            header('Retry-After: ' . $retry_after);
+        }
         wp_send_json_error([
             'code' => 'too_many_requests',
             'retry_after' => $retry_after,

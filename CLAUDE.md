@@ -69,6 +69,18 @@ sbt "form/run 9002"                                       # プラグインの�
 
 プラグイン設定（管理画面「Sform設定」）の URL は `http://localhost:9002`。グループ/パスワードは手動で入力する。
 
+テストは PHPUnit + wp-phpunit（WordPress 公式テストライブラリ）による結合テスト。`wordpress/` のコアと
+`sform-mysql` の `wp_test` スキーマ（実行のたびに初期化される）を使い、formApi はモック
+（`tests/mock-api/router.php`）を自動起動するので sbt の起動は不要。
+
+```
+cd receiver/wp-plugin
+composer install                        # 初回のみ（vendor/ は gitignore 対象）
+vendor/bin/phpunit                      # 全テスト（known-bug グループは除外）
+vendor/bin/phpunit --filter RateLimiter # 一部のみ
+vendor/bin/phpunit --group known-bug    # 既知の不具合を記録したテスト（修正するまで失敗する）
+```
+
 ## アーキテクチャ
 
 ### domain モジュール

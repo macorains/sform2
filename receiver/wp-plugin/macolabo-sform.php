@@ -258,7 +258,7 @@ function msform_load_form(){
     MacolaboSformRateLimiter::guard('msform_load_form');
     $loader = new MacolaboSformLoader();
     $response = $loader->form_load($_POST['form_id'], $_POST['cache_id']);
-    die($response);
+    wp_die($response);
 }
 
 /**
@@ -268,7 +268,7 @@ function msform_validate_form(){
     MacolaboSformRateLimiter::guard('msform_validate_form');
     $loader = new MacolaboSformLoader();
     $response = $loader->form_validate($_POST['form_id'], $_POST['data']);
-    die($response);
+    wp_die($response);
 }
 
 /**
@@ -278,7 +278,7 @@ function msform_confirm_form(){
     MacolaboSformRateLimiter::guard('msform_confirm_form');
     $loader = new MacolaboSformLoader();
     $response = $loader->form_confirm($_POST['form_id'], $_POST['data'], $_POST['cache_id']);
-    die($response);
+    wp_die($response);
 }
 
 /**
@@ -288,7 +288,7 @@ function msform_save_form(){
     MacolaboSformRateLimiter::guard('msform_save_form');
     $loader = new MacolaboSformLoader();
     $response = $loader->form_save($_POST['form_id'], $_POST['cache_id']);
-    die($response);
+    wp_die($response);
 
 }
 
@@ -305,7 +305,7 @@ function msform_connection_check(){
     'group' => $data['group']
   ];
   $response = json_encode($loader->_login($info));
-  die($response);
+  wp_die($response);
 }
 
 add_action('wp_ajax_msform_load_form', 'msform_load_form');
