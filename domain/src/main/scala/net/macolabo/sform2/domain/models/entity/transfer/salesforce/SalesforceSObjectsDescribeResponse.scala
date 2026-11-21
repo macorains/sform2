@@ -1,12 +1,16 @@
 package net.macolabo.sform2.domain.models.entity.transfer.salesforce
 
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-import play.api.libs.json.{Format, JsPath}
+import play.api.libs.json.{Format, JsPath, Json}
 
 case class SalesforceSObjectsDescribeResponse(
   name: String,
   fields: List[SalesforceSObjectsDescribeResponseField]
 )
+
+object SalesforceSObjectsDescribeResponse {
+  implicit val format: Format[SalesforceSObjectsDescribeResponse] = Json.format[SalesforceSObjectsDescribeResponse]
+}
 
 case class SalesforceSObjectsDescribeResponseField(
   name: String,
@@ -19,8 +23,9 @@ case class SalesforceSObjectsDescribeResponseField(
   calculated: Boolean,
 )
 
-trait SalesforceSObjectsDescribeResponseJson {
-  implicit val SalesforceSObjectsDescribeResponseFieldFormat: Format[SalesforceSObjectsDescribeResponseField] = (
+object SalesforceSObjectsDescribeResponseField {
+  // Custom format required: JSON keys "type" and "autoNumber" differ from field names "_type" and "auto_number"
+  implicit val format: Format[SalesforceSObjectsDescribeResponseField] = (
     (JsPath \ "name").format[String] ~
       (JsPath \ "label").format[String] ~
       (JsPath \ "type").format[String] ~
@@ -30,9 +35,4 @@ trait SalesforceSObjectsDescribeResponseJson {
       (JsPath \ "autoNumber").format[Boolean] ~
       (JsPath \ "calculated").format[Boolean]
   )(SalesforceSObjectsDescribeResponseField.apply, unlift(SalesforceSObjectsDescribeResponseField.unapply))
-
-  implicit val salesforceSObjectsDescribeResponseFormat: Format[SalesforceSObjectsDescribeResponse] = (
-    (JsPath \ "name").format[String] ~
-      (JsPath \ "fields").format[List[SalesforceSObjectsDescribeResponseField]]
-  )(SalesforceSObjectsDescribeResponse.apply, unlift(SalesforceSObjectsDescribeResponse.unapply))
 }

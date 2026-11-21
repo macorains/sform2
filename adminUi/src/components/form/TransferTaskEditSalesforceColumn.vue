@@ -32,7 +32,7 @@
 }
 </style>
 <script setup>
-import {onMounted, ref, inject, toRaw} from "vue"
+import {ref, toRaw} from "vue"
 import {useHttpRequest} from "@/composables/useHttpRequest.js";
 import { BTable, BFormSelect } from 'bootstrap-vue-3'
 

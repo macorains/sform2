@@ -2,7 +2,7 @@ package net.macolabo.sform2.controllers
 
 import javax.inject._
 import net.macolabo.sform2.domain.models.SessionInfo
-import net.macolabo.sform2.domain.services.User.{UserSaveRequest, UserSaveRequestJson, UserService}
+import net.macolabo.sform2.domain.services.User.{UserSaveRequest, UserService}
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.libs.json._
@@ -10,7 +10,7 @@ import play.api.mvc._
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.scala.{Security, SecurityComponents}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 class UserController @Inject() (
@@ -22,7 +22,6 @@ class UserController @Inject() (
   ex: ExecutionContext
 ) extends Security[UserProfile]
   with I18nSupport
-  with UserSaveRequestJson
   with Pac4jUtil
 {
 
@@ -50,22 +49,26 @@ class UserController @Inject() (
 
   // ユーザーの保存
   // POST /user
-  def save: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+  def save: Action[AnyContent] = Secure("HeaderClient").async { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         request.body.asJson match {
           case Some(jsBody) =>
             jsBody.validate[UserSaveRequest].fold(
-              errors => BadRequest(JsError.toJson(errors)),
+              errors => Future.successful(BadRequest(JsError.toJson(errors))),
               value => {
-                userService.save(value, sessionInfo)
-                Ok
+                userService.retrieveByEmail(value.email, sessionInfo).map {
+                  case Some(u) => BadRequest("""{"message":"ALREADY_EXISTS"}""")
+                  case None =>
+                    userService.save(value, sessionInfo)
+                    Ok
+                }
               }
             )
-          case None => BadRequest("Missing JSON")
+          case None => Future.successful(BadRequest("Missing JSON"))
         }
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Future.successful(BadRequest(s"Session invalid. ${e.getMessage}"))
     }
   }
 

@@ -17,7 +17,7 @@ class TransferConfigMailAddressDAOImpl extends TransferConfigMailAddressDAO {
     withSQL(
       select(
         t.id,
-        t.transfer_config_mail_id,
+        t.transfer_config_id,
         t.address_index,
         t.name,
         t.address,
@@ -40,12 +40,12 @@ class TransferConfigMailAddressDAOImpl extends TransferConfigMailAddressDAO {
    * @param session DB Session
    * @return TransferCongirMailAddressのリスト
    */
-  def getList(userGroup: String, transferConfigMailId: BigInt)(implicit session: DBSession = autoSession): List[TransferConfigMailAddress] = {
+  def getList(userGroup: String, transferConfigId: BigInt)(implicit session: DBSession = autoSession): List[TransferConfigMailAddress] = {
     val f = TransferConfigMailAddress.syntax("f")
     withSQL(
       select(
         f.id,
-        f.transfer_config_mail_id,
+        f.transfer_config_id,
         f.address_index,
         f.name,
         f.address,
@@ -57,7 +57,7 @@ class TransferConfigMailAddressDAOImpl extends TransferConfigMailAddressDAO {
       )
         .from(TransferConfigMailAddress as f)
         .where
-        .eq(f.transfer_config_mail_id, transferConfigMailId)
+        .eq(f.transfer_config_id, transferConfigId)
         .and
         .eq(f.user_group, userGroup)
         .orderBy(f.address_index)
@@ -74,7 +74,7 @@ class TransferConfigMailAddressDAOImpl extends TransferConfigMailAddressDAO {
     withSQL {
       val c = TransferConfigMailAddress.column
       insert.into(TransferConfigMailAddress).namedValues(
-        c.transfer_config_mail_id -> transferConfigMailAddress.transfer_config_mail_id,
+        c.transfer_config_id -> transferConfigMailAddress.transfer_config_id,
         c.address_index -> transferConfigMailAddress.address_index,
         c.name -> transferConfigMailAddress.name,
         c.address -> transferConfigMailAddress.address,
@@ -97,7 +97,7 @@ class TransferConfigMailAddressDAOImpl extends TransferConfigMailAddressDAO {
     withSQL {
       val c = TransferConfigMailAddress.column
       update(TransferConfigMailAddress).set(
-        c.transfer_config_mail_id -> transferConfigMailAddress.transfer_config_mail_id,
+        c.transfer_config_id -> transferConfigMailAddress.transfer_config_id,
         c.address_index -> transferConfigMailAddress.address_index,
         c.name -> transferConfigMailAddress.name,
         c.address -> transferConfigMailAddress.address,

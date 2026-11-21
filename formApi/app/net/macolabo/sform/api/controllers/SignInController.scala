@@ -1,7 +1,5 @@
 package net.macolabo.sform.api.controllers
 
-import net.macolabo.sform2.domain.services.AuthToken.AuthTokenService
-import org.apache.pekko.http.scaladsl.model.StatusCodes.ClientError
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.jwt.config.signature.SecretSignatureConfiguration
 import org.pac4j.jwt.profile.JwtGenerator
@@ -19,13 +17,11 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
   * The `Sign In` controller.
   * @param env Environment
   * @param controllerComponents             The Play controller components.
-  * @param authTokenService            The authToken service implementation.
   * @param configuration          The Play configuration.
   */
 class SignInController @Inject() (
                                    env: Environment,
                                    val controllerComponents: SecurityComponents,
-                                   authTokenService: AuthTokenService,
                                    configuration: Configuration
                                  )(
                                    implicit

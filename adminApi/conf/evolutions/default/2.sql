@@ -1,15 +1,9 @@
 # --- !Ups
 
-CREATE TABLE `d_form` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `hashed_id` VARCHAR(45) NOT NULL,
-  `form_data` JSON,
-  `created_user` VARCHAR(45),
-  `modified_user` VARCHAR(45),
-  `created` DATETIME DEFAULT NULL,
-  `modified` DATETIME DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
+ALTER TABLE d_transfer_config_mail RENAME TO d_transfer_config_ses_mail;
+ALTER TABLE d_form_transfer_task_mail RENAME TO d_form_transfer_task_ses_mail;
 
 # --- !Downs
-DROP TABLE `d_form`;
+
+ALTER TABLE d_transfer_config_ses_mail RENAME TO d_transfer_config_mail;
+ALTER TABLE d_form_transfer_task_ses_mail RENAME TO d_form_transfer_task_mail;

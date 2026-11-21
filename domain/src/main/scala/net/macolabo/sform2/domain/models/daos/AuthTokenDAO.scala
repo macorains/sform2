@@ -8,6 +8,8 @@ import java.util.UUID
 import scala.concurrent.Future
 
 /**
+ * 認証トークン用DAO
+ * 主にFormAPI側で使用
  * Give access to the AuthToken object.
  */
 trait AuthTokenDAO {

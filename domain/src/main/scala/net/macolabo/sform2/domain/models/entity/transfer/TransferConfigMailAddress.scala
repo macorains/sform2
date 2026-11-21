@@ -6,7 +6,7 @@ import java.time.ZonedDateTime
 
 case class TransferConfigMailAddress(
   id: BigInt,
-  transfer_config_mail_id: BigInt,
+  transfer_config_id: BigInt,
   address_index: Int,
   name: String,
   address: String,
@@ -22,7 +22,7 @@ object TransferConfigMailAddress extends SQLSyntaxSupport[TransferConfigMailAddr
   def apply(rs: WrappedResultSet): TransferConfigMailAddress = {
     TransferConfigMailAddress(
       rs.bigInt("id"),
-      rs.bigInt("transfer_config_mail_id"),
+      rs.bigInt("transfer_config_id"),
       rs.int("address_index"),
       rs.string("name"),
       rs.string("address"),

@@ -1,17 +1,13 @@
 package net.macolabo.sform2.domain.services.User
 
-import play.api.libs.json.{Json, Reads, Writes}
+import play.api.libs.json.{Format, Json}
 
-trait AdminExistsCheckResultJson {
+/**
+ * Adminグループユーザーの存在チェック結果
+ * @param result Adminグループユーザーが存在するか
+ */
+case class AdminExistsCheckResult(result: Boolean)
 
-  /**
-   * Adminグループユーザーの存在チェック結果
-   * @param result Adminグループユーザーが存在するか
-   */
-  case class AdminExistsCheckResult(result: Boolean)
-
-  object AdminExistsCheckResult {
-    implicit def jsonAdminExistsCheckResultWrites: Writes[AdminExistsCheckResult] = Json.writes[AdminExistsCheckResult]
-    implicit def jsonAdminExistsCheckResultReads: Reads[AdminExistsCheckResult] = Json.reads[AdminExistsCheckResult]
-  }
+object AdminExistsCheckResult {
+  implicit val format: Format[AdminExistsCheckResult] = Json.format[AdminExistsCheckResult]
 }

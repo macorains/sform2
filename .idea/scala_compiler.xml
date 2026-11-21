@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ScalaCompilerConfiguration">
+    <option name="separateProdTestSources" value="true" />
+    <profile name="sbt 1" modules="sform2s,sform2s.adminApi,sform2s.domain,sform2s.formApi,sform2s.main,sform2s.main~1,sform2s.test,sform2s.test~1,workspace_5566,workspace_5566.main,workspace_5566.test" />
+    <profile name="sbt 2" modules="sform2s.adminApi.main,sform2s.adminApi.main~1,sform2s.adminApi.test,sform2s.adminApi.test~1,sform2s.formApi.main,sform2s.formApi.main~1,sform2s.formApi.test,sform2s.formApi.test~1">
+      <option name="deprecationWarnings" value="true" />
+      <option name="uncheckedWarnings" value="true" />
+      <option name="featureWarnings" value="true" />
+      <parameters>
+        <parameter value="-encoding" />
+        <parameter value="utf8" />
+        <parameter value="-Xfatal-warnings" />
+        <parameter value="-Ywarn-dead-code" />
+        <parameter value="-Ywarn-numeric-widen" />
+        <parameter value="-Xlint:-unused,_" />
+      </parameters>
+    </profile>
+    <profile name="sbt 3" modules="sform2s.domain.main,sform2s.domain.main~1,sform2s.domain.test">
+      <option name="deprecationWarnings" value="true" />
+      <option name="uncheckedWarnings" value="true" />
+      <option name="featureWarnings" value="true" />
+      <parameters>
+        <parameter value="-Xfatal-warnings" />
+        <parameter value="-Ywarn-dead-code" />
+        <parameter value="-Ywarn-numeric-widen" />
+        <parameter value="-Xlint:-unused,_" />
+      </parameters>
+    </profile>
+    <profile name="sbt 4" modules="sform2s.domain.test~1">
+      <option name="deprecationWarnings" value="true" />
+      <option name="uncheckedWarnings" value="true" />
+      <option name="featureWarnings" value="true" />
+      <parameters>
+        <parameter value="-Xfatal-warnings" />
+        <parameter value="-Ywarn-numeric-widen" />
+        <parameter value="-Xlint:-unused,_" />
+      </parameters>
+    </profile>
+  </component>
+</project>

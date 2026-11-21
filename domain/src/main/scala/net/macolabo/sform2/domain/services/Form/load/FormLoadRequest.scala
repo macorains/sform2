@@ -1,7 +1,6 @@
 package net.macolabo.sform2.domain.services.Form.load
 
-import play.api.libs.json.{JsPath, Json, Reads, Writes}
-import play.api.libs.functional.syntax._
+import play.api.libs.json.{Format, Json}
 
 /**
  * フォーム呼び出し要求クラス
@@ -15,15 +14,6 @@ case class FormLoadRequest(
                             cache_id: Option[String]
                           )
 
-trait FormLoadRequestJson {
-  implicit def jsonFormLoadRequestReads: Reads[FormLoadRequest] = (
-    (JsPath \ "hashed_form_id").read[String] ~
-      (JsPath \ "receiver_path").read[String] ~
-      (JsPath \ "cache_id").readNullable[String]
-    )(FormLoadRequest.apply _)
-  implicit def jsonFormLoadRequestWrites: Writes[FormLoadRequest] = (formLoadRequest: FormLoadRequest) => Json.obj(
-    "hashed_form_id" -> formLoadRequest.hashed_form_id,
-    "receiver_path" -> formLoadRequest.receiver_path,
-    "cache_id" -> formLoadRequest.cache_id
-  )
+object FormLoadRequest {
+  implicit val format: Format[FormLoadRequest] = Json.format[FormLoadRequest]
 }

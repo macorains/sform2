@@ -1,7 +1,7 @@
 package net.macolabo.sform2.controllers
 
 import com.google.inject.Inject
-import net.macolabo.sform2.domain.services.User.{AdminExistsCheckResultJson, UserService}
+import net.macolabo.sform2.domain.services.User.{AdminExistsCheckResult, UserService}
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
@@ -18,7 +18,7 @@ class AdminExistsCheckController @Inject() (
   implicit
   webJarsUtil: WebJarsUtil,
   ex: ExecutionContext
-) extends Security[UserProfile] with I18nSupport with AdminExistsCheckResultJson {
+) extends Security[UserProfile] with I18nSupport {
 
   def check: Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
     Ok(Json.toJson(AdminExistsCheckResult(userService.checkAdminExists)))

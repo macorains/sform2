@@ -4,8 +4,8 @@ import org.apache.pekko.actor.ActorRef
 import com.google.inject.Inject
 import net.macolabo.sform2.domain.models.daos.{FormColDAO, FormColSelectDAO, FormColValidationDAO, FormDAO, PostdataDAO}
 import net.macolabo.sform2.domain.models.entity.form.{Form, FormCol, FormColSelect}
-import net.macolabo.sform2.domain.services.Form.load.{FormLoadRequest, FormLoadRequestJson}
-import net.macolabo.sform2.domain.services.Form.post.{FormPostRequest, FormPostRequestJson}
+import net.macolabo.sform2.domain.services.Form.load.FormLoadRequest
+import net.macolabo.sform2.domain.services.Form.post.FormPostRequest
 import net.macolabo.sform2.domain.services.Form.validate.FormValidateResultResponse
 import net.macolabo.sform2.domain.services.Transfer.TransferReceiver.NewTaskRequest
 import net.macolabo.sform2.domain.utils.forms.{FormColType_Checkbox, FormColType_Combo, FormColType_DisplayText, FormColType_Hidden, FormColType_Radio, FormColType_Text, FormColType_TextArea}
@@ -24,7 +24,6 @@ class FormExecuteService @Inject()(
   postdataDAO: PostdataDAO,
   @Named("actor_transfer_receiver") transferReceiver: ActorRef
 )
-extends FormLoadRequestJson with FormPostRequestJson
 {
   /**
    * load：以下のようなHTMLを生成して返す
@@ -94,7 +93,7 @@ extends FormLoadRequestJson with FormPostRequestJson
     DB.localTx(implicit session => {
       post_request.validate[FormPostRequest].map(request => {
         formDAO.get(request.hashed_form_id).map(formdata => {
-          createConfirmForm(formdata, request.postdata)
+          createConfirmForm(formdata, request.postdata, request.cache_id)
         })
       }).getOrElse(None)
     })
@@ -218,7 +217,7 @@ extends FormLoadRequestJson with FormPostRequestJson
                |    <div class="sform-col">
                |      <div class="sform-col-name">${formCol.name}</div>
                |        <div class="sform-col-input">
-               |          <input type="text" name="${formCol.col_id}" value="$posted_value">
+               |          <input class="sform-col-form-text" type="text" id="${formCol.col_id}" name="${formCol.col_id}" value="$posted_value">
                |          <div class="sform-col-input-error">
                |            ${validate_result.getOrElse(formCol.col_id, "")}
                |          </div>
@@ -230,7 +229,7 @@ extends FormLoadRequestJson with FormPostRequestJson
                |    <div class="sform-col">
                |      <div class="sform-col-name">${formCol.name}</div>
                |        <div class="sform-col-input">
-               |          <select name="${formCol.col_id}">
+               |          <select class="sform-col-form-text" name="${formCol.col_id}" id="${formCol.col_id}">
                |            $options
                |          </select>
                |          <div class="sform-col-input-error">
@@ -244,7 +243,9 @@ extends FormLoadRequestJson with FormPostRequestJson
                |    <div class="sform-col">
                |      <div class="sform-col-name">${formCol.name}</div>
                |        <div class="sform-col-input">
-               |          $options
+               |          <div class="sform-col-form-checkbox" id="${formCol.col_id}">
+               |            $options
+               |          </div>
                |          <div class="sform-col-input-error">
                |            ${validate_result.getOrElse(formCol.col_id, "")}
                |          </div>
@@ -256,7 +257,9 @@ extends FormLoadRequestJson with FormPostRequestJson
                |    <div class="sform-col">
                |      <div class="sform-col-name">${formCol.name}</div>
                |        <div class="sform-col-input">
+               |          <div class="sform-col-form-radio" id="${formCol.col_id}">
                |            $options
+               |          </div>
                |          <div class="sform-col-input-error">
                |            ${validate_result.getOrElse(formCol.col_id, "")}
                |          </div>
@@ -267,7 +270,7 @@ extends FormLoadRequestJson with FormPostRequestJson
                |    <div class="sform-col">
                |      <div class="sform-col-name">${formCol.name}</div>
                |        <div class="sform-col-input">
-               |          <textarea name="hoge">$posted_value</textarea>
+               |          <textarea name="${formCol.col_id}" id="${formCol.col_id}">$posted_value</textarea>
                |          <div class="sform-col-input-error">
                |            ${validate_result.getOrElse(formCol.col_id, "")}
                |          </div>
@@ -276,7 +279,7 @@ extends FormLoadRequestJson with FormPostRequestJson
           case t if t == FormColType_Hidden.col_type =>
             s"""
                |    <div class="sform-col-hidden">
-               |      <input type="hidden" name="hoge" value="${formCol.default_value}"
+               |      <input type="hidden" id="${formCol.col_id}" name="${formCol.col_id}" value="${formCol.default_value}"
                |    </div>""".stripMargin
           case t if t == FormColType_DisplayText.col_type =>
             s"""
@@ -288,7 +291,7 @@ extends FormLoadRequestJson with FormPostRequestJson
     })
   }
 
-  def createConfirmForm(formData: Form, postData: Option[JsValue]): String= {
+  def createConfirmForm(formData: Form, postData: Option[JsValue], cacheId: Option[String]): String= {
     DB.localTx(implicit session => {
       val formCols = formColDAO.getList(formData.id).map(formcol => {
         createConfirmCol(formcol, postData)
@@ -297,25 +300,15 @@ extends FormLoadRequestJson with FormPostRequestJson
          |<div class="sform-form-wrapper">
          |  <div class="sform-header">
          |    ${formData.confirm_header.getOrElse("")}
-
-         |
-
+         |  </div>
          |  <div class="sform-body">$formCols
-
-
-           </div>
-         |  <div class="sf
-         on_div">
-         |    <button type="button" id="sform_button_b
-         /button>
-         |    <button type="button" id="sform_button_sub
-         /button>
-         |    <input type="hidden"
-         rm_tmp">
-
-           </div>
-         |</div>""".
-        stripMargin
+         |  </div>
+         |  <div class="sform_button_div">
+         |    <button type="button" id="sform_button_back">戻る</button>
+         |    <button type="button" id="sform_button_submit">送信</button>
+         |    <input type="hidden" id="sform_cache_id" value="${cacheId.getOrElse("")}">
+         |  </div>
+         |</div>""".stripMargin
       })
   }
 
@@ -332,7 +325,7 @@ extends FormLoadRequestJson with FormPostRequestJson
                |      <div class="sform-col-form"><span id="${formColData.col_id}">$postValue</span></div>
                |    </div>""".stripMargin
           case t if t == FormColType_Combo.col_type || t == FormColType_Checkbox.col_type || t == FormColType_Radio.col_type =>
-            val values = postValue.split(",").map(v => formColSelectData.filter(d => d.select_value.equals(v)).map(d => d.select_name)).mkString(",")
+            val values = postValue.split(",").flatMap(v => formColSelectData.find(d => d.select_value.equals(v)).map(d => d.select_name)).mkString(",")
             s"""
                |    <div class="sform-col">
                |      <div class="sform-col-name">${formColData.name}</div>
@@ -388,7 +381,7 @@ extends FormLoadRequestJson with FormPostRequestJson
       formColSelectDAO.getList(form_id, formCol.id).map(formColSelect => {
         val selected = if(getSelected(formColSelect, posted_value)) "checked" else ""
         s"""
-           |<input type="checkbox" name="${formCol.col_id}" value="${formColSelect.select_value}" $selected>${formColSelect.select_name}
+           |<input type="checkbox" name="sel_${formCol.col_id}" value="${formColSelect.select_value}" $selected>${formColSelect.select_name}
            |""".stripMargin
       }).mkString
     })
@@ -399,7 +392,7 @@ extends FormLoadRequestJson with FormPostRequestJson
       formColSelectDAO.getList(form_id, formCol.id).map(formColSelect => {
         val selected = if(getSelected(formColSelect, posted_value)) "checked" else ""
         s"""
-           |<input type="radio" name="${formCol.col_id}" value="${formColSelect.select_value}" $selected>${formColSelect.select_name}
+           |<input type="radio" name="sel_${formCol.col_id}" value="${formColSelect.select_value}" $selected>${formColSelect.select_name}
            |""".stripMargin
       }).mkString
     })
@@ -412,11 +405,9 @@ extends FormLoadRequestJson with FormPostRequestJson
        |  <div class="sform-header">
        |    ${formdata.complete_text.getOrElse("")}
        |  </div>
-       |  <div class="sform-body">
-       |    <button type="button" onClick="location.href='${formdata.complete_url}'">完了</button>
-       |  </div>
        |  <div class="sform_button_div">
        |    <button type="button" id="sform_button_finish">完了</button>
+       |    <input type="hidden" id="complete_url" value="${formdata.complete_url}">
        |  </div>
        |</div>""".stripMargin
   }

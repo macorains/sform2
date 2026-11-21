@@ -1,6 +1,8 @@
 package net.macolabo.sform2.domain.models.entity.user
 
 import scalikejdbc._
+
+import java.time.ZonedDateTime
 import java.util.UUID
 
 /**
@@ -31,7 +33,10 @@ case class User(
   email: Option[String],
   avatar_url: Option[String],
   activated: Boolean,
-  deletable: Boolean) {
+  deletable: Boolean,
+  created: ZonedDateTime,
+  modified: ZonedDateTime
+) {
 
   /**
    * Tries to construct a name.
@@ -63,7 +68,9 @@ object User extends SQLSyntaxSupport[User] {
       rs.stringOpt("email"),
       rs.stringOpt("avatar_url"),
       rs.boolean("activated"),
-      rs.boolean("deletable")
+      rs.boolean("deletable"),
+      rs.zonedDateTime("created"),
+      rs.zonedDateTime("modified")
     )
   }
 }

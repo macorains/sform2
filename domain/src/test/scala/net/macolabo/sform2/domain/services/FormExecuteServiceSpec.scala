@@ -7,6 +7,7 @@ import net.macolabo.sform2.domain.models.entity.form.{Form, FormCol, FormColVali
 import net.macolabo.sform2.domain.models.helper.SformTestHelper
 import net.macolabo.sform2.domain.services.Form.FormExecuteService
 import net.macolabo.sform2.domain.services.Transfer.TransferReceiver
+import org.mockito.ArgumentMatchersSugar._
 import org.mockito.MockitoSugar
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -36,8 +37,8 @@ class FormExecuteServiceSpec
       val f: Form = testForm
       val c: List[FormCol] = List(testFormCol(1, "fuga", "fuga", 1, 1))
 
-      when(mockFormDAO.get("hoge")).thenReturn(Option(f))
-      when(mockFormColDAO.getList(BigInt(1))).thenReturn(c)
+      when(mockFormDAO.get(eqTo("hoge"))(*)).thenReturn(Option(f))
+      when(mockFormColDAO.getList(eqTo(BigInt(1)))(*)).thenReturn(c)
       val formService = new FormExecuteService(mockCache, mockFormDAO, mockFormColDAO, mockFormColSelectDAO, mockFormColValidationDAO, mockPostdataDAO, mockActor)
       val loadRequest = Json.parse("{\"hashed_form_id\":\"hoge\", \"receiver_path\":\"http://\", \"cache_id\":null}")
       val result = formService.load(loadRequest, "")
@@ -66,9 +67,9 @@ class FormExecuteServiceSpec
       val c: List[FormCol] = List(testFormCol(1, "fuga", "fuga", 1, 1))
       val v: FormColValidation = testFormColValidation(1, 1, None, None, None, None, 1, required = true)
 
-      when(mockFormDAO.get("hoge")).thenReturn(Option(f))
-      when(mockFormColDAO.getList(BigInt(1))).thenReturn(c)
-      when(mockFormColValidationDAO.get("Admin",BigInt(1),BigInt(1))).thenReturn(Option(v))
+      when(mockFormDAO.get(eqTo("hoge"))(*)).thenReturn(Option(f))
+      when(mockFormColDAO.getList(eqTo(BigInt(1)))(*)).thenReturn(c)
+      when(mockFormColValidationDAO.get(eqTo("Admin"),eqTo(BigInt(1)),eqTo(BigInt(1)))(*)).thenReturn(Option(v))
       val formService = new FormExecuteService(mockCache, mockFormDAO, mockFormColDAO, mockFormColSelectDAO, mockFormColValidationDAO, mockPostdataDAO, mockActor)
       val validateRequestJson =
         s"""
@@ -125,12 +126,12 @@ class FormExecuteServiceSpec
         testFormColValidation(7, 7, None, None, None, None, 1, required = true),
       )
 
-      when(mockFormDAO.get("hoge")).thenReturn(Option(f))
-      when(mockFormColDAO.getList(BigInt(1))).thenReturn(c)
+      when(mockFormDAO.get(eqTo("hoge"))(*)).thenReturn(Option(f))
+      when(mockFormColDAO.getList(eqTo(BigInt(1)))(*)).thenReturn(c)
 
       c.foreach(col => {
         val targetValidation = v.filter(validation => validation.form_col_id == col.id).last
-        when(mockFormColValidationDAO.get("Admin", BigInt(1), col.id)).thenReturn(Option(targetValidation))
+        when(mockFormColValidationDAO.get(eqTo("Admin"), eqTo(BigInt(1)), eqTo(col.id))(*)).thenReturn(Option(targetValidation))
       })
 
       val formService = new FormExecuteService(mockCache, mockFormDAO, mockFormColDAO, mockFormColSelectDAO, mockFormColValidationDAO, mockPostdataDAO, mockActor)
@@ -186,8 +187,8 @@ class FormExecuteServiceSpec
         testFormCol(7, "fuga7", "fuga7", 7, 1),
       )
 
-      when(mockFormDAO.get("hoge")).thenReturn(Option(f))
-      when(mockFormColDAO.getList(BigInt(1))).thenReturn(c)
+      when(mockFormDAO.get(eqTo("hoge"))(*)).thenReturn(Option(f))
+      when(mockFormColDAO.getList(eqTo(BigInt(1)))(*)).thenReturn(c)
 
       val formService = new FormExecuteService(mockCache, mockFormDAO, mockFormColDAO, mockFormColSelectDAO, mockFormColValidationDAO, mockPostdataDAO, mockActor)
       val confirmRequestJson =

@@ -1,16 +1,12 @@
 package net.macolabo.sform2.domain.services.Form.validate
 
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.{Format, Json}
 
 case class FormValidateResultResponse(
                                      cache_id: Option[String],
                                      validate_result: Map[String,String]
                                      )
 
-trait FormValidationResultJson {
-  implicit def FormValidationResultWrites: Writes[FormValidateResultResponse] = (formValidationResulteResponse: FormValidateResultResponse) => Json.obj(
-    "cache_id" -> formValidationResulteResponse.cache_id,
-    "validate_result" -> formValidationResulteResponse.validate_result
-  )
+object FormValidateResultResponse {
+  implicit val format: Format[FormValidateResultResponse] = Json.format[FormValidateResultResponse]
 }
-

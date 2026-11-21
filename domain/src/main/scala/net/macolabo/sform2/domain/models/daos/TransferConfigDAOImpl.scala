@@ -105,6 +105,7 @@ class TransferConfigDAOImpl extends TransferConfigDAO {
         c.modified -> transferConfig.modified
       ).where.eq(c.id, transferConfig.id)
     }.update().apply()
+    transferConfig.id
   }
 
   /**

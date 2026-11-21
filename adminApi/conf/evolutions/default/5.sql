@@ -1,17 +1,7 @@
 # --- !Ups
-
-CREATE TABLE `m_userinfo` (
-  `user_id` VARCHAR(50) NOT NULL,
-  `provider_id` VARCHAR(50),
-  `provider_key` VARCHAR(50),
-  `first_name` VARCHAR(30),
-  `last_name` VARCHAR(30),
-  `full_name` VARCHAR(50),
-  `email` VARCHAR(255),
-  `avatar_url` VARCHAR(255),
-  `activated` TINYINT,
-  PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
+ALTER TABLE d_transfer_config_smtp_mail
+  ADD COLUMN from_address VARCHAR(255) NOT NULL DEFAULT '' AFTER smtp_user;
 
 # --- !Downs
-DROP TABLE `m_userinfo`;
+ALTER TABLE d_transfer_config_smtp_mail
+  DROP COLUMN from_address;

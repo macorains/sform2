@@ -1,7 +1,6 @@
 package net.macolabo.sform2.domain.services.Transfer
 
-import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-import play.api.libs.json.{Format, JsPath}
+import play.api.libs.json.{Format, Json}
 
 case class SalesforceLoginResponse(
   access_token: String,
@@ -12,13 +11,6 @@ case class SalesforceLoginResponse(
   signature: String
 )
 
-trait SalesforceLoginResponseJson {
-  implicit val salesforceLoginResponseFormat: Format[SalesforceLoginResponse] = (
-    (JsPath \ "access_token").format[String] ~
-      (JsPath \ "instance_url").format[String] ~
-      (JsPath \ "id").format[String] ~
-      (JsPath \ "token_type").format[String] ~
-      (JsPath \ "issued_at").format[String] ~
-      (JsPath \ "signature").format[String]
-    ) (SalesforceLoginResponse.apply, unlift(SalesforceLoginResponse.unapply))
+object SalesforceLoginResponse {
+  implicit val format: Format[SalesforceLoginResponse] = Json.format[SalesforceLoginResponse]
 }

@@ -10,7 +10,7 @@ case class TransferTaskBean(
   name: String,
   user_group: String,
   condition: List[TransferTaskBeanCondition],
-  t_mail: Option[TransferTaskBeanMail],
+  t_mail: Option[TransferTaskBeanSesMail],
   t_salesforce: Option[TransferTaskBeanSalesforce]
 )
 
@@ -24,7 +24,7 @@ case class TransferTaskBeanCondition(
   user_group: String
 )
 
-case class TransferTaskBeanMail (
+case class TransferTaskBeanSesMail (
   id: BigInt,
   form_transfer_task_id: BigInt,
   from_address_id: BigInteger,

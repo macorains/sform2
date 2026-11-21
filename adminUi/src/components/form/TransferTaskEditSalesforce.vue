@@ -40,7 +40,7 @@
 </template>
 
 <script setup>
-import {ref, reactive, toRaw, inject} from "vue"
+import {ref, reactive, inject} from "vue"
 import TransferTaskEditSalesforceColumn from "@/components/form/TransferTaskEditSalesforceColumn.vue"
 import { useHttpRequest } from "@/composables/useHttpRequest.js"
 import { BSpinner } from "bootstrap-vue-3";
