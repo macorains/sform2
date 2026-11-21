@@ -176,6 +176,7 @@ class MacolaboSformLoader {
         $_curl = curl_init();
         curl_setopt($_curl, CURLOPT_POST, TRUE);
         curl_setopt($_curl, CURLOPT_URL, $url);
+        curl_setopt($_curl, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);   // file:// 等へのアクセスを防ぐ
         curl_setopt($_curl, CURLOPT_POSTFIELDS, json_encode($data));
         curl_setopt($_curl, CURLOPT_HTTPHEADER, $header);
         curl_setopt($_curl, CURLOPT_HEADER, true);
@@ -212,6 +213,7 @@ class MacolaboSformLoader {
         $_curl = curl_init();
         curl_setopt($_curl, CURLOPT_POST, TRUE);
         curl_setopt($_curl, CURLOPT_URL, $url);
+        curl_setopt($_curl, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);   // file:// 等へのアクセスを防ぐ
         curl_setopt($_curl, CURLOPT_POSTFIELDS, http_build_query($data));
         curl_setopt($_curl, CURLOPT_HTTPHEADER, $header);
         curl_setopt($_curl, CURLOPT_HEADER, true);
@@ -248,7 +250,8 @@ class MacolaboSformLoader {
     }
 
     function get_hidden_param($form_id) {
-        $res = '<input type="hidden" id="sform_form_id" value="' . $form_id . '"/>';
+        // form_id は投稿本文や $_POST 由来のため必ずエスケープする
+        $res = '<input type="hidden" id="sform_form_id" value="' . esc_attr($form_id) . '"/>';
         return $res;
     }
 }

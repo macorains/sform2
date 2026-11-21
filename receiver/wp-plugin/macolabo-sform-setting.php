@@ -109,6 +109,7 @@ class MacolaboSformSettingPage {
                 url: ajaxurl,
                 data: {
                     'action' : 'msform_connection_check',
+                    '_ajax_nonce' : '<?php echo esc_js(wp_create_nonce('msform_connection_check')); ?>',
                     'contentType' : 'application/json',
                     'data' : {
                       api_url: jQuery("#api_url").val(),

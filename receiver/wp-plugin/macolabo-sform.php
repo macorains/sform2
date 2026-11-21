@@ -29,6 +29,11 @@ License: GPL2
 <?php
 require(dirname(__FILE__) . "/macolabo-sform-setting.php");
 require(dirname(__FILE__) . "/macolabo-sform-loader.php");
+require(dirname(__FILE__) . "/macolabo-sform-ratelimit.php");
+
+MacolaboSformRateLimiter::init();
+register_activation_hook(__FILE__, array('MacolaboSformRateLimiter', 'maybe_install'));
+register_deactivation_hook(__FILE__, array('MacolaboSformRateLimiter', 'deactivate'));
 
 function msform_hello() {
     $loader = new MacolaboSformLoader();
@@ -45,6 +50,44 @@ function msform_js_footer(){
         var that = this;
         var ajaxurl = '<?php echo admin_url( 'admin-ajax.php' ); ?>';
 
+        // AJAXエラー時のメッセージ表示（429: 連続リクエスト制限）
+        function msformShowError(xhr) {
+            var message = 'エラーが発生しました。時間をおいて再度お試しください。';
+            if (xhr && xhr.status === 429) {
+                var retryAfter = xhr.responseJSON && xhr.responseJSON.data ? xhr.responseJSON.data.retry_after : null;
+                var wait = 'しばらく待ってから';
+                if (retryAfter >= 60) {
+                    wait = '約' + Math.ceil(retryAfter / 60) + '分後に';
+                } else if (retryAfter > 0) {
+                    wait = '約' + retryAfter + '秒後に';
+                }
+                message = '短時間に連続して操作されたため、処理を受け付けられませんでした。' + wait + '再度お試しください。';
+            }
+            var box = jQuery('div.sform_wrapper .sform-error-message');
+            if (box.length === 0) {
+                box = jQuery('<div class="sform-error-message" role="alert"></div>');
+                jQuery('div.sform_wrapper').prepend(box);
+            }
+            box.text(message);
+        }
+        function msformClearError() {
+            jQuery('div.sform_wrapper .sform-error-message').remove();
+        }
+        // エラー表示してボタンを再度押せるようにする
+        function msformFail(button, xhr) {
+            msformShowError(xhr);
+            button.prop('disabled', false);
+        }
+        // 二重エンコードされたレスポンスを解析する。失敗時は null を返す
+        function msformParse(response, key) {
+            try {
+                return JSON.parse(JSON.parse(response)[key]);
+            } catch (e) {
+                console.error(e);
+                return null;
+            }
+        }
+
         // 入力フォームの「次へ」ボタンクリック時
         jQuery('#sform_button_confirm').on('click', function(){
             onClickConfirm(that);
@@ -55,6 +98,12 @@ function msform_js_footer(){
         });
 
         function onClickConfirm(that) {
+            // 二重送信防止
+            var confirmButton = jQuery('#sform_button_confirm');
+            if (confirmButton.prop('disabled')) return;
+            confirmButton.prop('disabled', true);
+            msformClearError();
+
             var tmpData = {};
             // フォーム入力内容でjson作る
             jQuery(".sform-col-form-text").each(function(){
@@ -78,7 +127,8 @@ function msform_js_footer(){
                     'form_id' : jQuery("#sform_form_id").val()
                 },
                 success: function( response ){
-                    var response_data = JSON.parse(JSON.parse(response).data);
+                    var response_data = msformParse(response, 'data');
+                    if (response_data === null) return msformFail(confirmButton);
                     console.log('*** validate result***')
                     console.log(response_data)
                     if(Object.keys(response_data.validate_result).length === 0) {
@@ -94,12 +144,17 @@ function msform_js_footer(){
                                 'cache_id' : response_data.cache_id
                             },
                             success: function( response ) {
-                                var response_data = JSON.parse(JSON.parse(response).data);
+                                var response_data = msformParse(response, 'data');
+                                if (response_data === null) return msformFail(confirmButton);
                                 console.log('*** confirm result***')
                                 console.log(response)
                                 jQuery("div.sform_wrapper .sform-form-wrapper").replaceWith(response_data);
                                 // 「送信」クリック時
                                 jQuery('#sform_button_submit').on('click', function(){
+                                    var submitButton = jQuery(this);
+                                    if (submitButton.prop('disabled')) return;
+                                    submitButton.prop('disabled', true);
+                                    msformClearError();
                                     jQuery.ajax({
                                         type: 'POST',
                                         url: ajaxurl,
@@ -113,18 +168,26 @@ function msform_js_footer(){
                                         success: function(response) {
                                             console.log('*** save result ***')
                                             console.log(response)
-                                            var response_data = JSON.parse(JSON.parse(response).html);
+                                            var response_data = msformParse(response, 'html');
+                                            if (response_data === null) return msformFail(submitButton);
                                             jQuery("div.sform_wrapper .sform-form-wrapper").replaceWith(response_data);
                                                 // 「完了」ボタンクリック時
                                                 jQuery('#sform_button_finish').on('click', function(){
                                                 location.href = jQuery("#complete_url").val();
                                             });
 
+                                        },
+                                        error: function(xhr) {
+                                            msformFail(submitButton, xhr);
                                         }
                                     })
                                 });
                                 // 「戻る」クリック時
                                 jQuery('#sform_button_back').on('click', function(){
+                                    var backButton = jQuery(this);
+                                    if (backButton.prop('disabled')) return;
+                                    backButton.prop('disabled', true);
+                                    msformClearError();
                                     console.log(jQuery("#sform_form_id").val())
                                     console.log(jQuery("#sform_cache_id").val())
                                     jQuery.ajax({
@@ -148,27 +211,33 @@ function msform_js_footer(){
                                                 that.onClickCancel(that);
                                             });
                                         },
-                                        error: function(a,b,c) {
-                                            console.error(a);
-                                            console.error(b);
-                                            console.error(c);
+                                        error: function(xhr) {
+                                            console.error(xhr);
+                                            msformFail(backButton, xhr);
                                         }
                                     })
                                 });
                             },
-                            error: function(a,b,c){
-                                console.log(a);
+                            error: function(xhr){
+                                console.log(xhr);
+                                msformFail(confirmButton, xhr);
                             }
                         });
                     } else {
                         // validate ng なら入力フォームにエラーメッセージを追加
+                        confirmButton.prop('disabled', false);
                         Object.keys(response_data.validate_result).forEach(function(k){
-                            jQuery('#sform-col-error-' + k)[0].textContent = response_data.validate_result[k];
+                            var errorElement = jQuery('#sform-col-error-' + k)[0];
+                            if (errorElement) {
+                                errorElement.textContent = response_data.validate_result[k];
+                            } else {
+                                console.error('error element not found: ' + k, response_data.validate_result[k]);
+                            }
                         })
                     }
                 },
-                error: function(a,b,c){
-                    alert( 'error' );
+                error: function(xhr){
+                    msformFail(confirmButton, xhr);
                 }
             });
         }
@@ -186,36 +255,40 @@ add_action( 'wp_footer', 'msform_js_footer' );
  * フォーム読み込み（主にリロード）
  */
 function msform_load_form(){
+    MacolaboSformRateLimiter::guard('msform_load_form');
     $loader = new MacolaboSformLoader();
     $response = $loader->form_load($_POST['form_id'], $_POST['cache_id']);
-    die($response);
+    wp_die($response);
 }
 
 /**
  * フォームバリデーション
  */
 function msform_validate_form(){
+    MacolaboSformRateLimiter::guard('msform_validate_form');
     $loader = new MacolaboSformLoader();
     $response = $loader->form_validate($_POST['form_id'], $_POST['data']);
-    die($response);
+    wp_die($response);
 }
 
 /**
  * 確認ページ取得
  */
 function msform_confirm_form(){
+    MacolaboSformRateLimiter::guard('msform_confirm_form');
     $loader = new MacolaboSformLoader();
     $response = $loader->form_confirm($_POST['form_id'], $_POST['data'], $_POST['cache_id']);
-    die($response);
+    wp_die($response);
 }
 
 /**
  * フォーム保存
  */
 function msform_save_form(){
+    MacolaboSformRateLimiter::guard('msform_save_form');
     $loader = new MacolaboSformLoader();
     $response = $loader->form_save($_POST['form_id'], $_POST['cache_id']);
-    die($response);
+    wp_die($response);
 
 }
 
@@ -223,16 +296,21 @@ function msform_save_form(){
  * 疎通確認（ログインできるか）
  */
 function msform_connection_check(){
+  // 指定された URL へサーバーからリクエストするため（SSRF になりうる）、設定を変更できる管理者に限定し、
+  // CSRF 対策として設定画面で発行した nonce を検証する
+  if (!current_user_can('manage_options')) {
+    wp_die('-1', 403);
+  }
+  check_ajax_referer('msform_connection_check');
+
   $loader = new MacolaboSformLoader();
-  $data = $_POST['data'];
-  $info = [
-    'api_url' => $data['api_url'],
-    //'user_id' => $data['user_id'],
-    'password' => $data['password'],
-    'group' => $data['group']
-  ];
+  $data = isset($_POST['data']) && is_array($_POST['data']) ? wp_unslash($_POST['data']) : [];
+  $info = [];
+  foreach (['api_url', 'password', 'group'] as $key) {
+    $info[$key] = isset($data[$key]) ? sanitize_text_field($data[$key]) : '';
+  }
   $response = json_encode($loader->_login($info));
-  die($response);
+  wp_die($response);
 }
 
 add_action('wp_ajax_msform_load_form', 'msform_load_form');

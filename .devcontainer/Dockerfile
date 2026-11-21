@@ -35,6 +35,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   php-imagick  \
   php-mbstring \
   php-zip \
+  composer \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Eclipse Temurin JDK 17 and 21
