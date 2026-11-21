@@ -56,6 +56,31 @@ npm run lint         # eslint --fix
 npm run format      # prettier --write src/
 ```
 
+### receiver/wp-plugin（WordPress での動作確認）
+
+devcontainer 作成時に `.devcontainer/setup-wordpress.sh`（冪等、手動再実行可）が `wordpress/` を
+用意する。DB は `sform-mysql` の `wp` スキーマ、プラグインは `receiver/wp-plugin` へのシンボリック
+リンクなので、`receiver/wp-plugin` を編集すればそのまま反映される。
+
+```
+wp server --host=0.0.0.0 --port=8081 --path=wordpress   # WordPress（http://localhost:8081, 新規作成時は admin/admin）
+sbt "form/run 9002"                                       # プラグインの接続先 formApi
+```
+
+プラグイン設定（管理画面「Sform設定」）の URL は `http://localhost:9002`。グループ/パスワードは手動で入力する。
+
+テストは PHPUnit + wp-phpunit（WordPress 公式テストライブラリ）による結合テスト。`wordpress/` のコアと
+`sform-mysql` の `wp_test` スキーマ（実行のたびに初期化される）を使い、formApi はモック
+（`tests/mock-api/router.php`）を自動起動するので sbt の起動は不要。
+
+```
+cd receiver/wp-plugin
+composer install                        # 初回のみ（vendor/ は gitignore 対象）
+vendor/bin/phpunit                      # 全テスト（known-bug グループは除外）
+vendor/bin/phpunit --filter RateLimiter # 一部のみ
+vendor/bin/phpunit --group known-bug    # 既知の不具合を記録したテスト（修正するまで失敗する）
+```
+
 ## アーキテクチャ
 
 ### domain モジュール

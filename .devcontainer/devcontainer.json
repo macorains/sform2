@@ -42,6 +42,7 @@
     "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
     "JAVA_HOME": "/usr/lib/jvm/temurin-17-jdk-amd64"
   },
+  "postCreateCommand": "bash /workspace/.devcontainer/setup-wordpress.sh",
   "postStartCommand": "sudo /usr/local/bin/init-firewall.sh",
   "waitFor": "postStartCommand",
   "mounts": [
