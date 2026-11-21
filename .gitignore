@@ -30,3 +30,4 @@ out/
 wordpress
 /.chrome
 .claude/settings.local.json
+.bsp/
