@@ -1,6 +1,6 @@
 <template>
   <main>
-    <HeaderMenu />
+    <HeaderMenu/>
     <BBreadcrumb>
       <BBreadcrumbItem href="/form">フォーム</BBreadcrumbItem>
       <BBreadcrumbItem active>{{ form.name }}</BBreadcrumbItem>

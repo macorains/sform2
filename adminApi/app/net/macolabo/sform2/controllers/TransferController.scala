@@ -55,7 +55,7 @@ class TransferController @Inject() (
         val res = transferService.getTransferConfigSelectList(sessionInfo)
         Ok(toJson(res))
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 
@@ -70,7 +70,7 @@ class TransferController @Inject() (
         val res = transferService.getTransferConfigList(sessionInfo)
         Ok(toJson(res))
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 
@@ -85,7 +85,7 @@ class TransferController @Inject() (
         val res = transferService.getTransferConfig(transferConfigId, cryptoConfig, sessionInfo)
         Ok(toJson(res))
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 
@@ -108,7 +108,7 @@ class TransferController @Inject() (
           case None => BadRequest("Missing JSON")
         }
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 
@@ -118,7 +118,7 @@ class TransferController @Inject() (
         transferConfigService.deleteTransferConfig(transferConfigId, sessionInfo)
         Ok("")
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 
@@ -155,7 +155,7 @@ class TransferController @Inject() (
           case None => BadRequest("Missing JSON")
         }
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 
@@ -182,7 +182,7 @@ class TransferController @Inject() (
           case None => Future.successful(BadRequest("Missing JSON"))
         }
       case Failure(e) =>
-        Future.successful(BadRequest(s"Session invalid. ${e.getMessage}"))
+        Future.successful(Unauthorized(s"Session invalid. ${e.getMessage}"))
 
     }
   }
@@ -210,7 +210,7 @@ class TransferController @Inject() (
             Future.successful(NotFound)
         }
       case Failure(e) =>
-        Future.successful(BadRequest("Session invalid." + e.getMessage))
+        Future.successful(Unauthorized(s"Session invalid. ${e.getMessage}"))
     }
   }
 
@@ -241,7 +241,7 @@ class TransferController @Inject() (
             Future.successful(BadRequest)
         }
       case Failure(e) =>
-        Future.successful(BadRequest(s"Session invalid. ${e.getMessage}"))
+        Future.successful(Unauthorized(s"Session invalid. ${e.getMessage}"))
     }
   }
 }

@@ -1,6 +1,6 @@
 <template>
   <main>
-    <HeaderMenu :has-menu="false"/>
+    <HeaderMenu hide-menu/>
     <BContainer>
       <BRow class="mb-4">
         <BCard>

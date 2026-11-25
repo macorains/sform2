@@ -41,7 +41,7 @@ class ApiTokenController @Inject()(
           case None => BadRequest("Missing JSON")
         }
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 
@@ -53,7 +53,7 @@ class ApiTokenController @Inject()(
           case None => NotFound
         }
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 }

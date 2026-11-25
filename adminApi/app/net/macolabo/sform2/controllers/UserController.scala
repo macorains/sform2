@@ -32,18 +32,7 @@ class UserController @Inject() (
         val res = userService.getList(sessionInfo)
         Ok(Json.toJson(res))
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
-    }
-  }
-
-  // adminロールの有無チェック用
-  // GET /user/isadmin
-  def isAdmin: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
-    Try(SessionInfo(request.session)) match {
-      case Success(sessionInfo) =>
-        Ok(s"""{"is_admin": ${sessionInfo.user_role == "admin"}}""")
-      case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 
@@ -68,7 +57,7 @@ class UserController @Inject() (
           case None => Future.successful(BadRequest("Missing JSON"))
         }
       case Failure(e) =>
-        Future.successful(BadRequest(s"Session invalid. ${e.getMessage}"))
+        Future.successful(Unauthorized(s"Session invalid. ${e.getMessage}"))
     }
   }
 
@@ -80,7 +69,7 @@ class UserController @Inject() (
         userService.delete(userId, sessionInfo)
         Ok
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 }

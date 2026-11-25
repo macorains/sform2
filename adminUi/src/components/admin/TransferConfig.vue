@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isLoading" class="loading-overlay">
+  <div v-if="loading" class="loading-overlay">
     <BSpinner label="Processing..." variant="light" />
   </div>
   <div class="container">
@@ -52,7 +52,6 @@ const fields = ref([
 const configList = ref([])
 const editModalVisible = ref(false)
 const configEditRef = ref(null)
-const isLoading = ref(false)
 
 
 const edit = (row) => {
@@ -77,12 +76,10 @@ const deleteConfig = (row) => {
 }
 
 const load = () => {
-  isLoading.value = true
   requestGet(
       '/transfer/config/list',
       response => {
         configList.value = response.data
-        isLoading.value = false
       }
   )
 }

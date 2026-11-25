@@ -14,8 +14,11 @@ import org.pac4j.jwt.profile.JwtGenerator
 import org.pac4j.play.context.PlayContextFactory
 import org.pac4j.play.scala.{Security, SecurityComponents}
 import play.api.libs.ws.WSClient
+import play.api.libs.json.Json
+import net.macolabo.sform2.domain.models.SessionInfo
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 /**
  * The `Sign In` controller.
@@ -81,13 +84,22 @@ class SignInController @Inject() (
     }
   }
 
-  def checkSession: Action[AnyContent] = Secure("HeaderClient")  { request =>
-    try {
-      val profiles = getProfiles(controllerComponents)(request)
-      val userGroup = request.session.get("user_group")
-      userGroup.map(ug => Ok("Token is valid")).getOrElse(Unauthorized("Session Expired."))
-    } catch {
-      case e: NullPointerException => Unauthorized("Token is invalid or missing")
+  /**
+   * ログイン中ユーザー情報の取得（フロントのログイン状態の唯一の取得元）
+   * GET /me
+   * JWT（X-Auth-Token）とセッションの両方が有効な場合のみ200、それ以外は401を返す。
+   */
+  def me: Action[AnyContent] = Secure("HeaderClient") { request =>
+    Try(SessionInfo(request.session)) match {
+      case Success(sessionInfo) =>
+        Ok(Json.obj(
+          "user_id" -> sessionInfo.user_id,
+          "user_group" -> sessionInfo.user_group,
+          "user_role" -> sessionInfo.user_role,
+          "is_admin" -> (sessionInfo.user_role == "admin")
+        ))
+      case Failure(e) =>
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 }

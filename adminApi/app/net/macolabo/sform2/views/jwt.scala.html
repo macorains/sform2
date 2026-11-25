@@ -1,10 +1,10 @@
 @(redirect_url:String, jwt:String)
-<input type="button" onClick="toSignin()">
+@*
+  管理画面(SPA)とAPIはオリジンが異なるため、ここで localStorage に保存してもSPAからは読めない。
+  トークンはURLフラグメントで渡し、SPA側(main.js)で保存してURLから除去する。
+  フラグメントはサーバーへ送信されないのでアクセスログには残らない。
+  location.replace を使い、このページ自体を履歴に残さない。
+*@
 <script>
-    localStorage.setItem('sformToken', '@(jwt)')
-    window.location.href = '@(redirect_url)'
-    function toSignin() {
-    localStorage.setItem('sformToken', '@(jwt)')
-        window.location.href = '@(redirect_url)'
-    }
+    window.location.replace('@(redirect_url)' + '#sform_token=' + encodeURIComponent('@(jwt)'))
 </script>

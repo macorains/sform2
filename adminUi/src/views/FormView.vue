@@ -13,7 +13,6 @@ const fields = ref([
     { key: 'status_name', sortable: true, label: 'ステータス'},
     { key: 'actions', label: '操作' },
 ])
-const isAdmin = ref(false)
 const router = useRouter()
 const { requestGet, requestPost, requestDelete, loading } = useHttpRequest()
 const showConfirm = inject("showConfirm")
@@ -31,12 +30,6 @@ function loadFormList(callback) {
 
 // ライフサイクルフック
 onMounted(() => {
-  requestGet(
-      '/user/isadmin',
-      response => {
-        isAdmin.value = response.data.is_admin
-      }
-  )
   loadFormList()
 })
 
@@ -101,7 +94,7 @@ function deleteForm(row) {
 
 <template>
   <main>
-    <HeaderMenu :hasMenu="true" :isAdmin="isAdmin"/>
+    <HeaderMenu/>
     <div class="container">
       <h1 class="mt-5 mb-5">フォーム</h1>
       <b-table striped hover :items="data" :fields="fields">

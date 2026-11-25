@@ -40,7 +40,7 @@ class FormController @Inject() (
         val res = formService.getForm(hashed_form_id, sessionInfo)
         Ok(toJson(res))
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 
@@ -55,7 +55,7 @@ class FormController @Inject() (
         val res = formService.getList(sessionInfo)
         Ok(toJson(res))
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
 
   }
@@ -79,7 +79,7 @@ class FormController @Inject() (
           case None => BadRequest("Missing JSON")
         }
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 
@@ -102,7 +102,7 @@ class FormController @Inject() (
           case None => BadRequest("Missing JSON")
         }
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 
@@ -118,7 +118,7 @@ class FormController @Inject() (
         val result = formService.deleteForm(hashed_form_id, sessionInfo)
         Ok(toJson(result))
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 
@@ -139,7 +139,7 @@ class FormController @Inject() (
           case None => BadRequest("Missing JSON")
         }
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 }
