@@ -190,6 +190,8 @@ db {
   default.username=username
   default.password="password"
   default.logStatements=true
+  # MySQL の wait_timeout で切られた接続を使い回さないよう、貸し出し時に確認する
+  default.poolValidationQuery="select 1"
 
   # You can turn on SQL logging for any datasource
   # https://www.playframework.com/documentation/latest/Highlights25#Logging-SQL-statements
