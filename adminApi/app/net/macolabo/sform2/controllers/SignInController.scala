@@ -9,8 +9,6 @@ import play.api.libs.mailer._
 import play.api.mvc._
 import play.api.cache.SyncCacheApi
 import org.pac4j.core.profile.UserProfile
-import org.pac4j.jwt.config.signature.SecretSignatureConfiguration
-import org.pac4j.jwt.profile.JwtGenerator
 import org.pac4j.play.context.PlayContextFactory
 import org.pac4j.play.scala.{Security, SecurityComponents}
 import play.api.libs.ws.WSClient
@@ -45,6 +43,7 @@ class SignInController @Inject() (
 ) extends Security[UserProfile]
   with I18nSupport
   with Pac4jUtil
+  with SessionAuthentication
 {
 
   val logger: Logger = Logger(this.getClass)
@@ -54,26 +53,39 @@ class SignInController @Inject() (
    * @return The result to display.
    */
 
+  /**
+   * Google OIDC ログイン完了後の処理
+   * GET /oidc
+   * 登録済みユーザーならセッション Cookie を発行して管理画面へリダイレクトする。
+   * セッションは user_id / user_group / user_role だけで作り直し、pac4j が保存した
+   * OIDC プロファイルは破棄する（Cookie サイズを抑えるため。ログイン後は使わない）。
+   */
   def oidcSignin: Action[AnyContent] = Secure("OidcClient").async { implicit request =>
     val profiles = getProfiles(controllerComponents)(request)
     val profile = profiles.get(0)
     checkUser(profile).map {
       case Some(u) =>
-        configuration.getOptional[String]("sform.jwt.secret").map(jwtSecret => {
-          val generator = new JwtGenerator(new SecretSignatureConfiguration(jwtSecret))
-          generator.setExpirationTime(java.util.Date.from(
-            java.time.Instant.now().plus(java.time.Duration.ofHours(8))
-          ))
-          val token = generator.generate(profile)
-          Ok(net.macolabo.sform2.views.html.jwt(configuration.get[String]("sform.oauth.redirectUrl"), token))
-            .addingToSession("user_id" -> u.id.toString)
-            .addingToSession("user_group" -> u.user_group.get)
-            .addingToSession("user_role" -> u.role.getOrElse(""))
-          // TODO 複数グループに属するユーザーの場合どうするか考える
-        }).getOrElse(InternalServerError("sfrom.jwt.secret not found."))
+        Redirect(configuration.get[String]("sform.oauth.redirectUrl"))
+          .withSession(
+            "user_id" -> u.id.toString,
+            "user_group" -> u.user_group.get,
+            "user_role" -> u.role.getOrElse("")
+          )
+        // TODO 複数グループに属するユーザーの場合どうするか考える
       case None =>
+        // 未登録ユーザー。別アカウントで再ログインできるようセッションも破棄する
         Forbidden(net.macolabo.sform2.views.html.redirect(configuration.get[String]("sform.oauth.loginFailedUrl")))
+          .withNewSession
     }
+  }
+
+  /**
+   * ログアウト
+   * GET /logout
+   * セッション Cookie を破棄してログイン画面へリダイレクトする。
+   */
+  def logout: Action[AnyContent] = Action {
+    Redirect(configuration.get[String]("sform.oauth.loginUrl")).withNewSession
   }
 
   private def checkUser(profile: UserProfile) = {
@@ -87,9 +99,9 @@ class SignInController @Inject() (
   /**
    * ログイン中ユーザー情報の取得（フロントのログイン状態の唯一の取得元）
    * GET /me
-   * JWT（X-Auth-Token）とセッションの両方が有効な場合のみ200、それ以外は401を返す。
+   * セッション Cookie が有効な場合のみ200、それ以外は401を返す。
    */
-  def me: Action[AnyContent] = Secure("HeaderClient") { request =>
+  def me: Action[AnyContent] = Authenticated { request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         Ok(Json.obj(

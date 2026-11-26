@@ -16,9 +16,6 @@ configureCompat({
     MODE: 3
 })
 
-// ログイン直後のトークン受け取り（ルーターの初回遷移・/me より前に行う）
-http.consumeTokenFromUrl()
-
 const app = createApp(App)
 app.config.globalProperties.$http = http
 app.use(BootstrapVue3)

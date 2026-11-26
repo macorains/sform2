@@ -1,7 +1,8 @@
 import axios from 'axios'
 
-const TOKEN_KEY = 'sformToken'
-
+// ログイン状態は adminApi が発行する HttpOnly のセッション Cookie だけで管理する。
+// - withCredentials: クロスオリジンでも Cookie を送受信するため必須
+// - X-Requested-With: adminApi の CSRF チェックはこのヘッダーで通す設定になっている（外さないこと）
 const http = axios.create({
   baseURL: import.meta.env.VITE_APP_API_URL,
   withCredentials: true,
@@ -15,47 +16,11 @@ const http = axios.create({
   }
 })
 
-const readToken = () => {
-  try {
-    return localStorage.getItem(TOKEN_KEY)
-  } catch {
-    return null
-  }
-}
-
-http.hasToken = () => !!readToken()
-
-http.setToken = (token) => {
-  try {
-    localStorage.setItem(TOKEN_KEY, token)
-  } catch {
-    // localStorage が使えない環境では保存できない（未ログイン扱いになる）
-  }
-}
-
-/**
- * ログイン直後、API から URL フラグメント(#sform_token=...)で渡されたトークンを保存し、
- * URL からは即座に取り除く。ルーターの初回遷移より前に呼ぶこと。
- */
-http.consumeTokenFromUrl = () => {
-  const hash = window.location.hash
-  if (!hash.startsWith('#')) return
-  const params = new URLSearchParams(hash.slice(1))
-  const token = params.get('sform_token')
-  if (!token) return
-  http.setToken(token)
-  params.delete('sform_token')
-  const rest = params.toString()
-  window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search + (rest ? '#' + rest : ''))
-}
-
-// トークンを削除する関数
-http.clearToken = () => {
-  try {
-    localStorage.removeItem(TOKEN_KEY)
-  } catch {
-    // localStorage が使えない環境では何もしない
-  }
+// 旧方式（JWT を localStorage に保存）の残骸を消しておく
+try {
+  localStorage.removeItem('sformToken')
+} catch {
+  // localStorage が使えない環境では何もしない
 }
 
 // 認証切れ(401)時の処理。ルーター/ストアへの依存を避けるため main.js から登録する
@@ -63,17 +28,6 @@ let unauthorizedHandler = null
 http.setUnauthorizedHandler = (handler) => {
   unauthorizedHandler = handler
 }
-
-// トークンの付与はここ1か所で行う（HeaderClient は生のJWTを期待する）
-http.interceptors.request.use(config => {
-  const token = readToken()
-  if (token) {
-    config.headers['X-Auth-Token'] = token
-  }
-  return config
-}, error => {
-  return Promise.reject(error)
-})
 
 http.interceptors.response.use(
   response => response,

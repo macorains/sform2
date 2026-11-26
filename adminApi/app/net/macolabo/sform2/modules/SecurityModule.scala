@@ -5,15 +5,13 @@ import com.google.inject.{AbstractModule, Inject, Provides}
 import com.nimbusds.jose.JWSAlgorithm
 import net.codingwell.scalaguice.ScalaModule
 import net.macolabo.sform2.domain.models.daos.UserDAOImpl
-import org.pac4j.http.client.direct.HeaderClient
-import org.pac4j.jwt.config.signature.{RSASignatureConfiguration, SecretSignatureConfiguration}
-import org.pac4j.jwt.credentials.authenticator.JwtAuthenticator
+import org.pac4j.jwt.config.signature.RSASignatureConfiguration
 import net.macolabo.sform2.views.models.security.{DatabaseExecutionContext, DemoHttpActionAdapter, SqlAuthencator}
 import org.pac4j.core.authorization.generator.DefaultRolesAuthorizationGenerator
 import org.pac4j.core.client.Clients
 import org.pac4j.http.client.indirect.FormClient
 import org.pac4j.http.credentials.authenticator.test.SimpleTestUsernamePasswordAuthenticator
-import org.pac4j.play.{CallbackController, LogoutController}
+import org.pac4j.play.CallbackController
 import play.api.{Configuration, Environment}
 
 import java.nio.charset.StandardCharsets
@@ -62,13 +60,7 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
     callbackController.setDefaultUrl(configuration.get[String]("sform.oauth.loginUrl"))
     bind(classOf[CallbackController]).toInstance(callbackController)
 
-    // logout
-    val logoutController = new LogoutController()
-    logoutController.setLocalLogout(true)
-    logoutController.setCentralLogout(true)
-    logoutController.setDestroySession(true)
-    logoutController.setDefaultUrl(configuration.get[String]("sform.oauth.loginUrl"))
-    bind(classOf[LogoutController]).toInstance(logoutController)
+    // logout は SignInController.logout（セッション Cookie の破棄）で行う
 
   }
 
@@ -85,17 +77,6 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
     val userDAO = new UserDAOImpl()
     val client = new DirectFormClient()
     client.setAuthenticator(new SqlAuthencator(userDAO))
-    client
-  }
-
-  @Provides
-  def provideHeaderClient(configuration: Configuration): HeaderClient = {
-    val jwtAuthenticator = new JwtAuthenticator()
-    val jwtSecret = configuration.get[String]("sform.jwt.secret")
-    jwtAuthenticator.addSignatureConfiguration(new SecretSignatureConfiguration(jwtSecret))
-    val client = new HeaderClient()
-    client.setHeaderName("X-Auth-Token")
-    client.setAuthenticator(jwtAuthenticator)
     client
   }
 
@@ -125,8 +106,8 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
   }
 
   @Provides
-  def provideConfig(formClient: FormClient, directFormClient: DirectFormClient, headerClient: HeaderClient, oidcClient: OidcClient, sessionStore: SessionStore): Config = {
-    val clients = new Clients(configuration.get[String]("baseUrl") + "/callback", formClient, directFormClient, headerClient, oidcClient)
+  def provideConfig(formClient: FormClient, directFormClient: DirectFormClient, oidcClient: OidcClient, sessionStore: SessionStore): Config = {
+    val clients = new Clients(configuration.get[String]("baseUrl") + "/callback", formClient, directFormClient, oidcClient)
     val config = new Config(clients)
 
     // セッションストアの設定

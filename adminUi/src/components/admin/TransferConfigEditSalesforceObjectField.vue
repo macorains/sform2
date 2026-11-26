@@ -11,15 +11,15 @@
 </template>
 <script setup>
 import {BTable} from "bootstrap-vue-3"
-import {getCurrentInstance, ref, reactive, onMounted, computed, watch, defineEmits} from "vue";
+import {ref, reactive, onMounted, computed, watch, defineEmits} from "vue";
+import { useHttpRequest } from "@/composables/useHttpRequest.js"
 
 const props = defineProps({
   transferConfigId: Number,
   data: Object
 })
 
-const instance = getCurrentInstance()
-const $http = instance.appContext.config.globalProperties.$http
+const { requestGet } = useHttpRequest()
 
 const emit = defineEmits(['updateField']);
 
@@ -50,11 +50,10 @@ onMounted(() => {
 const hasList = computed(() => sfObjectFieldList.fields?.length > 0)
 
 const importObjectField = (objectName) => {
-  $http.get('/transfer/salesforce/field/' + sfObjectFieldList.transferConfigId + '/' + objectName)
-      .then(response => {
-        const data = response.data.map(d => convert(d))
-        emit('updateField', objectName, data)
-      })
+  requestGet('/transfer/salesforce/field/' + sfObjectFieldList.transferConfigId + '/' + objectName, response => {
+    const data = response.data.map(d => convert(d))
+    emit('updateField', objectName, data)
+  })
 }
 
 const updateObjectField = (val, name) => {

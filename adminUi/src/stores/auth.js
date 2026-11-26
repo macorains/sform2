@@ -29,11 +29,8 @@ export const useAuthStore = defineStore('auth', {
       }
       return pending
     },
+    // セッション Cookie は HttpOnly で JS から見えないため、有無は /me で確認する
     async fetchMe() {
-      if (!http.hasToken()) {
-        this.setUnauthenticated()
-        return
-      }
       try {
         const response = await http.get('/me', { skipAuthRedirect: true })
         this.user = response.data
@@ -42,7 +39,7 @@ export const useAuthStore = defineStore('auth', {
         if (error.response?.status === 401) {
           this.clear()
         } else {
-          // 通信エラー等。トークンは残し、次の画面遷移で再確認する
+          // 通信エラー等。状態不明のままにし、次の画面遷移で再確認する
           console.error(error)
           this.user = null
           this.status = 'unknown'
@@ -54,8 +51,8 @@ export const useAuthStore = defineStore('auth', {
       this.user = null
       this.status = 'unauthenticated'
     },
+    // フロント側の状態だけを破棄する（Cookie の破棄は adminApi の /logout で行う）
     clear() {
-      http.clearToken()
       this.setUnauthenticated()
     },
     // OIDC ログイン後は固定URLに戻るため、元の遷移先を一時保存しておく

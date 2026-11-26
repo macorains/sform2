@@ -39,10 +39,10 @@
 <script setup>
 import TransferConfigEditSalesforceObjectField from "@/components/admin/TransferConfigEditSalesforceObjectField.vue"
 import {BTable} from "bootstrap-vue-3"
-import {getCurrentInstance, ref, reactive, computed} from "vue";
+import {ref, reactive, computed} from "vue";
+import { useHttpRequest } from "@/composables/useHttpRequest.js"
 
-const instance = getCurrentInstance()
-const $http = instance.appContext.config.globalProperties.$http
+const { requestGet } = useHttpRequest()
 
 
 const sfObjectFieldRef = ref([])
@@ -65,10 +65,9 @@ const getData = () => {
 }
 
 const importObject = () => {
-  $http.get('/transfer/salesforce/object/' + sfObjectList.transferConfigId)
-      .then(response => {
-        sfObjectList.objectList = response.data.map(d => convert(d))
-      })
+  requestGet('/transfer/salesforce/object/' + sfObjectList.transferConfigId, response => {
+    sfObjectList.objectList = response.data.map(d => convert(d))
+  })
 }
 
 const convert = (src) => {

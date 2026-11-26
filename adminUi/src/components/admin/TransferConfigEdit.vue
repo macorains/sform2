@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isLoading" class="loading-overlay">
+  <div v-if="loading" class="loading-overlay">
     <BSpinner label="Processing..." variant="light" />
   </div>
   <BContainer class="text-left">
@@ -63,14 +63,14 @@
 </template>
 
 <script setup>
-import {getCurrentInstance, ref, computed, reactive} from "vue"
+import {ref, computed, reactive} from "vue"
+import { useHttpRequest } from "@/composables/useHttpRequest.js"
 import {BSpinner} from "bootstrap-vue-3"
 import TransferConfigEditSesMail from "@/components/admin/TransferConfigEditSesMail.vue";
 import TransferConfigEditSalesforce from "@/components/admin/TransferConfigEditSalesforce.vue";
 import TransferConfigEditSmtpMail from "@/components/admin/TransferConfigEditSmtpMail.vue";
 
-const instance = getCurrentInstance()
-const $http = instance.appContext.config.globalProperties.$http
+const { requestGet, requestPost, loading } = useHttpRequest()
 
 const emit = defineEmits(['saved'])
 
@@ -78,7 +78,6 @@ const configEditSesMailRef = ref(null)
 const configEditSalesforceRef = ref(null)
 const configEditSmtpMailRef = ref(null)
 
-const isLoading = ref(false)
 const transferConfig = reactive({
   id: null,
   type_code: '',
@@ -127,26 +126,22 @@ const mailAddressFields = ref([
 ])
 
 const loadConfig = (id) => {
-  $http.get('/transfer/config/' + id)
-      .then((response) => {
-        console.log(response)
-        transferConfig.id = response.data.id
-        transferConfig.name = response.data.name
-        transferConfig.config_index = response.data.config_index
-        transferConfig.type_code = response.data.type_code
-        const defaultDetail = {
-          sesmail: { use_cc: false, use_replyto: false, use_bcc: false, mail_address_list: [] },
-          salesforce: { sf_user_name: '', sf_password: '', sf_client_id: '', sf_client_secret: '', sf_domain: '', api_version: '', objects: [] },
-          smtpmail: { smtp_host: '', smtp_port: 587, smtp_user: '', from_address: '', smtp_password: '' }
-        }
-        transferConfig.detail = { ...defaultDetail, ...response.data.detail }
-        setTypeOptions(transferConfig.type_code)
-      })
+  requestGet('/transfer/config/' + id, (response) => {
+    transferConfig.id = response.data.id
+    transferConfig.name = response.data.name
+    transferConfig.config_index = response.data.config_index
+    transferConfig.type_code = response.data.type_code
+    const defaultDetail = {
+      sesmail: { use_cc: false, use_replyto: false, use_bcc: false, mail_address_list: [] },
+      salesforce: { sf_user_name: '', sf_password: '', sf_client_id: '', sf_client_secret: '', sf_domain: '', api_version: '', objects: [] },
+      smtpmail: { smtp_host: '', smtp_port: 587, smtp_user: '', from_address: '', smtp_password: '' }
+    }
+    transferConfig.detail = { ...defaultDetail, ...response.data.detail }
+    setTypeOptions(transferConfig.type_code)
+  })
 }
 
 const saveConfig = () => {
-  isLoading.value = true
-
   const saveData = JSON.parse(JSON.stringify(transferConfig))
 
   if (transferConfig.type_code === 'sesmail') {
@@ -165,11 +160,9 @@ const saveConfig = () => {
     delete saveData.detail.salesforce
   }
 
-  $http.post('/transfer/config', saveData)
-      .then(response => {
-        isLoading.value = false
-        emit('saved')
-      })
+  requestPost('/transfer/config', saveData, () => {
+    emit('saved')
+  })
 }
 
 const addMailAddress = () => {

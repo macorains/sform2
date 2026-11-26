@@ -173,7 +173,7 @@
 </template>
 
 <script setup>
-import {onBeforeMount, getCurrentInstance, ref, computed, reactive} from "vue"
+import {onBeforeMount, ref, computed, reactive} from "vue"
 import {useRoute, useRouter} from "vue-router"
 import { BButton, BFormGroup, BFormRadioGroup, BFormRadio, BFormInput, BFormTextarea } from 'bootstrap-vue-3'
 import { useHttpRequest } from "@/composables/useHttpRequest.js"
@@ -182,8 +182,6 @@ import ColumnList from "@/components/form/ColumnList.vue"
 import TransferTaskList from "@/components/form/TransferTaskList.vue"
 
 const { requestGet, requestPost, loading } = useHttpRequest()
-const instance = getCurrentInstance()
-const $http = instance.appContext.config.globalProperties.$http
 const router = useRouter()
 const route = useRoute()
 const form = reactive({})

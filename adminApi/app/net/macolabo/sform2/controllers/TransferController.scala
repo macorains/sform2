@@ -33,6 +33,7 @@ class TransferController @Inject() (
 ) extends Security[UserProfile]
   with I18nSupport
   with Pac4jUtil
+  with SessionAuthentication
 {
 
   private val logger = Logger(this.getClass).logger
@@ -49,7 +50,7 @@ class TransferController @Inject() (
    * GET /transfer/selectlist
    * @return TransferConfigのid,nameのリスト
    */
-  def getSelectList: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+  def getSelectList: Action[AnyContent] = Authenticated { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         val res = transferService.getTransferConfigSelectList(sessionInfo)
@@ -64,7 +65,7 @@ class TransferController @Inject() (
    * GET /transfer/config/list
    * @return TransferConfigのリスト
    */
-  def getTransferConfigList: Action[AnyContent] =  Secure("HeaderClient") { implicit request =>
+  def getTransferConfigList: Action[AnyContent] =  Authenticated { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         val res = transferService.getTransferConfigList(sessionInfo)
@@ -79,7 +80,7 @@ class TransferController @Inject() (
    * @param transferConfigId TransferConfig ID
    * @return TransferConfig
    */
-  def getTransferConfig(transferConfigId: Int): Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+  def getTransferConfig(transferConfigId: Int): Action[AnyContent] = Authenticated { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         val res = transferService.getTransferConfig(transferConfigId, cryptoConfig, sessionInfo)
@@ -93,7 +94,7 @@ class TransferController @Inject() (
    * TransferConfig更新
    * @return Result
    */
-  def saveTransferConfig: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+  def saveTransferConfig: Action[AnyContent] = Authenticated { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         request.body.asJson match {
@@ -112,7 +113,7 @@ class TransferController @Inject() (
     }
   }
 
-  def deleteTransferConfig(transferConfigId: Int): Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+  def deleteTransferConfig(transferConfigId: Int): Action[AnyContent] = Authenticated { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         transferConfigService.deleteTransferConfig(transferConfigId, sessionInfo)
@@ -127,7 +128,7 @@ class TransferController @Inject() (
    * POST /transfer/smtp/test
    * @return Result
    */
-  def testSmtpMail: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+  def testSmtpMail: Action[AnyContent] = Authenticated { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(_) =>
         request.body.asJson match {
@@ -163,7 +164,7 @@ class TransferController @Inject() (
    * Salesforce疎通チェック
    * @return Result
    */
-  def checkTransferSalesforce: Action[AnyContent] = Secure("HeaderClient").async { implicit request =>
+  def checkTransferSalesforce: Action[AnyContent] = Authenticated.async { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(_) =>
         request.body.asJson match {
@@ -192,7 +193,7 @@ class TransferController @Inject() (
    * @param transferConfigId TransferConfig ID
    * @return SalesforceのObject情報リスト
    */
-  def getTransferSalesforceObject(transferConfigId: Int): Action[AnyContent] =  Secure("HeaderClient").async { implicit request =>
+  def getTransferSalesforceObject(transferConfigId: Int): Action[AnyContent] =  Authenticated.async { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         transferService.getTransferConfig(transferConfigId, cryptoConfig, sessionInfo) match {
@@ -220,7 +221,7 @@ class TransferController @Inject() (
    * @param objectName オブジェクト名
    * @return SalesforceのField情報リスト
    */
-  def getTransferSalesforceField(transferConfigId: Int, objectName: String): Action[AnyContent] =  Secure("HeaderClient").async { implicit request =>
+  def getTransferSalesforceField(transferConfigId: Int, objectName: String): Action[AnyContent] =  Authenticated.async { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         transferService.getTransferConfig(transferConfigId, cryptoConfig, sessionInfo) match {

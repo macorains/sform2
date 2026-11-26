@@ -23,10 +23,11 @@ class UserController @Inject() (
 ) extends Security[UserProfile]
   with I18nSupport
   with Pac4jUtil
+  with SessionAuthentication
 {
 
   // GET /user
-  def getList: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+  def getList: Action[AnyContent] = Authenticated { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         val res = userService.getList(sessionInfo)
@@ -38,7 +39,7 @@ class UserController @Inject() (
 
   // ユーザーの保存
   // POST /user
-  def save: Action[AnyContent] = Secure("HeaderClient").async { implicit request =>
+  def save: Action[AnyContent] = Authenticated.async { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         request.body.asJson match {
@@ -63,7 +64,7 @@ class UserController @Inject() (
 
   // ユーザーの削除
   // DELETE /user
-  def delete(userId: String): Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+  def delete(userId: String): Action[AnyContent] = Authenticated { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         userService.delete(userId, sessionInfo)
