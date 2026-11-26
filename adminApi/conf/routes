@@ -36,7 +36,7 @@ POST /transfer/smtp/test @net.macolabo.sform2.controllers.TransferController.tes
 GET /user @net.macolabo.sform2.controllers.UserController.getList()
 POST /user @net.macolabo.sform2.controllers.UserController.save()
 DELETE /user/:user_id @net.macolabo.sform2.controllers.UserController.delete(user_id: String)
-GET /user/isadmin @net.macolabo.sform2.controllers.UserController.isAdmin()
+
 
 # adminExistsCheck
 GET /adminExistsCheck @net.macolabo.sform2.controllers.AdminExistsCheckController.check()
@@ -51,7 +51,7 @@ POST /apitoken @net.macolabo.sform2.controllers.ApiTokenController.save()
 GET /oidc @net.macolabo.sform2.controllers.SignInController.oidcSignin()
 GET /callback @org.pac4j.play.CallbackController.callback(request: play.mvc.Http.Request)
 POST /callback @org.pac4j.play.CallbackController.callback(request: play.mvc.Http.Request)
-GET /logout @org.pac4j.play.LogoutController.logout(request: play.mvc.Http.Request)
+GET /logout @net.macolabo.sform2.controllers.SignInController.logout()
 
 # Session
-GET /checkSession @net.macolabo.sform2.controllers.SignInController.checkSession()
+GET /me @net.macolabo.sform2.controllers.SignInController.me()

@@ -22,6 +22,15 @@ parsers.anyContent.maxLength = 100MB
 
 # Session Cookie
 play.http.session.maxAge = 1h
+# 管理画面のログイン状態はこのセッション Cookie だけで管理する（SessionRenewalFilter により操作のたびに延長）。
+# - httpOnly: JS から読めないようにする（XSS 対策）
+# - sameSite: lax。管理画面(adminUi)と adminApi は same-site（同じ登録ドメイン配下）に配置すること。
+#   別ドメインに置くと Cookie が送られずログインできない
+# - secure: 本番(HTTPS)では SFORM_SESSION_SECURE=true を設定する
+play.http.session.httpOnly = true
+play.http.session.sameSite = "lax"
+play.http.session.secure = false
+play.http.session.secure = ${?SFORM_SESSION_SECURE}
 
 # The application DI modules
 # ~~~~~
@@ -77,7 +86,7 @@ play.filters {
     contentSecurityPolicy = ${play.filters.headers.contentSecurityPolicy}" connect-src 'self' twitter.com *.xing.com;"
  }
   cors {
-    exposedHeaders = ["x-auth-token","X-Auth-Token","Access-Control-Allow-Origin"]
+    exposedHeaders = ["Access-Control-Allow-Origin"]
     pathPrefixes = ["/"]
     # Chrome拡張のAPI Testerの類を使う場合はallowedOriginsに追加が必要
     allowedOrigins = ["http://localhost:8080","http://localhost:8081", "chrome-extension://aejoelaoggembcahagimdiliamlcdmfm"]
@@ -103,10 +112,15 @@ play.filters {
         "Timeout"
         "User-Agent",
         "X-Requested-With",
-        "X-Auth-Token",
     ]
     preflightMaxAge = 3 days
+    # セッション Cookie を送受信するため必須
+    supportsCredentials = true
   }
+  # セッション Cookie で認証するため、状態を変更するリクエストは CSRF チェックの対象になる。
+  # adminUi は常に X-Requested-With ヘッダーを付けて送る。カスタムヘッダー付きのクロスオリジン
+  # リクエストは CORS の allowedOrigins しか送れないため、これが CSRF 対策になる
+  # （bypassCorsTrustedOrigins = false は必ず維持すること）。
   csrf {
     header.bypassHeaders {
       X-Requested-With = "*"
@@ -176,6 +190,8 @@ db {
   default.username=username
   default.password="password"
   default.logStatements=true
+  # MySQL の wait_timeout で切られた接続を使い回さないよう、貸し出し時に確認する
+  default.poolValidationQuery="select 1"
 
   # You can turn on SQL logging for any datasource
   # https://www.playframework.com/documentation/latest/Highlights25#Logging-SQL-statements

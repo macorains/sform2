@@ -109,10 +109,18 @@ vendor/bin/phpunit --group known-bug    # 既知の不具合を記録したテ�
 - `adminApi` はフォーム/転送/ユーザーの CRUD と管理者認証を担当し、`formApi` は外部のレシーバ
   スクリプトが呼び出す最小限のインターフェース（`/signin`, `/validate`, `/confirm`, `/save`,
   `/load`, `/forminputjs/*`）を提供する。
-- 認証には `pac4j`（`play-pac4j`）を使用し、`modules/SecurityModule.scala` で配線されている。複数
-  のクライアントが同時に登録されている点に注意: `FormClient`/`DirectFormClient`（`UserDAO` に対して
-  `SqlAuthencator` によるユーザー名/パスワード認証）、`HeaderClient`（`X-Auth-Token` による JWT）、
-  `OidcClient`（Google OIDC）。セッションは暗号化された `PlayCookieSessionStore` に保存される。
+- 認証には `pac4j`（`play-pac4j`）を使用し、各アプリの `modules/SecurityModule.scala` で配線されて
+  いる。アプリごとに方式が異なる点に注意:
+  - `adminApi`: ログインは `OidcClient`（Google OIDC、`/oidc`）。ログイン後の状態は Play のセッション
+    Cookie（HttpOnly / SameSite=Lax、`user_id`/`user_group`/`user_role` のみ）だけで管理し、各 API は
+    `controllers/SessionAuthentication.scala` の `Authenticated`（セッション不備なら 401）で保護する。
+    JWT/`HeaderClient` は使わない。Cookie 認証なので CSRF 対策（`X-Requested-With` ヘッダー必須 +
+    CORS の `allowedOrigins` + `bypassCorsTrustedOrigins = false`）を崩さないこと。管理画面と
+    adminApi は same-site に配置する必要がある。
+  - `formApi`: `HeaderClient`（`X-Auth-Token` による JWT）。レシーバ（WordPress プラグイン）が使う。
+  - `FormClient`/`DirectFormClient`（`SqlAuthencator` によるユーザー名/パスワード認証）も登録されている。
+- adminUi のログイン状態は Pinia の `stores/auth.js`（`/me` で取得）が持ち、`router/index.js` の
+  `beforeEach` でガードする。401 は `main.js` で登録したハンドラが一括でログイン画面へ遷移させる。
 - ルーティングは通常の Play のルートファイル（`conf/routes`）でコントローラのアクションに直接
   マッピングされており、別途 API バージョニング層は存在しない。
 

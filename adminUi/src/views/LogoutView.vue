@@ -1,6 +1,6 @@
 <template>
   <main>
-    <HeaderMenu :has-menu="false"/>
+    <HeaderMenu hide-menu/>
     <BContainer>
       <BRow class="mb-4">
         <BCard>
@@ -20,12 +20,14 @@
 <script setup>
 import HeaderMenu from "@/components/HeaderMenu.vue";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 
 const router = useRouter()
+const auth = useAuthStore()
 
 const onLogout = (event) => {
   event.preventDefault()
-  localStorage.removeItem('sformToken')
+  auth.clear()
   location.href = import.meta.env.VITE_APP_API_URL + '/logout'
 }
 const onCancel = (event) => {

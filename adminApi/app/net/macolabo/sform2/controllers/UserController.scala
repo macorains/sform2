@@ -23,33 +23,23 @@ class UserController @Inject() (
 ) extends Security[UserProfile]
   with I18nSupport
   with Pac4jUtil
+  with SessionAuthentication
 {
 
   // GET /user
-  def getList: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+  def getList: Action[AnyContent] = Authenticated { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         val res = userService.getList(sessionInfo)
         Ok(Json.toJson(res))
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
-    }
-  }
-
-  // adminロールの有無チェック用
-  // GET /user/isadmin
-  def isAdmin: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
-    Try(SessionInfo(request.session)) match {
-      case Success(sessionInfo) =>
-        Ok(s"""{"is_admin": ${sessionInfo.user_role == "admin"}}""")
-      case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 
   // ユーザーの保存
   // POST /user
-  def save: Action[AnyContent] = Secure("HeaderClient").async { implicit request =>
+  def save: Action[AnyContent] = Authenticated.async { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         request.body.asJson match {
@@ -68,19 +58,19 @@ class UserController @Inject() (
           case None => Future.successful(BadRequest("Missing JSON"))
         }
       case Failure(e) =>
-        Future.successful(BadRequest(s"Session invalid. ${e.getMessage}"))
+        Future.successful(Unauthorized(s"Session invalid. ${e.getMessage}"))
     }
   }
 
   // ユーザーの削除
   // DELETE /user
-  def delete(userId: String): Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+  def delete(userId: String): Action[AnyContent] = Authenticated { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         userService.delete(userId, sessionInfo)
         Ok
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 }

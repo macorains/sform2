@@ -118,7 +118,8 @@
 </template>
 <script setup>
 import TransferConfigEditSalesforceObject from "@/components/admin/TransferConfigEditSalesforceObject.vue"
-import {computed, getCurrentInstance, reactive, ref, watch} from "vue";
+import {computed, reactive, ref, watch} from "vue";
+import { useHttpRequest } from "@/composables/useHttpRequest.js"
 
 const props = defineProps({
   salesforceData: {
@@ -127,8 +128,7 @@ const props = defineProps({
   }
 })
 
-const instance = getCurrentInstance()
-const $http = instance.appContext.config.globalProperties.$http
+const { requestPost } = useHttpRequest()
 
 const transferConfigDetailSalesforce = reactive({
   sf_user_name: '',
@@ -216,12 +216,12 @@ const salesforceTest = () => {
     domain: transferConfigDetailSalesforce.sf_domain
   }
 
-  $http.post('/transfer/salesforce/check', requestData)
-      .then(response => {
+  requestPost('/transfer/salesforce/check', requestData,
+      response => {
         salesforceCheckResult.value.code = response.request.status
         salesforceCheckResult.value.message = '接続成功'
-      })
-      .catch(error => {
+      },
+      error => {
         if (error.response) {
           salesforceCheckResult.value.code = error.response.status
           salesforceCheckResult.value.message = '接続失敗: ' + (error.response.data || error.response.statusText)
@@ -229,7 +229,8 @@ const salesforceTest = () => {
           salesforceCheckResult.value.code = null
           salesforceCheckResult.value.message = '接続失敗: ネットワークエラー'
         }
-      })
+      }
+  )
 }
 
 defineExpose({

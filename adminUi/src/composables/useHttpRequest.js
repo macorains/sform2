@@ -1,95 +1,58 @@
-import {getCurrentInstance, ref} from "vue"
-import { useRouter } from 'vue-router'
+import { computed, getCurrentInstance, inject, ref } from "vue"
 
-const loading = ref(false)
+const toMessage = (error) => {
+    const response = error.response
+    if (!response) return '通信エラーが発生しました'
+    const data = response.data
+    if (data?.message) return data.message
+    // Play のエラーページ等の HTML はそのまま表示しない
+    if (typeof data === 'string' && data && !data.trimStart().startsWith('<')) return data
+    return `エラーが発生しました (HTTP ${response.status})`
+}
 
+/**
+ * API 呼び出し用 composable。
+ * - 認証切れ(401)は axios の interceptor がログイン画面へ遷移させるので、ここでは何もしない
+ * - errorCallback を省略した場合はエラーモーダルで通知する
+ * - loading はこの composable を使うコンポーネントごとに、実行中リクエストがある間 true
+ */
 export function useHttpRequest() {
     const instance = getCurrentInstance()
     const $http = instance.appContext.config.globalProperties.$http
-    const router = useRouter()
+    const showError = inject("showError", null)
 
-    const requestGet = (url, callback, errorCallback) => {
-        loading.value = true
-        checkSession(
-            () => {
-                $http.get(url).then(response => callback(response))
-                    .catch(error => {
-                        if(errorCallback){errorCallback(error) }
-                    })
-                    .finally(() => loading.value = false)
-            },
-            (sessionError) => {
-                // セッション無効時の処理
-                if (errorCallback) {
-                    errorCallback(sessionError)
-                } else {
-                    router.push({path: '/login'})
-                }
-                loading.value = false;
-            }
-        )
-    }
+    const pendingCount = ref(0)
+    const loading = computed(() => pendingCount.value > 0)
 
-    const requestPost = (url, data, callback, errorCallback) => {
-        loading.value = true
-        checkSession(
-            () => {
-                $http.post(url, data).then(response => callback(response))
-                    .catch(error => {
-                        if(errorCallback){errorCallback(error) }
-                    })
-                    .finally(() => loading.value = false)
-            },
-            (sessionError) => {
-                // セッション無効時の処理
-                if (errorCallback) {
-                    errorCallback(sessionError)
-                } else {
-                    router.push({path: '/login'})
-                }
-                loading.value = false;
-            }
-        )
-    }
-
-    const requestDelete = (url, callback, errorCallback) => {
-        loading.value = true
-        checkSession(
-            () => {
-                $http.delete(url).then(response => callback(response))
-                    .catch(error => {
-                        if(errorCallback){errorCallback(error) }
-                    })
-                    .finally(() => loading.value = false)
-            },
-            (sessionError) => {
-                // セッション無効時の処理
-                if (errorCallback) {
-                    errorCallback(sessionError)
-                } else {
-                    router.push({path: '/login'})
-                }
-                loading.value = false;
-            }
-        )
-    }
-
-    const checkSession = (onSuccess, onFailure) => {
-        $http
-            .get('/checkSession')
-            .then((response) => {
-                console.log('**********')
-                console.log(response)
-                console.log('**********')
-                if (onSuccess) onSuccess()
+    const run = (request, callback, errorCallback) => {
+        pendingCount.value++
+        return request
+            .then(response => {
+                if (callback) callback(response)
             })
-            .catch((error) => {
-                console.log('**********')
-                console.error(error)
-                console.log('**********')
-                if (onFailure) onFailure(error)
+            .catch(error => {
+                if (error.response?.status === 401) return
+                if (errorCallback) {
+                    errorCallback(error)
+                } else if (showError) {
+                    showError(toMessage(error))
+                } else {
+                    console.error(error)
+                }
+            })
+            .finally(() => {
+                pendingCount.value--
             })
     }
+
+    const requestGet = (url, callback, errorCallback) =>
+        run($http.get(url), callback, errorCallback)
+
+    const requestPost = (url, data, callback, errorCallback) =>
+        run($http.post(url, data), callback, errorCallback)
+
+    const requestDelete = (url, callback, errorCallback) =>
+        run($http.delete(url), callback, errorCallback)
 
     return {
         requestGet,

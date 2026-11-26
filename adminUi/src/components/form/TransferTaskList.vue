@@ -55,7 +55,7 @@
   </BModal>
 </template>
 <script setup>
-import {onMounted, ref, inject, getCurrentInstance, reactive} from "vue"
+import {onMounted, ref, inject, reactive} from "vue"
 import { useHttpRequest } from "@/composables/useHttpRequest.js"
 import { BButton, BModal } from 'bootstrap-vue-3'
 import draggable from 'vuedraggable'
@@ -65,9 +65,6 @@ import TransferTaskEditSmtpMail from "@/components/form/TransferTaskEditSmtpMail
 import TransferTaskEditSelectConfig from "@/components/form/TransferTaskEditSelectConfig.vue";
 defineProps(['formId'])
 const emit = defineEmits(['update-transfer-tasks'])
-
-const instance = getCurrentInstance()
-const $http = instance.appContext.config.globalProperties.$http
 
 const { requestPost } = useHttpRequest()
 

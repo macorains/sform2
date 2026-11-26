@@ -1,5 +1,8 @@
 import axios from 'axios'
 
+// ログイン状態は adminApi が発行する HttpOnly のセッション Cookie だけで管理する。
+// - withCredentials: クロスオリジンでも Cookie を送受信するため必須
+// - X-Requested-With: adminApi の CSRF チェックはこのヘッダーで通す設定になっている（外さないこと）
 const http = axios.create({
   baseURL: import.meta.env.VITE_APP_API_URL,
   withCredentials: true,
@@ -13,43 +16,28 @@ const http = axios.create({
   }
 })
 
-const token = localStorage.getItem('sformToken');
-if (token) {
-    http.defaults.headers.common['X-Auth-Token'] = `Bearer ${token}`;
+// 旧方式（JWT を localStorage に保存）の残骸を消しておく
+try {
+  localStorage.removeItem('sformToken')
+} catch {
+  // localStorage が使えない環境では何もしない
 }
 
-http.setToken = (newToken) => {
-    localStorage.setItem('sformToken', newToken);
-    http.defaults.headers.common['X-Auth-Token'] = newToken;
+// 認証切れ(401)時の処理。ルーター/ストアへの依存を避けるため main.js から登録する
+let unauthorizedHandler = null
+http.setUnauthorizedHandler = (handler) => {
+  unauthorizedHandler = handler
 }
 
-// トークンを削除する関数
-http.clearToken = () => {
-    localStorage.removeItem('sformToken');
-    delete http.defaults.headers.common['X-Auth-Token'];
-}
-
-http.interceptors.request.use(config => {
-    const token = localStorage.getItem('sformToken');
-    if (token) {
-        config.headers['X-Auth-Token'] = token;
-    }
-    return config;
-}, error => {
-    return Promise.reject(error);
-})
 http.interceptors.response.use(
-    function (response)
-    {
-      return response
-    },
-    function (error) {
-      if (error.response && error.response.status === 401) {
-        localStorage.removeItem('sformToken')
-        window.location.href = '/login'
-      }
-      return Promise.reject(error)
+  response => response,
+  error => {
+    // skipAuthRedirect: 401 を呼び出し元で扱う場合（/me による状態確認など）
+    if (error.response?.status === 401 && !error.config?.skipAuthRedirect && unauthorizedHandler) {
+      unauthorizedHandler(error)
     }
+    return Promise.reject(error)
+  }
 )
 
 export default http

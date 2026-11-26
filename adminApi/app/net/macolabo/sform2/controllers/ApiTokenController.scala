@@ -24,9 +24,10 @@ class ApiTokenController @Inject()(
 ) extends Security[UserProfile]
   with I18nSupport
   with TokenUtil
-  with Pac4jUtil {
+  with Pac4jUtil
+  with SessionAuthentication {
 
-  def save: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+  def save: Action[AnyContent] = Authenticated { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         request.body.asJson match {
@@ -41,11 +42,11 @@ class ApiTokenController @Inject()(
           case None => BadRequest("Missing JSON")
         }
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 
-  def getExpiry: Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+  def getExpiry: Action[AnyContent] = Authenticated { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         apiTokenService.getExpiry(sessionInfo) match {
@@ -53,7 +54,7 @@ class ApiTokenController @Inject()(
           case None => NotFound
         }
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 }

@@ -6,10 +6,10 @@
   />
 </template>
 <script setup>
-import {getCurrentInstance, onMounted, ref, watch} from "vue";
+import {onMounted, ref, watch} from "vue";
+import { useHttpRequest } from "@/composables/useHttpRequest.js"
 
-const instance = getCurrentInstance()
-const $http = instance.appContext.config.globalProperties.$http
+const { requestGet } = useHttpRequest()
 
 const emit = defineEmits(['selectionChange'])
 
@@ -22,13 +22,12 @@ watch(selectedTransferConfig, (val) => {
 })
 
 onMounted(() => {
-  $http.get('/transfer/config/list')
-      .then(response => {
-        response.data.forEach(res => {
-          transferConfigList.value.push(res)
-          transferConfigIdList.value.push({ text: res.name + '(' + res.type_code + ')', value: res.id})
-        })
-      })
+  requestGet('/transfer/config/list', response => {
+    response.data.forEach(res => {
+      transferConfigList.value.push(res)
+      transferConfigIdList.value.push({ text: res.name + '(' + res.type_code + ')', value: res.id})
+    })
+  })
 })
 
 const getConfig = () => {

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isLoading" class="loading-overlay">
+  <div v-if="loading" class="loading-overlay">
     <BSpinner label="Processing..." variant="light" />
   </div>
   <BForm>
@@ -75,11 +75,8 @@
 </template>
 <script setup>
 import {BSpinner} from "bootstrap-vue-3";
-import {computed, getCurrentInstance, reactive, ref, defineEmits, inject} from "vue";
+import {computed, reactive, ref, defineEmits, inject} from "vue";
 import {useHttpRequest} from "@/composables/useHttpRequest.js";
-
-const instance = getCurrentInstance()
-const $http = instance.appContext.config.globalProperties.$http
 
 const { requestGet, requestPost, loading } = useHttpRequest()
 const showError = inject("showError")
@@ -105,7 +102,6 @@ const roleOptions = ref([
   { value: 'admin', text: '管理者' },
 ])
 
-const isLoading = ref(false)
 
 const userDataLastNameState = computed(() => userData.last_name.trim() !== '')
 const userDataFirstNameState = computed(() => userData.first_name.trim() !== '')

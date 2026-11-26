@@ -120,7 +120,7 @@
 
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
-import { getCurrentInstance } from 'vue'
+import { useHttpRequest } from "@/composables/useHttpRequest.js"
 
 const props = defineProps({
   smtpMailData: {
@@ -129,8 +129,7 @@ const props = defineProps({
   }
 })
 
-const instance = getCurrentInstance()
-const $http = instance.appContext.config.globalProperties.$http
+const { requestPost, loading: isSending } = useHttpRequest()
 
 const smtpMailConfig = reactive({
   id: null,
@@ -144,7 +143,6 @@ const smtpMailConfig = reactive({
 
 const testToAddress = ref('')
 const testMailResult = ref('')
-const isSending = ref(false)
 
 const smtpHostState     = computed(() => smtpMailConfig.smtp_host.trim() !== '')
 const smtpPortState     = computed(() => smtpMailConfig.smtp_port > 0)
@@ -194,7 +192,6 @@ const clearData = () => {
 }
 
 const sendTestMail = () => {
-  isSending.value      = true
   testMailResult.value = ''
   const requestData = {
     smtp_host:     smtpMailConfig.smtp_host,
@@ -204,20 +201,18 @@ const sendTestMail = () => {
     smtp_password: smtpMailConfig.smtp_password,
     to_address:    testToAddress.value,
   }
-  $http.post('/transfer/smtp/test', requestData)
-    .then(response => {
+  requestPost('/transfer/smtp/test', requestData,
+    response => {
       testMailResult.value = '送信成功: ' + response.data
-    })
-    .catch(error => {
+    },
+    error => {
       if (error.response) {
         testMailResult.value = '送信失敗: ' + (error.response.data || error.response.statusText)
       } else {
         testMailResult.value = '送信失敗: ネットワークエラー'
       }
-    })
-    .finally(() => {
-      isSending.value = false
-    })
+    }
+  )
 }
 
 defineExpose({

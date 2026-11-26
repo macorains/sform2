@@ -23,7 +23,7 @@ const features = [
 
 <template>
   <main>
-    <HeaderMenu />
+    <HeaderMenu/>
     <BContainer>
       <section class="hero text-center py-5 mb-4">
         <h1 class="display-5 fw-bold">SForm</h1>

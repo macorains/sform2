@@ -28,19 +28,20 @@ class FormController @Inject() (
 ) extends Security[UserProfile]
   with I18nSupport
   with Pac4jUtil
+  with SessionAuthentication
 {
 
   /**
    * フォームデータ取得
    * @return フォームデータ
    */
-  def get(hashed_form_id: String): Action[AnyContent] = Secure("HeaderClient")  { implicit request =>
+  def get(hashed_form_id: String): Action[AnyContent] = Authenticated  { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         val res = formService.getForm(hashed_form_id, sessionInfo)
         Ok(toJson(res))
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 
@@ -49,13 +50,13 @@ class FormController @Inject() (
    * GET /form/list
    * @return フォームデータのリスト
    */
-  def getList: Action[AnyContent] = Secure(clients = "HeaderClient") { implicit request =>
+  def getList: Action[AnyContent] = Authenticated { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         val res = formService.getList(sessionInfo)
         Ok(toJson(res))
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
 
   }
@@ -64,7 +65,7 @@ class FormController @Inject() (
    * フォーム更新
    * @return
    */
-  def save(): Action[AnyContent] = Secure("HeaderClient")  { implicit request =>
+  def save(): Action[AnyContent] = Authenticated  { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         request.body.asJson match {
@@ -79,7 +80,7 @@ class FormController @Inject() (
           case None => BadRequest("Missing JSON")
         }
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 
@@ -87,7 +88,7 @@ class FormController @Inject() (
    * フォーム作成
    * @return
    */
-  def create(): Action[AnyContent] = Secure("HeaderClient")  { implicit request =>
+  def create(): Action[AnyContent] = Authenticated  { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         request.body.asJson match {
@@ -102,7 +103,7 @@ class FormController @Inject() (
           case None => BadRequest("Missing JSON")
         }
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 
@@ -112,13 +113,13 @@ class FormController @Inject() (
    * @param hashed_form_id フォームハッシュID
    * @return
    */
-  def delete(hashed_form_id: String): Action[AnyContent] = Secure("HeaderClient")  { implicit request =>
+  def delete(hashed_form_id: String): Action[AnyContent] = Authenticated  { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(sessionInfo) =>
         val result = formService.deleteForm(hashed_form_id, sessionInfo)
         Ok(toJson(result))
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 
@@ -127,7 +128,7 @@ class FormController @Inject() (
    * POST /form/test/mail
    * @return
    */
-  def sendTestMail(): Action[AnyContent] = Secure("HeaderClient") { implicit request =>
+  def sendTestMail(): Action[AnyContent] = Authenticated { implicit request =>
     Try(SessionInfo(request.session)) match {
       case Success(_) =>
         request.body.asJson match {
@@ -139,7 +140,7 @@ class FormController @Inject() (
           case None => BadRequest("Missing JSON")
         }
       case Failure(e) =>
-        BadRequest(s"Session invalid. ${e.getMessage}")
+        Unauthorized(s"Session invalid. ${e.getMessage}")
     }
   }
 }
